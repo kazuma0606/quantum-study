@@ -1,0 +1,610 @@
+# 水素原子のシュレディンガー方程式 ―変数分離からルジャンドル陪関数・ラゲール陪関数まで―
+
+前回までに導出したラプラス・ベルトラミ作用素（球座標版）
+
+$$
+\Delta f = \frac1{r^2}\partial_r(r^2\partial_rf) + \frac1{r^2\sin\theta}\partial_\theta(\sin\theta\,\partial_\theta f) + \frac1{r^2\sin^2\theta}\partial_\phi^2f
+$$
+
+を出発点に、水素様原子のシュレディンガー方程式
+
+$$
+-\frac{\hbar^2}{2\mu}\Delta\psi + V(r)\psi = E\psi,\qquad V(r) = -\frac{Ze^2}{4\pi\varepsilon_0\, r}
+$$
+
+（$\mu$：換算質量、$Z$：原子番号、水素なら $Z=1$）を変数分離し、$\Theta(\theta)$・$\Phi(\phi)$・$R(r)$ それぞれの満たす方程式を導出、そしてルジャンドル陪関数とラゲール陪関数の**導出そのもの**まで丁寧に追います。物理的な意味（角運動量、確率密度など）は履修済みとのことなので、ここでは数理的な導出の筋だけに集中します。
+
+量子数の記法は標準的な $n,l,m$（主量子数・方位量子数・磁気量子数）を使います。
+
+---
+
+# Part I：変数分離
+
+## 1. $\psi = R(r)Y(\theta,\phi)$ と置く
+
+$\psi(r,\theta,\phi)=R(r)Y(\theta,\phi)$ を代入し、$-2\mu r^2/(\hbar^2 RY)$ を全体に掛けます：
+
+$$
+\frac1R\frac{d}{dr}\left(r^2\frac{dR}{dr}\right) - \frac{2\mu r^2}{\hbar^2}\big(V(r)-E\big)
+= -\frac1Y\left[\frac1{\sin\theta}\partial_\theta(\sin\theta\,\partial_\theta Y) + \frac1{\sin^2\theta}\partial_\phi^2Y\right]
+$$
+
+左辺は $r$ だけの関数、右辺は $\theta,\phi$ だけの関数です。両辺が任意の $r,\theta,\phi$ で等しいためには、**両辺とも同じ定数**でなければなりません。この定数を、後の見通しのために $l(l+1)$ と置きます（今は単なる分離定数）：
+
+$$
+\boxed{\frac1{\sin\theta}\partial_\theta(\sin\theta\,\partial_\theta Y) + \frac1{\sin^2\theta}\partial_\phi^2Y = -l(l+1)\,Y}\tag{角度方程式}
+$$
+
+$$
+\boxed{\frac1{r^2}\frac{d}{dr}\left(r^2\frac{dR}{dr}\right) - \frac{2\mu}{\hbar^2}\big(V(r)-E\big)R = \frac{l(l+1)}{r^2}R}\tag{動径方程式}
+$$
+
+角度方程式は $V(r)$ にも $E$ にも依らないので、**どんな中心力ポテンシャルでも共通**の方程式です。まずこちらを片付けます。
+
+## 2. $Y=\Theta(\theta)\Phi(\phi)$ とさらに分離する
+
+角度方程式に $Y=\Theta\Phi$ を代入し、$\sin^2\theta/(\Theta\Phi)$ を掛けます：
+
+$$
+\frac{\sin\theta}{\Theta}\frac{d}{d\theta}\left(\sin\theta\frac{d\Theta}{d\theta}\right) + l(l+1)\sin^2\theta = -\frac1\Phi\frac{d^2\Phi}{d\phi^2}
+$$
+
+左辺は $\theta$ のみ、右辺は $\phi$ のみなので、両辺は定数（$m^2$ と置く）：
+
+$$
+-\frac1\Phi\frac{d^2\Phi}{d\phi^2}=m^2 \quad\Longrightarrow\quad \frac{d^2\Phi}{d\phi^2}=-m^2\Phi
+$$
+
+これはすでに解かれている通り $\Phi(\phi)=\dfrac1{\sqrt{2\pi}}e^{im\phi}$（一価性 $\Phi(\phi+2\pi)=\Phi(\phi)$ から $m$ は整数）です。
+
+残った $\theta$ 方程式：
+
+$$
+\frac{\sin\theta}{\Theta}\frac{d}{d\theta}\left(\sin\theta\frac{d\Theta}{d\theta}\right) + l(l+1)\sin^2\theta = m^2
+$$
+
+$\sin^2\theta$ で割ると
+
+$$
+\frac1{\sin\theta}\frac{d}{d\theta}\left(\sin\theta\frac{d\Theta}{d\theta}\right) + \left[l(l+1)-\frac{m^2}{\sin^2\theta}\right]\Theta = 0
+$$
+
+## 3. $x=\cos\theta$ への変数変換
+
+$x=\cos\theta$（$-1\le x\le1$）と置きます。$\sin^2\theta=1-x^2$、$\dfrac{d}{d\theta}=-\sin\theta\dfrac{d}{dx}$ なので：
+
+$$
+\sin\theta\frac{d\Theta}{d\theta} = \sin\theta\cdot\left(-\sin\theta\frac{d\Theta}{dx}\right) = -(1-x^2)\frac{d\Theta}{dx}
+$$
+
+$$
+\frac{d}{d\theta}\left[-(1-x^2)\frac{d\Theta}{dx}\right] = -\sin\theta\cdot\frac{d}{dx}\left[-(1-x^2)\frac{d\Theta}{dx}\right] = \sin\theta\frac{d}{dx}\left[(1-x^2)\frac{d\Theta}{dx}\right]
+$$
+
+$\dfrac1{\sin\theta}$ を掛けて $\sin\theta$ を消すと：
+
+$$
+\boxed{\frac{d}{dx}\left[(1-x^2)\frac{d\Theta}{dx}\right] + \left[l(l+1)-\frac{m^2}{1-x^2}\right]\Theta = 0}\tag{associated Legendre方程式}
+$$
+
+これが**ルジャンドルの陪微分方程式**です。$m=0$ なら通常のルジャンドル方程式：
+
+$$
+(1-x^2)\Theta'' - 2x\Theta' + l(l+1)\Theta = 0\tag{Legendre方程式}
+$$
+
+（積の微分を展開すれば一致することが確認できます。）
+
+---
+
+# Part II：ルジャンドル方程式を解く（$m=0$）
+
+## 4. なぜ $l$ が非負整数でなければならないか
+
+Legendre方程式を $x=0$ のまわりでべき級数 $\Theta=\sum_k a_kx^k$ として解こうとすると、漸化式
+
+$$
+a_{k+2} = \frac{k(k+1)-l(l+1)}{(k+1)(k+2)}a_k
+$$
+
+が得られます。もし級数が無限に続けば、$x\to\pm1$（つまり $\theta\to0,\pi$、極）で級数は発散し、物理的に許される（有限な）波動関数になりません。この発散を避けるには、**ある有限の $k$ で係数がゼロになり、級数が多項式で打ち切られる**必要があります。漸化式の分子が $k(k+1)-l(l+1)=0$ となるのは $k=l$ のときなので、
+
+$$
+\boxed{l=0,1,2,\dots\ (\text{非負整数})}
+$$
+
+でなければ、$\theta=0,\pi$ で正則な（＝物理的に許される）解は存在しません。これが方位量子数 $l$ が整数である理由です。
+
+## 5. Rodriguesの公式の導出（べき級数を使わない構成的な方法）
+
+級数を最後まで追う代わりに、**Legendre方程式を満たす多項式を直接構成**します。
+
+$$
+w(x) := (x^2-1)^l
+$$
+
+とおきます。$w$ を微分すると
+
+$$
+w' = 2lx(x^2-1)^{l-1} = \frac{2lx}{x^2-1}w
+$$
+
+なので
+
+$$
+(x^2-1)w' = 2lx\,w\tag{5-1}
+$$
+
+という恒等式が成り立ちます。この式の**両辺を $x$ で $(l+1)$ 回微分**します。ライプニッツの公式
+
+$$
+\frac{d^n}{dx^n}(uv) = \sum_{k=0}^n\binom nk u^{(k)}v^{(n-k)}
+$$
+
+を使います。左辺は $u=(x^2-1)$（$u'=2x,\ u''=2,\ u^{(k\ge3)}=0$）、$v=w'$ として：
+
+$$
+\frac{d^{l+1}}{dx^{l+1}}\big[(x^2-1)w'\big]
+= (x^2-1)w^{(l+2)} + (l+1)(2x)w^{(l+1)} + \binom{l+1}2(2)w^{(l)}
+$$
+
+$\binom{l+1}2\cdot2=l(l+1)$ なので
+
+$$
+= (x^2-1)w^{(l+2)} + 2(l+1)x\,w^{(l+1)} + l(l+1)w^{(l)}
+$$
+
+右辺は $u=2lx$（$u'=2l$、以降ゼロ）、$v=w$ として：
+
+$$
+\frac{d^{l+1}}{dx^{l+1}}\big[2lx\,w\big] = 2lx\,w^{(l+1)} + (l+1)(2l)w^{(l)}
+$$
+
+両辺を等しいと置いて整理すると：
+
+$$
+(x^2-1)w^{(l+2)} + \big[2(l+1)x-2lx\big]w^{(l+1)} + \big[l(l+1)-2l(l+1)\big]w^{(l)} = 0
+$$
+
+$$
+(x^2-1)w^{(l+2)} + 2x\,w^{(l+1)} - l(l+1)w^{(l)} = 0
+$$
+
+ここで $y:=w^{(l)}=\dfrac{d^l}{dx^l}(x^2-1)^l$ と置くと（$w^{(l+1)}=y',\ w^{(l+2)}=y''$）：
+
+$$
+(x^2-1)y'' + 2x\,y' - l(l+1)y = 0
+$$
+
+両辺に $-1$ を掛ければ、まさにLegendre方程式です：
+
+$$
+\boxed{(1-x^2)y'' - 2xy' + l(l+1)y = 0}
+$$
+
+つまり、**$y=\dfrac{d^l}{dx^l}(x^2-1)^l$ は自動的にLegendre方程式を満たします**。しかも $(x^2-1)^l$ は $2l$ 次の多項式なので、$l$ 回微分すれば $l$ 次の多項式になり、$\theta=0,\pi$ での発散も自動的に回避されます。
+
+規格化（慣習として $x=1$ で値が $1$ になるように定数を選ぶ）すると：
+
+$$
+\boxed{P_l(x) = \frac1{2^ll!}\frac{d^l}{dx^l}(x^2-1)^l}\qquad\text{（Rodriguesの公式）}
+$$
+
+（$x=1$ での値が $1$ になることは、ライプニッツの公式で $(x-1)^l(x+1)^l$ を微分し、$x=1$ で生き残る項が $k=l$ の項だけであることから確認できます：$\left.\dfrac{d^l}{dx^l}(x^2-1)^l\right|_{x=1}=l!\cdot2^l$。）
+
+これが**ルジャンドル多項式**です。例：$P_0=1,\ P_1=x,\ P_2=\dfrac12(3x^2-1)$。
+
+---
+
+# Part III：associated Legendre方程式を解く（$m\ne0$）
+
+## 6. Legendre方程式を $m$ 回微分する
+
+目標は、$m=0$ の解 $P_l(x)$ から、$m\ne0$ の解を作ることです。Legendre方程式
+
+$$
+(1-x^2)P_l'' - 2xP_l' + l(l+1)P_l = 0
+$$
+
+の両辺を $x$ で $m$ 回微分します（$m\ge0$ の整数）。ライプニッツの公式を各項に使います。
+
+**第1項**：$u=(1-x^2)$（$u'=-2x,\ u''=-2$）、$v=P_l''$：
+
+$$
+\frac{d^m}{dx^m}\big[(1-x^2)P_l''\big] = (1-x^2)P_l^{(m+2)} - 2mx\,P_l^{(m+1)} - m(m-1)P_l^{(m)}
+$$
+
+**第2項**：$u=-2x$（$u'=-2$）、$v=P_l'$：
+
+$$
+\frac{d^m}{dx^m}\big[-2xP_l'\big] = -2x\,P_l^{(m+1)} - 2m\,P_l^{(m)}
+$$
+
+**第3項**：定数倍なのでそのまま：
+
+$$
+\frac{d^m}{dx^m}\big[l(l+1)P_l\big] = l(l+1)P_l^{(m)}
+$$
+
+3つを足し合わせて整理します（$v:=P_l^{(m)}$ と置く）：
+
+$$
+(1-x^2)v'' + \big[-2mx-2x\big]v' + \big[-m(m-1)-2m+l(l+1)\big]v = 0
+$$
+
+$$
+-m(m-1)-2m = -m^2-m = -m(m+1)
+$$
+
+なので：
+
+$$
+\boxed{(1-x^2)v'' - 2(m+1)xv' + \big[l(l+1)-m(m+1)\big]v = 0}\tag{6-1}
+$$
+
+つまり **$v=P_l^{(m)}(x)$（$P_l$ の $m$ 階導関数）は、この形の方程式を満たします**。
+
+## 7. $v$ から associated Legendre方程式の解を作る（べき乗の補正）
+
+しかし (6-1) は目標の associated Legendre方程式そのものではありません。ここで
+
+$$
+\Theta(x) := (1-x^2)^{m/2}\,v(x)
+$$
+
+と置いて、$\Theta$ がちょうど associated Legendre方程式を満たすことを確認します。
+
+$s:=(1-x^2)^{m/2}$ とおくと $s'=-mx(1-x^2)^{m/2-1}=-\dfrac{mxs}{1-x^2}$ です。積の微分で $\Theta'=s'v+sv'$、さらに $\Theta''$ を計算し（途中の展開は積の微分と商の微分を機械的に繰り返すだけです）、整理すると：
+
+$$
+(1-x^2)\Theta'' - 2x\Theta' = s\Big[(1-x^2)v'' - 2(m+1)xv' + m^2x^2v/(1-x^2) - mv\Big]
+$$
+
+ここに $m^2x^2/(1-x^2) = m^2\big[(x^2-1)+1\big]/(1-x^2) = -m^2+m^2/(1-x^2)$ を使って整理すると：
+
+$$
+(1-x^2)\Theta''-2x\Theta' + \frac{m^2}{1-x^2}\Theta
+= s\Big[(1-x^2)v''-2(m+1)xv' -m(m+1)v \Big]
+$$
+
+(6-1) より角括弧内は $-l(l+1)v$ に等しい（(6-1) を移項した形）ので、最終的に
+
+$$
+(1-x^2)\Theta'' - 2x\Theta' + \left[l(l+1)-\frac{m^2}{1-x^2}\right]\Theta = 0
+$$
+
+が得られます。これはまさに **associated Legendre方程式そのもの**です。したがって：
+
+$$
+\boxed{\Theta(x) = (1-x^2)^{m/2}\frac{d^m}{dx^m}P_l(x)}
+$$
+
+が associated Legendre方程式の解です。慣習的な符号（Condon–Shortley位相）$(-1)^m$ を付けて：
+
+$$
+\boxed{P_l^m(x) := (-1)^m(1-x^2)^{m/2}\frac{d^m}{dx^m}P_l(x)}\qquad(0\le m\le l)
+$$
+
+これが**ルジャンドル陪関数**です。$P_l$ が $l$ 次多項式なので $m$ 回微分すると $(l-m)$ 次まで下がり、$m$ 回微分できるためには $m\le l$ が必要です。これが磁気量子数の範囲 $-l\le m\le l$（負の $m$ は対称性から定義を拡張）の数学的な由来です。
+
+---
+
+# Part IV：球面調和関数の組み立て
+
+$\Theta$ と $\Phi$ を掛け合わせ、規格化定数（$\displaystyle\int_0^\pi\int_0^{2\pi}|Y_l^m|^2\sin\theta\,d\theta\,d\phi=1$ となるように選ぶ）を付けると：
+
+$$
+\boxed{Y_l^m(\theta,\phi) = \sqrt{\frac{2l+1}{4\pi}\frac{(l-m)!}{(l+m)!}}\,P_l^m(\cos\theta)\,e^{im\phi}}
+$$
+
+これが**球面調和関数**です（規格化定数の導出は $P_l^m$ の直交性 $\int_{-1}^1P_l^m(x)P_{l'}^m(x)dx=\dfrac{2}{2l+1}\dfrac{(l+m)!}{(l-m)!}\delta_{ll'}$ から得られますが、これはRodriguesの公式を部分積分で処理する標準的な計算なので、ここでは結果のみ示します）。
+
+以上で角度方程式は完全に解けました。$l=0,1,2,\dots$、$m=-l,\dots,l$ です。
+
+---
+
+# Part V：動径方程式
+
+## 8. $u(r)=rR(r)$ という置き換え
+
+動径方程式
+
+$$
+\frac1{r^2}\frac{d}{dr}\left(r^2\frac{dR}{dr}\right) - \frac{2\mu}{\hbar^2}\big(V(r)-E\big)R = \frac{l(l+1)}{r^2}R
+$$
+
+に対して、$u(r):=rR(r)$（つまり $R=u/r$）と置きます。まず恒等式を確認します：
+
+$$
+r^2\frac{dR}{dr} = r^2\frac{d}{dr}\left(\frac ur\right) = r^2\left(\frac{u'}r-\frac u{r^2}\right) = ru'-u
+$$
+
+$$
+\frac{d}{dr}(ru'-u) = u'+ru''-u' = ru''
+$$
+
+したがって
+
+$$
+\boxed{\frac1{r^2}\frac{d}{dr}\left(r^2\frac{dR}{dr}\right) = \frac{u''}r}
+$$
+
+という便利な恒等式が得られます。これを動径方程式に代入し、両辺に $r$ を掛けて $R=u/r$ を戻すと：
+
+$$
+\boxed{-\frac{\hbar^2}{2\mu}u'' + \left[V(r)+\frac{\hbar^2l(l+1)}{2\mu r^2}\right]u = Eu}\tag{動径方程式・変形版}
+$$
+
+これは**1次元シュレディンガー方程式と全く同じ形**です。$\dfrac{\hbar^2l(l+1)}{2\mu r^2}$ は「遠心力ポテンシャル」と呼ばれる項で、角度方向の運動エネルギーが動径方向の実効ポテンシャルとして現れたものです。
+
+## 9. 無次元化（Bohr半径の導入）
+
+束縛状態（$E<0$）を考えます。
+
+$$
+\kappa := \frac{\sqrt{-2\mu E}}\hbar
+$$
+
+と定義し（$E<0$ なので $\kappa$ は実数）、無次元変数
+
+$$
+\rho := 2\kappa r
+$$
+
+を導入します。$\dfrac{d}{dr}=2\kappa\dfrac{d}{d\rho}$ なので $u''(r)=4\kappa^2\dfrac{d^2u}{d\rho^2}$ です。動径方程式に代入し、$V(r)=-\dfrac{Ze^2}{4\pi\varepsilon_0r}$（$r=\rho/(2\kappa)$ を使用）を整理すると、次の無次元方程式が得られます：
+
+$$
+\frac{d^2u}{d\rho^2} = \left[\frac{l(l+1)}{\rho^2}-\frac\lambda\rho+\frac14\right]u
+$$
+
+ここで
+
+$$
+\lambda := \frac{\mu Ze^2}{4\pi\varepsilon_0\hbar^2\kappa}
+$$
+
+という無次元定数を定義しました。この $\lambda$ が最終的に量子化条件を通して整数（主量子数 $n$）に一致することになります。
+
+## 10. 漸近的な振る舞い（$\rho\to0$、$\rho\to\infty$）
+
+### $\rho\to\infty$ の極限
+
+$\rho$ が大きいとき、$l(l+1)/\rho^2$ と $\lambda/\rho$ は無視でき、方程式は近似的に
+
+$$
+\frac{d^2u}{d\rho^2}\approx\frac14u
+$$
+
+その解は $u\sim e^{\pm\rho/2}$。有限（束縛状態として $\rho\to\infty$ で $u\to0$）であるためには
+
+$$
+u(\rho)\ \sim\ e^{-\rho/2}\qquad(\rho\to\infty)
+$$
+
+### $\rho\to0$ の極限
+
+$\rho$ が小さいとき、$l(l+1)/\rho^2$ の項が支配的になり
+
+$$
+\frac{d^2u}{d\rho^2}\approx\frac{l(l+1)}{\rho^2}u
+$$
+
+これはオイラー型の方程式で、$u=\rho^s$ を代入すると $s(s-1)=l(l+1)$、つまり $s=l+1$ または $s=-l$。$\rho\to0$ で発散しない（$R=u/r$ が原点で有限であるためには $u/r\to0$ 以上が必要）解は
+
+$$
+u(\rho)\ \sim\ \rho^{l+1}\qquad(\rho\to0)
+$$
+
+## 11. 両極限を分離して残りの関数を決める
+
+この2つの漸近形をまとめて
+
+$$
+u(\rho) = \rho^{l+1}e^{-\rho/2}L(\rho)
+$$
+
+と置きます（$L(\rho)$ は $\rho\to0,\infty$ で発散しない、多項式的に振る舞うことが期待される未知関数）。これを方程式に代入します。積の微分を2回使う（計算は Part III と同様の機械的なライプニッツ的展開です）と：
+
+$$
+\rho L'' + \big[2(l+1)-\rho\big]L' + \big[\lambda-l-1\big]L = 0
+$$
+
+$k:=2l+1$、$n':=\lambda-l-1$ と置き直すと、これは標準形
+
+$$
+\boxed{\rho L'' + (k+1-\rho)L' + n'L = 0}\tag{associated Laguerre方程式}
+$$
+
+の形になります。
+
+---
+
+# Part VI：ラゲール方程式を解く
+
+## 12. Rodriguesの公式（Laguerre多項式）— Legendreと同じ方法で構成する
+
+まず $k=0$ の場合、標準形は $\rho y''+(1-\rho)y'+ny=0$（素のLaguerre方程式）です。これをLegendreのときと同様に、指数関数を含む $w$ を微分して構成的に作ります。
+
+$$
+w(\rho) := \rho^ne^{-\rho}
+$$
+
+とおきます。微分すると
+
+$$
+w' = n\rho^{n-1}e^{-\rho} - \rho^ne^{-\rho} = \left(\frac n\rho-1\right)w
+$$
+
+すなわち
+
+$$
+\rho w' = (n-\rho)w \tag{12-1}
+$$
+
+これを $\rho$ で $(n+1)$ 回微分します。左辺は $u=\rho$（$u'=1$、以降ゼロ）、$v=w'$：
+
+$$
+\frac{d^{n+1}}{d\rho^{n+1}}[\rho w'] = \rho\,w^{(n+2)} + (n+1)w^{(n+1)}
+$$
+
+右辺は $u=(n-\rho)$（$u'=-1$、以降ゼロ）、$v=w$：
+
+$$
+\frac{d^{n+1}}{d\rho^{n+1}}[(n-\rho)w] = (n-\rho)w^{(n+1)} - (n+1)w^{(n)}
+$$
+
+両辺を等号で結んで整理すると（$z:=w^{(n)}$、$w^{(n+1)}=z',\ w^{(n+2)}=z''$）：
+
+$$
+\rho z'' + (n+1)z' = (n-\rho)z' - (n+1)z
+$$
+
+$$
+\rho z'' + (1+\rho)z' + (n+1)z = 0\tag{12-2}
+$$
+
+（この $z$ 自体は $e^{-\rho}$ の因子を含んだままの関数であり、Legendreのときの $y=w^{(l)}$ とは違って、そのままではLaguerre方程式になりません。$w$ が $e^{-\rho}$ を含んでいるため、微分のたびに $e^{-\rho}$ 由来の項が追加で出てくるのが、代数的な多項式だけだったLegendreの場合との違いです。）
+
+そこで $z=e^{-\rho}L_n(\rho)$（$L_n$ を多項式として抜き出す）と置き、(12-2) に代入します。$z'=e^{-\rho}(L_n'-L_n)$、$z''=e^{-\rho}(L_n''-2L_n'+L_n)$ なので：
+
+$$
+\rho e^{-\rho}(L_n''-2L_n'+L_n) + (1+\rho)e^{-\rho}(L_n'-L_n) + (n+1)e^{-\rho}L_n = 0
+$$
+
+$e^{-\rho}$ で割って整理します。$L_n''$ の係数は $\rho$。$L_n'$ の係数：$-2\rho+(1+\rho)=1-\rho$。$L_n$ の係数：$\rho-(1+\rho)+(n+1) = n$。したがって：
+
+$$
+\boxed{\rho L_n'' + (1-\rho)L_n' + nL_n = 0}
+$$
+
+これがまさに素のLaguerre方程式です。$L_n(\rho)=e^\rho z(\rho)=e^\rho w^{(n)}(\rho)$ なので：
+
+$$
+\boxed{L_n(\rho) := e^{\rho}\frac{d^n}{d\rho^n}\big(\rho^ne^{-\rho}\big)}\qquad\text{（Rodriguesの公式）}
+$$
+
+（$w^{(n)}=\dfrac{d^n}{d\rho^n}(\rho^ne^{-\rho})$ が $e^{-\rho}\times(\text{$n$次多項式})$ の形をしていることは、Leibniz展開から確認できます。）
+
+## 13. associated Laguerre多項式
+
+$k$ 階微分することで、$(k+1-\rho)$ を係数に持つ associated Laguerre方程式の解が得られます（Legendreのときの「$m$ 階微分」と全く同じ論理で、素のLaguerre方程式を $k$ 回微分すると Part III の (6-1) に相当する式が得られます）：
+
+$$
+\boxed{L_n^k(\rho) := \frac{d^k}{d\rho^k}L_n(\rho)}
+$$
+
+は
+
+$$
+\rho\,(L_n^k)'' + (k+1-\rho)(L_n^k)' + (n-k)L_n^k = 0
+$$
+
+を満たします。Part Vの (associated Laguerre方程式) と見比えると、$n'=n-k$、そして今回必要な形は $k=2l+1$ だったので：
+
+$$
+n' = \lambda - l - 1 \quad\Longleftrightarrow\quad n = n' + k = (\lambda-l-1)+(2l+1) = \lambda+l
+$$
+
+つまり、$L(\rho)=L_{n}^{2l+1}(\rho)$ という**多項式**（無限級数ではなく有限で終わる）が解になるためには、$n=\lambda+l$ が**非負整数**でなければなりません。$n'=n-k\ge0$（多項式の次数が非負であること）から $n\ge2l+1$、つまり
+
+$$
+\boxed{n\ge l+1 \quad\Longleftrightarrow\quad l\le n-1}
+$$
+
+という、$l$ の範囲に対する条件（$l=0,1,\dots,n-1$）が自動的に出てきます。
+
+---
+
+# Part VII：エネルギー量子化と最終的な波動関数
+
+## 14. $\lambda$ が整数 $n$ に量子化される
+
+13節の結果 $n=\lambda+l$（$n$：非負整数、$l\ge0$）から、$\lambda$ もまた正の整数でなければなりません：
+
+$$
+\lambda = n \quad(n=1,2,3,\dots,\ \text{主量子数})
+$$
+
+$\lambda$ の定義（9節）に戻ると：
+
+$$
+n = \lambda = \frac{\mu Ze^2}{4\pi\varepsilon_0\hbar^2\kappa}
+\quad\Longrightarrow\quad
+\kappa = \frac{\mu Ze^2}{4\pi\varepsilon_0\hbar^2n}
+$$
+
+$\kappa=\sqrt{-2\mu E}/\hbar$（9節の定義）だったので、$E$ について解くと：
+
+$$
+E_n = -\frac{\hbar^2\kappa^2}{2\mu} = -\frac{\mu Z^2e^4}{2(4\pi\varepsilon_0)^2\hbar^2}\cdot\frac1{n^2}
+$$
+
+$$
+\boxed{E_n = -\frac{Z^2}{n^2}\cdot\text{Ry},\qquad \text{Ry}=\frac{\mu e^4}{2(4\pi\varepsilon_0)^2\hbar^2}\approx13.6\,\text{eV}}
+$$
+
+これが水素原子のエネルギー準位です。Bohr半径
+
+$$
+a_0 := \frac{4\pi\varepsilon_0\hbar^2}{\mu e^2}
+$$
+
+を使うと $\kappa = Z/(na_0)$、したがって $\rho = 2\kappa r = \dfrac{2Zr}{na_0}$ という、教科書でおなじみの無次元変数の定義に一致します。
+
+## 15. 動径波動関数
+
+$$
+u(\rho) = \rho^{l+1}e^{-\rho/2}L_{n+l}^{2l+1}(\rho)
+$$
+
+（13節の結果 $n_{\text{Laguerre添字}}=\lambda+l=n+l$ を使用）。$R(r)=u(r)/r$ と $\rho=2Zr/(na_0)$ を戻し、規格化定数 $N_{nl}$（$\int_0^\infty|R_{nl}|^2r^2dr=1$ から決まる）を付けると：
+
+$$
+\boxed{R_{nl}(r) = N_{nl}\left(\frac{2Zr}{na_0}\right)^{l}e^{-Zr/(na_0)}L_{n+l}^{2l+1}\!\left(\frac{2Zr}{na_0}\right)}
+$$
+
+## 16. 全体の波動関数
+
+角度部分（Part IV）と動径部分（15節）を掛け合わせると：
+
+$$
+\boxed{\psi_{nlm}(r,\theta,\phi) = R_{nl}(r)\,Y_l^m(\theta,\phi)}
+$$
+
+量子数の範囲：
+
+$$
+n=1,2,3,\dots,\qquad l=0,1,\dots,n-1,\qquad m=-l,\dots,l
+$$
+
+---
+
+# まとめ：全体の論理構造
+
+```
+Δψ = 0 の一般形（球座標）
+        │  ψ=R(r)Y(θ,φ) と分離
+        ▼
+角度方程式（分離定数 l(l+1)）        動径方程式（同じ l(l+1) を含む）
+        │  Y=Θ(θ)Φ(φ)                    │  u=rR
+        ▼                                 ▼
+Φ''=-m²Φ → e^{imφ}              1次元Schrödinger型: -ħ²/2μ u'' + [V+遠心力]u=Eu
+        │                                 │  ρ=2κr で無次元化、漸近形 ρ^{l+1}e^{-ρ/2} を分離
+        ▼                                 ▼
+associated Legendre方程式          associated Laguerre方程式
+        │  x=cosθ                         │
+        ▼                                 ▼
+(x²-1)^l を l 回微分              ρ^n e^{-ρ} を n 回微分・e^{-ρ}を抜き出す
+  → Legendre方程式の解 P_l(x)        → Laguerre方程式の解 L_n(ρ)
+        │  P_l を m 回微分 + (1-x²)^{m/2}   │  L_n を k=2l+1 回微分
+        ▼                                 ▼
+   P_l^m(x)（ルジャンドル陪関数）      L_{n+l}^{2l+1}(ρ)（ラゲール陪関数）
+        │                                 │  多項式で終わる条件 → n=λ+l ∈ ℤ
+        ▼                                 ▼
+  Y_l^m(θ,φ)（球面調和関数）         E_n = -Z²Ry/n²、R_nl(r)
+        └──────────────┬──────────────────┘
+                        ▼
+              ψ_nlm(r,θ,φ) = R_nl(r) Y_l^m(θ,φ)
+```
+
+**「Legendre方程式もLaguerre方程式も、同じ手法（ある関数 $w$ を作り、その満たす恒等式をライプニッツの公式で $N$ 回微分する）で多項式解が構成できる」**という点が、今回の導出全体を貫く共通の骨格でした。$m$ 階微分・$k$ 階微分によって「陪関数（associated function）」が作られる仕組みも、Legendre・Laguerre両方でまったく同じロジック（元の方程式をもう一段微分して次の方程式を導く）です。
