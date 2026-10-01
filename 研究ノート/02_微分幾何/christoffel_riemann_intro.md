@@ -2432,7 +2432,13 @@ $$
 \Gamma^k{}_{ij}\,g_{kl} = \frac12\big(\partial_ig_{jl}+\partial_jg_{il}-\partial_lg_{ij}\big)
 $$
 
-**これは、Part IIで導出したクリストッフェル記号の定義式そのもの**です（両辺に逆計量$g^{lm}$を掛けて$l$について和を取れば、標準公式$\Gamma^m{}_{ij}=\frac12g^{lm}(\partial_ig_{jl}+\partial_jg_{il}-\partial_lg_{ij})$に戻ります）。**つまり、$\mathbf r_{ij}$の接する方向の係数は、確かにクリストッフェル記号$\Gamma^k{}_{ij}$に一致することが、計算で確認できました。** 法線方向の係数は、定義よりそのまま$L_{ij}$です（$\mathbf r_{ij}\cdot\mathbf n=L_{ij}$、$\mathbf n\cdot\mathbf n=1$なので）。
+**これは、Part II で導出したクリストッフェル記号の定義式そのもの**です。両辺に逆計量 $g^{lm}$ を掛けて $l$ について和を取れば、標準公式に戻ります：
+
+$$
+\Gamma^m{}_{ij}=\frac12g^{lm}\big(\partial_ig_{jl}+\partial_jg_{il}-\partial_lg_{ij}\big)
+$$
+
+つまり、$\mathbf r_{ij}$ の接する方向の係数は、確かにクリストッフェル記号 $\Gamma^k{}_{ij}$ に一致することが、計算で確認できました。法線方向の係数は、定義よりそのまま $L_{ij}$ です（$\mathbf r_{ij}\cdot\mathbf n=L_{ij}$、$\mathbf n\cdot\mathbf n=1$ なので）。
 
 $$
 \boxed{\mathbf r_{ij} = \Gamma^k{}_{ij}\,\mathbf r_k + L_{ij}\,\mathbf n}\qquad\text{（ガウスの公式）}
@@ -2450,7 +2456,25 @@ $$
 \mathbf n_i\cdot\mathbf r_k + \mathbf n\cdot\mathbf r_{ik} = 0 \quad\Longrightarrow\quad \mathbf n_i\cdot\mathbf r_k = -\mathbf n\cdot\mathbf r_{ik} = -L_{ik}
 $$
 
-また、$\mathbf n\cdot\mathbf n=1$を微分すると$2\mathbf n\cdot\mathbf n_i=0$、つまり$\mathbf n_i$は$\mathbf n$と直交する（＝曲面に接する）ベクトルです。したがって$\mathbf n_i$は$\mathbf r_1,\mathbf r_2$だけで展開できます：$\mathbf n_i=c^k\mathbf r_k$。$\mathbf n_i\cdot\mathbf r_j=c^kg_{kj}$と、上で求めた$\mathbf n_i\cdot\mathbf r_j=-L_{ij}$を見比べると、$c^kg_{kj}=-L_{ij}$という式が得られます。ここから、$c^k$を単独で表す形に変形します。
+また、$\mathbf n\cdot\mathbf n=1$ を微分すると、
+
+$$
+2\,\mathbf n\cdot\mathbf n_i=0
+$$
+
+となります。つまり、$\mathbf n_i$ は $\mathbf n$ と直交する（曲面に接する）ベクトルです。したがって、$\mathbf n_i$ は $\mathbf r_1,\mathbf r_2$ だけで展開できます：
+
+$$
+\mathbf n_i=c^k\mathbf r_k
+$$
+
+この両辺と $\mathbf r_j$ の内積を取ると、$\mathbf n_i\cdot\mathbf r_j=c^kg_{kj}$ です。これと、上で求めた $\mathbf n_i\cdot\mathbf r_j=-L_{ij}$ を見比べると、次の式が得られます：
+
+$$
+c^kg_{kj}=-L_{ij}
+$$
+
+ここから、$c^k$ を単独で表す形に変形します。
 
 **ステップ1**：両辺に逆計量$g^{jm}$を掛けて、$j$について和を取ります：
 
@@ -2492,7 +2516,9 @@ $$
 \boxed{\mathbf n_i = -L_i{}^k\,\mathbf r_k}\qquad\text{（ヴァインガルテンの公式）}
 $$
 
-$L_i{}^k$は、$L_{ij}$の添字を1つ上げた表示であり（$V^i$と$V_i$の関係と同様）、別の対象ではありません。ヴァインガルテンの公式が主張しているのは、「$\mathbf n_i$（$\mathbf n$の微分）が接ベクトル$\mathbf r_k$の組み合わせで書ける」ことであり、$\mathbf n$自体が$\mathbf r_k$の組み合わせになるわけではありません。$\mathbf n_i$が接ベクトルの組み合わせになるのは、上で確認した通り$\mathbf n\cdot\mathbf n=1$の微分から$\mathbf n_i$が$\mathbf n$と直交し、接平面（$\mathbf r_1,\mathbf r_2$が張る面）の中に収まるためです。
+$L_i{}^k$ は、$L_{ij}$ の添字を1つ上げた表示であり、別の対象ではありません（$V^i$ と $V_i$ の関係と同様です）。
+
+ヴァインガルテンの公式が主張しているのは、$\mathbf n_i$（$\mathbf n$ の微分）が、接ベクトル $\mathbf r_k$ の組み合わせで書けることです。$\mathbf n$ 自体が $\mathbf r_k$ の組み合わせになるわけではありません。$\mathbf n_i$ が接ベクトルの組み合わせになるのは、上で確認した通り、$\mathbf n\cdot\mathbf n=1$ の微分から $\mathbf n_i$ が $\mathbf n$ と直交し、接平面（$\mathbf r_1,\mathbf r_2$ が張る面）の中に収まるためです。
 
 ![ガウスの公式とヴァインガルテンの公式の幾何的な意味](figures/fig14_gauss_weingarten.png)
 
@@ -2502,7 +2528,11 @@ $L_i{}^k$は、$L_{ij}$の添字を1つ上げた表示であり（$V^i$と$V_i$�
 
 ## A-4. 3階微分を、2通りの順番で計算する
 
-A-2, A-3で、$\mathbf r_{ij}$（接する方向＋法線方向）と$\mathbf n_i$（接する方向のみ）の分解を得ました。この2つの分解の中に、$\Gamma$（内部の量）と$L$（外から見た量）が同時に現れており、両者の関係を引き出すには、この分解をもう一段先まで使う必要があります。そこで、$\mathbf r_{ij}$をもう1回微分した$\mathbf r_{ijl}:=\partial_l(\mathbf r_{ij})$を、順序を変えた2通りの経路（先に$j$方向、後に$l$方向／その逆）で計算し、両者が等しいという条件（A-5で使う、混合偏微分の対称性）から、$\Gamma$と$L$の関係式を導きます。まず、$\mathbf r_{ijl}$を、A-2のガウスの公式に代入して計算します：
+A-2, A-3 で、$\mathbf r_{ij}$（接する方向＋法線方向）と $\mathbf n_i$（接する方向のみ）の分解を得ました。この2つの分解の中に、$\Gamma$（内部の量）と $L$（外から見た量）が同時に現れています。両者の関係を引き出すには、この分解をもう一段先まで使います。
+
+そこで、$\mathbf r_{ij}$ をもう1回微分した $\mathbf r_{ijl}:=\partial_l(\mathbf r_{ij})$ を、順序を変えた2通りの経路（先に $j$ 方向、後に $l$ 方向／その逆）で計算します。両者が等しいという条件（A-5 で使う、混合偏微分の対称性）から、$\Gamma$ と $L$ の関係式が導かれます。
+
+まず、$\mathbf r_{ijl}$ を、A-2 のガウスの公式に代入して計算します：
 
 $$
 \mathbf r_{ijl} = \partial_l\big(\Gamma^k{}_{ij}\mathbf r_k+L_{ij}\mathbf n\big) = (\partial_l\Gamma^k{}_{ij})\mathbf r_k+\Gamma^k{}_{ij}\mathbf r_{kl}+(\partial_lL_{ij})\mathbf n+L_{ij}\mathbf n_l
@@ -2564,7 +2594,13 @@ $$
 \Big[\partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}\Big]+\Big[\Gamma^k{}_{ij}\Gamma^m{}_{kl}-\Gamma^k{}_{il}\Gamma^m{}_{kj}\Big] = L_{ij}L_l{}^m-L_{il}L_j{}^m
 $$
 
-**左辺が、Part VII §2 で導出したリーマン曲率テンソルの公式$R^p{}_{qrs}=\partial_r\Gamma^p{}_{sq}-\partial_s\Gamma^p{}_{rq}+\Gamma^p{}_{rt}\Gamma^t{}_{sq}-\Gamma^p{}_{st}\Gamma^t{}_{rq}$の、どの成分に対応するかを、実際に代入して確認します。** $p=m,q=i,r=l,s=j$を代入します：
+**左辺が、Part VII §2 で導出したリーマン曲率テンソルの公式の、どの成分に対応するかを、実際に代入して確認します。** 公式は、次の形でした：
+
+$$
+R^p{}_{qrs}=\partial_r\Gamma^p{}_{sq}-\partial_s\Gamma^p{}_{rq}+\Gamma^p{}_{rt}\Gamma^t{}_{sq}-\Gamma^p{}_{st}\Gamma^t{}_{rq}
+$$
+
+ここに $p=m,\ q=i,\ r=l,\ s=j$ を代入します：
 
 $$
 R^m{}_{ilj} = \partial_l\Gamma^m{}_{ji}-\partial_j\Gamma^m{}_{li}+\Gamma^m{}_{lt}\Gamma^t{}_{ji}-\Gamma^m{}_{jt}\Gamma^t{}_{li}
@@ -2576,13 +2612,29 @@ $$
 R^m{}_{ilj} = \partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}+\Gamma^m{}_{lt}\Gamma^t{}_{ij}-\Gamma^m{}_{jt}\Gamma^t{}_{il}
 $$
 
-**これを、上での左辺$\big[\partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}\big]+\big[\Gamma^k{}_{ij}\Gamma^m{}_{kl}-\Gamma^k{}_{il}\Gamma^m{}_{kj}\big]$と、項ごとに照合します**。
+**これを、上の左辺と、項ごとに照合します：**
+
+$$
+\Big[\partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}\Big]+\Big[\Gamma^k{}_{ij}\Gamma^m{}_{kl}-\Gamma^k{}_{il}\Gamma^m{}_{kj}\Big]
+$$
 
 最初の2項（$\partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}$）は、両方とも完全に同じ形です。
 
-残り2項について：$\Gamma^k{}_{ij}\Gamma^m{}_{kl}$は、掛け算の順序を入れ替え（$\Gamma^m{}_{kl}\Gamma^k{}_{ij}$）、$\Gamma$の対称性（$\Gamma^m{}_{kl}=\Gamma^m{}_{lk}$）を使うと$\Gamma^m{}_{lk}\Gamma^k{}_{ij}$となり、ダミー添字$k\to t$と付け替えれば$\Gamma^m{}_{lt}\Gamma^t{}_{ij}$——**$R^m{}_{ilj}$の第3項と完全に一致します。**
+残り2項のうち、まず $\Gamma^k{}_{ij}\Gamma^m{}_{kl}$ を変形します。掛け算の順序を入れ替え、$\Gamma$ の対称性 $\Gamma^m{}_{kl}=\Gamma^m{}_{lk}$ を使い、ダミー添字を $k\to t$ と付け替えると：
 
-同様に、$-\Gamma^k{}_{il}\Gamma^m{}_{kj}$も、順序を入れ替えて$\Gamma$の対称性（$\Gamma^m{}_{kj}=\Gamma^m{}_{jk}$）を使うと$-\Gamma^m{}_{jk}\Gamma^k{}_{il}$、ダミー添字$k\to t$と付け替えれば$-\Gamma^m{}_{jt}\Gamma^t{}_{il}$——**$R^m{}_{ilj}$の第4項と完全に一致します。**
+$$
+\Gamma^k{}_{ij}\Gamma^m{}_{kl}=\Gamma^m{}_{kl}\Gamma^k{}_{ij}=\Gamma^m{}_{lk}\Gamma^k{}_{ij}=\Gamma^m{}_{lt}\Gamma^t{}_{ij}
+$$
+
+となり、$R^m{}_{ilj}$ の第3項と完全に一致します。
+
+同様に、$-\Gamma^k{}_{il}\Gamma^m{}_{kj}$ も、順序を入れ替えて $\Gamma^m{}_{kj}=\Gamma^m{}_{jk}$ を使い、$k\to t$ と付け替えると：
+
+$$
+-\Gamma^k{}_{il}\Gamma^m{}_{kj}=-\Gamma^m{}_{kj}\Gamma^k{}_{il}=-\Gamma^m{}_{jk}\Gamma^k{}_{il}=-\Gamma^m{}_{jt}\Gamma^t{}_{il}
+$$
+
+となり、$R^m{}_{ilj}$ の第4項と完全に一致します。
 
 **4項すべてが一致したので、左辺$=R^m{}_{ilj}$であることが、実際の計算で確認できました：**
 
@@ -2690,7 +2742,7 @@ $$
 R(X,Y)Z = \nabla_X\nabla_YZ-\nabla_Y\nabla_XZ-\nabla_{[X,Y]}Z
 $$
 
-に、$X=\mathbf e_2,Y=\mathbf e_1,Z=\mathbf e_1$（$\mathbf e_1=\partial_\theta,\mathbf e_2=\partial_\phi$）を代入します。**座標基底同士のリー括弧は必ずゼロ**（$[\mathbf e_i,\mathbf e_j]=0$、[リー微分のノート](lie_derivative.md)の Part IV §14）なので、$-\nabla_{[X,Y]}Z$の項が自動的に消えます：
+に、$X=\mathbf e_2$、$Y=\mathbf e_1$、$Z=\mathbf e_1$ を代入します（$\mathbf e_1=\partial_\theta$、$\mathbf e_2=\partial_\phi$）。座標基底同士のリー括弧は必ずゼロなので（$[\mathbf e_i,\mathbf e_j]=0$、[リー微分のノート](lie_derivative.md)の Part IV §14）、$-\nabla_{[X,Y]}Z$ の項は自動的に消えます：
 
 $$
 R(\mathbf e_2,\mathbf e_1)\mathbf e_1 = \nabla_2\nabla_1\mathbf e_1-\nabla_1\nabla_2\mathbf e_1
@@ -2716,7 +2768,14 @@ $$
 R^\phi{}_{\theta\phi\theta} = \partial_\phi\Gamma^\phi{}_{\theta\theta}-\partial_\theta\Gamma^\phi{}_{\phi\theta}+\Gamma^\phi{}_{\phi m}\Gamma^m{}_{\theta\theta}-\Gamma^\phi{}_{\theta m}\Gamma^m{}_{\phi\theta}
 $$
 
-$\Gamma^\phi{}_{\theta\theta}=0$（定数）なので$\partial_\phi\Gamma^\phi{}_{\theta\theta}=0$。$\Gamma^\phi{}_{\phi\theta}=\cot\theta$なので$\partial_\theta\Gamma^\phi{}_{\phi\theta}=\partial_\theta(\cot\theta)=-1/\sin^2\theta$、したがって$-\partial_\theta\Gamma^\phi{}_{\phi\theta}=1/\sin^2\theta$。$\Gamma^m{}_{\theta\theta}=0$（全ての$m$）なので第3項はゼロ。$\Gamma^\phi{}_{\theta m}\Gamma^m{}_{\phi\theta}$は$m=\phi$の項だけ残り、$\Gamma^\phi{}_{\theta\phi}\Gamma^\phi{}_{\phi\theta}=\cot\theta\cdot\cot\theta=\cot^2\theta$：
+各項を、順に求めます。
+
+- $\Gamma^\phi{}_{\theta\theta}=0$（定数）なので、$\partial_\phi\Gamma^\phi{}_{\theta\theta}=0$ です。
+- $\Gamma^\phi{}_{\phi\theta}=\cot\theta$ なので、$\partial_\theta\Gamma^\phi{}_{\phi\theta}=-1/\sin^2\theta$ です。したがって、$-\partial_\theta\Gamma^\phi{}_{\phi\theta}=1/\sin^2\theta$ です。
+- $\Gamma^m{}_{\theta\theta}=0$（すべての $m$）なので、第3項はゼロです。
+- 第4項 $\Gamma^\phi{}_{\theta m}\Gamma^m{}_{\phi\theta}$ は、$m=\phi$ の項だけが残り、$\Gamma^\phi{}_{\theta\phi}\Gamma^\phi{}_{\phi\theta}=\cot^2\theta$ です。
+
+これらを足し合わせると：
 
 $$
 R^\phi{}_{\theta\phi\theta} = 0+\frac1{\sin^2\theta}+0-\cot^2\theta = \frac{1-\cos^2\theta}{\sin^2\theta} = \frac{\sin^2\theta}{\sin^2\theta} = 1
@@ -2752,9 +2811,20 @@ $$
 
 **$L_{ij}$がテンソルであることの確認**：$\mathbf r_{ij}=\partial_i\partial_j\mathbf r$自体は、クリストッフェル記号がテンソルでなかったのと同じ理由で、単独ではテンソルになりません（座標変換で余計な項がつきます）。**$\mathbf n$との内積を取ることで、その余計な項がちょうど消える**、というのが、$L_{ij}$がテンソルになる本当の理由です。
 
-**記法**：$u^i$は元の座標、$\tilde u^i$は新しい座標です（どちらも添字$i$は$1,2$を走ります）。チルダは添字ではなく、**どの座標系の成分か**を区別するための記号です。添字の文字だけでは区別できない（添字は自由に付け替えてよいため）ので、座標そのものに印を付けています。Part I〜VIIIの$x^a\to q^i$（デカルト座標から曲線座標）は、この特別な場合（$u^k=x^a$、$\tilde u^i=q^i$）にあたり、$\partial u^k/\partial\tilde u^i$はヤコビアン$J^a{}_i$に対応します。
+**記法**：座標の記号を、次のように決めます。
 
-座標変換$u^i\to\tilde u^i$のもとで、$\mathbf r_i$は$\tilde{\mathbf r}_i=\dfrac{\partial u^k}{\partial\tilde u^i}\mathbf r_k$と変換します。これをもう一度$\tilde u^j$で微分します。$\dfrac{\partial u^k}{\partial\tilde u^i}$（係数）と$\mathbf r_k$（本体）の積なので、積の微分で2項に分かれます：
+- $u^i$ は元の座標、$\tilde u^i$ は新しい座標です（どちらも添字 $i$ は $1,2$ を走ります）。
+- チルダは添字ではなく、**どの座標系の成分か**を区別するための記号です。添字の文字だけでは区別できない（添字は自由に付け替えてよいため）ので、座標そのものに印を付けています。
+
+Part I〜VIII の $x^a\to q^i$（デカルト座標から曲線座標）は、この特別な場合（$u^k=x^a$、$\tilde u^i=q^i$）にあたり、$\partial u^k/\partial\tilde u^i$ はヤコビアン $J^a{}_i$ に対応します。
+
+座標変換 $u^i\to\tilde u^i$ のもとで、$\mathbf r_i$ は次のように変換します：
+
+$$
+\tilde{\mathbf r}_i=\frac{\partial u^k}{\partial\tilde u^i}\,\mathbf r_k
+$$
+
+これをもう一度 $\tilde u^j$ で微分します。右辺は、係数 $\partial u^k/\partial\tilde u^i$ と、本体 $\mathbf r_k$ の積なので、積の微分で2項に分かれます：
 
 $$
 \tilde{\mathbf r}_{ij} = \underbrace{\frac{\partial}{\partial\tilde u^j}\left(\frac{\partial u^k}{\partial\tilde u^i}\right)\mathbf r_k}_{\text{項A}} + \underbrace{\frac{\partial u^k}{\partial\tilde u^i}\cdot\frac{\partial\mathbf r_k}{\partial\tilde u^j}}_{\text{項B}}
@@ -3269,7 +3339,15 @@ $$
 R_{pilj}=L_{ij}L_{lp}-L_{il}L_{jp}\tag{B.3}
 $$
 
-右辺は、$(l,j)$の入れ替えについて反対称です（$l\leftrightarrow j$とすると$L_{il}L_{jp}-L_{ij}L_{lp}$となり、符号だけが反転します）。また$(p,i)$の入れ替えについても反対称です：$p\leftrightarrow i$とすると$L_{pj}L_{li}-L_{pl}L_{ji}$となり、$L$の対称性から$L_{jp}L_{il}-L_{lp}L_{ij}$、つまり元の式の符号反転になります。（一般の多様体での反対称性の証明は[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part II-b §7-b で扱うので、ここでは埋め込まれた曲面の場合に(B.3)から直接確認するのに止めます。）
+右辺は、$(l,j)$の入れ替えについて反対称です。$l\leftrightarrow j$とすると$L_{il}L_{jp}-L_{ij}L_{lp}$となり、符号だけが反転するためです。
+
+$(p,i)$の入れ替えについても反対称です。$p\leftrightarrow i$とすると、
+
+$$
+L_{pj}L_{li}-L_{pl}L_{ji}=L_{jp}L_{il}-L_{lp}L_{ij}
+$$
+
+となり（$L$の対称性を使いました）、これは元の式の符号反転です。（一般の多様体での反対称性の証明は[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part II-b §7-b で扱うので、ここでは埋め込まれた曲面の場合に(B.3)から直接確認するのに止めます。）
 
 反対称な添字の組は、同じ値を取ると成分がゼロになります。2次元では、$p\ne i$かつ$l\ne j$となる組は$(p,i),(l,j)\in\{(1,2),(2,1)\}$だけで、それらの成分はすべて$\pm R_{1212}$に等しくなります。したがって独立な式は1本です：
 
@@ -3689,7 +3767,19 @@ $$
 (\Omega_{ij})_{pq}=R^q{}_{pji}-L_{ip}L_j{}^q+L_{jp}L_i{}^q
 $$
 
-$(\Omega_{ij})_{pq}=0$は$R^q{}_{pji}=L_{ip}L_j{}^q-L_{jp}L_i{}^q$と同じです。A-6のガウス方程式$R^m{}_{ilj}=L_{ij}L_l{}^m-L_{il}L_j{}^m$はすべての添字の値で成り立つ式なので、添字を$(m,i,l,j)\to(q,p,j,i)$と付け替えてよく、$R^q{}_{pji}=L_{pi}L_j{}^q-L_{pj}L_i{}^q$となります。$L$の対称性（$L_{pi}=L_{ip}$、$L_{pj}=L_{jp}$）から、2つは同じ式です。**左上ブロックはガウス方程式です。**
+$(\Omega_{ij})_{pq}=0$は、
+
+$$
+R^q{}_{pji}=L_{ip}L_j{}^q-L_{jp}L_i{}^q
+$$
+
+と同じです。一方、A-6のガウス方程式$R^m{}_{ilj}=L_{ij}L_l{}^m-L_{il}L_j{}^m$は、すべての添字の値で成り立つ式なので、添字を$(m,i,l,j)\to(q,p,j,i)$と付け替えてよく、
+
+$$
+R^q{}_{pji}=L_{pi}L_j{}^q-L_{pj}L_i{}^q
+$$
+
+となります。$L$の対称性（$L_{pi}=L_{ip}$、$L_{pj}=L_{jp}$）から、2つは同じ式です。**左上ブロックはガウス方程式です。**
 
 **右上ブロック$(p,3)$**：
 
@@ -3707,7 +3797,19 @@ $$
 (\Omega_{ij})_{p3}=\partial_jL_{ip}-\partial_iL_{jp}+\Gamma^k{}_{ip}L_{jk}-\Gamma^k{}_{jp}L_{ik}
 $$
 
-$(\Omega_{ij})_{p3}=0$は$\partial_jL_{ip}-\partial_iL_{jp}=\Gamma^k{}_{jp}L_{ik}-\Gamma^k{}_{ip}L_{jk}$と同じです。(A-7)の添字を$(i,l,j)\to(p,j,i)$と付け替えると$\partial_jL_{pi}-\partial_iL_{pj}=\Gamma^k{}_{pj}L_{ki}-\Gamma^k{}_{pi}L_{kj}$で、$L$と$\Gamma$の対称性から同じ式です。**右上ブロックはコダッツィ方程式です。**
+$(\Omega_{ij})_{p3}=0$は、
+
+$$
+\partial_jL_{ip}-\partial_iL_{jp}=\Gamma^k{}_{jp}L_{ik}-\Gamma^k{}_{ip}L_{jk}
+$$
+
+と同じです。一方、(A-7)の添字を$(i,l,j)\to(p,j,i)$と付け替えると、
+
+$$
+\partial_jL_{pi}-\partial_iL_{pj}=\Gamma^k{}_{pj}L_{ki}-\Gamma^k{}_{pi}L_{kj}
+$$
+
+で、$L$と$\Gamma$の対称性から同じ式です。**右上ブロックはコダッツィ方程式です。**
 
 **左下ブロック$(3,q)$**：
 
@@ -3731,7 +3833,31 @@ $$
 \partial_iL_j{}^q+\Gamma^q{}_{ik}L_j{}^k=\partial_jL_i{}^q+\Gamma^q{}_{jk}L_i{}^k
 $$
 
-$L_j{}^q$を(1,1)型テンソル$T^q{}_j$とみなすと、B-0-1の式から$\nabla_iL_j{}^q=\partial_iL_j{}^q+\Gamma^q{}_{mi}L_j{}^m-\Gamma^m{}_{ji}L_m{}^q$です。$\Gamma^q{}_{mi}=\Gamma^q{}_{im}$として和の文字$m$を$k$と読み替えると、上の式の左辺は$\nabla_iL_j{}^q+\Gamma^m{}_{ji}L_m{}^q$、右辺は$\nabla_jL_i{}^q+\Gamma^m{}_{ij}L_m{}^q$です。$\Gamma^m{}_{ji}=\Gamma^m{}_{ij}$なので、条件は$\nabla_iL_j{}^q=\nabla_jL_i{}^q$と同じです。両辺に$g_{qs}$を掛けて添字を下げると（B-0-2の帰結から、共変微分と交換できます。$g_{qs}L_j{}^q=g_{qs}g^{kq}L_{jk}=\delta^k{}_sL_{jk}=L_{js}$）、$\nabla_iL_{js}=\nabla_jL_{is}$となります。これはB-1-1のコダッツィ方程式（$\nabla_lL_{ij}=\nabla_jL_{il}$の添字を$(l,i,j)\to(i,s,j)$と付け替え、$L$の対称性を使ったもの）です。**左下ブロックは、コダッツィ方程式をもう一度与えるだけです。**
+$L_j{}^q$を(1,1)型テンソル$T^q{}_j$とみなすと、B-0-1の式から
+
+$$
+\nabla_iL_j{}^q=\partial_iL_j{}^q+\Gamma^q{}_{mi}L_j{}^m-\Gamma^m{}_{ji}L_m{}^q
+$$
+
+です。$\Gamma^q{}_{mi}=\Gamma^q{}_{im}$として和の文字$m$を$k$と読み替えると、上の条件式の両辺は
+
+$$
+\text{左辺}=\nabla_iL_j{}^q+\Gamma^m{}_{ji}L_m{}^q,\qquad\text{右辺}=\nabla_jL_i{}^q+\Gamma^m{}_{ij}L_m{}^q
+$$
+
+と書けます。$\Gamma^m{}_{ji}=\Gamma^m{}_{ij}$なので、余分な項は両辺で同じになり、条件は
+
+$$
+\nabla_iL_j{}^q=\nabla_jL_i{}^q
+$$
+
+と同じです。次に、両辺に$g_{qs}$を掛けて添字を下げます。B-0-2の帰結から、$g_{qs}$は共変微分と交換できます。また、$g_{qs}L_j{}^q=g_{qs}g^{kq}L_{jk}=\delta^k{}_sL_{jk}=L_{js}$なので、
+
+$$
+\nabla_iL_{js}=\nabla_jL_{is}
+$$
+
+となります。これはB-1-1のコダッツィ方程式（$\nabla_lL_{ij}=\nabla_jL_{il}$の添字を$(l,i,j)\to(i,s,j)$と付け替え、$L$の対称性を使ったもの）です。**左下ブロックは、コダッツィ方程式をもう一度与えるだけです。**
 
 **右下ブロック$(3,3)$**：$\partial A$の$(3,3)$成分はゼロです。積については：
 
@@ -3873,19 +3999,49 @@ $$
 
 3次元空間の各点に、2次元の平面（接平面の候補）が滑らかに指定されているとします。これを、各点で平面を張る2本のベクトル場$X,Y$で表します（このような平面の場を**分布**と呼びます）。問題は、「各点を通り、その各点で指定された平面に接する曲面（**積分曲面**）が存在するか」です。
 
-**必要条件（包合性）**：積分曲面が存在するなら、リー括弧$[X,Y]$も各点で指定された平面の中にあります。これは短く示せます。積分曲面上の座標を$(s,t)$とすると、$X,Y$は曲面に接するので、曲面上で$X=f_1\partial_s+f_2\partial_t$、$Y=h_1\partial_s+h_2\partial_t$と書けます（$f_a,h_a$は関数）。リー括弧の成分の定義$[X,Y]^i=X^j\partial_jY^i-Y^j\partial_jX^i$（[リー微分のノート](lie_derivative.md)の Part IV §11）から、関数倍について
+**必要条件（包合性）**：積分曲面が存在するなら、リー括弧$[X,Y]$も各点で指定された平面の中にあります。これは短く示せます。
+
+積分曲面上の座標を$(s,t)$とすると、$X,Y$は曲面に接するので、曲面上で
+
+$$
+X=f_1\partial_s+f_2\partial_t,\qquad Y=h_1\partial_s+h_2\partial_t
+$$
+
+と書けます（$f_a,h_a$は関数）。リー括弧の成分の定義$[X,Y]^i=X^j\partial_jY^i-Y^j\partial_jX^i$（[リー微分のノート](lie_derivative.md)の Part IV §11）から、関数倍について
 
 $$
 [fA,hB]=fh[A,B]+f(Ah)B-h(Bf)A
 $$
 
-が成り立ちます（積の微分で展開すると、$A,B$の成分を微分する項が$fh[A,B]$に、$f,h$を微分する項が残りの2項になります）。$[\partial_s,\partial_s]=[\partial_t,\partial_t]=[\partial_s,\partial_t]=0$（座標ベクトル場のリー括弧はゼロ）なので、$[X,Y]$を展開すると、$[A,B]$の項はすべて消え、残る項はすべて$\partial_s$か$\partial_t$の関数倍です。したがって$[X,Y]$は曲面に接し、指定された平面の中にあります。
+が成り立ちます（積の微分で展開すると、$A,B$の成分を微分する項が$fh[A,B]$に、$f,h$を微分する項が残りの2項になります）。
+
+座標ベクトル場のリー括弧はゼロです：
+
+$$
+[\partial_s,\partial_s]=[\partial_t,\partial_t]=[\partial_s,\partial_t]=0
+$$
+
+なので、$[X,Y]$を展開すると、$[A,B]$の項はすべて消え、残る項はすべて$\partial_s$か$\partial_t$の関数倍です。したがって$[X,Y]$は曲面に接し、指定された平面の中にあります。
 
 **十分条件（定理の主張）**：逆に、$[X,Y]$が常に指定された平面の中にあれば（包合的なら）、積分曲面が各点の近くに存在します。この向きの証明には、$X$の流れと$Y$の流れを組み合わせて曲面を作る議論が必要になり、ここでは扱いません。ここでは、「包合性を仮定すれば、積分曲面の存在が従う」という定理として引用します。
 
 **B-5との関係**：B-5-2の証明も、「まず$u^1$方向に解き、次に$u^2$方向に解いて、誤差項が可積分条件（$\Omega_{12}=0$）によって消える」という構造でした。一般の証明も、「一方の流れで動いてから他方の流れで動く」という同じ発想で組み立てられます。
 
-**領域の形**：定理は長方形$D$（穴のない領域）で述べました。穴のある領域では、$\Omega=0$でも解が1つの値に定まらないことがあります。$1\times1$の場合（$A_i$が数）で例を挙げます。原点を除いた平面で、$c$を実数の定数として$A_i\,du^i=c\,\dfrac{-u^2du^1+u^1du^2}{(u^1)^2+(u^2)^2}$とすると、数の積は交換するので$\Omega_{12}=\partial_2A_1-\partial_1A_2$で、これは[積分のノート](../03_多様体・微分形式・トポロジー/integration_algebraic_structure_stokes.md)で確認した通りゼロです。しかし解$\Phi=\Phi_0\exp\big(\int A_i\,du^i\big)$は、原点の周りを1周すると$\oint=2\pi c$だけ指数が増え、$e^{2\pi c}$倍になって元に戻りません。これはde Rhamコホモロジー（[積分のノート](../03_多様体・微分形式・トポロジー/integration_algebraic_structure_stokes.md)）やホロノミー（[行列値微分形式のノート](../03_多様体・微分形式・トポロジー/matrix_valued_forms_gauge_theory.md)）で扱う現象であり、ここでは例の紹介に止めます。
+**領域の形**：定理は長方形$D$（穴のない領域）で述べました。穴のある領域では、$\Omega=0$でも解が1つの値に定まらないことがあります。$1\times1$の場合（$A_i$が数）で例を挙げます。
+
+原点を除いた平面で、$c$を実数の定数として、
+
+$$
+A_i\,du^i=c\,\frac{-u^2du^1+u^1du^2}{(u^1)^2+(u^2)^2}
+$$
+
+とします。数の積は交換するので$\Omega_{12}=\partial_2A_1-\partial_1A_2$で、これは[積分のノート](../03_多様体・微分形式・トポロジー/integration_algebraic_structure_stokes.md)で確認した通りゼロです。しかし解
+
+$$
+\Phi=\Phi_0\exp\Big(\int A_i\,du^i\Big)
+$$
+
+は、原点の周りを1周すると$\oint A_i\,du^i=2\pi c$だけ指数が増え、$e^{2\pi c}$倍になって元に戻りません。これはde Rhamコホモロジー（[積分のノート](../03_多様体・微分形式・トポロジー/integration_algebraic_structure_stokes.md)）やホロノミー（[行列値微分形式のノート](../03_多様体・微分形式・トポロジー/matrix_valued_forms_gauge_theory.md)）で扱う現象であり、ここでは例の紹介に止めます。
 
 ---
 
@@ -3902,7 +4058,20 @@ $$
 1. 第一基本形式が$g_{ij}$、第二基本形式が$L_{ij}$となる曲面$\mathbf r:D\to\mathbb R^3$が存在します。
 2. そのような曲面は、回転と平行移動を除いてただ1つです。
 
-**$g$だけでは曲面が決まらない例**：$g$だけを与えても、曲面は決まりません。平面$\mathbf r(s,z)=(s,z,0)$と、半径$c>0$の円柱$\mathbf r(s,z)=\big(c\cos(s/c),\ c\sin(s/c),\ z\big)$を比べます。円柱では$\mathbf r_s=(-\sin(s/c),\cos(s/c),0)$、$\mathbf r_z=(0,0,1)$なので、平面と同じ$g_{ij}=\delta_{ij}$です。一方、外向き法線$\mathbf n=(\cos(s/c),\sin(s/c),0)$に対して$\mathbf r_{ss}=-\frac1c(\cos(s/c),\sin(s/c),0)=-\frac1c\mathbf n$なので$L_{ss}=-1/c$、$\mathbf r_{sz}=\mathbf r_{zz}=0$から$L_{sz}=L_{zz}=0$です。平面は$L=0$です。どちらも（$\Gamma=0$、$R=0$、$\det L=0$、$L$が定数なので）ガウス方程式とコダッツィ方程式を満たします。同じ$g$に対して、異なる$L$を持つ別の曲面が存在するので、曲面を決めるには$L$まで指定する必要があります。
+**$g$だけでは曲面が決まらない例**：$g$だけを与えても、曲面は決まりません。次の2つを比べます。
+
+- 平面：$\mathbf r(s,z)=(s,z,0)$
+- 半径$c>0$の円柱：$\mathbf r(s,z)=\big(c\cos(s/c),\ c\sin(s/c),\ z\big)$
+
+円柱では$\mathbf r_s=(-\sin(s/c),\cos(s/c),0)$、$\mathbf r_z=(0,0,1)$なので、平面と同じ$g_{ij}=\delta_{ij}$です。一方、外向き法線を$\mathbf n=(\cos(s/c),\sin(s/c),0)$とすると、
+
+$$
+\mathbf r_{ss}=-\frac1c\big(\cos(s/c),\sin(s/c),0\big)=-\frac1c\mathbf n,\qquad\mathbf r_{sz}=\mathbf r_{zz}=0
+$$
+
+なので、円柱の第二基本形式は$L_{ss}=-1/c$、$L_{sz}=L_{zz}=0$です。平面は$L=0$です。
+
+どちらも、$\Gamma=0$、$R=0$、$\det L=0$で、$L$が定数なので、ガウス方程式とコダッツィ方程式を満たします。同じ$g$に対して異なる$L$を持つ別の曲面が存在するので、曲面を決めるには$L$まで指定する必要があります。
 
 ![gだけでは曲面が決まらない例と、(g,L) が決まれば曲面が決まること](figures/fig18_bonnet_uniqueness.png)
 
@@ -3920,7 +4089,17 @@ $$
 \mathbf r_1^{(0)}:=\big(\sqrt{g_{11}},\ 0,\ 0\big),\qquad\mathbf r_2^{(0)}:=\Big(\frac{g_{12}}{\sqrt{g_{11}}},\ \sqrt{\frac{\det g}{g_{11}}},\ 0\Big),\qquad\mathbf n^{(0)}:=(0,0,1)
 $$
 
-（すべて原点での値です。）内積を確認します：$\mathbf r_1^{(0)}\cdot\mathbf r_1^{(0)}=g_{11}$、$\mathbf r_1^{(0)}\cdot\mathbf r_2^{(0)}=g_{12}$、$\mathbf r_2^{(0)}\cdot\mathbf r_2^{(0)}=\dfrac{g_{12}^2}{g_{11}}+\dfrac{g_{11}g_{22}-g_{12}^2}{g_{11}}=g_{22}$、$\mathbf n^{(0)}\cdot\mathbf r_i^{(0)}=0$、$\mathbf n^{(0)}\cdot\mathbf n^{(0)}=1$。この3本を行に並べたものを$\Phi_0$とします。
+（すべて原点での値です。）内積を確認します：
+
+$$
+\mathbf r_1^{(0)}\cdot\mathbf r_1^{(0)}=g_{11},\qquad\mathbf r_1^{(0)}\cdot\mathbf r_2^{(0)}=g_{12},\qquad\mathbf r_2^{(0)}\cdot\mathbf r_2^{(0)}=\frac{g_{12}^2}{g_{11}}+\frac{g_{11}g_{22}-g_{12}^2}{g_{11}}=g_{22}
+$$
+
+$$
+\mathbf n^{(0)}\cdot\mathbf r_i^{(0)}=0,\qquad\mathbf n^{(0)}\cdot\mathbf n^{(0)}=1
+$$
+
+この3本を行に並べたものを$\Phi_0$とします。
 
 B-5の定理から、$\partial_i\Phi=A_i\Phi$、$\Phi(0,0)=\Phi_0$を満たす$\Phi$が$D$上にただ1つ存在します。**記法**：まだ何かの曲面の微分であるとは分かっていないので、$\Phi$の行を$\mathbf X_1,\mathbf X_2,\mathbf N$と書きます。
 
@@ -3973,7 +4152,7 @@ $$
 \partial_1\mathbf r=\mathbf X_1(u^1,0)+\int_0^{u^2}\partial_1\mathbf X_2(u^1,t)\,dt=\mathbf X_1(u^1,0)+\int_0^{u^2}\partial_2\mathbf X_1(u^1,t)\,dt
 $$
 
-（$\partial_1\mathbf X_2=\partial_2\mathbf X_1$を使いました。）最後の積分は微積分の基本定理から$\mathbf X_1(u^1,u^2)-\mathbf X_1(u^1,0)$なので、$\partial_1\mathbf r=\mathbf X_1(u^1,u^2)$です。（これは「閉じた1-形式は、穴のない領域では完全形式になる」というポアンカレの補題の逆向きの主張の、今の場合の証明になっています。B-5-3の例のように、穴のある領域ではこの構成は一般にうまくいきません。）
+（$\partial_1\mathbf X_2=\partial_2\mathbf X_1$を使いました。）最後の積分は微積分の基本定理から$\mathbf X_1(u^1,u^2)-\mathbf X_1(u^1,0)$なので、$\partial_1\mathbf r=\mathbf X_1(u^1,u^2)$です。（これは、ポアンカレの補題「閉じた1-形式は、穴のない領域では完全形式になる」の、今の場合の証明になっています。B-5-3の例のように、穴のある領域ではこの構成は一般にうまくいきません。）
 
 **ステップ4：作った曲面が$g$と$L$を持つことを確認する**。$\mathbf r_i=\mathbf X_i$なので、ステップ2から$\mathbf r_i\cdot\mathbf r_j=g_{ij}$です。$\mathbf X_1,\mathbf X_2$は1次独立なので、$\mathbf r$は各点で接平面を持つ曲面です。$\mathbf N$は$\mathbf r_1,\mathbf r_2$に垂直な単位ベクトルなので、単位法線です。第二基本形式は、ステップ3の式から：
 
@@ -3991,9 +4170,29 @@ $$
 QQ^T=\Phi(0,0)^{-1}\Phi'(0,0)\Phi'(0,0)^T\big(\Phi(0,0)^{-1}\big)^T=\Phi(0,0)^{-1}G^\ast(0,0)\big(\Phi(0,0)^T\big)^{-1}
 $$
 
-$G^\ast(0,0)=\Phi(0,0)\Phi(0,0)^T$を代入すると$QQ^T=I$です。さらに、$\det\Phi=\mathbf r_1\cdot(\mathbf r_2\times\mathbf n)=(\mathbf r_1\times\mathbf r_2)\cdot\mathbf n>0$（$\mathbf n$の向きの取り方から）が$\Phi,\Phi'$の両方で成り立つので、$\det Q=\det\Phi'(0,0)/\det\Phi(0,0)>0$、つまり$\det Q=1$で、$Q$は回転です。
+$G^\ast(0,0)=\Phi(0,0)\Phi(0,0)^T$を代入すると$QQ^T=I$です。
 
-$\Psi:=\Phi Q$とおくと、$\partial_i\Psi=(\partial_i\Phi)Q=A_i\Phi Q=A_i\Psi$、$\Psi(0,0)=\Phi'(0,0)$です。B-5の一意性から$\Psi=\Phi'$、つまり各行について$\mathbf r'_i=\mathbf r_iQ$が$D$全体で成り立ちます。すると$\partial_i(\mathbf r'-\mathbf rQ)=\mathbf r'_i-\mathbf r_iQ=0$なので、$\mathbf r'-\mathbf rQ$は定数ベクトル$\mathbf c$で、$\mathbf r'=\mathbf rQ+\mathbf c$です。横ベクトルに右から回転行列$Q$を掛けることは回転、$\mathbf c$を足すことは平行移動なので、主張2が示されました。
+さらに、$\Phi,\Phi'$の両方で、$\mathbf n$の向きの取り方から
+
+$$
+\det\Phi=\mathbf r_1\cdot(\mathbf r_2\times\mathbf n)=(\mathbf r_1\times\mathbf r_2)\cdot\mathbf n>0
+$$
+
+が成り立ちます。したがって$\det Q=\det\Phi'(0,0)/\det\Phi(0,0)>0$、つまり$\det Q=1$で、$Q$は回転です。
+
+$\Psi:=\Phi Q$とおくと、
+
+$$
+\partial_i\Psi=(\partial_i\Phi)Q=A_i\Phi Q=A_i\Psi,\qquad\Psi(0,0)=\Phi'(0,0)
+$$
+
+です。B-5の一意性から$\Psi=\Phi'$、つまり各行について$\mathbf r'_i=\mathbf r_iQ$が$D$全体で成り立ちます。すると$\partial_i(\mathbf r'-\mathbf rQ)=\mathbf r'_i-\mathbf r_iQ=0$なので、$\mathbf r'-\mathbf rQ$は定数ベクトル$\mathbf c$で、
+
+$$
+\mathbf r'=\mathbf rQ+\mathbf c
+$$
+
+です。横ベクトルに右から回転行列$Q$を掛けることは回転、$\mathbf c$を足すことは平行移動なので、主張2が示されました。
 
 **トーラスへの適用**：B-2で、トーラスの$g,L$がガウス方程式とコダッツィ方程式を満たすことを確認しました。ボネの定理から、この$g,L$を持つ曲面は、（パラメータ領域の各長方形の上で）回転と平行移動を除いてトーラスしかありません。
 
@@ -4039,9 +4238,21 @@ $$
 
 (B.2)から右辺は$2K$なので、$R=2K$が得られます。これは[リッチテンソルのノート](ricci_tensor_einstein_equations.md)の §11-a で計量だけから導いた関係と同じで、ここでは埋め込み（$L$）を経由する別の経路で到達しています。
 
-**球面での検算**：$L_{ij}=-g_{ij}/a$なので、$\operatorname{tr}L=-\frac1ag^{ij}g_{ij}=-\frac1a\delta^i{}_i=-\frac2a$、$L_{ij}L^{ij}=\frac1{a^2}g_{ij}g^{ij}=\frac2{a^2}$です。$R=\frac4{a^2}-\frac2{a^2}=\frac2{a^2}$で、[リッチテンソルのノート](ricci_tensor_einstein_equations.md)の値と一致します。
+**球面での検算**：$L_{ij}=-g_{ij}/a$なので、
 
-**トーラスでの検算**：B-2-5から$\operatorname{tr}L=\kappa_1+\kappa_2=-\frac1a-\frac{\cos\theta}{\rho}$です。$g,L$が対角なので$L_{ij}L^{ij}=(g^{\theta\theta}L_{\theta\theta})^2+(g^{\phi\phi}L_{\phi\phi})^2=\frac1{a^2}+\frac{\cos^2\theta}{\rho^2}$です：
+$$
+\operatorname{tr}L=-\frac1ag^{ij}g_{ij}=-\frac1a\delta^i{}_i=-\frac2a,\qquad L_{ij}L^{ij}=\frac1{a^2}g_{ij}g^{ij}=\frac2{a^2}
+$$
+
+です。したがって$R=\dfrac4{a^2}-\dfrac2{a^2}=\dfrac2{a^2}$で、[リッチテンソルのノート](ricci_tensor_einstein_equations.md)の値と一致します。
+
+**トーラスでの検算**：B-2-5から$\operatorname{tr}L=\kappa_1+\kappa_2$です。$g,L$が対角なので、
+
+$$
+\operatorname{tr}L=-\frac1a-\frac{\cos\theta}{\rho},\qquad L_{ij}L^{ij}=(g^{\theta\theta}L_{\theta\theta})^2+(g^{\phi\phi}L_{\phi\phi})^2=\frac1{a^2}+\frac{\cos^2\theta}{\rho^2}
+$$
+
+です。したがって：
 
 $$
 R=\Big(\frac1a+\frac{\cos\theta}{\rho}\Big)^2-\frac1{a^2}-\frac{\cos^2\theta}{\rho^2}=\frac{2\cos\theta}{a\rho}=2K
