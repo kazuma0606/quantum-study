@@ -61,7 +61,7 @@
   - [A-7. 法線方向の係数を比較する ―コダッツィ・マイナルディ方程式](#A-7)
   - [A-8. ガウス方程式から、K=R\_θφθφ/det g を導く（ガウスの驚異の定理の核心）](#A-8)
   - [A-9. 球面の具体例で、最終確認](#A-9)
-  - [A-10. Wikipediaの「別の定義」も、同じ式であることの確認](#A-10)
+  - [A-10. 別の書き方（座標に依らない形）でも、同じガウス曲率になることの確認](#A-10)
   - [A-11. L\_ijの名前と、テンソルであることの確認](#A-11)
   - [まとめ](#A-sum)
 - [付録B：曲面が存在するための条件（ボネの定理）](#appB)
@@ -2348,7 +2348,7 @@ flowchart TD
 - [A-7. 法線方向の係数を比較する ―コダッツィ・マイナルディ方程式](#A-7)
 - [A-8. ガウス方程式から、K=R\_θφθφ/det g を導く（ガウスの驚異の定理の核心）](#A-8)
 - [A-9. 球面の具体例で、最終確認](#A-9)
-- [A-10. Wikipediaの「別の定義」も、同じ式であることの確認](#A-10)
+- [A-10. 別の書き方（座標に依らない形）でも、同じガウス曲率になることの確認](#A-10)
 - [A-11. L\_ijの名前と、テンソルであることの確認](#A-11)
 - [まとめ](#A-sum)
 
@@ -2726,9 +2726,9 @@ $$
 
 <a id="A-10"></a>
 
-## A-10. Wikipediaの「別の定義」も、同じ式であることの確認
+## A-10. 別の書き方（座標に依らない形）でも、同じガウス曲率になることの確認
 
-日本語版Wikipedia「ガウス曲率」のページには、次の式が載っています：
+ガウス曲率は、座標に依らない形では、次のようにも書かれます：
 
 $$
 K = \frac{\big\langle(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1,\ \mathbf e_2\big\rangle}{\det g}
@@ -2748,7 +2748,7 @@ $$
 R(\mathbf e_2,\mathbf e_1)\mathbf e_1 = \nabla_2\nabla_1\mathbf e_1-\nabla_1\nabla_2\mathbf e_1
 $$
 
-つまり、Wikipediaの$(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1$は、$R(\mathbf e_2,\mathbf e_1)\mathbf e_1$のことです。
+つまり、座標に依らない式の$(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1$は、$R(\mathbf e_2,\mathbf e_1)\mathbf e_1$のことです。
 
 **ステップ2**：これを、Part VII §2の添字を使った定義$(\nabla_i\nabla_j-\nabla_j\nabla_i)V^l=R^l{}_{kij}V^k$と対応させます。$Z=\mathbf e_1=\partial_\theta$（成分$V^k=\delta^k_\theta$）、$i=\phi,j=\theta$（$\nabla_\phi\nabla_\theta-\nabla_\theta\nabla_\phi$）とすると：
 
@@ -2787,7 +2787,7 @@ $$
 \big\langle(\nabla_\phi\nabla_\theta-\nabla_\theta\nabla_\phi)\mathbf e_\theta,\ \mathbf e_\phi\big\rangle = R^\phi{}_{\theta\phi\theta}\,g_{\phi\phi} = 1\cdot a^2\sin^2\theta = a^2\sin^2\theta
 $$
 
-**ステップ5**：Wikipediaの式の$(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1$は、$1=\theta,2=\phi$と対応させると、まさに$(\nabla_\phi\nabla_\theta-\nabla_\theta\nabla_\phi)\mathbf e_\theta$そのものです（順序の入れ替えや符号の反転は不要です）：
+**ステップ5**：座標に依らない式の$(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1$は、$1=\theta,2=\phi$と対応させると、まさに$(\nabla_\phi\nabla_\theta-\nabla_\theta\nabla_\phi)\mathbf e_\theta$そのものです（順序の入れ替えや符号の反転は不要です）：
 
 $$
 \big\langle(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1,\mathbf e_2\big\rangle = \big\langle(\nabla_\phi\nabla_\theta-\nabla_\theta\nabla_\phi)\mathbf e_\theta,\mathbf e_\phi\big\rangle = a^2\sin^2\theta
@@ -2801,7 +2801,7 @@ $$
 K = \frac{\big\langle(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1,\mathbf e_2\big\rangle}{\det g} = \frac{a^2\sin^2\theta}{a^4\sin^2\theta} = \frac1{a^2}
 $$
 
-**Wikipediaの「別の定義」は、私たちの$K=R_{\theta\phi\theta\phi}/\det g$と、まったく同じ式でした。** $\langle(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1,\mathbf e_2\rangle$という書き方は、$R^l{}_{kij}$という添字だらけの表記を経由せず、「共変微分を2回、順番を変えて引いたものを、内積で1つの数に落とし込む」という、座標に依らない言い方をしているだけです。
+**座標に依らない形の式は、私たちの$K=R_{\theta\phi\theta\phi}/\det g$と、まったく同じ式でした。** $\langle(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1,\mathbf e_2\rangle$という書き方は、$R^l{}_{kij}$という添字だらけの表記を経由せず、「共変微分を2回、順番を変えて引いたものを、内積で1つの数に落とし込む」という、座標に依らない言い方をしているだけです。
 
 <a id="A-11"></a>
 
