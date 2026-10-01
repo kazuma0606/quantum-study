@@ -4535,7 +4535,12 @@ $$
 \partial_\gamma\bar g_{\alpha\beta}=\bar\Gamma^\lambda{}_{\alpha\gamma}\bar g_{\lambda\beta}+\bar\Gamma^\lambda{}_{\beta\gamma}\bar g_{\alpha\lambda}
 $$
 
-1本目＋2本目−3本目を計算します。$\bar\Gamma$と$\bar g$の対称性から、$\bar\Gamma^\lambda{}_{\gamma\alpha}\bar g_{\beta\lambda}$と$-\bar\Gamma^\lambda{}_{\alpha\gamma}\bar g_{\lambda\beta}$、$\bar\Gamma^\lambda{}_{\gamma\beta}\bar g_{\alpha\lambda}$と$-\bar\Gamma^\lambda{}_{\beta\gamma}\bar g_{\alpha\lambda}$がそれぞれ打ち消し合い、$\bar\Gamma^\lambda{}_{\beta\alpha}\bar g_{\lambda\gamma}+\bar\Gamma^\lambda{}_{\alpha\beta}\bar g_{\lambda\gamma}=2\bar\Gamma^\lambda{}_{\alpha\beta}\bar g_{\lambda\gamma}$が残ります：
+1本目＋2本目−3本目を計算します。$\bar\Gamma$と$\bar g$の対称性から、次の2組が打ち消し合います。
+
+- $\bar\Gamma^\lambda{}_{\gamma\alpha}\bar g_{\beta\lambda}$と$-\bar\Gamma^\lambda{}_{\alpha\gamma}\bar g_{\lambda\beta}$
+- $\bar\Gamma^\lambda{}_{\gamma\beta}\bar g_{\alpha\lambda}$と$-\bar\Gamma^\lambda{}_{\beta\gamma}\bar g_{\alpha\lambda}$
+
+残るのは$\bar\Gamma^\lambda{}_{\beta\alpha}\bar g_{\lambda\gamma}+\bar\Gamma^\lambda{}_{\alpha\beta}\bar g_{\lambda\gamma}=2\bar\Gamma^\lambda{}_{\alpha\beta}\bar g_{\lambda\gamma}$で：
 
 $$
 2\bar\Gamma^\lambda{}_{\alpha\beta}\bar g_{\lambda\gamma}=\partial_\alpha\bar g_{\beta\gamma}+\partial_\beta\bar g_{\alpha\gamma}-\partial_\gamma\bar g_{\alpha\beta}
@@ -4565,13 +4570,27 @@ $$
 \bar\nabla_\alpha\bar\nabla_\beta s=\bar g_{\mu\nu}\Big[(\bar\nabla_\alpha\bar\nabla_\beta V^\mu)V^\nu+(\bar\nabla_\beta V^\mu)(\bar\nabla_\alpha V^\nu)+(\bar\nabla_\alpha V^\mu)(\bar\nabla_\beta V^\nu)+V^\mu(\bar\nabla_\alpha\bar\nabla_\beta V^\nu)\Big]
 $$
 
-$\alpha\leftrightarrow\beta$を入れ替えて引くと、中央の2項（$\bar g_{\mu\nu}$の対称性から、$\alpha,\beta$について対称）は消えます。残る項に$(\bar\nabla_\alpha\bar\nabla_\beta-\bar\nabla_\beta\bar\nabla_\alpha)V^\mu=\bar R^\mu{}_{\gamma\alpha\beta}V^\gamma$（Part VII §2の定義）を代入すると：
+$\alpha\leftrightarrow\beta$を入れ替えて引くと、中央の2項は消えます。$\bar g_{\mu\nu}$の対称性から、$\alpha,\beta$について対称だからです。残る項に、Part VII §2の定義
+
+$$
+\big(\bar\nabla_\alpha\bar\nabla_\beta-\bar\nabla_\beta\bar\nabla_\alpha\big)V^\mu=\bar R^\mu{}_{\gamma\alpha\beta}V^\gamma
+$$
+
+を代入すると：
 
 $$
 0=\bar g_{\mu\nu}\bar R^\mu{}_{\gamma\alpha\beta}V^\gamma V^\nu+\bar g_{\mu\nu}V^\mu\bar R^\nu{}_{\gamma\alpha\beta}V^\gamma=\bar R_{\nu\gamma\alpha\beta}V^\gamma V^\nu+\bar R_{\mu\gamma\alpha\beta}V^\mu V^\gamma
 $$
 
-第2項のダミー添字を$\mu\to\nu$と付け替えると第1項と同じになり、$2\bar R_{\nu\gamma\alpha\beta}V^\nu V^\gamma=0$です。**記法**：$\alpha,\beta$を固定し、$S_{\nu\gamma}:=\bar R_{\nu\gamma\alpha\beta}+\bar R_{\gamma\nu\alpha\beta}$（$\nu,\gamma$について対称）とおくと、$S_{\nu\gamma}V^\nu V^\gamma=2\bar R_{\nu\gamma\alpha\beta}V^\nu V^\gamma=0$がすべての$V$で成り立ちます。$V=U+W$を代入し、$U$だけ・$W$だけの項（どちらもゼロ）を引くと、$S$の対称性から$2S_{\nu\gamma}U^\nu W^\gamma=0$です。$U,W$は任意なので$S_{\nu\gamma}=0$、つまり最初の2添字について反対称です。
+第2項のダミー添字を$\mu\to\nu$と付け替えると第1項と同じになり、$2\bar R_{\nu\gamma\alpha\beta}V^\nu V^\gamma=0$です。
+
+あとは、これが任意の$V$で成り立つことから、反対称性を引き出します。**記法**：$\alpha,\beta$を固定し、
+
+$$
+S_{\nu\gamma}:=\bar R_{\nu\gamma\alpha\beta}+\bar R_{\gamma\nu\alpha\beta}
+$$
+
+とおきます（$\nu,\gamma$について対称）。$S_{\nu\gamma}V^\nu V^\gamma=2\bar R_{\nu\gamma\alpha\beta}V^\nu V^\gamma=0$がすべての$V$で成り立ちます。$V=U+W$を代入し、$U$だけ・$W$だけの項（どちらもゼロ）を引くと、$S$の対称性から$2S_{\nu\gamma}U^\nu W^\gamma=0$です。$U,W$は任意なので$S_{\nu\gamma}=0$、つまり最初の2添字について反対称です。
 
 最後の2添字についての反対称性$\bar R^\delta{}_{\gamma\alpha\beta}=-\bar R^\delta{}_{\gamma\beta\alpha}$は、公式で$\alpha\leftrightarrow\beta$を入れ替えると全項の符号が反転することから直接分かります（[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part II-b §7-a）。
 
@@ -4605,7 +4624,19 @@ $$
 \partial_j\big(\bar g_{\mu\nu}U^\mu V^\nu\big)=(\partial_\beta\bar g_{\mu\nu})e_j{}^\beta U^\mu V^\nu+\bar g_{\mu\nu}(\partial_jU^\mu)V^\nu+\bar g_{\mu\nu}U^\mu(\partial_jV^\nu)
 $$
 
-第1項に(C.1)（添字を$(\alpha,\beta,\gamma)\to(\beta,\mu,\nu)$と付け替えたもの）$\partial_\beta\bar g_{\mu\nu}=\bar\Gamma^\lambda{}_{\mu\beta}\bar g_{\lambda\nu}+\bar\Gamma^\lambda{}_{\nu\beta}\bar g_{\mu\lambda}$を代入します。$\bar\Gamma^\lambda{}_{\mu\beta}\bar g_{\lambda\nu}U^\mu e_j{}^\beta V^\nu$では、ダミー添字の名前を$\mu\to\alpha$、$\lambda\to\mu$と付け替えて$\bar g_{\mu\nu}\big(\bar\Gamma^\mu{}_{\alpha\beta}U^\alpha e_j{}^\beta\big)V^\nu$とし、第2項と合わせると$\bar g(\bar\nabla_{e_j}U,V)$になります。もう一方の項も同様に第3項と合わせて$\bar g(U,\bar\nabla_{e_j}V)$になります。
+第1項に(C.1)を代入します。(C.1)の添字を$(\alpha,\beta,\gamma)\to(\beta,\mu,\nu)$と付け替えると：
+
+$$
+\partial_\beta\bar g_{\mu\nu}=\bar\Gamma^\lambda{}_{\mu\beta}\bar g_{\lambda\nu}+\bar\Gamma^\lambda{}_{\nu\beta}\bar g_{\mu\lambda}
+$$
+
+です。右辺の前半を$U^\mu e_j{}^\beta V^\nu$に掛けた項では、ダミー添字の名前を$\mu\to\alpha$、$\lambda\to\mu$と付け替えて
+
+$$
+\bar\Gamma^\lambda{}_{\mu\beta}\bar g_{\lambda\nu}U^\mu e_j{}^\beta V^\nu=\bar g_{\mu\nu}\big(\bar\Gamma^\mu{}_{\alpha\beta}U^\alpha e_j{}^\beta\big)V^\nu
+$$
+
+とし、第2項と合わせると$\bar g(\bar\nabla_{e_j}U,V)$になります。もう一方の項も同様に第3項と合わせて$\bar g(U,\bar\nabla_{e_j}V)$になります。
 
 **性質4（2回の共変微分の交換子は曲率）**：
 
@@ -4698,7 +4729,13 @@ $$
 \partial_ig_{jl}+\partial_jg_{il}-\partial_lg_{ij}=2Q_{ijl}
 $$
 
-(B.1)（$a=i,b=j,c=l$、和の文字$m\to k$）と比べると$Q_{ijl}=\Gamma^k{}_{ij}g_{kl}$です。一方、展開式と$e_l$の内積を取ると$Q_{ijl}=c^kg_{kl}+d\,\bar g(n,e_l)=c^kg_{kl}$です。2つを比べ、両辺に$g^{lm}$を掛けて$l$について和を取ると、$c^m=\Gamma^m{}_{ij}$です。これで(C.3)が示されました。
+(B.1)（$a=i,b=j,c=l$、和の文字$m\to k$）と比べると$Q_{ijl}=\Gamma^k{}_{ij}g_{kl}$です。一方、展開式と$e_l$の内積を取ると、
+
+$$
+Q_{ijl}=c^kg_{kl}+d\,\bar g(n,e_l)=c^kg_{kl}
+$$
+
+です。2つを比べ、両辺に$g^{lm}$を掛けて$l$について和を取ると、$c^m=\Gamma^m{}_{ij}$です。これで(C.3)が示されました。
 
 $\varepsilon=+1$、外側が平坦な$\mathbb R^3$の場合（$\bar\Gamma=0$で$\bar\nabla_{e_j}e_i=\mathbf r_{ij}$）、(C.3)はA-2のガウスの公式に戻ります。
 
@@ -4718,7 +4755,13 @@ $$
 0=\bar g(\bar\nabla_{e_i}n,e_k)+\bar g(n,\bar\nabla_{e_i}e_k)
 $$
 
-第2項は、$K$の定義（$K_{ki}=\bar g(\bar\nabla_{e_i}e_k,n)$）と$K$の対称性から$K_{ik}$です。第1項は$c^mg_{mk}$です。したがって$c^mg_{mk}=-K_{ik}$で、両辺に$g^{kq}$を掛けて$k$について和を取ると、$c^q=-g^{kq}K_{ik}=-K_i{}^q$です（A-3と同じ手順です）。ヴァインガルテンの公式には$\varepsilon$が現れません。
+第2項は、$K$の定義（$K_{ki}=\bar g(\bar\nabla_{e_i}e_k,n)$）と$K$の対称性から$K_{ik}$です。第1項は$c^mg_{mk}$です。したがって、
+
+$$
+c^mg_{mk}=-K_{ik}
+$$
+
+で、両辺に$g^{kq}$を掛けて$k$について和を取ると、$c^q=-g^{kq}K_{ik}=-K_i{}^q$です（A-3と同じ手順です）。ヴァインガルテンの公式には$\varepsilon$が現れません。
 
 <a id="C-1-3"></a>
 
@@ -4760,7 +4803,19 @@ $$
 \bar R^\mu{}_{\alpha\lambda\beta}e_i{}^\alpha e_l{}^\lambda e_j{}^\beta=\Big[R^m{}_{ilj}-\varepsilon\big(K_{ij}K_l{}^m-K_{il}K_j{}^m\big)\Big]e_m{}^\mu+\varepsilon\big(D_lK_{ij}-D_jK_{il}\big)n^\mu
 $$
 
-**ガウス方程式**：両辺と$e_p$の内積を取ります。左辺は、C-0-1の記法で$\bar g_{\mu\nu}e_p{}^\nu\bar R^\mu{}_{\alpha\lambda\beta}e_i{}^\alpha e_l{}^\lambda e_j{}^\beta=\bar R_{pilj}$です。右辺は、$\bar g(e_m,e_p)=g_{mp}$、$\bar g(n,e_p)=0$から、$R_{pilj}:=g_{mp}R^m{}_{ilj}$と$K_l{}^mg_{mp}=g^{km}K_{lk}g_{mp}=K_{lp}$（同様に$K_j{}^mg_{mp}=K_{jp}$）を使って：
+**ガウス方程式**：両辺と$e_p$の内積を取ります。左辺は、C-0-1の記法で
+
+$$
+\bar g_{\mu\nu}e_p{}^\nu\bar R^\mu{}_{\alpha\lambda\beta}e_i{}^\alpha e_l{}^\lambda e_j{}^\beta=\bar R_{pilj}
+$$
+
+です。右辺は、$\bar g(e_m,e_p)=g_{mp}$、$\bar g(n,e_p)=0$から、$R_{pilj}:=g_{mp}R^m{}_{ilj}$と、
+
+$$
+K_l{}^mg_{mp}=g^{km}K_{lk}g_{mp}=K_{lp},\qquad K_j{}^mg_{mp}=K_{jp}
+$$
+
+を使って：
 
 $$
 \boxed{\bar R_{pilj}=R_{pilj}-\varepsilon\big(K_{ij}K_{lp}-K_{il}K_{jp}\big)}\tag{C.5}
@@ -4826,7 +4881,13 @@ $$
 
 $g$と見比べると$K_{ij}=-g_{ij}/a$です（球面の$L_{ij}=-g_{ij}/a$と同じ形です）。
 
-**(C.3)の検算**：$\chi$方向について、$g$の成分は$\chi$だけの関数なので(B.1)から$\Gamma^\chi{}_{\chi\chi}=\Gamma^\phi{}_{\chi\chi}=0$です。(C.3)の右辺は$\varepsilon K_{\chi\chi}n=(-1)(-a)(X/a)=X$で、$\partial_\chi\partial_\chi X=X$と一致します。$\varepsilon$を付けずに$K_{\chi\chi}n=-X$とすると一致しないので、(C.3)の$\varepsilon$が必要なことが分かります。
+**(C.3)の検算**：$\chi$方向について、$g$の成分は$\chi$だけの関数なので(B.1)から$\Gamma^\chi{}_{\chi\chi}=\Gamma^\phi{}_{\chi\chi}=0$です。したがって(C.3)の右辺は$\varepsilon K_{\chi\chi}n$だけで、
+
+$$
+\varepsilon K_{\chi\chi}n=(-1)(-a)\frac Xa=X
+$$
+
+となり、$\partial_\chi\partial_\chi X=X$と一致します。$\varepsilon$を付けずに$K_{\chi\chi}n=-X$とすると一致しないので、(C.3)の$\varepsilon$が必要なことが分かります。
 
 **(C.5)によるガウス曲率**：$\bar R=0$なので、(C.5)は$R_{pilj}=\varepsilon(K_{ij}K_{lp}-K_{il}K_{jp})$です。$p=\chi,i=\phi,l=\chi,j=\phi$とすると：
 
@@ -4878,7 +4939,12 @@ $$
 
 **一般的な事実**：**記法**：$N$本のベクトルからなる基底を$b_A$（大文字の添字$A,B,C$は$1,\dots,N$を走ります）、そのグラム行列を$G_{AB}:=\bar g(b_A,b_B)$、逆行列を$G^{AB}$とします。このとき$\bar g^{\alpha\beta}=G^{AB}b_A{}^\alpha b_B{}^\beta$です。
 
-証明：両辺に$\bar g_{\beta\gamma}b_C{}^\gamma$を掛けて$\beta,\gamma$について和を取ります。左辺は$\bar g^{\alpha\beta}\bar g_{\beta\gamma}b_C{}^\gamma=\delta^\alpha{}_\gamma b_C{}^\gamma=b_C{}^\alpha$です。右辺は$G^{AB}b_A{}^\alpha\bar g(b_B,b_C)=G^{AB}G_{BC}b_A{}^\alpha=\delta^A{}_Cb_A{}^\alpha=b_C{}^\alpha$です。$\bar g$は逆行列を持ち$b_C$は基底なので、$\bar g_{\beta\gamma}b_C{}^\gamma$（$C=1,\dots,N$）も1次独立で、これらとの縮約がすべて一致する2つの量は等しくなります。
+証明：両辺に$\bar g_{\beta\gamma}b_C{}^\gamma$を掛けて$\beta,\gamma$について和を取ります。
+
+- 左辺：$\bar g^{\alpha\beta}\bar g_{\beta\gamma}b_C{}^\gamma=\delta^\alpha{}_\gamma b_C{}^\gamma=b_C{}^\alpha$
+- 右辺：$G^{AB}b_A{}^\alpha\bar g(b_B,b_C)=G^{AB}G_{BC}b_A{}^\alpha=\delta^A{}_Cb_A{}^\alpha=b_C{}^\alpha$
+
+両辺が一致します。$\bar g$は逆行列を持ち$b_C$は基底なので、$\bar g_{\beta\gamma}b_C{}^\gamma$（$C=1,\dots,N$）も1次独立で、これらとの縮約がすべて一致する2つの量は等しくなります。
 
 **今の場合**：基底を$\{e_1,\dots,e_{N-1},n\}$とすると、グラム行列は$\bar g(e_i,e_j)=g_{ij}$、$\bar g(e_i,n)=0$、$\bar g(n,n)=\varepsilon$のブロック対角行列です。逆行列もブロック対角で、成分は$g^{ij}$と$1/\varepsilon=\varepsilon$です。これを一般的な事実に代入すると(C.7)です。
 
@@ -4900,7 +4966,13 @@ $$
 \bar R_{nn}=\big(g^{pl}e_p{}^\gamma e_l{}^\alpha+\varepsilon n^\gamma n^\alpha\big)\bar R_{\gamma\beta\alpha\delta}n^\beta n^\delta=g^{pl}\bar R_{pnln}+\varepsilon\bar R_{nnnn}
 $$
 
-C-0-4から$\bar R_{nnnn}=0$です。また、最初の2添字の反対称性と最後の2添字の反対称性を1回ずつ使うと$\bar R_{pnln}=-\bar R_{npln}=\bar R_{npnl}$です。したがって、和の文字を$p\to i$、$l\to j$と付け替えて：
+C-0-4から$\bar R_{nnnn}=0$です。また、最初の2添字の反対称性と最後の2添字の反対称性を1回ずつ使うと、
+
+$$
+\bar R_{pnln}=-\bar R_{npln}=\bar R_{npnl}
+$$
+
+です。したがって、和の文字を$p\to i$、$l\to j$と付け替えて：
 
 $$
 \bar R_{nn}=g^{ij}\bar R_{ninj}
@@ -4937,7 +5009,13 @@ $$
 g^{ij}g^{pl}\bar R_{pilj}=g^{ij}g^{pl}R_{pilj}-\varepsilon\,g^{ij}g^{pl}\big(K_{ij}K_{lp}-K_{il}K_{jp}\big)
 $$
 
-第1項：B-7-1と同じく$g^{pl}R_{pilj}=R^l{}_{ilj}=R_{ij}$なので、$g^{ij}R_{ij}=R$です。第2項の括弧の前半は$(g^{ij}K_{ij})(g^{pl}K_{lp})=(\operatorname{tr}K)^2$、後半は$K_{il}g^{ij}g^{lp}K_{jp}=K_{il}K^{il}$です（C-0-1の$K^{il}$の定義）。ダミー添字を$l\to j$と付け替えて$K_{ij}K^{ij}$と書くと：
+第1項：B-7-1と同じく$g^{pl}R_{pilj}=R^l{}_{ilj}=R_{ij}$なので、$g^{ij}R_{ij}=R$です。第2項の括弧は、
+
+$$
+g^{ij}g^{pl}K_{ij}K_{lp}=(\operatorname{tr}K)^2,\qquad g^{ij}g^{lp}K_{il}K_{jp}=K_{il}K^{il}
+$$
+
+です（後者はC-0-1の$K^{il}$の定義です）。ダミー添字を$l\to j$と付け替えて$K_{ij}K^{ij}$と書くと：
 
 $$
 \bar G_{nn}=-\tfrac12\varepsilon\Big[R-\varepsilon\big((\operatorname{tr}K)^2-K_{ij}K^{ij}\big)\Big]=-\tfrac12\varepsilon R+\tfrac12\Big[(\operatorname{tr}K)^2-K_{ij}K^{ij}\Big]\tag{C.8}
@@ -5135,7 +5213,13 @@ $$
 \bar R^t{}_{itj}=\partial_t\bar\Gamma^t{}_{ji}-\partial_j\bar\Gamma^t{}_{ti}+\bar\Gamma^t{}_{t\gamma}\bar\Gamma^\gamma{}_{ji}-\bar\Gamma^t{}_{j\gamma}\bar\Gamma^\gamma{}_{ti}
 $$
 
-$\bar\Gamma^t{}_{ti}=0$、$\bar\Gamma^t{}_{t\gamma}=0$（すべての$\gamma$）なので第2項と第3項は消えます。第4項は、$\gamma=t$では$\bar\Gamma^t{}_{jt}=0$で消え、$\gamma=k$（空間）の項だけ残ります：$\bar\Gamma^t{}_{jk}\bar\Gamma^k{}_{ti}=(-K_{jk})(-K_i{}^k)=K_{jk}K_i{}^k$。第1項は$\partial_t(-K_{ij})$です。したがって：
+$\bar\Gamma^t{}_{ti}=0$、$\bar\Gamma^t{}_{t\gamma}=0$（すべての$\gamma$）なので、第2項と第3項は消えます。第4項は、$\gamma=t$では$\bar\Gamma^t{}_{jt}=0$で消え、$\gamma=k$（空間）の項だけ残ります：
+
+$$
+\bar\Gamma^t{}_{jk}\bar\Gamma^k{}_{ti}=(-K_{jk})(-K_i{}^k)=K_{jk}K_i{}^k
+$$
+
+第1項は$\partial_t(-K_{ij})$です。したがって：
 
 $$
 \bar R^t{}_{itj}=-\partial_tK_{ij}-K_{jk}K_i{}^k\quad\Rightarrow\quad\bar R_{ninj}=\partial_tK_{ij}+K_{ik}K_j{}^k
@@ -5179,7 +5263,13 @@ $$
 
 **仮定5（縮約ビアンキ恒等式）**：任意の計量について$\bar\nabla^\mu\bar G_{\mu\nu}=0$が成り立つとします。（これはリーマン曲率テンソルの第二ビアンキ恒等式を縮約して得られる恒等式で、このノートでは導出していません。）
 
-**ステップ1：$\bar G$のすべての成分を、拘束条件の量で書く**。**記法**：$C_\nu:=\bar G_{t\nu}$（$\nu=t,1,\dots$）とします。拘束条件は$C_\nu=0$です。発展方程式$\bar R_{ij}=0$が成り立っているとすると、スカラー曲率は$\bar R=\bar g^{tt}\bar R_{tt}+g^{ij}\bar R_{ij}=-\bar R_{tt}$です（$\bar g$はブロック対角）。これを使うと：
+**ステップ1：$\bar G$のすべての成分を、拘束条件の量で書く**。**記法**：$C_\nu:=\bar G_{t\nu}$（$\nu=t,1,\dots$）とします。拘束条件は$C_\nu=0$です。発展方程式$\bar R_{ij}=0$が成り立っているとすると、$\bar g$がブロック対角なので、スカラー曲率は
+
+$$
+\bar R=\bar g^{tt}\bar R_{tt}+g^{ij}\bar R_{ij}=-\bar R_{tt}
+$$
+
+です。これを使うと：
 
 $$
 \bar G_{tt}=\bar R_{tt}-\tfrac12\bar R\,\bar g_{tt}=\bar R_{tt}+\tfrac12\bar R=\tfrac12\bar R_{tt},\qquad\bar G_{ij}=\bar R_{ij}-\tfrac12\bar R\,g_{ij}=\tfrac12\bar R_{tt}\,g_{ij}=C_t\,g_{ij}
