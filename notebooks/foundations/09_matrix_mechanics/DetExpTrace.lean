@@ -1,5 +1,5 @@
 -- det(e^A) = e^(tr A) の形式証明
--- 対応ノート: 研究ノート/det_exp_trace_proof.md
+-- 対応ノート: 研究ノート/04_群論・代数/det_exp_trace_proof.md
 --
 -- Lean4 + Mathlib では Matrix.exp（行列指数関数）が定義されており、
 -- この定理は Mathlib に既に収録されている。

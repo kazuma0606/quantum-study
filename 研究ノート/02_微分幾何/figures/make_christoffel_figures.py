@@ -1,7 +1,7 @@
 """christoffel_riemann_intro.md 用の図を生成するスクリプト。
 
 実行（リポジトリのルートから）:
-    uv run python 研究ノート/figures/make_christoffel_figures.py
+    uv run python 研究ノート/02_微分幾何/figures/make_christoffel_figures.py
 
 出力（このスクリプトと同じ figures/ ディレクトリ）:
     fig1_polar_basis.png       極座標の基底ベクトルの場所依存と Γ^r_θθ = -r

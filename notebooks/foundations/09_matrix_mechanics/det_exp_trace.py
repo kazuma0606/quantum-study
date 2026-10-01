@@ -1,5 +1,5 @@
 # det(e^A) = e^(tr A) の検証
-# 対応ノート: 研究ノート/det_exp_trace_proof.md
+# 対応ノート: 研究ノート/04_群論・代数/det_exp_trace_proof.md
 # 証明1（対角化できる場合）を式番号通りに追う
 
 import numpy as np

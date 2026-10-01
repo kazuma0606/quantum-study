@@ -1,5 +1,5 @@
 # pytest テスト
-# 対応ノート: 研究ノート/det_exp_trace_proof.md
+# 対応ノート: 研究ノート/04_群論・代数/det_exp_trace_proof.md
 
 import numpy as np
 import pytest

@@ -1,7 +1,7 @@
 """添字の読み方を「見える化」する図（図10〜図13）を生成するスクリプト。
 
 実行（リポジトリのルートから）:
-    uv run python 研究ノート/figures/make_index_figures.py
+    uv run python 研究ノート/02_微分幾何/figures/make_index_figures.py
 
 出力（figures/）:
     fig10_free_dummy_rename.png   自由添字・ダミー添字・付け替えの衝突・一斉付け替え

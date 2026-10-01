@@ -1,4 +1,4 @@
-"""christoffel_riemann_intro.md の目次（全体と各 Part の小目次）とアンカーを生成・更新するスクリプト。
+"""研究ノート/02_微分幾何/christoffel_riemann_intro.md の目次（全体と各 Part の小目次）とアンカーを生成・更新するスクリプト。
 
 実行（リポジトリのルートから）:
     uv run python 研究ノート/tools/build_toc.py            # 更新して書き込む
@@ -23,7 +23,7 @@ import re
 import sys
 from pathlib import Path
 
-FILE = Path(__file__).resolve().parent.parent / "christoffel_riemann_intro.md"
+FILE = Path(__file__).resolve().parent.parent / "02_微分幾何" / "christoffel_riemann_intro.md"
 ROMAN = {"0": 0, "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8, "IX": 9}
 
 LATEX = {r"\Gamma": "Γ", r"\partial": "∂", r"\nabla": "∇", r"\theta": "θ", r"\phi": "φ", r"\Omega": "Ω", r"\Sigma": "Σ",

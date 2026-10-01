@@ -1,7 +1,7 @@
 """付録A・B・C 用の図（図14〜図22）を生成するスクリプト。
 
 実行（リポジトリのルートから）:
-    uv run python 研究ノート/figures/make_appendix_figures.py
+    uv run python 研究ノート/02_微分幾何/figures/make_appendix_figures.py
 
 出力（figures/）:
   付録A

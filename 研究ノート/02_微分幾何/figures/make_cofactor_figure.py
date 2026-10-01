@@ -1,9 +1,9 @@
 """Part III §4（余因子行列）用の図を生成するスクリプト。
 
 実行（リポジトリのルートから）:
-    uv run python 研究ノート/figures/make_cofactor_figure.py
+    uv run python 研究ノート/02_微分幾何/figures/make_cofactor_figure.py
 
-出力: 研究ノート/figures/fig9_cofactor_matrix.png
+出力: 研究ノート/02_微分幾何/figures/fig9_cofactor_matrix.png
     3x3 の J に対して、余因子行列 J~ の 9 成分を J~ の配置に並べ、
     各成分 J~_ij を作るために「J の j 行 i 列を消す」様子を示す。
     （転置のため、J~_ij は J の (i, j) ではなく (j, i) を消す）

@@ -1,7 +1,7 @@
-﻿"""研究ノート用のアニメーションを生成するスクリプト。
+"""研究ノート用のアニメーションを生成するスクリプト。
 
 実行（リポジトリのルートから）:
-    uv run python 研究ノート/figures/make_animations.py
+    uv run python 研究ノート/02_微分幾何/figures/make_animations.py
 
 必要なもの: ffmpeg（MP4 の書き出し。GIF は Pillow だけで書き出せる）
 

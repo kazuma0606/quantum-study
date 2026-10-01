@@ -1,7 +1,7 @@
 """christoffel_riemann_intro.md 用の追加の図（図4〜図8）を生成するスクリプト。
 
 実行（リポジトリのルートから）:
-    uv run python 研究ノート/figures/make_extra_figures.py
+    uv run python 研究ノート/02_微分幾何/figures/make_extra_figures.py
 
 出力（このスクリプトと同じ figures/ ディレクトリ）:
     fig4_flat_but_gamma_nonzero.png  一様な場の極座標成分と、共変微分がゼロになること（Part VI §9）

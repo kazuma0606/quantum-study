@@ -17,7 +17,7 @@ Mermaid は GitHub と VS Code（Markdown Preview Mermaid Support 拡張）で�
 | `fig8_adm_slicing.png` | 付録C C-3-1 | ラプス・シフト／ガウス正規座標 |
 | `fig9_cofactor_matrix.png` | Part III §4-c の末尾 | 余因子行列の9成分と、消す行・列（生成は `make_cofactor_figure.py`） |
 
-挿入の書き方（本文は `研究ノート/` にあるので、相対パスは `figures/...` です）：
+挿入の書き方（本文は `研究ノート/02_微分幾何/` にあるので、相対パスは `figures/...` です）：
 
 ```markdown
 ![極座標の基底ベクトルは場所ごとに変わる](figures/fig1_polar_basis.png)
