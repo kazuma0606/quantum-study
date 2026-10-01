@@ -19,9 +19,9 @@
 - [Part II：計量からクリストッフェル記号の公式を導く](#p2)
   - [1. 計量の微分とクリストッフェル記号](#p2-1)
   - [2. 3つの式を組み合わせて Γ だけを取り出す](#p2-2)
-- [Part III：別の定義（ヤコビアンの2階微分から）― 以前の議論との接続](#p3)
+- [Part III：別の定義（ヤコビアンの2階微分から）](#p3)
   - [1. Γ^k\_ij=A^k\_a∂\_jJ^a\_i の詳細な導出](#p3-1)
-  - [2. 前回の「A(∂ J)」との接続を、自分の手で再導出する](#p3-2)
+  - [2. 逆行列の微分と、Γ との関係](#p3-2)
   - [3. 共変発散とは何か（Γ^i\_ij=∂\_jln√|g| の導出）](#p3-3)
   - [4. 補足：逆ヤコビ行列 A=J^-1 を成分で作る（余因子行列）](#p3-4)
 - [Part IV：共変微分](#p4)
@@ -123,7 +123,7 @@
 - **計量テンソルと、共変・反変**：計量 $g_{ij}$ と逆計量 $g^{ij}$、上付きと下付きの添字、ラプラス・ベルトラミ作用素までを、前提にしています。このリポジトリでは、[計量テンソルと共変反変_まとめ](計量テンソルと共変反変_まとめ.md) と [球座標の計量テンソル計算例](球座標の計量テンソル計算例.md) にまとめています。
 - **線形代数と多変数の微分**：行列、逆行列、行列式、トレースと、偏微分、連鎖律、混合偏微分の交換（2階微分が連続であれば、微分の順序を入れ替えても同じ）を使います。
 - **付録B・C の追加の前提**：常微分方程式の解の存在と一意性（B-0-4 に要点を書いています）と、特殊相対論のミンコフスキー計量（C-0-2 に要点を書いています）です。
-- **他のノートへの参照**：本文には、リー微分、微分形式、多様体、トポロジー入門、リッチテンソルとアインシュタイン方程式を扱った別のノートを参照する箇所があります。これらは別に作成したもので、このリポジトリには含まれていません。
+- **他のノートへの参照**：本文には、リー微分、微分形式、多様体、トポロジー入門、リッチテンソルとアインシュタイン方程式を扱った別のノートを参照する箇所があります。いずれも同じ `研究ノート/` にあり、本文中のリンクから辿れます。
 
 <a id="p0-3"></a>
 
@@ -222,7 +222,7 @@ $$
 \mathbf e_i(q) = \frac{\partial\mathbf x}{\partial q^i}
 $$
 
-自体が**場所によって向きも長さも変わります**（前回の極座標の例で $\mathbf e_\theta=(-r\sin\theta,\,r\cos\theta)$ が $r,\theta$ によって変わっていたことを思い出してください）。したがって、ベクトル場 $V=V^i\mathbf e_i$ を微分すると、積の微分から**基底ベクトル自身の微分**という新しい項が出てきます：
+自体が**場所によって向きも長さも変わります**（極座標の例では、$\mathbf e_\theta=(-r\sin\theta,\,r\cos\theta)$ が $r,\theta$ によって変わります）。したがって、ベクトル場 $V=V^i\mathbf e_i$ を微分すると、積の微分から**基底ベクトル自身の微分**という新しい項が出てきます：
 
 $$
 \frac{\partial V}{\partial q^j} = \frac{\partial V^i}{\partial q^j}\mathbf e_i + V^i\frac{\partial\mathbf e_i}{\partial q^j}
@@ -232,7 +232,7 @@ $$
 
 ![極座標の基底ベクトルは場所ごとに向きが変わる](figures/fig1_polar_basis.png)
 
-*左：極座標の基底ベクトル $\mathbf e_r,\mathbf e_\theta$ は場所ごとに向きが違う。右：$\theta$ を $d\theta$ だけ動かすと $\mathbf e_\theta$ が原点側に傾き、その変化 $\Delta\mathbf e_\theta$ は $-r\,\mathbf e_r$ の向きになる（$\Gamma^r{}_{\theta\theta}=-r$ に対応。Part VI §1 で計算します）。*
+*左：極座標の基底ベクトル $\mathbf e_r,\mathbf e_\theta$ は場所ごとに向きが違います。右：$\theta$ を $d\theta$ だけ動かすと $\mathbf e_\theta$ が原点側に傾き、その変化 $\Delta\mathbf e_\theta$ は $-r\,\mathbf e_r$ の向きになります（$\Gamma^r{}_{\theta\theta}=-r$ に対応します。Part VI §1 で計算します）。*
 
 <a id="p1-2"></a>
 
@@ -252,7 +252,7 @@ $$
 \frac{\partial\mathbf e_i}{\partial q^j} = \frac{\partial^2\mathbf x}{\partial q^j\partial q^i} = \frac{\partial\mathbf e_j}{\partial q^i}
 $$
 
-（偏微分の交換、以前のラプラシアン導出でも使った混合偏微分の対称性そのものです）。したがって：
+（偏微分の交換、つまり混合偏微分の対称性そのものです）。したがって：
 
 $$
 \boxed{\Gamma^k{}_{ij} = \Gamma^k{}_{ji}}\qquad\text{（下2つの添字について対称）}
@@ -262,7 +262,7 @@ $$
 
 ![混合偏微分は交換する（座標基底）／しない（単位ベクトルの枠）](figures/anim02_mixed_partials.gif)
 
-*前半：座標基底では2通りの経路が同じ点に着き、$D/\varepsilon^2\to\mathbf r_{ij}$（青と橙の曲線が重なる）。後半：単位ベクトル場の枠では、ずれ$/t^2$ が $t\to0$ でも $|[X,Y]|=1/r$ に一致して $0$ にならない。動画が示すのは $\varepsilon\to0$ での振る舞いで、証明ではない（2階微分が連続という前提は、本文のとおり必要）。*
+*前半：座標基底では2通りの経路が同じ点に着き、$D/\varepsilon^2\to\mathbf r_{ij}$ に収束します（青と橙の曲線が重なります）。後半：単位ベクトル場の枠では、ずれ$/t^2$ が $t\to0$ でも $|[X,Y]|=1/r$ に一致して、$0$ になりません。動画が示すのは $\varepsilon\to0$ での振る舞いで、証明ではありません（2階微分が連続という前提は、本文のとおり必要です）。*
 
 ---
 
@@ -350,32 +350,32 @@ $$\fcolorbox{#3b6fb6}{white}{$\displaystyle\color{black}\ A^k{}_aJ^a{}_i=\colorb
 
 ![δ のカード：計量×逆計量、添字のすり替え、上げ下げ、AJ=I](figures/fig11_delta_cards.png)
 
-*① 計量 $\times$ 逆計量：上下でペアの $k$ は和で消え、$i,j$ が $\delta$ の添字に引き継がれる。② $\delta$ は $j=i$ の項だけを残し、添字をすり替える。③ 添字の上げ下げも、$g^{ij}g_{jk}=\delta^i{}_k$ で $j$ が消え、$k$ が $i$ にすり替わる操作。④ $AJ=I$（Part III §1）も、和を取った $a$ が消えて $\delta$ が残り、その $\delta$ が $\Gamma$ の添字 $k$ を $k'$ にすり替える。*
+*① 計量 $\times$ 逆計量：上下でペアの $k$ は和で消え、$i,j$ が $\delta$ の添字に引き継がれます。② $\delta$ は $j=i$ の項だけを残し、添字をすり替えます。③ 添字の上げ下げも、$g^{ij}g_{jk}=\delta^i{}_k$ で $j$ が消え、$k$ が $i$ にすり替わる操作です。④ $AJ=I$（Part III §1）も、和を取った $a$ が消えて $\delta$ が残り、その $\delta$ が $\Gamma$ の添字 $k$ を $k'$ にすり替えます。*
 
 同じことを、具体的な数値の行列で動かすと次のようになります（ループ再生）。前半は、$g^{ik}$ の第 $i$ 行と $g_{kj}$ の第 $j$ 列を $k$ について足すと、各成分が $\delta^i{}_j$（対角は 1、それ以外は 0）になる様子です。後半は、$\delta^i{}_jV^j$ の和のうち $j=i$ の項だけが生き残って $V^i$ になる様子です。
 
 ![δ による添字のすり替え：計量×逆計量とδ×ベクトル](figures/anim05_delta_substitution.gif)
 
-*前半：$g=\begin{pmatrix}2&1&0\\1&3&1\\0&1&2\end{pmatrix}$ とその逆行列で、$\sum_kg^{ik}g_{kj}$ を成分ごとに計算する（$k$ は和で消える）。後半：$\delta^i{}_jV^j=V^i$（$V=(5,7,9)$）。どちらも数値で検算済みで、アニメーションの式は、実際の計算結果をそのまま表示している。*
+*前半：$g=\begin{pmatrix}2&1&0\\1&3&1\\0&1&2\end{pmatrix}$ とその逆行列で、$\sum_kg^{ik}g_{kj}$ を成分ごとに計算します（$k$ は和で消えます）。後半：$\delta^i{}_jV^j=V^i$（$V=(5,7,9)$）です。どちらも数値で検算済みで、アニメーションの式は、実際の計算結果をそのまま表示しています。*
 
 クリストッフェル記号の添字は、次のように読みます（① $\Gamma^k{}_{ij}$ の3つの席、② この節の公式の添字の行き先、③ 反変・共変微分でダミー添字 $i$ と自由添字 $k$ の入る場所が入れ替わる、Part IV §1）。
 
 ![クリストッフェル記号の添字の意味と、公式の添字の対応](figures/fig12_christoffel_indices.png)
 
-*① $\partial_j\mathbf e_i=\Gamma^k{}_{ij}\mathbf e_k$：上の $k$ は結果の基底、下の $i$ は微分される基底、下の $j$ は動く方向。② 公式の $l$ は、$g^{kl}$ の上の $l$ と括弧の中の3か所の下の $l$ がペアになって和を取る。③ 反変ベクトルでは自由添字 $k$ が $\Gamma$ の上、共変ベクトルでは下に入り、ダミー添字 $i$ は逆側に入る（符号も $+$ と $-$ で変わる）。*
+*① $\partial_j\mathbf e_i=\Gamma^k{}_{ij}\mathbf e_k$：上の $k$ は結果の基底、下の $i$ は微分される基底、下の $j$ は動く方向です。② 公式の $l$ は、$g^{kl}$ の上の $l$ と括弧の中の3か所の下の $l$ がペアになって和を取ります。③ 反変ベクトルでは自由添字 $k$ が $\Gamma$ の上、共変ベクトルでは下に入り、ダミー添字 $i$ は逆側に入ります（符号も $+$ と $-$ で変わります）。*
 
 ---
 
 <a id="p3"></a>
 
-# Part III：別の定義（ヤコビアンの2階微分から）― 以前の議論との接続
+# Part III：別の定義（ヤコビアンの2階微分から）
 
 <!-- part-toc:start -->
 
 **この Part の内容**
 
 - [1. Γ^k\_ij=A^k\_a∂\_jJ^a\_i の詳細な導出](#p3-1)
-- [2. 前回の「A(∂ J)」との接続を、自分の手で再導出する](#p3-2)
+- [2. 逆行列の微分と、Γ との関係](#p3-2)
 - [3. 共変発散とは何か（Γ^i\_ij=∂\_jln√|g| の導出）](#p3-3)
   - [3-a. 添字の置き換えを、1ステップずつ丁寧に追う（混乱しやすいのでここだけ念入りに）](#p3-3a)
 - [4. 補足：逆ヤコビ行列 A=J^-1 を成分で作る（余因子行列）](#p3-4)
@@ -387,7 +387,7 @@ $$\fcolorbox{#3b6fb6}{white}{$\displaystyle\color{black}\ A^k{}_aJ^a{}_i=\colorb
 
 <!-- part-toc:end -->
 
-実はクリストッフェル記号には、計量を経由しない、もっと直接的な定義もあります。これは以前ヤコビアン $J,A$ を使って計算していた内容と直結します。
+実はクリストッフェル記号には、計量を経由しない、もっと直接的な定義もあります。これは、ヤコビアン $J$ とその逆行列 $A$ を使う座標変換の計算（[計量テンソルと共変反変_まとめ](計量テンソルと共変反変_まとめ.md)）と直結します。
 
 <a id="p3-1"></a>
 
@@ -431,15 +431,15 @@ $$
 
 <a id="p3-2"></a>
 
-## 2. 前回の「$A(\partial J)$」との接続を、自分の手で再導出する
+## 2. 逆行列の微分と、$\Gamma$ との関係
 
-**「前回の資料」について**：以前、ラプラス作用素を一般座標に書き直すノートの中で、$A=J^{-1}$（ヤコビアンの逆行列）を座標で微分すると
+$A=J^{-1}$（ヤコビアンの逆行列）を座標で微分すると、次の**逆行列の微分公式**が得られます：
 
 $$
 \boxed{\partial_jA_{ik} = -A_{il}(\partial_jJ_{lm})A_{mk}}
 $$
 
-という**逆行列の微分公式**が出てきました。これ自体は、以下のように$AJ=I$を微分するだけで得られる、一般的な行列の性質です（簡単に再確認しておきます）：
+この式は、以下のように$AJ=I$を微分するだけで得られる、一般的な行列の性質です：
 
 $$
 AJ=I \quad\Longrightarrow\quad \partial_j(AJ)=0 \quad\Longrightarrow\quad (\partial_jA)J+A(\partial_jJ)=0
@@ -449,9 +449,9 @@ $$
 \Longrightarrow\quad (\partial_jA)J = -A(\partial_jJ) \quad\Longrightarrow\quad \partial_jA = -A(\partial_jJ)A
 $$
 
-（最後は両辺に右から$A=J^{-1}$を掛けて、左辺の$J$を$JA=I$で消しています。）成分で書けば $\partial_jA_{ik}=-A_{il}(\partial_jJ_{lm})A_{mk}$ で、これが上の式の正体です。**この式自体は「行列の逆行列を微分するとどうなるか」という一般論**であり、クリストッフェル記号という名前も$\Gamma$という記号も、当時はまだ登場していませんでした。
+（最後は両辺に右から$A=J^{-1}$を掛けて、左辺の$J$を$JA=I$で消しています。）成分で書けば $\partial_jA_{ik}=-A_{il}(\partial_jJ_{lm})A_{mk}$ で、これが上の式の正体です。**この式は「行列の逆行列を微分するとどうなるか」という一般論**であり、$\Gamma$ とは無関係に成り立ちます。
 
-**今回の目的**は、この$\partial_jA=-A(\partial_jJ)A$の中に含まれる$A(\partial_jJ)$という組み合わせが、実は$\Gamma^k{}_{ij}$そのものだったことを、今回定義した$\Gamma$を使って確認することです。$AJ=I$から出発して、もう一度$\Gamma$の記号を使って導き直します。
+**この節の目的**は、この$\partial_jA=-A(\partial_jJ)A$の中に含まれる$A(\partial_jJ)$という組み合わせが、実は$\Gamma^k{}_{ij}$そのものであることを、定義した$\Gamma$を使って確認することです。$AJ=I$から出発して、$\Gamma$の記号を使って導き直します。
 
 $AJ=I$（$A^k{}_aJ^a{}_i=\delta^k_i$）を$q^j$で微分します：
 
@@ -518,7 +518,7 @@ $$
 
 **ステップ3：ダミー添字$m$を、$j$に付け替える**
 
-$m$はダミー添字なので、以前確認した通り自由に名前を変えられます（$j$という文字は、$j=i$と置き換えた時点で「自由な添字」としての役目を終えているので、ここで改めてダミー添字の名前として再利用できます）：
+$m$はダミー添字なので、Part 0 §5 で確認した通り、自由に名前を変えられます（$j$という文字は、$j=i$と置き換えた時点で「自由な添字」としての役目を終えているので、ここで改めてダミー添字の名前として再利用できます）：
 
 $$
 \Gamma^i{}_{mi}V^m \ \longrightarrow\ \Gamma^i{}_{ji}V^j
@@ -567,7 +567,7 @@ $$
 \Gamma^i{}_{ij} = \frac12g^{il}\partial_jg_{il}\tag{†}
 $$
 
-**ここでJacobiの公式を使います。** 以前のラプラシアンのノートで導出した公式で、正則行列$M(q)$に対して次が成り立つ、というものでした：
+**ここでJacobiの公式を使います。** 正則行列$M(q)$に対して、次が成り立ちます（導出は、この直後に振り返ります）：
 
 $$
 \boxed{\partial_j\ln|\det M| = \operatorname{tr}(M^{-1}\partial_jM)}
@@ -575,13 +575,13 @@ $$
 
 **簡単に導出を振り返ります**：$M+dM=M(I+M^{-1}dM)$なので、行列式を取ると $\det(M+dM)=\det M\cdot\det(I+M^{-1}dM)$。微小な行列$\varepsilon X$に対して一般に$\det(I+\varepsilon X)\approx1+\varepsilon\operatorname{tr}X$（固有値の積を展開すればこの近似が出ます）が成り立つので、$\det(M+dM)\approx\det M\big(1+\operatorname{tr}(M^{-1}dM)\big)$。両辺から$\det M$を引いて$\det M$で割ると $d(\det M)/\det M=\operatorname{tr}(M^{-1}dM)$。
 
-$d(\det M)$と$\det(dM)$は異なる量である。$f(M):=\det M$と、$\det$を1つの関数の名前と見なす：
+$d(\det M)$と$\det(dM)$は異なる量です。$f(M):=\det M$と、$\det$を1つの関数の名前と見なします：
 
 $$
 d(\det M) = df(M) = f(M+dM)-f(M) = \det(M+dM)-\det M\qquad(\text{1次近似の範囲で})
 $$
 
-**これは、以前から知っている「関数の微分（全微分）」の定義そのもの**です。$f(x)=x^2$なら$df=f(x+dx)-f(x)=2x\,dx$となるのと、まったく同じ発想を、$f=\det$、変数が「行列$M$」という対象に当てはめただけでした。つまり$d(\det M)$は「$M$を$dM$だけ動かしたときの、$\det$の出力の変化分」を表す、ごく普通の微分です。
+**これは、すでに知っている「関数の微分（全微分）」の定義そのもの**です。$f(x)=x^2$なら$df=f(x+dx)-f(x)=2x\,dx$となるのと、まったく同じ発想を、$f=\det$、変数が「行列$M$」という対象に当てはめただけでした。つまり$d(\det M)$は「$M$を$dM$だけ動かしたときの、$\det$の出力の変化分」を表す、ごく普通の微分です。
 
 **一方、$\det(dM)$**は、$dM$という行列**そのもの**を、そのまま行列式の公式に代入して計算した、**まったく別の計算**です（$f(x)=x^2$のときの$f(dx)=(dx)^2$に対応する量で、$df=f(x+dx)-f(x)$とは最初から問うている問題が違います）：
 
@@ -639,13 +639,13 @@ $$
 \boxed{\Gamma^i{}_{ij} = \frac12g^{il}\partial_jg_{il} = \frac12\partial_j\ln|\det g| = \partial_j\ln\sqrt{|g|}}
 $$
 
-**共変発散が、以前の$\operatorname{div}$の一般公式と一致することの確認**：
+**共変発散が、$\operatorname{div}$の一般公式（[計量テンソルと共変反変_まとめ](計量テンソルと共変反変_まとめ.md)）と一致することの確認**：
 
 $$
 \nabla_iV^i = \partial_iV^i+\Gamma^i{}_{ij}V^j = \partial_iV^i+(\partial_j\ln\sqrt{|g|})V^j
 $$
 
-一方、以前の$\dfrac1{\sqrt{|g|}}\partial_i(\sqrt{|g|}V^i)$を積の微分で展開すると：
+一方、一般座標での発散の公式$\dfrac1{\sqrt{|g|}}\partial_i(\sqrt{|g|}V^i)$を積の微分で展開すると：
 
 $$
 \frac1{\sqrt{|g|}}\partial_i\big(\sqrt{|g|}V^i\big) = (\partial_i\ln\sqrt{|g|})V^i+\partial_iV^i
@@ -657,7 +657,7 @@ $$
 \boxed{\frac1{\sqrt{|g|}}\partial_i\big(\sqrt{|g|}V^i\big) = \partial_iV^i+\Gamma^i{}_{ij}V^j}
 $$
 
-以前扱った「体積要素の発散」の話は、この**共変発散**の特別な場合だったことが、こうして正確に確認できました。
+体積要素を使った発散の公式は、この**共変発散**の特別な場合だったことが、こうして正確に確認できました。
 
 <a id="p3-4"></a>
 
@@ -811,7 +811,7 @@ $$
 
 ![余因子行列の9成分と、消す行・列](figures/fig9_cofactor_matrix.png)
 
-*$\tilde J$ の $(i,j)$ の位置に $\tilde J_{ij}$ を作る様子。灰色の十字が消す行と列（$J$ の $j$ 行 $i$ 列）、赤が残った $2\times2$。枠の色は符号 $(-1)^{i+j}$（青が $+$、紫が $-$）で、市松模様になっている。$\tilde J_{ij}$ が消すのは $J$ の $(j,i)$ 側（転置）だが、対角成分は $i=j$ なので違いが見えない。*
+*$\tilde J$ の $(i,j)$ の位置に $\tilde J_{ij}$ を作る様子です。灰色の十字が消す行と列（$J$ の $j$ 行 $i$ 列）、赤が残った $2\times2$ です。枠の色は符号 $(-1)^{i+j}$（青が $+$、紫が $-$）で、市松模様になっています。$\tilde J_{ij}$ が消すのは $J$ の $(j,i)$ 側（転置）ですが、対角成分は $i=j$ なので違いが見えません。*
 
 <a id="p3-4d"></a>
 
@@ -946,7 +946,7 @@ $$
 
 **ここで、$i$は$V^i$の添字と$\Gamma^k{}_{ij}$の下付き1番目の添字を兼ねて2回登場しているので、これは既に$i$について和が取られたダミー添字です。** 一方、残る基底は$\mathbf e_k$（$\mathbf e_i$ではない）です。これは、$\mathbf e_i$自体を微分した結果が、クリストッフェル記号の定義によって新しい基底$\mathbf e_k$の言葉で書き直されるためです。
 
-**2つの項は基底が異なる文字（$\mathbf e_i$と$\mathbf e_k$）のままでは足し算できません。** そこで、第1項のダミー添字$i$を、以前確認した「ダミー添字は自由に名前を変えてよい」というルールに従って$k$に付け替えます（$i=k$と置いたわけではなく、単なる文字の言い換えです）：
+**2つの項は基底が異なる文字（$\mathbf e_i$と$\mathbf e_k$）のままでは足し算できません。** そこで、第1項のダミー添字$i$を、Part 0 §5 で確認した「ダミー添字は自由に名前を変えてよい」というルールに従って$k$に付け替えます（$i=k$と置いたわけではなく、単なる文字の言い換えです）：
 
 $$
 \frac{\partial V^i}{\partial q^j}\mathbf e_i \ \longrightarrow\ \frac{\partial V^k}{\partial q^j}\mathbf e_k
@@ -1102,7 +1102,7 @@ $$
 &\text{普通の偏微分 }\partial_i\text{：一般の座標では、テンソルとして正しく振る舞わない（座標変換で余分な項が付く）}\\
 &\text{共変微分 }\nabla_i\text{：}\Gamma\text{による補正で、どの座標系でもテンソルとして振る舞うよう"設計"された微分}\\
 &\text{外微分 }d\text{：計量も接続（}\Gamma\text{）も一切使わずに定義できる、もともと座標に依らない微分}\\
-&\text{リー微分 }\mathcal L_X\text{：以前の積分のノートで触れた、ベクトル場の"流れ"だけで定義される微分}
+&\text{リー微分 }\mathcal L_X\text{：ベクトル場の"流れ"だけで定義される微分（リー微分のノートで扱う）}
 \end{aligned}
 }
 $$
@@ -1122,7 +1122,7 @@ $$
 
 ## 4. なぜ外微分$d$には$\Gamma$の補正が要らないのか（$\operatorname{rot}$と$\operatorname{div}$の非対称性の正体）
 
-以前の微分形式のノートで「$\operatorname{rot}$（$d$）は計量不要だが、$\operatorname{div}$は計量（$\sqrt{|g|}$）が必要」という非対称性が出てきました。**これは偶然でも、デカルト座標に限った現象でもなく、$\Gamma$の対称性から必然的に決まる構造**です。実際に一般の座標系で確認します。
+[微分形式のノート](../03_多様体・微分形式・トポロジー/differential_forms_hodge_star.md)では、「$\operatorname{rot}$（$d$）は計量不要だが、$\operatorname{div}$は計量（$\sqrt{|g|}$）が必要」という非対称性が出てきます。**これは偶然でも、デカルト座標に限った現象でもなく、$\Gamma$の対称性から必然的に決まる構造**です。実際に一般の座標系で確認します。
 
 1-形式$\omega=\omega_idx^i$の共変微分は $\nabla_j\omega_i=\partial_j\omega_i-\Gamma^k{}_{ji}\omega_k$ でした。これを反対称化（$i,j$を入れ替えて引く）します：
 
@@ -1149,7 +1149,7 @@ $$
 }
 $$
 
-**これが、以前の微分形式のノートで見た「$\operatorname{rot}=d$は計量不要、$\operatorname{div}=\star d\star$は計量が必要」という非対称性の、本当の理由**でした。
+**これが、[微分形式のノート](../03_多様体・微分形式・トポロジー/differential_forms_hodge_star.md)で見た「$\operatorname{rot}=d$は計量不要、$\operatorname{div}=\star d\star$は計量が必要」という非対称性の、本当の理由です。**
 
 ---
 
@@ -1203,7 +1203,7 @@ $$
 
 ## 3. 代わりの解法：キリングベクトルから保存量を作る
 
-一般には、**対称性から保存量を見つけて、方程式の次数を下げる**のが標準的な解法です。以前のリー微分のノートで扱ったキリングベクトル（$\mathcal L_Xg=0$）が、ここで使われます。
+一般には、**対称性から保存量を見つけて、方程式の次数を下げる**のが標準的な解法です。[リー微分のノート](lie_derivative.md)（Part IX）で扱ったキリングベクトル（$\mathcal L_Xg=0$）が、ここで使われます。
 
 **主張**：$X$がキリングベクトルなら、測地線に沿って$g_{ij}X^i\dot q^j$は保存量（一定値）になります。
 
@@ -1219,13 +1219,13 @@ $$
 \frac d{dt}(X_iu^i) = u^iu^j\nabla_jX_i
 $$
 
-$u^iu^j$（$i,j$について対称）を$\nabla_jX_i$に掛けると、対称部分だけが効きます（ダミー添字の入れ替えを使って示せます。詳しい導出はリー微分のノートPart VIIIにまとめています）：
+$u^iu^j$（$i,j$について対称）を$\nabla_jX_i$に掛けると、対称部分だけが効きます（ダミー添字の入れ替えを使って示せます。詳しい導出は[リー微分のノート](lie_derivative.md)の Part XI §37 にまとめています）：
 
 $$
 \boxed{u^iu^j\nabla_jX_i = u^iu^j\cdot\frac12\big(\nabla_jX_i+\nabla_iX_j\big)}
 $$
 
-**ここで使う関係式**：$X$がキリングベクトル（$\mathcal L_Xg=0$）なら、次の恒等式が成り立ちます（$\Gamma$の下2添字対称性を使って証明できます。詳しい導出はリー微分のノートPart VIIIを参照してください）：
+**ここで使う関係式**：$X$がキリングベクトル（$\mathcal L_Xg=0$）なら、次の恒等式が成り立ちます（$\Gamma$の下2添字対称性を使って証明できます。詳しい導出は[リー微分のノート](lie_derivative.md)の Part XI §35 を参照してください）：
 
 $$
 \boxed{\nabla_iX_j+\nabla_jX_i = (\mathcal L_Xg)_{ij}}
@@ -1247,7 +1247,7 @@ $$
 \boxed{\frac d{dt}\big(g_{ij}X^i\dot q^j\big) = 0}
 $$
 
-**具体例（極座標）**：$X=\partial_\theta$は平面のキリングベクトル（回転対称性、リー微分のノートPart VI §11で確認済み）でした。保存量は：
+**具体例（極座標）**：$X=\partial_\theta$は平面のキリングベクトル（回転対称性、[リー微分のノート](lie_derivative.md)の Part IX §29 で確認済み）でした。保存量は：
 
 $$
 g_{ij}X^i\dot q^j = g_{\theta\theta}\dot\theta = r^2\dot\theta
@@ -1271,7 +1271,7 @@ $$
 
 ## 4. 測地線方程式は複素数領域まで考えるか
 
-以前の「行列値の微分形式」のノートで整理した「定義域と値域は独立」という視点をここでも使います。
+[行列値微分形式のノート](../03_多様体・微分形式・トポロジー/matrix_valued_forms_gauge_theory.md)の Part I で整理した「定義域と値域は独立」という視点をここでも使います。
 
 **波動関数$\psi$の複素数**は「関数の"値"が複素数」という話でした（$\psi:\mathbb R^4\to\mathbb C$、定義域は実数の時空のまま）。**一方、測地線方程式の$q^i(t)$は「座標そのもの」**です。$q^i$を複素数にするというのは、値が複素になるという話ではなく、**空間（多様体）自体を複素多様体にする**、まったく別の一般化です。
 
@@ -1288,7 +1288,7 @@ $$
 
 - **ウィック回転**：一般相対論・場の量子論で、時間$t\to i\tau$（虚時間）と置き換えて計算する手法（ユークリッド量子重力、インスタントンの計算など）。測地線の$t$（パラメータ）を複素化する例です。
 - **ツイスター理論**：光的測地線（光の経路）を、複素多様体の言葉で扱う、ペンローズが提唱した枠組み。
-- **ケーラー多様体上の測地線**：空間自体が最初から複素多様体である場合（以前の「行列値の微分形式」のノートで触れたDolbeault複体の世界）。
+- **ケーラー多様体上の測地線**：空間自体が最初から複素多様体である場合（[行列値微分形式のノート](../03_多様体・微分形式・トポロジー/matrix_valued_forms_gauge_theory.md)の §10 で触れた Dolbeault 複体の世界）。
 
 **波動関数の複素数と、測地線方程式の複素数は、「関数の値を複素にする」か「空間自体を複素にする」かという、根本的に異なる種類の一般化**であり、両者が自動的につながるわけではありません。ただし物理学の実際の計算（ウィック回転など）では、複素化された測地線・座標が道具として登場することは確かにあります。
 
@@ -1308,7 +1308,7 @@ $$
 
 <!-- part-toc:end -->
 
-2次元極座標 $q^1=r,\ q^2=\theta$、$x=r\cos\theta,\ y=r\sin\theta$。基底ベクトルは前回と同様：
+2次元極座標 $q^1=r,\ q^2=\theta$、$x=r\cos\theta,\ y=r\sin\theta$。基底ベクトルは Part I と同じです：
 
 $$
 \mathbf e_r=(\cos\theta,\sin\theta),\qquad \mathbf e_\theta=(-r\sin\theta,\ r\cos\theta)
@@ -1336,13 +1336,13 @@ $$
 
 ![極座標の基底ベクトルの変化と、そこから読み取るクリストッフェル記号](figures/anim04_polar_basis.gif)
 
-*画面に出ている $\Gamma$ の値は、基底ベクトルを有限差分で微分して基底で展開した、実際の数値。$\Gamma^r{}_{\theta\theta}=-r$、$\Gamma^\theta{}_{\theta\theta}=0$、$\Gamma^\theta{}_{r\theta}=1/r$、$\Gamma^r{}_{r\theta}=0$ に一致することを、スクリプトで確認している。*
+*画面に出ている $\Gamma$ の値は、基底ベクトルを有限差分で微分して基底で展開した、実際の数値です。$\Gamma^r{}_{\theta\theta}=-r$、$\Gamma^\theta{}_{\theta\theta}=0$、$\Gamma^\theta{}_{r\theta}=1/r$、$\Gamma^r{}_{r\theta}=0$ に一致することを、スクリプトで確認しています。*
 
 <a id="p6-2"></a>
 
 ## 2. 計量からの公式で検算する
 
-$g_{rr}=1,\ g_{\theta\theta}=r^2,\ g_{r\theta}=0$（前回のノートの結果）、$g^{rr}=1,\ g^{\theta\theta}=1/r^2$ を使います：
+$g_{rr}=1,\ g_{\theta\theta}=r^2,\ g_{r\theta}=0$（基底ベクトルから $g_{ij}=\mathbf e_i\cdot\mathbf e_j$ で求まります）、$g^{rr}=1,\ g^{\theta\theta}=1/r^2$ を使います：
 
 $$
 \Gamma^r{}_{\theta\theta} = \frac12g^{rr}\big(2\partial_\theta g_{\theta r}-\partial_rg_{\theta\theta}\big) = \frac12(1)(0-2r) = -r\ \checkmark
@@ -1370,7 +1370,7 @@ $$
 
 ![一様な場は平面では一定だが、極座標の成分は場所で変わる](figures/fig4_flat_but_gamma_nonzero.png)
 
-*平らな平面の一様な場 $V=(1,0)$（左）。極座標の成分 $V^r=\cos\theta,\ V^\theta=-\sin\theta/r$ は場所で変わるので $\partial_\theta V^k\neq0$ だが（右、破線）、$\Gamma$ の補正項がちょうど打ち消し、共変微分は $0$ になる（$r=1$ で表示）。$\Gamma\neq0$ でも空間は平坦。*
+*左は、平らな平面の一様な場 $V=(1,0)$ です。極座標の成分 $V^r=\cos\theta,\ V^\theta=-\sin\theta/r$ は場所で変わるので $\partial_\theta V^k\neq0$ ですが（右、破線）、$\Gamma$ の補正項がちょうど打ち消し、共変微分は $0$ になります（$r=1$ で表示）。$\Gamma\neq0$ でも空間は平坦です。*
 
 ---
 
@@ -1544,7 +1544,7 @@ $$
 
 ![リーマン曲率テンソルの添字の意味と、添字の帳簿チェック](figures/fig13_riemann_indices.png)
 
-*① $R^l{}_{kij}V^k$ は、入力の成分 $k$ を、結果の成分 $l$ に写す。$i,j$ は動く順序で、入れ替えると符号が反転する。② 公式のどの項でも、$l$ は上に1個、$k,i,j$ は下に1個ずつ現れ、ダミー添字 $m$ は上下のペアで消える。③ 各項の、どこにどの文字があるかを表にした「帳簿」。添字の付け間違いに気づく検算に使える。*
+*① $R^l{}_{kij}V^k$ は、入力の成分 $k$ を、結果の成分 $l$ に写します。$i,j$ は動く順序で、入れ替えると符号が反転します。② 公式のどの項でも、$l$ は上に1個、$k,i,j$ は下に1個ずつ現れ、ダミー添字 $m$ は上下のペアで消えます。③ 各項の、どこにどの文字があるかを表にした「帳簿」です。添字の付け間違いに気づく検算に使えます。*
 
 <a id="p7-3"></a>
 
@@ -1554,19 +1554,19 @@ $$
 
 ![平面と球面での並行移動](figures/fig2_parallel_transport.png)
 
-*左：平面では、閉じた経路を一周して戻ったベクトルは元と一致する。右：球面の1/8（北極→A→B→北極）を一周すると、ベクトルは $90^\circ$ 回転して戻る。回転角は $K\times$面積 $=\frac1{a^2}\cdot\frac{4\pi a^2}8=\frac\pi2$ と一致する。*
+*左：平面では、閉じた経路を一周して戻ったベクトルは元と一致します。右：球面の1/8（北極→A→B→北極）を一周すると、ベクトルは $90^\circ$ 回転して戻ります。回転角は $K\times$面積 $=\frac1{a^2}\cdot\frac{4\pi a^2}8=\frac\pi2$ と一致します。*
 
 同じ例を動かすと、次のようになります（ループ再生）。ベクトルは各区間で進行方向との角度を保ったまま運ばれ（右のグラフは $0^\circ\to90^\circ\to180^\circ$ と階段状）、回っているのは進行方向のほうです。曲がり角の合計は $90^\circ\times3=270^\circ$ で、平面なら $360^\circ$ になるはずなので、不足の $90^\circ$ が一周したときのベクトルの回転角になります。
 
 ![球面上の並行移動のアニメーション](figures/anim01_parallel_transport.gif)
 
-*北極 → A → B → 北極 の経路でベクトル（橙）を並行移動する。出発時のベクトル（青）との間に、一周後に $90^\circ$ のずれが残る。ベクトルは、経路を細かく刻み、各ステップで接平面に射影して実際に数値で運んでいる（生成：`figures/make_animations.py`）。*
+*北極 → A → B → 北極 の経路でベクトル（橙）を並行移動します。出発時のベクトル（青）との間に、一周後に $90^\circ$ のずれが残ります。ベクトルは、経路を細かく刻み、各ステップで接平面に射影して実際に数値で運んでいます（生成：`figures/make_animations.py`）。*
 
 上の動画は大きな経路でしたが、曲率 $R^l{}_{kij}$ の定義は「**小さな座標の四角形**」を2通りの順で回るという形でした。それを動かしたのが次の動画です（ループ再生）。Part I §2 の動画（2通りの経路で位置は同じ点に着く）と見比べてください。位置は交換しますが、ベクトルを並行移動すると、順序によって $R^l{}_{kij}V^k$ だけずれます（ずれ $\propto\varepsilon^2$）。
 
 ![小さな座標の四角形を2通りの順で回る：ベクトルのずれ](figures/anim03_holonomy_square.gif)
 
-*球面上の小さな座標の四角形（辺の長さ $\varepsilon$）を、$\theta$ 方向 → $\phi$ 方向（青）と $\phi$ 方向 → $\theta$ 方向（橙）の順に回ってベクトルを並行移動する。着く点は同じだが、ベクトルは $(\nabla_\theta\nabla_\phi-\nabla_\phi\nabla_\theta)V^l=R^l{}_{k\theta\phi}V^k$ のぶんだけずれる（赤は $\varepsilon^2$ で割って拡大した表示）。右のグラフでは、ずれ$/\varepsilon^2$ が $\varepsilon\to0$ で $0$ に近づかず、曲率で決まる一定値に近づく。数値は本文の球面の曲率（$R^\theta{}_{\phi\theta\phi}=\sin^2\theta$）と照合済みで、ずれの大きさは $\varepsilon^2R^l{}_{kij}V^k$ に一致する。*
+*球面上の小さな座標の四角形（辺の長さ $\varepsilon$）を、$\theta$ 方向 → $\phi$ 方向（青）と $\phi$ 方向 → $\theta$ 方向（橙）の順に回ってベクトルを並行移動します。着く点は同じですが、ベクトルは $(\nabla_\theta\nabla_\phi-\nabla_\phi\nabla_\theta)V^l=R^l{}_{k\theta\phi}V^k$ のぶんだけずれます（赤は $\varepsilon^2$ で割って拡大した表示です）。右のグラフでは、ずれ$/\varepsilon^2$ が $\varepsilon\to0$ で $0$ に近づかず、曲率で決まる一定値に近づきます。数値は本文の球面の曲率（$R^\theta{}_{\phi\theta\phi}=\sin^2\theta$）と照合済みで、ずれの大きさは $\varepsilon^2R^l{}_{kij}V^k$ に一致します。*
 
 ---
 
@@ -1597,7 +1597,7 @@ $$
 
 半径 $a$（一定）の球面**そのもの**を、2次元の空間として考えます（3次元空間に埋め込まれた球の「表面」だけを、独立した2次元の曲がった世界として扱う、という点が重要です）。座標は $q^1=\theta,\ q^2=\phi$。
 
-計量（前回導出した3次元球座標の計量で $r=a$ を固定したもの）：
+計量（3次元球座標の計量（[球座標の計量テンソル計算例](球座標の計量テンソル計算例.md)）で $r=a$ を固定したもの）：
 
 $$
 g_{\theta\theta}=a^2,\qquad g_{\phi\phi}=a^2\sin^2\theta,\qquad g_{\theta\phi}=0
@@ -1627,7 +1627,7 @@ $$
 
 ![球面上の測地線と、測地線でない緯線](figures/fig6_geodesics_sphere.png)
 
-*Part V の測地線方程式を球面に適用したもの。$\Gamma^\theta{}_{\phi\phi}=-\sin\theta\cos\theta$ から $\ddot\theta=\sin\theta\cos\theta\,\dot\phi^{\,2}$ となる。赤道（$\theta=\pi/2$）と大円は測地線だが、緯線は $\ddot\theta=0$ でこの式を満たさない（緯線を保つには北向きの加速度が必要）。右の地図では、緯線は直線に見えても測地線ではない。*
+*Part V の測地線方程式を球面に適用したものです。$\Gamma^\theta{}_{\phi\phi}=-\sin\theta\cos\theta$ から $\ddot\theta=\sin\theta\cos\theta\,\dot\phi^{\,2}$ となります。赤道（$\theta=\pi/2$）と大円は測地線ですが、緯線は $\ddot\theta=0$ でこの式を満たしません（緯線を保つには北向きの加速度が必要です）。右の地図では、緯線は直線に見えても測地線ではありません。*
 
 <a id="p8-3"></a>
 
@@ -1676,7 +1676,7 @@ $$
 
 ![球・円柱・鞍面の主曲率とガウス曲率の符号](figures/fig3_principal_curvature.png)
 
-*黒点で曲面に垂直な平面で切った断面（赤・青）が主方向。断面の曲がる向きが同じなら $K>0$（球）、片方が真っ直ぐなら $K=0$（円柱）、逆向きなら $K<0$（鞍面）。*
+*黒点で曲面に垂直な平面で切った断面（赤・青）が、主方向です。断面の曲がる向きが同じなら $K>0$（球）、片方が真っ直ぐなら $K=0$（円柱）、逆向きなら $K<0$（鞍面）になります。*
 
 <a id="p8-4b"></a>
 
@@ -1698,7 +1698,7 @@ $$
 
 **記法の確認**：以下で使う$\mathbf r_\theta,\mathbf r_{\theta\theta}$などは、単なる偏微分の略記です：$\mathbf r_\theta:=\partial\mathbf r/\partial\theta$、$\mathbf r_{\theta\theta}:=\partial^2\mathbf r/\partial\theta^2=\partial_\theta(\mathbf r_\theta)$。
 
-**第一基本形式（計量）を、$g_{ij}=\mathbf r_i\cdot\mathbf r_j$の定義から、実際に計算します**（「以前導出済み」という言い方に頼らず、今回の枠組みで検算します）。まず$\mathbf r_\theta,\mathbf r_\phi$を求めます：
+**第一基本形式（計量）を、$g_{ij}=\mathbf r_i\cdot\mathbf r_j$の定義から、実際に計算します**（導出済みの結果に頼らず、この節の枠組みで検算します）。まず$\mathbf r_\theta,\mathbf r_\phi$を求めます：
 
 $$
 \mathbf r_\theta = a(\cos\theta\cos\phi,\ \cos\theta\sin\phi,\ -\sin\theta),\qquad \mathbf r_\phi = a(-\sin\theta\sin\phi,\ \sin\theta\cos\phi,\ 0)
@@ -1726,11 +1726,11 @@ $$
 \boxed{g_{\theta\theta}=a^2,\qquad g_{\phi\phi}=a^2\sin^2\theta,\qquad g_{\theta\phi}=0}
 $$
 
-**記法**：$\mathbf r_i:=\partial\mathbf r/\partial u^i$は、Part Iの基底ベクトル$\mathbf e_i=\partial\mathbf x/\partial q^i$と同じ対象を、埋め込み先の座標を$\mathbf r$、パラメータを$u^i$（$\theta,\phi$）と呼んでいるだけである。$g_{ij}=\mathbf r_i\cdot\mathbf r_j$と$g_{ij}=\mathbf e_i\cdot\mathbf e_j$は同一の式であり、以下の$g_{\theta\theta}=a^2,g_{\phi\phi}=a^2\sin^2\theta$は、Part VIIIで求めた値と同じ計量を指す。
+**記法**：$\mathbf r_i:=\partial\mathbf r/\partial u^i$は、Part Iの基底ベクトル$\mathbf e_i=\partial\mathbf x/\partial q^i$と同じ対象を、埋め込み先の座標を$\mathbf r$、パラメータを$u^i$（$\theta,\phi$）と呼んでいるだけです。$g_{ij}=\mathbf r_i\cdot\mathbf r_j$と$g_{ij}=\mathbf e_i\cdot\mathbf e_j$は同一の式であり、以下の$g_{\theta\theta}=a^2,g_{\phi\phi}=a^2\sin^2\theta$は、Part VIIIで求めた値と同じ計量を指します。
 
 **第二基本形式**$L_{ij}:=\mathbf r_{ij}\cdot\mathbf n$（2階微分を法線方向に射影したもの）を計算します。
 
-**まず$\mathbf r_{\theta\theta}$を、成分ごとに実際に計算します**。$\mathbf r_\theta$は先ほど求めた通りです。もう一度$\theta$で微分します（各成分を、それぞれ$\theta$についてさらに1回微分するだけです：$\frac{d}{d\theta}\cos\theta=-\sin\theta$、$\frac{d}{d\theta}(-\sin\theta)=-\cos\theta$）：
+**まず$\mathbf r_{\theta\theta}$を、成分ごとに実際に計算します**。$\mathbf r_\theta$は上で求めた通りです。もう一度$\theta$で微分します（各成分を、それぞれ$\theta$についてさらに1回微分するだけです：$\frac{d}{d\theta}\cos\theta=-\sin\theta$、$\frac{d}{d\theta}(-\sin\theta)=-\cos\theta$）：
 
 $$
 \mathbf r_{\theta\theta} = \frac{\partial\mathbf r_\theta}{\partial\theta} = a(-\sin\theta\cos\phi,\ -\sin\theta\sin\phi,\ -\cos\theta)
@@ -1746,13 +1746,13 @@ $$
 L_{\theta\theta} = \mathbf r_{\theta\theta}\cdot\mathbf n = -\mathbf r\cdot\frac{\mathbf r}a = -\frac{|\mathbf r|^2}a = -\frac{a^2}a = -a
 $$
 
-**次に$\mathbf r_{\phi\phi}$を計算します。** 先ほど求めた$\mathbf r_\phi=a(-\sin\theta\sin\phi,\ \sin\theta\cos\phi,\ 0)$を、もう一度$\phi$で微分します（各成分を、それぞれ$\phi$についてさらに1回微分するだけです：$\frac{d}{d\phi}(-\sin\phi)=-\cos\phi$、$\frac{d}{d\phi}\cos\phi=-\sin\phi$、定数の微分は$0$）：
+**次に$\mathbf r_{\phi\phi}$を計算します。** 上で求めた$\mathbf r_\phi=a(-\sin\theta\sin\phi,\ \sin\theta\cos\phi,\ 0)$を、もう一度$\phi$で微分します（各成分を、それぞれ$\phi$についてさらに1回微分するだけです：$\frac{d}{d\phi}(-\sin\phi)=-\cos\phi$、$\frac{d}{d\phi}\cos\phi=-\sin\phi$、定数の微分は$0$）：
 
 $$
 \mathbf r_{\phi\phi} = \frac{\partial\mathbf r_\phi}{\partial\phi} = a(-\sin\theta\cos\phi,\ -\sin\theta\sin\phi,\ 0)
 $$
 
-$\mathbf r_{\phi\phi}$の第3成分は$0$（$\mathbf r$の第3成分$\cos\theta$とは異なる）ため、$\mathbf r_{\theta\theta}=-\mathbf r$のような係数比較はできない。$\mathbf n=\mathbf r/a=(\sin\theta\cos\phi,\sin\theta\sin\phi,\cos\theta)$との内積を、成分ごとに計算する：
+$\mathbf r_{\phi\phi}$の第3成分は$0$（$\mathbf r$の第3成分$\cos\theta$とは異なる）ため、$\mathbf r_{\theta\theta}=-\mathbf r$のような係数比較はできません。$\mathbf n=\mathbf r/a=(\sin\theta\cos\phi,\sin\theta\sin\phi,\cos\theta)$との内積を、成分ごとに計算します：
 
 $$
 L_{\phi\phi} = \mathbf r_{\phi\phi}\cdot\mathbf n = a\big[(-\sin\theta\cos\phi)(\sin\theta\cos\phi)+(-\sin\theta\sin\phi)(\sin\theta\sin\phi)+0\cdot\cos\theta\big]
@@ -1822,7 +1822,7 @@ $$
 
 （今回使う形は、これを一般化した「一般化レイリー商」$\dfrac{v^TLv}{v^Tgv}$で、分母が単なる$v^Tv$ではなく、別の対称行列$g$で測った量になっています。）
 
-**核心の性質：$R(v)$の値は、常に$A$の固有値の最小値と最大値の間に収まります。** これを確認します。$A$（対称行列）の固有ベクトルを$\mathbf e_1,\dots,\mathbf e_n$（正規直交基底、以前のユニタリ行列の対角化のノートで扱った内容）、対応する固有値を$\lambda_1\le\cdots\le\lambda_n$とします。任意の単位ベクトル$v$は、この固有ベクトルの組み合わせで書けます：
+**核心の性質：$R(v)$の値は、常に$A$の固有値の最小値と最大値の間に収まります。** これを確認します。$A$（対称行列）の固有ベクトルを$\mathbf e_1,\dots,\mathbf e_n$（正規直交基底。実対称行列は、固有ベクトルからなる正規直交基底を持ちます）、対応する固有値を$\lambda_1\le\cdots\le\lambda_n$とします。任意の単位ベクトル$v$は、この固有ベクトルの組み合わせで書けます：
 
 $$
 v = c_1\mathbf e_1+\cdots+c_n\mathbf e_n,\qquad c_1^2+\cdots+c_n^2=1
@@ -1938,7 +1938,7 @@ $$
 K = \kappa_1\kappa_2 = \det(g^{-1}L) = \det(g^{-1})\det(L) = \frac{\det L}{\det g}
 $$
 
-（$\det(g^{-1})=1/\det(g)$、逆行列の行列式は元の行列式の逆数、というのも以前確認済みの性質です。）
+（$\det(g^{-1})=1/\det(g)$、逆行列の行列式は元の行列式の逆数、というのも標準的な性質です。）
 
 $$
 \boxed{K = \kappa_1\kappa_2 = \frac{\det L}{\det g}}
@@ -1988,19 +1988,19 @@ $$
 \boxed{K = \frac{R_{\theta\phi\theta\phi}}{\det g}}
 $$
 
-（一般に、2次元多様体では$R^l{}_{kij}$の独立成分が1つしかないため、この比が、平面の向き・パラメータの取り方によらず、$K$という1つの数に定まります。これは「断面曲率」という、より一般の次元でも定義できる量の、2次元での特別な場合です。**なぜ2次元で独立成分が1つに決まるのか、また3次元以上では何個になるのかは、多様体のノートPart II-bで証明しています**。）
+（一般に、2次元多様体では$R^l{}_{kij}$の独立成分が1つしかないため、この比が、平面の向き・パラメータの取り方によらず、$K$という1つの数に定まります。これは「断面曲率」という、より一般の次元でも定義できる量の、2次元での特別な場合です。**なぜ2次元で独立成分が1つに決まるのか、また3次元以上では何個になるのかは、[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part II-b §7-c〜§7-d で証明しています**。）
 
 **この2つの定義（外から見た主曲率の積と、内部だけで測る$R_{\theta\phi\theta\phi}/\det g$）がなぜ一致するのか、という証明は、付録A（ガウス・コダッツィ方程式）で最初から最後まで行います**。ここではまず、球面という具体例で、両方の計算方法が実際に同じ$1/a^2$という値に到達することを確認します。
 
 ![円柱を切り開くと平面になる](figures/fig7_cylinder_unrolled.png)
 
-*内在的な曲率と、外から見た曲がり方は別のもの。円柱は外から見ると曲がっている（$\kappa_1=1/a$）が、切り開けば距離も角度も変わらない平面になり、計量 $g=ds^2+dz^2$ は定数で $\Gamma=0,\ R=0$、つまり $K=0$。上の三角形の内角の和はちょうど $180^\circ$。球面は同じ操作で切り開けない。*
+*内在的な曲率と、外から見た曲がり方は別のものです。円柱は外から見ると曲がっています（$\kappa_1=1/a$）が、切り開けば距離も角度も変わらない平面になり、計量 $g=ds^2+dz^2$ は定数で $\Gamma=0,\ R=0$、つまり $K=0$ です。上の三角形の内角の和はちょうど $180^\circ$ です。球面は同じ操作で切り開けません。*
 
 <a id="p8-5"></a>
 
 ## 5. 実際に計算し、両者の一致を確認する
 
-以前導出した$R_{\theta\phi\theta\phi}=a^2\sin^2\theta$を、§4-eの式に代入します：
+Part VIII §3 で導出した$R_{\theta\phi\theta\phi}=a^2\sin^2\theta$を、§4-eの式に代入します：
 
 $$
 K = \frac{R_{\theta\phi\theta\phi}}{\det g} = \frac{a^2\sin^2\theta}{a^4\sin^2\theta} = \frac1{a^2}
@@ -2014,7 +2014,7 @@ $$
 
 ![球面の基底ベクトルと、直角が3つの球面三角形](figures/fig5_sphere_basis_triangle.png)
 
-*左：球面の基底ベクトル。$\mathbf e_\theta$ の長さは常に $a$、$\mathbf e_\phi$ の長さは $a\sin\theta$ で極に近づくほど短い（$g_{\theta\theta}=a^2,\ g_{\phi\phi}=a^2\sin^2\theta$ の視覚化）。右：1/8球面の三角形は3つの角がすべて $90^\circ$ で、内角の和は $270^\circ$。$180^\circ$ からの超過 $\frac\pi2$ は $K\times$面積 $=\frac1{a^2}\cdot\frac{4\pi a^2}8$ に等しい。*
+*左：球面の基底ベクトルです。$\mathbf e_\theta$ の長さは常に $a$、$\mathbf e_\phi$ の長さは $a\sin\theta$ で極に近づくほど短くなります（$g_{\theta\theta}=a^2,\ g_{\phi\phi}=a^2\sin^2\theta$ の視覚化）。右：1/8球面の三角形は3つの角がすべて $90^\circ$ で、内角の和は $270^\circ$ です。$180^\circ$ からの超過 $\frac\pi2$ は $K\times$面積 $=\frac1{a^2}\cdot\frac{4\pi a^2}8$ に等しくなります。*
 
 ここまでに出てきた曲面を並べると、次のようになります。
 
@@ -2043,7 +2043,7 @@ $$
 \boxed{R := g^{ij}R_{ij}}\qquad\text{（スカラー曲率、1つの数）}
 $$
 
-2次元の場合、スカラー曲率とガウス曲率の間には $R=2K$ という単純な関係があります（今回の球面の例なら $R=2/a^2$）。**この関係の導出、および一般の$(p,q)$型リッチテンソルの縮約の正当性（対称×反対称＝0の応用）、アインシュタイン方程式の紹介は、別ノート「リッチテンソル・スカラー曲率・アインシュタイン方程式」で最初から最後まで扱っています**（球面の具体例で$R_{\theta\theta}=1,R_{\phi\phi}=\sin^2\theta$を実際に計算し、$R=2/a^2$を導出済みです）。ここではこれ以上踏み込みません。
+2次元の場合、スカラー曲率とガウス曲率の間には $R=2K$ という単純な関係があります（今回の球面の例なら $R=2/a^2$）。**この関係の導出、および一般の$(p,q)$型リッチテンソルの縮約の正当性（対称×反対称＝0の応用）、アインシュタイン方程式の紹介は、[「リッチテンソル・スカラー曲率・アインシュタイン方程式」のノート](ricci_tensor_einstein_equations.md)で最初から最後まで扱っています**（球面の具体例で$R_{\theta\theta}=1,R_{\phi\phi}=\sin^2\theta$を実際に計算し、$R=2/a^2$を導出済みです）。ここではこれ以上踏み込みません。
 
 ---
 
@@ -2139,7 +2139,7 @@ flowchart TD
 
 <!-- part-toc:end -->
 
-Part VIII §4で「今回は踏み込まない」としていた、**「外から見た主曲率の積」と「内部だけで測る$R_{\theta\phi\theta\phi}/\det g$」が、なぜ一致するのか**の証明を、最初から最後まで行います。使う道具は、この会話で何度も登場した**「3階微分の順序を入れ替えても同じ」**という性質、ただ1つです。
+Part VIII §4で「今回は踏み込まない」としていた、**「外から見た主曲率の積」と「内部だけで測る$R_{\theta\phi\theta\phi}/\det g$」が、なぜ一致するのか**の証明を、最初から最後まで行います。使う道具は、このノートで何度も使ってきた**「3階微分の順序を入れ替えても同じ」**という性質（Part I §2）、ただ1つです。
 
 <a id="A-0"></a>
 
@@ -2235,7 +2235,7 @@ $$
 \mathbf n_i\cdot\mathbf r_k + \mathbf n\cdot\mathbf r_{ik} = 0 \quad\Longrightarrow\quad \mathbf n_i\cdot\mathbf r_k = -\mathbf n\cdot\mathbf r_{ik} = -L_{ik}
 $$
 
-また、$\mathbf n\cdot\mathbf n=1$を微分すると$2\mathbf n\cdot\mathbf n_i=0$、つまり$\mathbf n_i$は$\mathbf n$と直交する（＝曲面に接する）ベクトルです。したがって$\mathbf n_i$は$\mathbf r_1,\mathbf r_2$だけで展開できます：$\mathbf n_i=c^k\mathbf r_k$。$\mathbf n_i\cdot\mathbf r_j=c^kg_{kj}$と、先ほど求めた$\mathbf n_i\cdot\mathbf r_j=-L_{ij}$を見比べると、$c^kg_{kj}=-L_{ij}$という式が得られます。ここから、$c^k$を単独で表す形に変形します。
+また、$\mathbf n\cdot\mathbf n=1$を微分すると$2\mathbf n\cdot\mathbf n_i=0$、つまり$\mathbf n_i$は$\mathbf n$と直交する（＝曲面に接する）ベクトルです。したがって$\mathbf n_i$は$\mathbf r_1,\mathbf r_2$だけで展開できます：$\mathbf n_i=c^k\mathbf r_k$。$\mathbf n_i\cdot\mathbf r_j=c^kg_{kj}$と、上で求めた$\mathbf n_i\cdot\mathbf r_j=-L_{ij}$を見比べると、$c^kg_{kj}=-L_{ij}$という式が得られます。ここから、$c^k$を単独で表す形に変形します。
 
 **ステップ1**：両辺に逆計量$g^{jm}$を掛けて、$j$について和を取ります：
 
@@ -2277,17 +2277,17 @@ $$
 \boxed{\mathbf n_i = -L_i{}^k\,\mathbf r_k}\qquad\text{（ヴァインガルテンの公式）}
 $$
 
-$L_i{}^k$は、$L_{ij}$の添字を1つ上げた表示であり（$V^i$と$V_i$の関係と同様）、別の対象ではない。ヴァインガルテンの公式が主張しているのは、「$\mathbf n_i$（$\mathbf n$の微分）が接ベクトル$\mathbf r_k$の組み合わせで書ける」ことであり、$\mathbf n$自体が$\mathbf r_k$の組み合わせになるわけではない。$\mathbf n_i$が接ベクトルの組み合わせになるのは、上で確認した通り$\mathbf n\cdot\mathbf n=1$の微分から$\mathbf n_i$が$\mathbf n$と直交し、接平面（$\mathbf r_1,\mathbf r_2$が張る面）の中に収まるためである。
+$L_i{}^k$は、$L_{ij}$の添字を1つ上げた表示であり（$V^i$と$V_i$の関係と同様）、別の対象ではありません。ヴァインガルテンの公式が主張しているのは、「$\mathbf n_i$（$\mathbf n$の微分）が接ベクトル$\mathbf r_k$の組み合わせで書ける」ことであり、$\mathbf n$自体が$\mathbf r_k$の組み合わせになるわけではありません。$\mathbf n_i$が接ベクトルの組み合わせになるのは、上で確認した通り$\mathbf n\cdot\mathbf n=1$の微分から$\mathbf n_i$が$\mathbf n$と直交し、接平面（$\mathbf r_1,\mathbf r_2$が張る面）の中に収まるためです。
 
 ![ガウスの公式とヴァインガルテンの公式の幾何的な意味](figures/fig14_gauss_weingarten.png)
 
-*左：曲面上の1点で、接ベクトル $\mathbf r_1,\mathbf r_2$（青・緑）と単位法線 $\mathbf n$（紫）。2階微分 $\mathbf r_{11}$（黒）は、接する方向の成分 $\Gamma^k{}_{11}\mathbf r_k$（橙、内部の量）と、法線方向の成分 $L_{11}\mathbf n$（紫、外から見た量）に分かれる。右：曲線に沿って $\mathbf n$ を動かすと、その変化 $\mathbf n_1$（橙）は接平面（黄）の中にあり、$\mathbf n_1=-L_1{}^k\mathbf r_k$ と書ける。図の値は、この2つの公式が成り立つことを数値で確認して描いた。*
+*左：曲面上の1点で、接ベクトル $\mathbf r_1,\mathbf r_2$（青・緑）と単位法線 $\mathbf n$（紫）です。2階微分 $\mathbf r_{11}$（黒）は、接する方向の成分 $\Gamma^k{}_{11}\mathbf r_k$（橙、内部の量）と、法線方向の成分 $L_{11}\mathbf n$（紫、外から見た量）に分かれます。右：曲線に沿って $\mathbf n$ を動かすと、その変化 $\mathbf n_1$（橙）は接平面（黄）の中にあり、$\mathbf n_1=-L_1{}^k\mathbf r_k$ と書けます。図の値は、この2つの公式が成り立つことを数値で確認して描きました。*
 
 <a id="A-4"></a>
 
 ## A-4. 3階微分を、2通りの順番で計算する
 
-A-2, A-3で、$\mathbf r_{ij}$（接する方向＋法線方向）と$\mathbf n_i$（接する方向のみ）の分解を得た。この2つの分解の中に、$\Gamma$（内部の量）と$L$（外から見た量）が同時に現れており、両者の関係を引き出すには、この分解をもう一段先まで使う必要がある。そこで、$\mathbf r_{ij}$をもう1回微分した$\mathbf r_{ijl}:=\partial_l(\mathbf r_{ij})$を、順序を変えた2通りの経路（先に$j$方向、後に$l$方向／その逆）で計算し、両者が等しいという条件（A-5で使う、混合偏微分の対称性）から、$\Gamma$と$L$の関係式を導く。まず、$\mathbf r_{ijl}$を、A-2のガウスの公式に代入して計算する：
+A-2, A-3で、$\mathbf r_{ij}$（接する方向＋法線方向）と$\mathbf n_i$（接する方向のみ）の分解を得ました。この2つの分解の中に、$\Gamma$（内部の量）と$L$（外から見た量）が同時に現れており、両者の関係を引き出すには、この分解をもう一段先まで使う必要があります。そこで、$\mathbf r_{ij}$をもう1回微分した$\mathbf r_{ijl}:=\partial_l(\mathbf r_{ij})$を、順序を変えた2通りの経路（先に$j$方向、後に$l$方向／その逆）で計算し、両者が等しいという条件（A-5で使う、混合偏微分の対称性）から、$\Gamma$と$L$の関係式を導きます。まず、$\mathbf r_{ijl}$を、A-2のガウスの公式に代入して計算します：
 
 $$
 \mathbf r_{ijl} = \partial_l\big(\Gamma^k{}_{ij}\mathbf r_k+L_{ij}\mathbf n\big) = (\partial_l\Gamma^k{}_{ij})\mathbf r_k+\Gamma^k{}_{ij}\mathbf r_{kl}+(\partial_lL_{ij})\mathbf n+L_{ij}\mathbf n_l
@@ -2327,7 +2327,7 @@ $$
 
 ## A-5. 3階微分の対称性を使う
 
-$\mathbf r_{ijl}=\partial_l\partial_j\partial_i\mathbf r$、$\mathbf r_{ilj}=\partial_j\partial_l\partial_i\mathbf r$は、**偏微分の順序を入れ替えても同じ**（この会話で何度も使った、混合偏微分の対称性）なので：
+$\mathbf r_{ijl}=\partial_l\partial_j\partial_i\mathbf r$、$\mathbf r_{ilj}=\partial_j\partial_l\partial_i\mathbf r$は、**偏微分の順序を入れ替えても同じ**（Part I §2 などで使った、混合偏微分の対称性）なので：
 
 $$
 \boxed{\mathbf r_{ijl} = \mathbf r_{ilj}}
@@ -2349,7 +2349,7 @@ $$
 \Big[\partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}\Big]+\Big[\Gamma^k{}_{ij}\Gamma^m{}_{kl}-\Gamma^k{}_{il}\Gamma^m{}_{kj}\Big] = L_{ij}L_l{}^m-L_{il}L_j{}^m
 $$
 
-**左辺が、以前導出したリーマン曲率テンソルの公式$R^p{}_{qrs}=\partial_r\Gamma^p{}_{sq}-\partial_s\Gamma^p{}_{rq}+\Gamma^p{}_{rt}\Gamma^t{}_{sq}-\Gamma^p{}_{st}\Gamma^t{}_{rq}$の、どの成分に対応するかを、実際に代入して確認します。** $p=m,q=i,r=l,s=j$を代入します：
+**左辺が、Part VII §2 で導出したリーマン曲率テンソルの公式$R^p{}_{qrs}=\partial_r\Gamma^p{}_{sq}-\partial_s\Gamma^p{}_{rq}+\Gamma^p{}_{rt}\Gamma^t{}_{sq}-\Gamma^p{}_{st}\Gamma^t{}_{rq}$の、どの成分に対応するかを、実際に代入して確認します。** $p=m,q=i,r=l,s=j$を代入します：
 
 $$
 R^m{}_{ilj} = \partial_l\Gamma^m{}_{ji}-\partial_j\Gamma^m{}_{li}+\Gamma^m{}_{lt}\Gamma^t{}_{ji}-\Gamma^m{}_{jt}\Gamma^t{}_{li}
@@ -2361,7 +2361,7 @@ $$
 R^m{}_{ilj} = \partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}+\Gamma^m{}_{lt}\Gamma^t{}_{ij}-\Gamma^m{}_{jt}\Gamma^t{}_{il}
 $$
 
-**これを、先ほどの左辺$\big[\partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}\big]+\big[\Gamma^k{}_{ij}\Gamma^m{}_{kl}-\Gamma^k{}_{il}\Gamma^m{}_{kj}\big]$と、項ごとに照合します**。
+**これを、上での左辺$\big[\partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}\big]+\big[\Gamma^k{}_{ij}\Gamma^m{}_{kl}-\Gamma^k{}_{il}\Gamma^m{}_{kj}\big]$と、項ごとに照合します**。
 
 最初の2項（$\partial_l\Gamma^m{}_{ij}-\partial_j\Gamma^m{}_{il}$）は、両方とも完全に同じ形です。
 
@@ -2397,7 +2397,7 @@ A-2 から A-7 の流れを図にまとめると、次のようになります�
 
 ![ガウス方程式とコダッツィ方程式が出る流れ](figures/fig15_gauss_codazzi_flow.png)
 
-*ガウスの公式とヴァインガルテンの公式（A-2, A-3）を代入して、3階微分 $\mathbf r_{ijl}$ を2通りの順序で計算する（A-4）。混合偏微分の対称性 $\mathbf r_{ijl}=\mathbf r_{ilj}$（A-5）から、基底 $\{\mathbf r_1,\mathbf r_2,\mathbf n\}$ ごとに係数が一致する。接する方向（橙）の一致がガウス方程式（A-6）、法線方向（紫）の一致がコダッツィ・マイナルディ方程式（A-7）になる。*
+*ガウスの公式とヴァインガルテンの公式（A-2, A-3）を代入して、3階微分 $\mathbf r_{ijl}$ を2通りの順序で計算します（A-4）。混合偏微分の対称性 $\mathbf r_{ijl}=\mathbf r_{ilj}$（A-5）から、基底 $\{\mathbf r_1,\mathbf r_2,\mathbf n\}$ ごとに係数が一致します。接する方向（橙）の一致がガウス方程式（A-6）、法線方向（紫）の一致がコダッツィ・マイナルディ方程式（A-7）になります。*
 
 <a id="A-8"></a>
 
@@ -2469,13 +2469,13 @@ $$
 
 （$\nabla_i:=\nabla_{\mathbf e_i}$は共変微分、$\mathbf e_1,\mathbf e_2$は座標基底ベクトル。）**これが、私たちの$K=R_{\theta\phi\theta\phi}/\det g$と、同じ式であることを確認します。**
 
-**ステップ1**：リー微分のノートPart IX §19の、座標に依らないリーマン曲率テンソルの定義
+**ステップ1**：[リー微分のノート](lie_derivative.md)の Part XII §40 の、座標に依らないリーマン曲率テンソルの定義
 
 $$
 R(X,Y)Z = \nabla_X\nabla_YZ-\nabla_Y\nabla_XZ-\nabla_{[X,Y]}Z
 $$
 
-に、$X=\mathbf e_2,Y=\mathbf e_1,Z=\mathbf e_1$（$\mathbf e_1=\partial_\theta,\mathbf e_2=\partial_\phi$）を代入します。**座標基底同士のリー括弧は必ずゼロ**（$[\mathbf e_i,\mathbf e_j]=0$、リー微分のノートPart III §5）なので、$-\nabla_{[X,Y]}Z$の項が自動的に消えます：
+に、$X=\mathbf e_2,Y=\mathbf e_1,Z=\mathbf e_1$（$\mathbf e_1=\partial_\theta,\mathbf e_2=\partial_\phi$）を代入します。**座標基底同士のリー括弧は必ずゼロ**（$[\mathbf e_i,\mathbf e_j]=0$、[リー微分のノート](lie_derivative.md)の Part IV §14）なので、$-\nabla_{[X,Y]}Z$の項が自動的に消えます：
 
 $$
 R(\mathbf e_2,\mathbf e_1)\mathbf e_1 = \nabla_2\nabla_1\mathbf e_1-\nabla_1\nabla_2\mathbf e_1
@@ -2495,7 +2495,7 @@ $$
 \big\langle(\nabla_\phi\nabla_\theta-\nabla_\theta\nabla_\phi)\mathbf e_\theta,\ \mathbf e_\phi\big\rangle = R^\phi{}_{\theta\phi\theta}\,g_{\phi\phi}
 $$
 
-**ステップ4**：$R^\phi{}_{\theta\phi\theta}$を、以前と同じ公式に直接代入して計算します（$l=\phi,k=\theta,i=\phi,j=\theta$）：
+**ステップ4**：$R^\phi{}_{\theta\phi\theta}$を、同じ公式に直接代入して計算します（$l=\phi,k=\theta,i=\phi,j=\theta$）：
 
 $$
 R^\phi{}_{\theta\phi\theta} = \partial_\phi\Gamma^\phi{}_{\theta\theta}-\partial_\theta\Gamma^\phi{}_{\phi\theta}+\Gamma^\phi{}_{\phi m}\Gamma^m{}_{\theta\theta}-\Gamma^\phi{}_{\theta m}\Gamma^m{}_{\phi\theta}
@@ -2519,7 +2519,7 @@ $$
 \big\langle(\nabla_2\nabla_1-\nabla_1\nabla_2)\mathbf e_1,\mathbf e_2\big\rangle = \big\langle(\nabla_\phi\nabla_\theta-\nabla_\theta\nabla_\phi)\mathbf e_\theta,\mathbf e_\phi\big\rangle = a^2\sin^2\theta
 $$
 
-**これは、以前直接計算した$R_{\theta\phi\theta\phi}=a^2\sin^2\theta$と、完全に一致します。**
+**これは、Part VIII §3 で直接計算した$R_{\theta\phi\theta\phi}=a^2\sin^2\theta$と、完全に一致します。**
 
 **結論**：
 
@@ -2537,7 +2537,7 @@ $$
 
 **$L_{ij}$がテンソルであることの確認**：$\mathbf r_{ij}=\partial_i\partial_j\mathbf r$自体は、クリストッフェル記号がテンソルでなかったのと同じ理由で、単独ではテンソルになりません（座標変換で余計な項がつきます）。**$\mathbf n$との内積を取ることで、その余計な項がちょうど消える**、というのが、$L_{ij}$がテンソルになる本当の理由です。
 
-**記法**：$u^i$は元の座標、$\tilde u^i$は新しい座標である（どちらも添字$i$は$1,2$を走る）。チルダは添字ではなく、**どの座標系の成分か**を区別するための記号である。添字の文字だけでは区別できない（添字は自由に付け替えてよいため）ので、座標そのものに印を付けている。Part I〜VIIIの$x^a\to q^i$（デカルト座標から曲線座標）は、この特別な場合（$u^k=x^a$、$\tilde u^i=q^i$）にあたり、$\partial u^k/\partial\tilde u^i$はヤコビアン$J^a{}_i$に対応する。
+**記法**：$u^i$は元の座標、$\tilde u^i$は新しい座標です（どちらも添字$i$は$1,2$を走ります）。チルダは添字ではなく、**どの座標系の成分か**を区別するための記号です。添字の文字だけでは区別できない（添字は自由に付け替えてよいため）ので、座標そのものに印を付けています。Part I〜VIIIの$x^a\to q^i$（デカルト座標から曲線座標）は、この特別な場合（$u^k=x^a$、$\tilde u^i=q^i$）にあたり、$\partial u^k/\partial\tilde u^i$はヤコビアン$J^a{}_i$に対応します。
 
 座標変換$u^i\to\tilde u^i$のもとで、$\mathbf r_i$は$\tilde{\mathbf r}_i=\dfrac{\partial u^k}{\partial\tilde u^i}\mathbf r_k$と変換します。これをもう一度$\tilde u^j$で微分します。$\dfrac{\partial u^k}{\partial\tilde u^i}$（係数）と$\mathbf r_k$（本体）の積なので、積の微分で2項に分かれます：
 
@@ -2612,7 +2612,7 @@ $$
 }
 $$
 
-「ガウスの驚異の定理」という名前が意味しているのは、**「$K$（外から見た曲がり方）が、実は曲面を外から眺めなくても、内部の計量だけから計算できる」**という、当時としては驚くべき発見でした。その核心は、$\mathbb R^3$という外側の空間での**「3階微分の順序を入れ替えても同じ」**という、この会話の最初期（ラプラシアンの導出）から繰り返し使ってきた、ごく基礎的な性質に、最終的には帰着していました。
+「ガウスの驚異の定理」という名前が意味しているのは、**「$K$（外から見た曲がり方）が、実は曲面を外から眺めなくても、内部の計量だけから計算できる」**という、当時としては驚くべき発見でした。その核心は、$\mathbb R^3$という外側の空間での**「3階微分の順序を入れ替えても同じ」**という、Part I §2 の $\Gamma^k{}_{ij}=\Gamma^k{}_{ji}$ の導出から繰り返し使ってきた、ごく基礎的な性質に、最終的には帰着していました。
 
 ---
 
@@ -2732,7 +2732,7 @@ $$
 \boxed{\nabla_lg_{ij}=0,\qquad\nabla_lg^{ij}=0}
 $$
 
-詳しくはリッチテンソルのノートPart IIで扱うので、ここでは簡易的な証明に止めます。Part II（およびA-2）で導出した関係式
+詳しくは[リッチテンソルのノート](ricci_tensor_einstein_equations.md)の Part II で扱うので、ここでは簡易的な証明に止めます。Part II（およびA-2）で導出した関係式
 
 $$
 2\Gamma^m{}_{ab}g_{mc}=\partial_ag_{bc}+\partial_bg_{ac}-\partial_cg_{ab}\tag{B.1}
@@ -2925,8 +2925,8 @@ $\psi(t_0)=0$、$\psi\ge0$で、$t\ge t_0$では増えないので、$t\ge t_0$�
 
 解析学の次の2つの事実を、ここでは仮定として使います。
 
-- **仮定1（最大値の定理）**：有界閉区間上の連続関数は最大値を持つ。
-- **仮定2（一様収束と積分）**：連続関数の列$f_k$が、ある区間上で$f$に一様収束する（区間全体で同時に$\sup|f_k-f|\to0$となる）なら、$f$も連続で、$\int f_k\to\int f$である。
+- **仮定1（最大値の定理）**：有界閉区間上の連続関数は最大値を持ちます。
+- **仮定2（一様収束と積分）**：連続関数の列$f_k$が、ある区間上で$f$に一様収束する（区間全体で同時に$\sup|f_k-f|\to0$となる）なら、$f$も連続で、$\int f_k\to\int f$ です。
 
 まず、$t_0$を含む有界閉区間$J=[t_0,t_1]\subset I$で考えます（$t<t_0$の側も同様です）。仮定1から、$\beta$は$J$上で最大値$\beta_\ast$を持ちます。
 
@@ -2972,13 +2972,13 @@ $$
 Y(t)=\sum_{m=0}^\infty\frac{\big(B(t-t_0)\big)^m}{m!}Y_0=e^{B(t-t_0)}Y_0
 $$
 
-です。以前扱った行列の指数関数そのものです。逐次近似は、行列の指数関数を、係数が時間に依存する場合へ広げたものになっています。
+です。行列の指数関数そのものです。逐次近似は、行列の指数関数を、係数が時間に依存する場合へ広げたものになっています。
 
 #### B-0-4-f. パラメータへの依存
 
 B-5では、$B$が別の変数$s$（パラメータ）にも滑らかに依存するとき、解$Y(t;s)$が$s$についても滑らかであることを使います。これは次の形で導入します。
 
-**仮定3（微分と極限の交換）**：関数の列$f_k$とその導関数の列$f_k'$がともに一様収束するなら、極限は微分でき、その導関数は$f_k'$の極限に等しい。
+**仮定3（微分と極限の交換）**：関数の列$f_k$とその導関数の列$f_k'$がともに一様収束するなら、極限は微分でき、その導関数は$f_k'$の極限に等しくなります。
 
 逐次近似の各項$Y^{(k)}(t;s)$は、積分の中の$B$が$s$について滑らかなので、$s$について微分できます。漸化式を$s$で微分すると、$Z^{(k)}:=\partial_sY^{(k)}$は
 
@@ -3054,7 +3054,7 @@ $$
 R_{pilj}=L_{ij}L_{lp}-L_{il}L_{jp}\tag{B.3}
 $$
 
-右辺は、$(l,j)$の入れ替えについて反対称です（$l\leftrightarrow j$とすると$L_{il}L_{jp}-L_{ij}L_{lp}$となり、符号だけが反転します）。また$(p,i)$の入れ替えについても反対称です：$p\leftrightarrow i$とすると$L_{pj}L_{li}-L_{pl}L_{ji}$となり、$L$の対称性から$L_{jp}L_{il}-L_{lp}L_{ij}$、つまり元の式の符号反転になります。（一般の多様体での反対称性の証明は多様体のノートPart II-bで扱うので、ここでは埋め込まれた曲面の場合に(B.3)から直接確認するのに止めます。）
+右辺は、$(l,j)$の入れ替えについて反対称です（$l\leftrightarrow j$とすると$L_{il}L_{jp}-L_{ij}L_{lp}$となり、符号だけが反転します）。また$(p,i)$の入れ替えについても反対称です：$p\leftrightarrow i$とすると$L_{pj}L_{li}-L_{pl}L_{ji}$となり、$L$の対称性から$L_{jp}L_{il}-L_{lp}L_{ij}$、つまり元の式の符号反転になります。（一般の多様体での反対称性の証明は[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part II-b §7-b で扱うので、ここでは埋め込まれた曲面の場合に(B.3)から直接確認するのに止めます。）
 
 反対称な添字の組は、同じ値を取ると成分がゼロになります。2次元では、$p\ne i$かつ$l\ne j$となる組は$(p,i),(l,j)\in\{(1,2),(2,1)\}$だけで、それらの成分はすべて$\pm R_{1212}$に等しくなります。したがって独立な式は1本です：
 
@@ -3207,11 +3207,11 @@ $$
 \int_0^{2\pi}\!\!\int_0^{2\pi}K\sqrt{\det g}\,d\theta\,d\phi=\int_0^{2\pi}\!\!\int_0^{2\pi}\cos\theta\,d\theta\,d\phi=0
 $$
 
-トーラスのオイラー標数は$\chi=0$なので、$\iint K\,dA=2\pi\chi$と一致します。定理そのものはトポロジー入門のノートで扱うので、ここでは積分値の確認に止めます。
+トーラスのオイラー標数は$\chi=0$なので、$\iint K\,dA=2\pi\chi$と一致します。定理そのものは[トポロジー入門のノート](../03_多様体・微分形式・トポロジー/topology_introduction.md)で扱うので、ここでは積分値の確認に止めます。
 
 ![トーラスのガウス曲率の符号と、面積で重みを付けた曲率](figures/fig16_torus_curvature.png)
 
-*左：トーラスを $K=\cos\theta/(a\rho)$ で色分けしたもの（赤が $K>0$、青が $K<0$、黒の破線が $K=0$。図は $a=1,\ b=2.4$）。外側は赤、内側は青で、内側のほうが絶対値が大きい。中：断面。$\theta$ は管の周りの角度で、$\theta=0$ が外側の赤道。右：$K(\theta)$（上）と、面積要素 $\sqrt{\det g}=a\rho$ を掛けた $K\sqrt{\det g}=\cos\theta$（下）。正と負の面積がちょうど打ち消し合い、積分値は $0=2\pi\chi$（$\chi=0$）になる。*
+*左：トーラスを $K=\cos\theta/(a\rho)$ で色分けしたものです（赤が $K>0$、青が $K<0$、黒の破線が $K=0$。図は $a=1,\ b=2.4$）。外側は赤、内側は青で、内側のほうが絶対値が大きくなります。中：断面です。$\theta$ は管の周りの角度で、$\theta=0$ が外側の赤道です。右：$K(\theta)$（上）と、面積要素 $\sqrt{\det g}=a\rho$ を掛けた $K\sqrt{\det g}=\cos\theta$（下）です。正と負の面積がちょうど打ち消し合い、積分値は $0=2\pi\chi$（$\chi=0$）になります。*
 
 <a id="B-2-6"></a>
 
@@ -3344,7 +3344,7 @@ $$
 \Phi:=\begin{pmatrix}\mathbf r_1\\\mathbf r_2\\\mathbf n\end{pmatrix}
 $$
 
-と書き、**枠行列**と呼びます。（行列値微分形式のノートで場の強さを$F$と書いたので、それと区別するために$\Phi$を使います。）
+と書き、**枠行列**と呼びます。（[行列値微分形式のノート](../03_多様体・微分形式・トポロジー/matrix_valued_forms_gauge_theory.md)で場の強さを$F$と書いたので、それと区別するために$\Phi$を使います。）
 
 ガウスの公式とヴァインガルテンの公式を、$\Phi$の各行の微分として書き直します。$\partial_i\mathbf r_j=\mathbf r_{ji}=\mathbf r_{ij}$（混合偏微分の対称性）なので：
 
@@ -3438,7 +3438,7 @@ $$
 
 ![可積分条件：長方形を2通りの経路で回る](figures/fig17_integrability.png)
 
-*原点の $\Phi_0$ から、対角の頂点まで、$u^1$ 方向に進んでから $u^2$ 方向に進む経路（青）と、逆順の経路（橙）で $\Phi$ を運ぶ。左：$A_1,A_2$ が可換でない（$\Omega_{12}=[A_1,A_2]\neq0$）と、2つの経路で $\Phi_a\neq\Phi_b$ になり、解 $\Phi$ は存在しない。右：可換（$\Omega_{12}=0$）なら $\Phi_a=\Phi_b$ で、解が存在する（B-5）。下段の3本の矢印は $\Phi$ の3つの列（$3\times3$ の回転行列）で、太い色が $\Phi_a$、細い黒が $\Phi_b$。図の $A_1,A_2$ は定数行列の例で、$\Omega_{12}=\partial_2A_1-\partial_1A_2+[A_1,A_2]=[A_1,A_2]$。*
+*原点の $\Phi_0$ から、対角の頂点まで、$u^1$ 方向に進んでから $u^2$ 方向に進む経路（青）と、逆順の経路（橙）で $\Phi$ を運びます。左：$A_1,A_2$ が可換でない（$\Omega_{12}=[A_1,A_2]\neq0$）と、2つの経路で $\Phi_a\neq\Phi_b$ になり、解 $\Phi$ は存在しません。右：可換（$\Omega_{12}=0$）なら $\Phi_a=\Phi_b$ で、解が存在します（B-5）。下段の3本の矢印は $\Phi$ の3つの列（$3\times3$ の回転行列）で、太い色が $\Phi_a$、細い黒が $\Phi_b$ です。図の $A_1,A_2$ は定数行列の例で、$\Omega_{12}=\partial_2A_1-\partial_1A_2+[A_1,A_2]=[A_1,A_2]$ となります。*
 
 <a id="B-4-2"></a>
 
@@ -3542,11 +3542,11 @@ $$
 
 ### B-4-3. 行列値微分形式との対応
 
-行列値微分形式のノートで扱った「曲率がゼロ」という条件と同じ形であることを確認します。詳しくはそちらで扱うので、ここでは対応関係の確認に止めます。
+[行列値微分形式のノート](../03_多様体・微分形式・トポロジー/matrix_valued_forms_gauge_theory.md)で扱った「曲率がゼロ」という条件と同じ形であることを確認します。詳しくはそちらで扱うので、ここでは対応関係の確認に止めます。
 
 **記法**：行列値の1-形式$\mathcal A:=A_i\,du^i$を定義します。
 
-$d\mathcal A$は、1-形式の外微分の成分の式（微分形式のノート）から$d\mathcal A=\partial_iA_j\,du^i\wedge du^j$です。これを半分ずつに分け、後半ではダミー添字$i$と$j$の名前を入れ替えて$du^j\wedge du^i=-du^i\wedge du^j$を使うと：
+$d\mathcal A$は、1-形式の外微分の成分の式（[微分形式のノート](../03_多様体・微分形式・トポロジー/differential_forms_hodge_star.md)）から$d\mathcal A=\partial_iA_j\,du^i\wedge du^j$です。これを半分ずつに分け、後半ではダミー添字$i$と$j$の名前を入れ替えて$du^j\wedge du^i=-du^i\wedge du^j$を使うと：
 
 $$
 d\mathcal A=\tfrac12\partial_iA_j\,du^i\wedge du^j+\tfrac12\partial_jA_i\,du^j\wedge du^i=\tfrac12\big(\partial_iA_j-\partial_jA_i\big)du^i\wedge du^j
@@ -3564,7 +3564,7 @@ $$
 d\mathcal A-\mathcal A\wedge\mathcal A=\tfrac12\big(\partial_iA_j-\partial_jA_i-[A_i,A_j]\big)du^i\wedge du^j=-\tfrac12\Omega_{ij}\,du^i\wedge du^j
 $$
 
-(B.4)は$d\Phi-\mathcal A\Phi=0$、つまり$\omega:=-\mathcal A$とおけば$(d+\omega)\Phi=0$という形です。行列値微分形式のノートの$F=dA+A\wedge A$と同じ形で$\omega$の曲率を作ると：
+(B.4)は$d\Phi-\mathcal A\Phi=0$、つまり$\omega:=-\mathcal A$とおけば$(d+\omega)\Phi=0$という形です。[行列値微分形式のノート](../03_多様体・微分形式・トポロジー/matrix_valued_forms_gauge_theory.md)の$F=dA+A\wedge A$と同じ形で$\omega$の曲率を作ると：
 
 $$
 d\omega+\omega\wedge\omega=-d\mathcal A+\mathcal A\wedge\mathcal A=\tfrac12\Omega_{ij}\,du^i\wedge du^j
@@ -3658,7 +3658,7 @@ $$
 
 3次元空間の各点に、2次元の平面（接平面の候補）が滑らかに指定されているとします。これを、各点で平面を張る2本のベクトル場$X,Y$で表します（このような平面の場を**分布**と呼びます）。問題は、「各点を通り、その各点で指定された平面に接する曲面（**積分曲面**）が存在するか」です。
 
-**必要条件（包合性）**：積分曲面が存在するなら、リー括弧$[X,Y]$も各点で指定された平面の中にあります。これは短く示せます。積分曲面上の座標を$(s,t)$とすると、$X,Y$は曲面に接するので、曲面上で$X=f_1\partial_s+f_2\partial_t$、$Y=h_1\partial_s+h_2\partial_t$と書けます（$f_a,h_a$は関数）。リー括弧の成分の定義$[X,Y]^i=X^j\partial_jY^i-Y^j\partial_jX^i$（リー微分のノートPart III）から、関数倍について
+**必要条件（包合性）**：積分曲面が存在するなら、リー括弧$[X,Y]$も各点で指定された平面の中にあります。これは短く示せます。積分曲面上の座標を$(s,t)$とすると、$X,Y$は曲面に接するので、曲面上で$X=f_1\partial_s+f_2\partial_t$、$Y=h_1\partial_s+h_2\partial_t$と書けます（$f_a,h_a$は関数）。リー括弧の成分の定義$[X,Y]^i=X^j\partial_jY^i-Y^j\partial_jX^i$（[リー微分のノート](lie_derivative.md)の Part IV §12）から、関数倍について
 
 $$
 [fA,hB]=fh[A,B]+f(Ah)B-h(Bf)A
@@ -3670,7 +3670,7 @@ $$
 
 **B-5との関係**：B-5-2の証明も、「まず$u^1$方向に解き、次に$u^2$方向に解いて、誤差項が可積分条件（$\Omega_{12}=0$）によって消える」という構造でした。一般の証明も、「一方の流れで動いてから他方の流れで動く」という同じ発想で組み立てられます。
 
-**領域の形**：定理は長方形$D$（穴のない領域）で述べました。穴のある領域では、$\Omega=0$でも解が1つの値に定まらないことがあります。$1\times1$の場合（$A_i$が数）で例を挙げます。原点を除いた平面で、$c$を実数の定数として$A_i\,du^i=c\,\dfrac{-u^2du^1+u^1du^2}{(u^1)^2+(u^2)^2}$とすると、数の積は交換するので$\Omega_{12}=\partial_2A_1-\partial_1A_2$で、これは積分のノートで確認した通りゼロです。しかし解$\Phi=\Phi_0\exp\big(\int A_i\,du^i\big)$は、原点の周りを1周すると$\oint=2\pi c$だけ指数が増え、$e^{2\pi c}$倍になって元に戻りません。これはde Rhamコホモロジー（積分のノート）やホロノミー（行列値微分形式のノート）で扱う現象であり、ここでは例の紹介に止めます。
+**領域の形**：定理は長方形$D$（穴のない領域）で述べました。穴のある領域では、$\Omega=0$でも解が1つの値に定まらないことがあります。$1\times1$の場合（$A_i$が数）で例を挙げます。原点を除いた平面で、$c$を実数の定数として$A_i\,du^i=c\,\dfrac{-u^2du^1+u^1du^2}{(u^1)^2+(u^2)^2}$とすると、数の積は交換するので$\Omega_{12}=\partial_2A_1-\partial_1A_2$で、これは[積分のノート](../03_多様体・微分形式・トポロジー/integration_algebraic_structure_stokes.md)で確認した通りゼロです。しかし解$\Phi=\Phi_0\exp\big(\int A_i\,du^i\big)$は、原点の周りを1周すると$\oint=2\pi c$だけ指数が増え、$e^{2\pi c}$倍になって元に戻りません。これはde Rhamコホモロジー（[積分のノート](../03_多様体・微分形式・トポロジー/integration_algebraic_structure_stokes.md)）やホロノミー（[行列値微分形式のノート](../03_多様体・微分形式・トポロジー/matrix_valued_forms_gauge_theory.md)）で扱う現象であり、ここでは例の紹介に止めます。
 
 ---
 
@@ -3691,7 +3691,7 @@ $$
 
 ![gだけでは曲面が決まらない例と、(g,L) が決まれば曲面が決まること](figures/fig18_bonnet_uniqueness.png)
 
-*平面（$L=0$）と円柱（$L_{ss}=-1/c$）は、同じ $g_{ij}=\delta_{ij}$ を持つ（青・緑の格子はどちらも同じ長さの直角格子）が、$L$ が違うので別の曲面。円柱を回転・平行移動した曲面は、同じ $(g,L)$ を持ち、元の円柱と重なる（ボネの定理の「回転と平行移動を除いて一意」）。*
+*平面（$L=0$）と円柱（$L_{ss}=-1/c$）は、同じ $g_{ij}=\delta_{ij}$ を持ちます（青・緑の格子はどちらも同じ長さの直角格子）が、$L$ が違うので別の曲面です。円柱を回転・平行移動した曲面は、同じ $(g,L)$ を持ち、元の円柱と重なります（ボネの定理の「回転と平行移動を除いて一意」）。*
 
 <a id="B-6-2"></a>
 
@@ -3822,9 +3822,9 @@ $$
 \boxed{R=(\operatorname{tr}L)^2-L_{ij}L^{ij}}
 $$
 
-(B.2)から右辺は$2K$なので、$R=2K$が得られます。これはリッチテンソルのノート§11-aで計量だけから導いた関係と同じで、ここでは埋め込み（$L$）を経由する別の経路で到達しています。
+(B.2)から右辺は$2K$なので、$R=2K$が得られます。これは[リッチテンソルのノート](ricci_tensor_einstein_equations.md)の §11-a で計量だけから導いた関係と同じで、ここでは埋め込み（$L$）を経由する別の経路で到達しています。
 
-**球面での検算**：$L_{ij}=-g_{ij}/a$なので、$\operatorname{tr}L=-\frac1ag^{ij}g_{ij}=-\frac1a\delta^i{}_i=-\frac2a$、$L_{ij}L^{ij}=\frac1{a^2}g_{ij}g^{ij}=\frac2{a^2}$です。$R=\frac4{a^2}-\frac2{a^2}=\frac2{a^2}$で、リッチテンソルのノートの値と一致します。
+**球面での検算**：$L_{ij}=-g_{ij}/a$なので、$\operatorname{tr}L=-\frac1ag^{ij}g_{ij}=-\frac1a\delta^i{}_i=-\frac2a$、$L_{ij}L^{ij}=\frac1{a^2}g_{ij}g^{ij}=\frac2{a^2}$です。$R=\frac4{a^2}-\frac2{a^2}=\frac2{a^2}$で、[リッチテンソルのノート](ricci_tensor_einstein_equations.md)の値と一致します。
 
 **トーラスでの検算**：B-2-5から$\operatorname{tr}L=\kappa_1+\kappa_2=-\frac1a-\frac{\cos\theta}{\rho}$です。$g,L$が対角なので$L_{ij}L^{ij}=(g^{\theta\theta}L_{\theta\theta})^2+(g^{\phi\phi}L_{\phi\phi})^2=\frac1{a^2}+\frac{\cos^2\theta}{\rho^2}$です：
 
@@ -3991,7 +3991,7 @@ flowchart TD
 
 ### C-0-0. 多様体とは何だったか
 
-付録A・Bでは、曲面は$\mathbb R^3$の中にあり、外側の空間にはデカルト座標という特別な座標がありました。付録Cでは、外側の空間そのものが曲がっていてもよい、という状況を扱います。そのための舞台が**多様体**です。詳しくは多様体のノートで扱うので、ここでは付録Cで使う範囲の確認に止めます。
+付録A・Bでは、曲面は$\mathbb R^3$の中にあり、外側の空間にはデカルト座標という特別な座標がありました。付録Cでは、外側の空間そのものが曲がっていてもよい、という状況を扱います。そのための舞台が**多様体**です。詳しくは[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)で扱うので、ここでは付録Cで使う範囲の確認に止めます。
 
 **多様体**：各点の近くでは$\mathbb R^N$と同じように座標$(x^1,\dots,x^N)$が張れる空間を、$N$次元の多様体と呼びます。1つの座標系（チャート）で全体を覆えるとは限らず、一般にはいくつかの座標系を貼り合わせて全体を覆います。座標系が重なる部分では、座標の変換が滑らか（何回でも微分できる）であることを要求します。
 
@@ -4043,7 +4043,7 @@ $\varepsilon=+1$が付録A・Bの状況（正定値計量）、$\varepsilon=-1$�
 
 ### C-0-2. 不定値計量と空間的な超曲面
 
-**不定値計量**：計量は対称で逆行列を持ちますが、正定値とは限らないものも考えます。特殊相対論のミンコフスキー計量$\eta=\operatorname{diag}(-1,1,1,1)$（座標$(t,x,y,z)$、行列値微分形式のノートと同じ符号の約束）がその例です。
+**不定値計量**：計量は対称で逆行列を持ちますが、正定値とは限らないものも考えます。特殊相対論のミンコフスキー計量$\eta=\operatorname{diag}(-1,1,1,1)$（座標$(t,x,y,z)$、[行列値微分形式のノート](../03_多様体・微分形式・トポロジー/matrix_valued_forms_gauge_theory.md)と同じ符号の約束）がその例です。
 
 **ベクトルの分類**：$\bar g(v,v)<0$のベクトルを時間的、$\bar g(v,v)>0$を空間的、$\bar g(v,v)=0$（$v\ne0$）を光的と呼びます。
 
@@ -4053,7 +4053,7 @@ $\varepsilon=+1$が付録A・Bの状況（正定値計量）、$\varepsilon=-1$�
 
 ![空間的超曲面と、時間的な面の対比](figures/fig19_spacelike_hypersurface.png)
 
-*$(x,t)$ の平坦な時空図（光円錐は 45°）。左：空間的超曲面 $\Sigma$ では、接ベクトル（橙）は空間的で、法線 $n$（青）は時間的（$\varepsilon=-1$）。右（対比）：時間的な面では、接ベクトルが時間的で、法線は空間的（$\varepsilon=+1$）。「垂直」はローレンツ計量の意味で、見た目の直角ではなく、45° の線に関する鏡映の関係になる。*
+*$(x,t)$ の平坦な時空図（光円錐は 45°）です。左：空間的超曲面 $\Sigma$ では、接ベクトル（橙）は空間的で、法線 $n$（青）は時間的です（$\varepsilon=-1$）。右（対比）：時間的な面では、接ベクトルが時間的で、法線は空間的です（$\varepsilon=+1$）。「垂直」はローレンツ計量の意味で、見た目の直角ではなく、45° の線に関する鏡映の関係になります。*
 
 **主張**：時空の計量が、各点である基底を取ると$\operatorname{diag}(-1,1,\dots,1)$（$-1$が1つ、$+1$が$N-1$個）になる型のとき、空間的超曲面には単位法線が存在し、それは必ず時間的で$\varepsilon=-1$です。証明します。
 
@@ -4125,7 +4125,7 @@ $$
 \bar R_{\mu\nu\alpha\beta}=-\bar R_{\nu\mu\alpha\beta}
 $$
 
-を使います。一般の多様体での証明は多様体のノートPart II-bで扱うので、ここでは簡易的な証明に止めます。
+を使います。一般の多様体での証明は[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part II-b §7-b で扱うので、ここでは簡易的な証明に止めます。
 
 任意のベクトル場$V^\mu$から、スカラー$s:=\bar g_{\mu\nu}V^\mu V^\nu$を作ります。スカラーについては、$\bar\nabla_\alpha\bar\nabla_\beta s=\partial_\alpha\partial_\beta s-\bar\Gamma^\lambda{}_{\beta\alpha}\partial_\lambda s$（B-0-1と同じ規則で、$\partial_\beta s$を下付き添字1個の量として共変微分）が$\alpha,\beta$について対称なので、
 
@@ -4147,7 +4147,7 @@ $$
 
 第2項のダミー添字を$\mu\to\nu$と付け替えると第1項と同じになり、$2\bar R_{\nu\gamma\alpha\beta}V^\nu V^\gamma=0$です。**記法**：$\alpha,\beta$を固定し、$S_{\nu\gamma}:=\bar R_{\nu\gamma\alpha\beta}+\bar R_{\gamma\nu\alpha\beta}$（$\nu,\gamma$について対称）とおくと、$S_{\nu\gamma}V^\nu V^\gamma=2\bar R_{\nu\gamma\alpha\beta}V^\nu V^\gamma=0$がすべての$V$で成り立ちます。$V=U+W$を代入し、$U$だけ・$W$だけの項（どちらもゼロ）を引くと、$S$の対称性から$2S_{\nu\gamma}U^\nu W^\gamma=0$です。$U,W$は任意なので$S_{\nu\gamma}=0$、つまり最初の2添字について反対称です。
 
-最後の2添字についての反対称性$\bar R^\delta{}_{\gamma\alpha\beta}=-\bar R^\delta{}_{\gamma\beta\alpha}$は、公式で$\alpha\leftrightarrow\beta$を入れ替えると全項の符号が反転することから直接分かります（多様体のノートPart II-b §7-a）。
+最後の2添字についての反対称性$\bar R^\delta{}_{\gamma\alpha\beta}=-\bar R^\delta{}_{\gamma\beta\alpha}$は、公式で$\alpha\leftrightarrow\beta$を入れ替えると全項の符号が反転することから直接分かります（[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part II-b §7-a）。
 
 **帰結**：同じ量を最初の2つに入れると成分はゼロです。特に$\bar R_{nnnn}=0$、$\bar R_{nnni}=0$です。
 
@@ -4352,7 +4352,7 @@ $$
 
 ### C-1-4. 検算：ミンコフスキー空間の中の双曲面
 
-トポロジー入門のノート§7で、「一定の負の曲率を持つ双曲平面は、$\mathbb R^3$の中に全体を歪みなく埋め込めない（ヒルベルトの定理）」と紹介しました。ここでは、双曲平面が3次元ミンコフスキー空間の中には埋め込めること、そしてその負の曲率が$\varepsilon=-1$から生じることを確認します。定理そのものはトポロジー入門のノートで扱うので、ここでは(C.5)の符号の確認に止めます。
+[トポロジー入門のノート](../03_多様体・微分形式・トポロジー/topology_introduction.md)の §7 で、「一定の負の曲率を持つ双曲平面は、$\mathbb R^3$の中に全体を歪みなく埋め込めない（ヒルベルトの定理）」と紹介しました。ここでは、双曲平面が3次元ミンコフスキー空間の中には埋め込めること、そしてその負の曲率が$\varepsilon=-1$から生じることを確認します。定理そのものは[トポロジー入門のノート](../03_多様体・微分形式・トポロジー/topology_introduction.md)で扱うので、ここでは(C.5)の符号の確認に止めます。
 
 **設定**：3次元ミンコフスキー空間（座標$(t,x,y)$、計量$\bar g=\operatorname{diag}(-1,1,1)$）の中の曲面を、$a>0$、$\chi>0$として
 
@@ -4434,7 +4434,7 @@ $$
 
 ![球面と双曲面の比較](figures/fig20_sphere_vs_hyperboloid.png)
 
-*左：$\mathbb R^3$ の中の球面（$\varepsilon=+1$）。右：ミンコフスキー空間の中の双曲面 $-t^2+x^2+y^2=-a^2$（$\varepsilon=-1$、黄色は光円錐）。どちらも $K_{ij}=-g_{ij}/a$ で、紫の矢印は単位法線 $n=X/a$。球面では $\bar g(n,n)=+1$、双曲面では $-1$ なので、同じ形の $K_{ij}$ からガウス曲率の符号が反転し、$K_{\mathrm G}=+1/a^2$ と $-1/a^2$ になる。*
+*左：$\mathbb R^3$ の中の球面（$\varepsilon=+1$）です。右：ミンコフスキー空間の中の双曲面 $-t^2+x^2+y^2=-a^2$（$\varepsilon=-1$、黄色は光円錐）です。どちらも $K_{ij}=-g_{ij}/a$ で、紫の矢印は単位法線 $n=X/a$ です。球面では $\bar g(n,n)=+1$、双曲面では $-1$ なので、同じ形の $K_{ij}$ からガウス曲率の符号が反転し、$K_{\mathrm G}=+1/a^2$ と $-1/a^2$ になります。*
 
 ---
 
@@ -4460,7 +4460,7 @@ $$
 
 ### C-2-2. 外側の曲率を$\Sigma$の量で書く
 
-**記法**：リッチテンソルを$\bar R_{\beta\delta}:=\bar R^\alpha{}_{\beta\alpha\delta}$（Part IXの$R_{ij}=R^k{}_{ikj}$と同じ縮約）、スカラー曲率を$\bar R:=\bar g^{\beta\delta}\bar R_{\beta\delta}$、アインシュタインテンソルを$\bar G_{\mu\nu}:=\bar R_{\mu\nu}-\frac12\bar R\,\bar g_{\mu\nu}$とします（アインシュタイン方程式はリッチテンソルのノートで扱うので、ここでは定義の確認に止めます）。$n$や$e_i$との縮約は、C-0-1の約束で$\bar R_{nn}:=\bar R_{\beta\delta}n^\beta n^\delta$、$\bar R_{ni}:=\bar R_{\beta\delta}n^\beta e_i{}^\delta$などと書きます。
+**記法**：リッチテンソルを$\bar R_{\beta\delta}:=\bar R^\alpha{}_{\beta\alpha\delta}$（Part IXの$R_{ij}=R^k{}_{ikj}$と同じ縮約）、スカラー曲率を$\bar R:=\bar g^{\beta\delta}\bar R_{\beta\delta}$、アインシュタインテンソルを$\bar G_{\mu\nu}:=\bar R_{\mu\nu}-\frac12\bar R\,\bar g_{\mu\nu}$とします（アインシュタイン方程式は[リッチテンソルのノート](ricci_tensor_einstein_equations.md)で扱うので、ここでは定義の確認に止めます）。$n$や$e_i$との縮約は、C-0-1の約束で$\bar R_{nn}:=\bar R_{\beta\delta}n^\beta n^\delta$、$\bar R_{ni}:=\bar R_{\beta\delta}n^\beta e_i{}^\delta$などと書きます。
 
 添字を下げた形では、$\bar R_{\gamma\beta\alpha\delta}=\bar g_{\gamma\mu}\bar R^\mu{}_{\beta\alpha\delta}$から$\bar g^{\alpha\gamma}\bar R_{\gamma\beta\alpha\delta}=\bar g^{\alpha\gamma}\bar g_{\gamma\mu}\bar R^\mu{}_{\beta\alpha\delta}=\bar R^\alpha{}_{\beta\alpha\delta}$なので：
 
@@ -4553,7 +4553,7 @@ $$
 
 ![拘束条件と発展方程式：アインシュタインテンソルの成分の分解](figures/fig21_constraint_blocks.png)
 
-*アインシュタインテンソル $\bar G_{\mu\nu}$ を、$n$ 方向と $\Sigma$ の方向に分ける。$nn$ 成分がハミルトン拘束（ガウス方程式の縮約）、$ni$ 成分が運動量拘束（コダッツィ方程式の縮約）で、どちらも $K_{ij}$ の時間微分を含まない。$ij$ 成分は発展方程式（C-3-2）で、時間発展を決める。1+3+6=10 は、4次元時空の対称2階テンソルの独立成分の数と一致する。*
+*アインシュタインテンソル $\bar G_{\mu\nu}$ を、$n$ 方向と $\Sigma$ の方向に分けます。$nn$ 成分がハミルトン拘束（ガウス方程式の縮約）、$ni$ 成分が運動量拘束（コダッツィ方程式の縮約）で、どちらも $K_{ij}$ の時間微分を含みません。$ij$ 成分は発展方程式（C-3-2）で、時間発展を決めます。1+3+6=10 は、4次元時空の対称2階テンソルの独立成分の数と一致します。*
 
 **符号の約束について**：$K_{ij}$の符号は文献によって逆の定義（$K_{ij}:=+\bar g(\bar\nabla_{e_i}n,e_j)$）が使われることがあります。ハミルトン拘束は$K$について2次なので変わりませんが、運動量拘束は左辺の符号が反転します。$j_i$の符号の約束と合わせて、文献を読む際は定義を確認する必要があります。
 
@@ -4691,13 +4691,13 @@ $$
 
 ![ADM分解のラプス・シフトと、ガウス正規座標](figures/fig8_adm_slicing.png)
 
-*左：時間の流れ $\partial_t$ を、断面に垂直な成分 $N\,n$（ラプス）と断面に沿う成分 $N^ie_i$（シフト）に分解する。図は $(y,t)$ の平坦な時空図で、「垂直」はローレンツ計量の意味（見た目の直角ではない）。右：ガウス正規座標では断面から法線方向に測地線を伸ばす。隣り合う測地線の間隔が広がる（$\partial_tg_{ij}>0$）ので $K_{ij}=-\frac12\partial_tg_{ij}<0$。*
+*左：時間の流れ $\partial_t$ を、断面に垂直な成分 $N\,n$（ラプス）と断面に沿う成分 $N^ie_i$（シフト）に分解します。図は $(y,t)$ の平坦な時空図で、「垂直」はローレンツ計量の意味です（見た目の直角ではありません）。右：ガウス正規座標では断面から法線方向に測地線を伸ばします。隣り合う測地線の間隔が広がる（$\partial_tg_{ij}>0$）ので、$K_{ij}=-\frac12\partial_tg_{ij}<0$ です。*
 
 右側のガウス正規座標を動かすと、次のようになります（ループ再生）。曲がった断面 $\Sigma$ から法線方向に測地線を伸ばし、隣り合う測地線の間隔 $g(\tau)$ が広がる様子と、そのグラフです。
 
 ![ガウス正規座標：断面から法線方向に測地線を伸ばす](figures/anim06_gaussian_normal.gif)
 
-*$(y,t)$ の平坦な時空図（計量 $dy^2-dt^2$）で、$\Sigma:\ t=0.4y^2$ から法線方向に測地線を伸ばす。右のグラフが $g(\tau)$ で、$\tau=0$ での傾き $\partial_\tau g=-2K_{ij}=+1.6$（$K_{ij}=\bar g(X'',n)=-0.8$）に沿って増える。$\partial_\tau g=-2K_{ij}$ は、複数の点で数値的に確認している。*
+*$(y,t)$ の平坦な時空図（計量 $dy^2-dt^2$）で、$\Sigma:\ t=0.4y^2$ から法線方向に測地線を伸ばします。右のグラフが $g(\tau)$ で、$\tau=0$ での傾き $\partial_\tau g=-2K_{ij}=+1.6$（$K_{ij}=\bar g(X'',n)=-0.8$）に沿って増えます。$\partial_\tau g=-2K_{ij}$ は、複数の点で数値的に確認しています。*
 
 <a id="C-3-2"></a>
 
@@ -4735,7 +4735,7 @@ $$
 \bar R_{ij}=R_{ij}+(\operatorname{tr}K)K_{ij}-2K_{ik}K_j{}^k-\partial_tK_{ij}
 $$
 
-**真空の場合**：物質がない（$T_{\mu\nu}=0$）とき、アインシュタイン方程式は$\bar R_{\mu\nu}=0$と同じです（リッチテンソルのノート§13：$\bar G_{\mu\nu}=0$のトレースを取ると$\bar R=0$、代入し直すと$\bar R_{\mu\nu}=0$）。空間成分$\bar R_{ij}=0$から、
+**真空の場合**：物質がない（$T_{\mu\nu}=0$）とき、アインシュタイン方程式は$\bar R_{\mu\nu}=0$と同じです（[リッチテンソルのノート](ricci_tensor_einstein_equations.md)の §13：$\bar G_{\mu\nu}=0$のトレースを取ると$\bar R=0$、代入し直すと$\bar R_{\mu\nu}=0$）。空間成分$\bar R_{ij}=0$から、
 
 $$
 \boxed{\partial_tg_{ij}=-2K_{ij},\qquad\partial_tK_{ij}=R_{ij}+(\operatorname{tr}K)K_{ij}-2K_{ik}K_j{}^k}
@@ -4833,7 +4833,7 @@ $$
 
 ![初期値問題：初期データと、それだけで決まる領域](figures/fig22_cauchy_problem.png)
 
-*$(x,t)$ の時空図（光円錐は 45°）。区間 $S$ 上に初期データ $(g_{ij},K_{ij})$ を与えると、緑の領域 $D^+(S)$ が決まる（青の細線はガウス正規座標の法線方向の測地線、太い青線は断面 $\Sigma_t$）。$S$ の外の初期データは、信号が光速を超えないので $D^+(S)$ に影響しない。拘束条件は初期面で満たせば時間発展で保たれる（C-3-3）。*
+*$(x,t)$ の時空図（光円錐は 45°）です。区間 $S$ 上に初期データ $(g_{ij},K_{ij})$ を与えると、緑の領域 $D^+(S)$ が決まります（青の細線はガウス正規座標の法線方向の測地線、太い青線は断面 $\Sigma_t$）。$S$ の外の初期データは、信号が光速を超えないので $D^+(S)$ に影響しません。拘束条件は初期面で満たせば時間発展で保たれます（C-3-3）。*
 
 <a id="C-3-5"></a>
 
@@ -4842,7 +4842,7 @@ $$
 付録Cで仮定として使ったものをまとめます（付録Bの仮定1〜3は、B-0-4の解析学の事実です）。
 
 - **仮定4**：ガウス正規座標が取れること（測地線の存在とガウスの補題）
-- **仮定5**：縮約ビアンキ恒等式$\bar\nabla^\mu\bar G_{\mu\nu}=0$（第二ビアンキ恒等式から導かれる。このノートでは未導出）
+- **仮定5**：縮約ビアンキ恒等式$\bar\nabla^\mu\bar G_{\mu\nu}=0$（第二ビアンキ恒等式から導かれます。このノートでは未導出です）
 - **仮定6**：線形で定数項のない発展方程式の解の一意性（偏微分方程式論）
 - **仮定7**：調和座標が取れること
 - **仮定8**：波動方程式型の方程式の初期値問題の解の存在と一意性（偏微分方程式論）
