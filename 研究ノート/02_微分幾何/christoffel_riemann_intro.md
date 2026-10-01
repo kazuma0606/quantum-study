@@ -259,7 +259,7 @@ $$
 \boxed{\Gamma^k{}_{ij} = \Gamma^k{}_{ji}}\qquad\text{（下2つの添字について対称）}
 $$
 
-この「偏微分の交換」を動かして見ると、次のようになります（ループ再生）。曲面上の1点から、座標線に沿って $i$ 方向 → $j$ 方向、$j$ 方向 → $i$ 方向の2通りで進むと、同じ点に着きます。平行四辺形の4つ目の頂点からのずれ $D$ を刻み幅 $\varepsilon$ の2乗で割った量は、$\varepsilon\to0$ で $i,j$ の順序によらず $\mathbf r_{ij}$ に収束します。後半では、座標基底でない枠（極座標の単位ベクトル $\hat e_r,\hat e_\theta$）で同じことをすると、着く点が $t^2/r$ だけずれる（$[X,Y]\neq0$）ことを見ます。
+この「偏微分の交換」を動かして見ると、次のようになります（ループ再生）。曲面上の1点から、座標線に沿って「$i$ 方向、次に $j$ 方向」と「$j$ 方向、次に $i$ 方向」の2通りで進むと、同じ点に着きます。平行四辺形の4つ目の頂点からのずれ $D$ を、刻み幅 $\varepsilon$ の2乗で割った量は、$\varepsilon\to0$ で、順序によらず $\mathbf r_{ij}$ に収束します。後半では、座標基底でない枠（極座標の単位ベクトル $\hat e_r,\hat e_\theta$）で同じことをすると、着く点が $t^2/r$ だけずれること（つまり $[X,Y]\neq0$）を見ます。
 
 ![混合偏微分は交換する（座標基底）／しない（単位ベクトルの枠）](figures/anim02_mixed_partials.gif)
 
@@ -294,7 +294,19 @@ $$
 D:=f(x+h,\,y+k)-f(x+h,\,y)-f(x,\,y+k)+f(x,\,y)
 $$
 
-$g(s):=f(s,\,y+k)-f(s,\,y)$ とおくと、$D=g(x+h)-g(x)$ です。平均値の定理から、$x$ と $x+h$ の間に $\xi$ があって $D=h\,g'(\xi)$ となります。ここで $g'(\xi)=\partial_xf(\xi,\,y+k)-\partial_xf(\xi,\,y)$ なので、平均値の定理をもう一度使うと、$y$ と $y+k$ の間に $\eta$ があって、
+まず、$x$ だけを動かす関数 $g(s)$ を、次のように定めます。
+
+$$
+g(s):=f(s,\,y+k)-f(s,\,y)
+$$
+
+すると $D=g(x+h)-g(x)$ です。平均値の定理から、$x$ と $x+h$ の間に $\xi$ があって、$D=h\,g'(\xi)$ となります。ここで、
+
+$$
+g'(\xi)=\partial_xf(\xi,\,y+k)-\partial_xf(\xi,\,y)
+$$
+
+なので、$\partial_xf$ に平均値の定理をもう一度使うと、$y$ と $y+k$ の間に $\eta$ があって、
 
 $$
 D=hk\,\big(\partial_y\partial_xf\big)(\xi,\eta)
@@ -406,7 +418,7 @@ $$\fcolorbox{#3b6fb6}{white}{$\displaystyle\color{black}\ A^k{}_aJ^a{}_i=\colorb
 
 *① 計量 $\times$ 逆計量：上下でペアの $k$ は和で消え、$i,j$ が $\delta$ の添字に引き継がれます。② $\delta$ は $j=i$ の項だけを残し、添字をすり替えます。③ 添字の上げ下げも、$g^{ij}g_{jk}=\delta^i{}_k$ で $j$ が消え、$k$ が $i$ にすり替わる操作です。④ $AJ=I$（Part III §1）も、和を取った $a$ が消えて $\delta$ が残り、その $\delta$ が $\Gamma$ の添字 $k$ を $k'$ にすり替えます。*
 
-同じことを、具体的な数値の行列で動かすと次のようになります（ループ再生）。前半は、$g^{ik}$ の第 $i$ 行と $g_{kj}$ の第 $j$ 列を $k$ について足すと、各成分が $\delta^i{}_j$（対角は 1、それ以外は 0）になる様子です。後半は、$\delta^i{}_jV^j$ の和のうち $j=i$ の項だけが生き残って $V^i$ になる様子です。
+同じことを、具体的な数値の行列で動かすと次のようになります（ループ再生）。前半は、逆計量の第 $i$ 行と計量の第 $j$ 列を、$k$ について足すと、各成分が単位行列の成分 $\delta^i{}_j$（対角は 1、それ以外は 0）になる様子です。後半は、$\delta$ とベクトル $V$ の積の和のうち、$j=i$ の項だけが生き残って $V^i$ になる様子です。
 
 ![δ による添字のすり替え：計量×逆計量とδ×ベクトル](figures/anim05_delta_substitution.gif)
 
@@ -615,7 +627,13 @@ $$
 \Gamma^i{}_{ij} = \frac12g^{il}\big(\partial_ig_{jl}+\partial_jg_{il}-\partial_lg_{ij}\big)
 $$
 
-**第1項と第3項は打ち消し合います**：第3項$g^{il}\partial_lg_{ij}$は、ダミー添字$i,l$を入れ替え、$g$の対称性（$g_{ij}=g_{ji}$）を使うと $g^{li}\partial_ig_{lj}=g^{il}\partial_ig_{jl}$ となり、第1項と一致するからです。したがって：
+**第1項と第3項は打ち消し合います**。第3項は、ダミー添字 $i,l$ を入れ替え、$g$ の対称性 $g_{ij}=g_{ji}$ を使うと、第1項と一致するからです：
+
+$$
+g^{il}\partial_lg_{ij}\ \longrightarrow\ g^{li}\partial_ig_{lj}=g^{il}\partial_ig_{jl}
+$$
+
+したがって：
 
 $$
 \Gamma^i{}_{ij} = \frac12g^{il}\partial_jg_{il}\tag{†}
@@ -627,7 +645,29 @@ $$
 \boxed{\partial_j\ln|\det M| = \operatorname{tr}(M^{-1}\partial_jM)}
 $$
 
-**簡単に導出を振り返ります**：$M+dM=M(I+M^{-1}dM)$なので、行列式を取ると $\det(M+dM)=\det M\cdot\det(I+M^{-1}dM)$。微小な行列$\varepsilon X$に対して一般に$\det(I+\varepsilon X)\approx1+\varepsilon\operatorname{tr}X$（固有値の積を展開すればこの近似が出ます）が成り立つので、$\det(M+dM)\approx\det M\big(1+\operatorname{tr}(M^{-1}dM)\big)$。両辺から$\det M$を引いて$\det M$で割ると $d(\det M)/\det M=\operatorname{tr}(M^{-1}dM)$。
+**導出を簡単に振り返ります**。$M+dM=M(I+M^{-1}dM)$ と書けるので、行列式の積の性質から、
+
+$$
+\det(M+dM)=\det M\cdot\det\!\big(I+M^{-1}dM\big)
+$$
+
+です。微小な行列 $\varepsilon X$ については、固有値の積を展開すれば、次の近似が出ます。
+
+$$
+\det(I+\varepsilon X)\approx1+\varepsilon\operatorname{tr}X
+$$
+
+これを使うと、
+
+$$
+\det(M+dM)\approx\det M\Big(1+\operatorname{tr}\big(M^{-1}dM\big)\Big)
+$$
+
+となります。両辺から $\det M$ を引いて $\det M$ で割れば、次の式が得られます。
+
+$$
+\frac{d(\det M)}{\det M}=\operatorname{tr}\big(M^{-1}dM\big)
+$$
 
 $d(\det M)$と$\det(dM)$は異なる量です。$f(M):=\det M$と、$\det$を1つの関数の名前と見なします：
 
@@ -635,7 +675,13 @@ $$
 d(\det M) = df(M) = f(M+dM)-f(M) = \det(M+dM)-\det M\qquad(\text{1次近似の範囲で})
 $$
 
-**これは、すでに知っている「関数の微分（全微分）」の定義そのもの**です。$f(x)=x^2$なら$df=f(x+dx)-f(x)=2x\,dx$となるのと、まったく同じ発想を、$f=\det$、変数が「行列$M$」という対象に当てはめただけでした。つまり$d(\det M)$は「$M$を$dM$だけ動かしたときの、$\det$の出力の変化分」を表す、ごく普通の微分です。
+**これは、すでに知っている「関数の微分（全微分）」の定義そのもの**です。たとえば $f(x)=x^2$ なら、
+
+$$
+df=f(x+dx)-f(x)=2x\,dx
+$$
+
+となります。まったく同じ発想を、関数 $\det$ と、変数が「行列 $M$」という対象に当てはめただけです。つまり $d(\det M)$ は、「$M$ を $dM$ だけ動かしたときの、$\det$ の出力の変化分」を表す、ごく普通の微分です。
 
 **一方、$\det(dM)$**は、$dM$という行列**そのもの**を、そのまま行列式の公式に代入して計算した、**まったく別の計算**です（$f(x)=x^2$のときの$f(dx)=(dx)^2$に対応する量で、$df=f(x+dx)-f(x)$とは最初から問うている問題が違います）：
 
@@ -651,7 +697,7 @@ $$
 d(\det M) = \sum_{i=1}^n\det(\mathbf r_1,\dots,\mathbf r_{i-1},\,d\mathbf r_i,\,\mathbf r_{i+1},\dots,\mathbf r_n)
 $$
 
-（$\mathbf r_i$は$M$の$i$行目、$d\mathbf r_i$はその行だけを微小変化させたもの。「1行だけ微分し、残りはそのまま」という行列式を、行の数だけ作って足す、というのが正しい計算です。）**この計算を最後まで実行した結果が、たまたま$\operatorname{tr}(M^{-1}dM)$という、$dM$を外に出せる形にまとまる**のであって、「$d$が最初から$\det$の外にいて、中身をそのまま$dM$に置き換えられる」わけではありません。
+（ここで $\mathbf r_i$ は $M$ の $i$ 行目で、$d\mathbf r_i$ はその行だけを微小変化させたものです。「1行だけ微分し、残りはそのまま」という行列式を、行の数だけ作って足すのが、正しい計算です。）この計算を最後まで実行すると、結果がたまたま $\operatorname{tr}(M^{-1}dM)$ という、$dM$ を外に出せる形にまとまります。「$d$ が最初から $\det$ の外にいて、中身をそのまま $dM$ に置き換えられる」わけではありません。
 
 **1変数の場合で確認すると、この区別がはっきりします**：$f(x)=x^2$ を考えると、$d(x^2)=(x+dx)^2-x^2=2x\,dx$（1次近似）です。一方、$(dx)^2$は$dx$という数を2乗しただけの、まったく別の量（しかも2次の微小量で、通常の微分の議論では無視される桁）です：
 
@@ -659,15 +705,35 @@ $$
 \boxed{d(x^2) = 2x\,dx \quad\ne\quad (dx)^2}
 $$
 
-「$d(x^2)$の中の$x^2$の位置に、そのまま$dx$を代入したら$(dx)^2$になる」わけではなく、**$d(x^2)=2x\,dx$は「$f'(x)\,dx$」という、微分係数$2x$が掛かった上での結果**です。今回の$d(\det M)=\det M\cdot\operatorname{tr}(M^{-1}dM)$も、これとまったく同じ構造の関係で、$\det(dM)$（$M$の位置に直接$dM$を放り込んだもの）とは根本的に違う量です。
+「$d(x^2)$ の中の $x^2$ に、そのまま $dx$ を代入すれば $(dx)^2$ になる」わけではありません。$d(x^2)=2x\,dx$ は、微分係数 $2x$ が掛かった上での結果です。
 
-**なぜ「$d(\det M)/\det M$」が「$\ln|\det M|$の微分」と同じ意味になるのか（連鎖律の確認）**：高校数学の公式 $\dfrac{d}{dx}\ln|x|=\dfrac1x$ を思い出します。ここで$u:=\det M$と置くと、$\ln|\det M(q)|=\ln|u|$は「$u$の関数」に「$u=\det M(q)$という$q$の関数」を代入した**合成関数**です。連鎖律を使うと：
+今回の関係
+
+$$
+d(\det M)=\det M\cdot\operatorname{tr}\big(M^{-1}dM\big)
+$$
+
+も、これとまったく同じ構造です。$\det(dM)$（$M$ の位置に直接 $dM$ を入れたもの）とは、根本的に違う量です。
+
+**なぜ「$d(\det M)/\det M$」が「$\ln|\det M|$ の微分」と同じ意味になるのか**（連鎖律の確認）。高校数学の公式を思い出します。
+
+$$
+\frac{d}{dx}\ln|x|=\frac1x
+$$
+
+ここで $u:=\det M$ と置くと、$\ln|\det M(q)|=\ln|u|$ は、「$u$ の関数」に「$u=\det M(q)$ という $q$ の関数」を代入した合成関数です。連鎖律を使うと：
 
 $$
 \frac{d}{dq^j}\ln|u| = \frac{d\ln|u|}{du}\cdot\frac{du}{dq^j} = \frac1u\cdot\frac{du}{dq^j} = \frac1{\det M}\cdot\frac{\partial_j(\det M)}{1}
 $$
 
-つまり $\partial_j\ln|\det M|=\dfrac{\partial_j(\det M)}{\det M}$ です。**「$1/x$の形をした式は、$\ln|x|$を微分した跡である」という、通常の1変数微積分の関係を、$x$の代わりに「座標$q^j$に依存する量$\det M$」に当てはめただけ**、というのがこの一致の正体です。したがって $d(\det M)/\det M=\operatorname{tr}(M^{-1}dM)$ は、$d(\ln|\det M|)=\operatorname{tr}(M^{-1}dM)$と同じ意味です。
+つまり、
+
+$$
+\partial_j\ln|\det M|=\frac{\partial_j(\det M)}{\det M}
+$$
+
+です。これは、「$1/x$ の形の式は、$\ln|x|$ を微分したものだ」という1変数の関係を、$x$ の代わりに、座標 $q^j$ に依存する量 $\det M$ に当てはめただけです。したがって、$d(\det M)/\det M=\operatorname{tr}(M^{-1}dM)$ は、$d(\ln|\det M|)=\operatorname{tr}(M^{-1}dM)$ と同じ意味です。
 
 （**注**：ここでの$d$は、微分形式の外微分とは別の、素朴な「微小変化・微分」という意味で使っています。）
 
@@ -685,7 +751,9 @@ $$
 
 **ここで初めて$\ln$が登場します**（Jacobiの公式自体が「トレース＝$\ln|\det|$の微分」という中身を持つ公式だからです）。
 
-**記号「$|g|$」の正確な意味（脇道）**：$|g|:=|\det g|$は、**外側が絶対値、内側が$\det g$（サラスの公式などで計算する、符号付きの行列式）という、2段構えの記号**です。$\det$は消えているわけではなく、$|g|$という表記の中にずっと含まれています。**なぜ絶対値が必要か**：$\det g$自体は符号を持ちうる数です（普段扱う正定値の計量、例えば球座標の$g_{ij}$では常に正になりますが、一般相対論のミンコフスキー計量$\eta=\operatorname{diag}(-1,1,1,1)$のような不定値計量では$\det\eta=-1$と負になります）。体積要素$\sqrt{|g|}$は本来「空間の伸縮率」という、符号を持たない正の量であるべきなので、$\sqrt{\det g}$が負の数の平方根にならないよう、あらかじめ絶対値を取って符号を無視しています。
+**記号「$|g|$」の正確な意味（脇道）**：$|g|$ は $|\det g|$ の略で、外側が絶対値、内側が $\det g$（符号付きの行列式）という、2段構えの記号です。$\det$ は消えているわけではなく、$|g|$ という表記の中にずっと含まれています。
+
+**なぜ絶対値が必要か**：$\det g$ 自体は、符号を持ちうる数です。普段扱う正定値の計量（たとえば球座標の $g_{ij}$）では常に正ですが、一般相対論のミンコフスキー計量 $\eta=\operatorname{diag}(-1,1,1,1)$ のような不定値計量では、$\det\eta=-1$ と負になります。体積要素 $\sqrt{|g|}$ は、本来「空間の伸縮率」という、符号を持たない正の量であるべきなので、負の数の平方根にならないよう、あらかじめ絶対値を取って符号を無視しています。
 
 これを踏まえて、$\ln|\det g|=2\ln\sqrt{|g|}$（$\ln x^2=2\ln x$と同じ、指数法則）なので：
 
@@ -723,13 +791,22 @@ $$
 
 ### 4-a. 記号と定義
 
-成分を具体的に書くときは、$J^a{}_i$ の $a$（デカルト成分）を**行番号**、$i$（曲線座標）を**列番号**として $J_{ai}$ と書きます。$A^i{}_a$ は $i$ を行番号、$a$ を列番号として $A_{ia}$ と書きます（$A$ は逆行列なので、行と列の役割が $J$ と入れ替わります）：
+成分を具体的に書くときは、行番号と列番号を、次のように決めます。
+
+- $J^a{}_i$ は、$a$（デカルト成分）を行番号、$i$（曲線座標）を列番号として、$J_{ai}$ と書きます。
+- $A^i{}_a$ は、$i$ を行番号、$a$ を列番号として、$A_{ia}$ と書きます。$A$ は逆行列なので、行と列の役割が $J$ と入れ替わります。
+
+$J$ を行列で書くと：
 
 $$
 J=\begin{pmatrix}J_{11}&J_{12}&J_{13}\\J_{21}&J_{22}&J_{23}\\J_{31}&J_{32}&J_{33}\end{pmatrix}\qquad(\text{行}=\text{デカルト成分 }a,\ \ \text{列}=\text{曲線座標 }i)
 $$
 
-$J$ の**列**は基底ベクトル $\mathbf e_i$ のデカルト成分、逆行列 $A$ の**行**は $\nabla q^i$（座標関数の勾配）のデカルト成分です（$A^i{}_a=\partial q^i/\partial x^a$、つまり $AJ=I$ は「$\nabla q^i\cdot\mathbf e_j=\delta^i_j$」を表しています）。
+$J$ の列は、基底ベクトル $\mathbf e_i$ のデカルト成分です。逆行列 $A$ の行は、$\nabla q^i$（座標関数の勾配）のデカルト成分です。$A^i{}_a=\partial q^i/\partial x^a$ なので、$AJ=I$ は、次の関係を表しています。
+
+$$
+\nabla q^i\cdot\mathbf e_j=\delta^i{}_j
+$$
 
 **① 小行列式**：$J$ から $i$ 行と $j$ 列を取り除いた $2\times2$ 行列の行列式を $\Delta_{ij}$ と書きます。例えば：
 
@@ -749,7 +826,9 @@ $$
 \boxed{\tilde J_{ij}:=(-1)^{i+j}\,\Delta_{ji}}
 $$
 
-$\Delta$ の添字が $ji$ と**逆**になっています。つまり「$\tilde J$ の $(i,j)$ 成分を作るには、$J$ の **$j$ 行 $i$ 列**を取り除く」ということです。（教科書によっては、余因子 $(-1)^{i+j}\Delta_{ij}$ をそのまま並べた行列を余因子行列と呼び、その転置を随伴行列と呼びます。ここでは、$J\tilde J=(\det J)\,I$ が素直に書けるよう、転置済みの方を $\tilde J$ と書きます。）
+$\Delta$ の添字が $ji$ と逆になっています。つまり、$\tilde J$ の $(i,j)$ 成分を作るには、$J$ の「$j$ 行 $i$ 列」を取り除く、ということです。
+
+（教科書によっては、余因子 $(-1)^{i+j}\Delta_{ij}$ をそのまま並べた行列を余因子行列と呼び、その転置を随伴行列と呼びます。ここでは、$J\tilde J=(\det J)\,I$ が素直に書けるよう、転置済みの方を $\tilde J$ と書きます。）
 
 **④ 逆行列**：
 
@@ -961,7 +1040,15 @@ A=\begin{pmatrix}
 \end{pmatrix}
 $$
 
-$A$ の第3行は $\sin\theta=0$（北極・南極）で発散します。これは、極で $\phi$ が定まらない座標特異点（$\det J=r^2\sin\theta=0$）に対応しています。また、$g_{ij}=J^a{}_iJ^a{}_j$ から $\det g=(\det J)^2$ なので、$\sqrt{|g|}=|\det J|=r^2\sin\theta$ です（この Part の§3 で出てきた $\sqrt{|g|}$ は、$J$ の行列式の絶対値に等しいということです）。
+$A$ の第3行は、$\sin\theta=0$（北極・南極）で発散します。これは、極で $\phi$ が定まらない座標特異点に対応していて、そこでは $\det J=r^2\sin\theta=0$ です。
+
+また、$g_{ij}=J^a{}_iJ^a{}_j$ から $\det g=(\det J)^2$ なので、
+
+$$
+\sqrt{|g|}=|\det J|=r^2\sin\theta
+$$
+
+です。この Part の §3 で出てきた $\sqrt{|g|}$ は、$J$ の行列式の絶対値に等しい、ということです。
 
 ---
 
@@ -998,7 +1085,7 @@ $$
 V^i\frac{\partial\mathbf e_i}{\partial q^j} = V^i\Gamma^k{}_{ij}\,\mathbf e_k
 $$
 
-**ここで、$i$は$V^i$の添字と$\Gamma^k{}_{ij}$の下付き1番目の添字を兼ねて2回登場しているので、これは既に$i$について和が取られたダミー添字です。** 一方、残る基底は$\mathbf e_k$（$\mathbf e_i$ではない）です。これは、$\mathbf e_i$自体を微分した結果が、クリストッフェル記号の定義によって新しい基底$\mathbf e_k$の言葉で書き直されるためです。
+ここで、$i$ は $V^i$ の添字と、$\Gamma^k{}_{ij}$ の下付き1番目の添字を兼ねて2回登場しているので、既に和が取られたダミー添字です。一方、残る基底は $\mathbf e_k$（$\mathbf e_i$ ではない）です。これは、$\mathbf e_i$ 自体を微分した結果が、クリストッフェル記号の定義によって、新しい基底 $\mathbf e_k$ の言葉で書き直されるためです。
 
 **2つの項は基底が異なる文字（$\mathbf e_i$と$\mathbf e_k$）のままでは足し算できません。** そこで、第1項のダミー添字$i$を、Part 0 §5 で確認した「ダミー添字は自由に名前を変えてよい」というルールに従って$k$に付け替えます（$i=k$と置いたわけではなく、単なる文字の言い換えです）：
 
@@ -1035,7 +1122,11 @@ $\Gamma^k{}_{ij}V^i$の中で$i$（和を取る添字）と$j$（微分の方向
 - **$j$**：「$q^j$方向に動きながら見る」という、**観測する側の方向**。共変微分$\nabla_j$全体を指定する、式全体を通して固定された添字（自由添字）
 - **$i$**：「動いた結果、$V$の各成分（$V^1,V^2,\dots$）のうち、どの向きの基底ベクトルが、どれだけ新しい基底に混ざり込んでくるか」という、**寄与をすべて足し合わせる添字**（ダミー添字）
 
-**つまり$\Gamma^k{}_{ij}V^i$の和は、「$q^j$方向に動くと、元の$V$のすべての成分が、それぞれ$\Gamma^k{}_{1j},\Gamma^k{}_{2j},\dots$という重みで新しい第$k$成分に"漏れ込んでくる"、その全部を足し合わせる」という意味です**。$j$は「動く方向」という1つの決まった方向、$i$は「$V$のどの成分由来の寄与か」という走る添字——この2つは最初から性質が違うので、同じ文字にできないのは自然なことです。
+つまり、$\Gamma^k{}_{ij}V^i$ の和は、次の意味です。
+
+> $q^j$ 方向に動くと、元の $V$ のすべての成分が、それぞれ $\Gamma^k{}_{1j},\Gamma^k{}_{2j},\dots$ という重みで、新しい第 $k$ 成分に『漏れ込んでくる』。その全部を足し合わせる。
+
+$j$ は「動く方向」という1つの決まった方向、$i$ は「$V$ のどの成分由来の寄与か」という走る添字です。この2つは、最初から性質が違うので、同じ文字にできないのは自然なことです。
 
 **③ 極座標の具体例で確認する**：$q^1=r,\ q^2=\theta$として、まずヤコビアンから$\Gamma^r{}_{\theta\theta}$と$\Gamma^\theta{}_{r\theta}$を計算し、それを使って$\nabla_\theta V^r$を求めます。
 
@@ -1055,13 +1146,25 @@ $$
 
 **Part III §1で導出した$\Gamma^k{}_{ij}=A^k{}_a\partial_jJ^a{}_i$を使って、$\Gamma^r{}_{\theta\theta}$と$\Gamma^\theta{}_{r\theta}$を計算します。**
 
-**$\Gamma^r{}_{\theta\theta}$**（$k=r,\ i=j=\theta$）：$\partial_\theta J^x{}_\theta=-r\cos\theta$、$\partial_\theta J^y{}_\theta=-r\sin\theta$ なので：
+**$\Gamma^r{}_{\theta\theta}$ の計算**（$k=r,\ i=j=\theta$）です。必要な微分は、次の2つです：
+
+$$
+\partial_\theta J^x{}_\theta=-r\cos\theta,\qquad\partial_\theta J^y{}_\theta=-r\sin\theta
+$$
+
+これを使うと：
 
 $$
 \Gamma^r{}_{\theta\theta}=A^r{}_x\partial_\theta J^x{}_\theta+A^r{}_y\partial_\theta J^y{}_\theta = \cos\theta(-r\cos\theta)+\sin\theta(-r\sin\theta) = -r(\cos^2\theta+\sin^2\theta) = -r
 $$
 
-**$\Gamma^\theta{}_{r\theta}$**（$k=\theta,\ i=r,\ j=\theta$）：$\partial_\theta J^x{}_r=-\sin\theta$、$\partial_\theta J^y{}_r=\cos\theta$ なので：
+**$\Gamma^\theta{}_{r\theta}$ の計算**（$k=\theta,\ i=r,\ j=\theta$）です。必要な微分は、次の2つです：
+
+$$
+\partial_\theta J^x{}_r=-\sin\theta,\qquad\partial_\theta J^y{}_r=\cos\theta
+$$
+
+これを使うと：
 
 $$
 \Gamma^\theta{}_{r\theta}=A^\theta{}_x\partial_\theta J^x{}_r+A^\theta{}_y\partial_\theta J^y{}_r = \left(-\frac{\sin\theta}r\right)(-\sin\theta)+\frac{\cos\theta}r\cos\theta = \frac{\sin^2\theta+\cos^2\theta}r = \frac1r
@@ -1081,7 +1184,11 @@ $$
 \boxed{\nabla_\theta V^r = \partial_\theta V^r-rV^\theta}
 $$
 
-**この$\Gamma^r{}_{\theta\theta}V^\theta=-rV^\theta$という項が意味しているのは、「$V$の$\theta$成分（角度方向の成分）が、$\theta$方向に動くことで、基底ベクトル$\mathbf e_\theta$自体が回転し、$r$方向の成分に化けて見えてしまう分」**です（$\mathbf e_\theta$は$\theta$が変わると向きを変えるベクトルなので）。**この「化けて見える」効果を追うために、$j$（動く方向）とは別に、$i$（元のどの成分由来か）を走らせる必要があった、というのが$i\ne j$の物理的な理由です。**「$-rV^\theta$がヤコビアンに似ている」のは偶然ではなく、この$\Gamma^r{}_{\theta\theta}=-r$自体が、$\Gamma^k{}_{ij}=A^k{}_a\partial_jJ^a{}_i$というヤコビアンの2階微分から、上ですでに計算した通りに導かれていたためです。
+$\Gamma^r{}_{\theta\theta}V^\theta=-rV^\theta$ という項が意味しているのは、**$V$ の $\theta$ 成分（角度方向の成分）が、$\theta$ 方向に動くことで、基底ベクトル $\mathbf e_\theta$ 自体が回転し、$r$ 方向の成分に「化けて見えてしまう」分**です（$\mathbf e_\theta$ は $\theta$ が変わると向きを変えるベクトルなので）。
+
+この「化けて見える」効果を追うために、$j$（動く方向）とは別に、$i$（元のどの成分由来か）を走らせる必要があった、というのが $i\ne j$ の物理的な理由です。
+
+「$-rV^\theta$ がヤコビアンに似ている」のは、偶然ではありません。$\Gamma^r{}_{\theta\theta}=-r$ 自体が、$\Gamma^k{}_{ij}=A^k{}_a\partial_jJ^a{}_i$ というヤコビアンの2階微分から、上で計算した通りに導かれていたためです。
 
 共変ベクトル（下付き）の共変微分は符号が反転します。以下、なぜそうなるのかを、天下り的にではなく導出します。
 
@@ -1192,7 +1299,11 @@ $$
 
 **これが結論です。** 反対称化した共変微分（本来「一般座標で正しい$\operatorname{rot}$」を作ろうとした量）は、**一般のどんな座標系でも**、$\Gamma$を一切使わない外微分$d$と完全に一致します。デカルト座標だから$\Gamma$が消えていたのではなく、**「反対称化する」という操作そのものが、$\Gamma$の対称性によって自動的に$\Gamma$を消去する**、というのが正確な理由です。
 
-一方、$\operatorname{div}$（Part III §3で扱った共変発散）は、**反対称化ではなく縮約**（$i=j$と置いて和を取る）なので、この打ち消しが起きず、$\Gamma^i{}_{ij}=\partial_j\ln\sqrt{|g|}$という形で$\Gamma$（＝$\sqrt{|g|}$）が生き残ります。
+一方、$\operatorname{div}$（Part III §3 で扱った共変発散）は、反対称化ではなく縮約（$i=j$ と置いて和を取る）なので、この打ち消しが起きません。その結果、次の形で $\Gamma$（$=\sqrt{|g|}$ の微分）が生き残ります。
+
+$$
+\Gamma^i{}_{ij}=\partial_j\ln\sqrt{|g|}
+$$
 
 $$
 \boxed{
@@ -1251,7 +1362,9 @@ $$
 
 ## 2. 測地線方程式は特性方程式では解けない
 
-測地線方程式 $\ddot q^k+\Gamma^k{}_{ij}\dot q^i\dot q^j=0$ は**非線形**の2階常微分方程式です。特性方程式（$y''+ay'+by=0\to r^2+ar+b=0$）という手法は、**線形**（多くは定数係数）の微分方程式にしか使えません。測地線方程式には$\dot q^i\dot q^j$という速度の2次の項と、$\Gamma^k{}_{ij}(q)$という位置$q$自体に依存する係数の、両方が含まれるため、この手法は適用できません（平坦なデカルト座標では$\Gamma=0$となり$\ddot q^k=0$、つまり自明な直線運動に帰着します）。
+測地線方程式 $\ddot q^k+\Gamma^k{}_{ij}\dot q^i\dot q^j=0$ は、**非線形**の2階常微分方程式です。特性方程式という手法（$y''+ay'+by=0$ に対して $r^2+ar+b=0$ を解く）は、**線形**（多くは定数係数）の微分方程式にしか使えません。
+
+測地線方程式には、速度の2次の項 $\dot q^i\dot q^j$ と、位置 $q$ 自体に依存する係数 $\Gamma^k{}_{ij}(q)$ の、両方が含まれます。そのため、この手法は適用できません。平坦なデカルト座標では $\Gamma=0$ となり、$\ddot q^k=0$、つまり自明な直線運動に帰着します。
 
 <a id="p5-3"></a>
 
@@ -1386,7 +1499,7 @@ $$
 
 （$\partial\mathbf e_\theta/\partial r=\frac1r\mathbf e_\theta$ も計算すると $\Gamma^\theta{}_{\theta r}=\frac1r$ となり、$\Gamma^\theta{}_{r\theta}=\Gamma^\theta{}_{\theta r}$ の対称性と一致します。）
 
-この計算を動かすと、次のようになります（ループ再生）。点を動かすと基底ベクトルが変わり、その変化率を基底 $\{\mathbf e_r,\mathbf e_\theta\}$ で展開した係数が $\Gamma$ です。前半は $\theta$ 方向に動かして $\Gamma^r{}_{\theta\theta}=-r$（$\partial_\theta\mathbf e_\theta$ が原点側を向く）、後半は $r$ 方向に動かして $\Gamma^\theta{}_{r\theta}=1/r$（$\mathbf e_\theta$ が向きを変えずに長くなる）を読み取ります。
+この計算を動かすと、次のようになります（ループ再生）。点を動かすと基底ベクトルが変わり、その変化率を基底で展開した係数が $\Gamma$ です。前半は $\theta$ 方向に動かして、$\Gamma^r{}_{\theta\theta}=-r$ を読み取ります（$\partial_\theta\mathbf e_\theta$ が原点側を向きます）。後半は $r$ 方向に動かして、$\Gamma^\theta{}_{r\theta}=1/r$ を読み取ります（$\mathbf e_\theta$ が向きを変えずに長くなります）。
 
 ![極座標の基底ベクトルの変化と、そこから読み取るクリストッフェル記号](figures/anim04_polar_basis.gif)
 
@@ -1540,7 +1653,23 @@ $$
 \nabla_i\nabla_jV^l = \nabla_iT^l{}_j = \partial_iT^l{}_j+\Gamma^l{}_{mi}T^m{}_j-\Gamma^m{}_{ji}T^l{}_m
 $$
 
-$\nabla_iT^l{}_j$の右辺にある$\Gamma^l{}_{mi}T^m{}_j$と$-\Gamma^m{}_{ji}T^l{}_m$に、それぞれ$T$の定義を代入します。**ここで、ダミー添字の衝突を避けるための付け替えが必要になります。** $T^l{}_j=\partial_jV^l+\Gamma^l{}_{mj}V^m$（Part IV §1の定義、上付き添字$l$、内部のダミー添字$m$）を、そのまま「上付き添字が$m$の場合」に書き換えようとすると、$T^m{}_j=\partial_jV^m+\Gamma^m{}_{mj}V^m$のように、**外側の固定添字$m$と、内部のダミー添字$m$が同じ文字になってしまい、区別がつかなくなります**（プログラミングで言えば、外側のループ変数`m`を、内側のループでも`m`という同じ名前で使ってしまい、上書きが起きる状況と同じです）。そこで、**内部のダミー添字だけを、まだ使われていない文字$n$に付け替えます**：
+$\nabla_iT^l{}_j$ の右辺にある $\Gamma^l{}_{mi}T^m{}_j$ と $-\Gamma^m{}_{ji}T^l{}_m$ に、それぞれ $T$ の定義を代入します。ここで、ダミー添字の衝突を避けるための付け替えが必要になります。
+
+$T$ の定義は、上付き添字 $l$、内部のダミー添字 $m$ を使って、次のように書かれていました（Part IV §1）。
+
+$$
+T^l{}_j=\partial_jV^l+\Gamma^l{}_{mj}V^m
+$$
+
+これを、そのまま「上付き添字が $m$ の場合」に書き換えようとすると、
+
+$$
+T^m{}_j=\partial_jV^m+\Gamma^m{}_{mj}V^m
+$$
+
+となり、外側の固定添字 $m$ と、内部のダミー添字 $m$ が同じ文字になって、区別がつかなくなります。プログラミングで言えば、外側のループ変数 `m` を、内側のループでも同じ名前で使って、上書きが起きる状況と同じです。
+
+そこで、**内部のダミー添字だけを、まだ使われていない文字 $n$ に付け替えます**：
 
 $$
 T^m{}_j = \partial_jV^m+\Gamma^m{}_{nj}V^n\qquad(\text{Part IV §1の定義で }l\to m,\ m\to n\text{ と付け替えたもの})
@@ -1580,7 +1709,13 @@ $$
 \nabla_j\nabla_iV^l = \partial_j\partial_iV^l+(\partial_j\Gamma^l{}_{mi})V^m+\Gamma^l{}_{mi}\partial_jV^m+\Gamma^l{}_{mj}\partial_iV^m+\Gamma^l{}_{mj}\Gamma^m{}_{ni}V^n-\Gamma^m{}_{ij}\partial_mV^l-\Gamma^m{}_{ij}\Gamma^l{}_{nm}V^n
 $$
 
-**引き算すると**：$\partial_i\partial_jV^l-\partial_j\partial_iV^l=0$（混合偏微分の対称性）、$\Gamma^l{}_{mj}\partial_iV^m$と$\Gamma^l{}_{mi}\partial_jV^m$の項は両方の式に同じ形で現れるためそのまま打ち消し合い、$\Gamma^m{}_{ji}\partial_mV^l$と$\Gamma^m{}_{ij}\partial_mV^l$も$\Gamma$の下2添字対称性（$\Gamma^m{}_{ji}=\Gamma^m{}_{ij}$）から一致して打ち消し合います。生き残るのは：
+**引き算すると**、次の3つの打ち消しが起きます。
+
+- $\partial_i\partial_jV^l-\partial_j\partial_iV^l=0$（混合偏微分の対称性）
+- $\Gamma^l{}_{mj}\partial_iV^m$ と $\Gamma^l{}_{mi}\partial_jV^m$ の項は、両方の式に同じ形で現れるので、そのまま打ち消し合う
+- $\Gamma^m{}_{ji}\partial_mV^l$ と $\Gamma^m{}_{ij}\partial_mV^l$ は、$\Gamma$ の下2添字の対称性（$\Gamma^m{}_{ji}=\Gamma^m{}_{ij}$）から一致して打ち消し合う
+
+生き残るのは：
 
 $$
 \nabla_i\nabla_jV^l-\nabla_j\nabla_iV^l = \big[(\partial_i\Gamma^l{}_{mj}-\partial_j\Gamma^l{}_{mi})+(\Gamma^l{}_{mi}\Gamma^m{}_{nj}-\Gamma^l{}_{mj}\Gamma^m{}_{ni})\big]V^n
@@ -1780,11 +1915,17 @@ $$
 \boxed{g_{\theta\theta}=a^2,\qquad g_{\phi\phi}=a^2\sin^2\theta,\qquad g_{\theta\phi}=0}
 $$
 
-**記法**：$\mathbf r_i:=\partial\mathbf r/\partial u^i$は、Part Iの基底ベクトル$\mathbf e_i=\partial\mathbf x/\partial q^i$と同じ対象を、埋め込み先の座標を$\mathbf r$、パラメータを$u^i$（$\theta,\phi$）と呼んでいるだけです。$g_{ij}=\mathbf r_i\cdot\mathbf r_j$と$g_{ij}=\mathbf e_i\cdot\mathbf e_j$は同一の式であり、以下の$g_{\theta\theta}=a^2,g_{\phi\phi}=a^2\sin^2\theta$は、Part VIIIで求めた値と同じ計量を指します。
+**記法**：$\mathbf r_i:=\partial\mathbf r/\partial u^i$ は、Part I の基底ベクトル $\mathbf e_i=\partial\mathbf x/\partial q^i$ と同じ対象です。埋め込み先の座標を $\mathbf r$、パラメータを $u^i$（$\theta,\phi$）と呼んでいるだけです。したがって、$g_{ij}=\mathbf r_i\cdot\mathbf r_j$ と $g_{ij}=\mathbf e_i\cdot\mathbf e_j$ は同一の式で、以下の $g_{\theta\theta}=a^2,\ g_{\phi\phi}=a^2\sin^2\theta$ は、Part VIII で求めた値と同じ計量を指します。
 
 **第二基本形式**$L_{ij}:=\mathbf r_{ij}\cdot\mathbf n$（2階微分を法線方向に射影したもの）を計算します。
 
-**まず$\mathbf r_{\theta\theta}$を、成分ごとに実際に計算します**。$\mathbf r_\theta$は上で求めた通りです。もう一度$\theta$で微分します（各成分を、それぞれ$\theta$についてさらに1回微分するだけです：$\frac{d}{d\theta}\cos\theta=-\sin\theta$、$\frac{d}{d\theta}(-\sin\theta)=-\cos\theta$）：
+**まず $\mathbf r_{\theta\theta}$ を、成分ごとに実際に計算します。** $\mathbf r_\theta$ は上で求めた通りです。これを、もう一度 $\theta$ で微分します。各成分を、それぞれ $\theta$ についてさらに1回微分するだけで、使う微分は次の2つです：
+
+$$
+\frac{d}{d\theta}\cos\theta=-\sin\theta,\qquad\frac{d}{d\theta}(-\sin\theta)=-\cos\theta
+$$
+
+これを各成分に適用すると：
 
 $$
 \mathbf r_{\theta\theta} = \frac{\partial\mathbf r_\theta}{\partial\theta} = a(-\sin\theta\cos\phi,\ -\sin\theta\sin\phi,\ -\cos\theta)
@@ -1800,7 +1941,13 @@ $$
 L_{\theta\theta} = \mathbf r_{\theta\theta}\cdot\mathbf n = -\mathbf r\cdot\frac{\mathbf r}a = -\frac{|\mathbf r|^2}a = -\frac{a^2}a = -a
 $$
 
-**次に$\mathbf r_{\phi\phi}$を計算します。** 上で求めた$\mathbf r_\phi=a(-\sin\theta\sin\phi,\ \sin\theta\cos\phi,\ 0)$を、もう一度$\phi$で微分します（各成分を、それぞれ$\phi$についてさらに1回微分するだけです：$\frac{d}{d\phi}(-\sin\phi)=-\cos\phi$、$\frac{d}{d\phi}\cos\phi=-\sin\phi$、定数の微分は$0$）：
+**次に $\mathbf r_{\phi\phi}$ を計算します。** 上で求めた $\mathbf r_\phi=a(-\sin\theta\sin\phi,\ \sin\theta\cos\phi,\ 0)$ を、もう一度 $\phi$ で微分します。各成分を、それぞれ $\phi$ についてさらに1回微分するだけで、使う微分は次のとおりです（定数の微分は $0$）：
+
+$$
+\frac{d}{d\phi}(-\sin\phi)=-\cos\phi,\qquad\frac{d}{d\phi}\cos\phi=-\sin\phi
+$$
+
+これを各成分に適用すると：
 
 $$
 \mathbf r_{\phi\phi} = \frac{\partial\mathbf r_\phi}{\partial\phi} = a(-\sin\theta\cos\phi,\ -\sin\theta\sin\phi,\ 0)
@@ -1840,7 +1987,14 @@ $$
 \boxed{L_{\theta\phi} = 0}
 $$
 
-**なぜ$\det L$が$L_{\theta\theta}L_{\phi\phi}-L_{\theta\phi}^2$という形（$L_{\theta\phi}\cdot L_{\phi\theta}$ではなく、同じ添字の2乗）になるのかを確認します。** $2\times2$行列$L=\begin{pmatrix}L_{\theta\theta}&L_{\theta\phi}\\L_{\phi\theta}&L_{\phi\phi}\end{pmatrix}$の行列式は、一般に$\det L=L_{\theta\theta}L_{\phi\phi}-L_{\theta\phi}L_{\phi\theta}$（左上×右下$-$右上×左下）です。ここで、**$L$は対称行列**です：
+**なぜ $\det L$ が $L_{\theta\theta}L_{\phi\phi}-L_{\theta\phi}^2$ という形になるのかを確認します。** $L_{\theta\phi}\cdot L_{\phi\theta}$ ではなく、同じ添字の2乗になる理由です。$2\times2$ 行列 $L$ の行列式は、一般に次の形です（左上×右下 $-$ 右上×左下）：
+
+$$
+L=\begin{pmatrix}L_{\theta\theta}&L_{\theta\phi}\\L_{\phi\theta}&L_{\phi\phi}\end{pmatrix},\qquad
+\det L=L_{\theta\theta}L_{\phi\phi}-L_{\theta\phi}L_{\phi\theta}
+$$
+
+ここで、**$L$ は対称行列**です：
 
 $$
 L_{\theta\phi} = \mathbf r_{\theta\phi}\cdot\mathbf n = \mathbf r_{\phi\theta}\cdot\mathbf n = L_{\phi\theta}
@@ -2000,7 +2154,14 @@ $$
 
 **これで、前節で使った「主曲率の積＝行列式の比」という関係が、最初から最後まで導出できました。**
 
-**ステップ5：球面の具体的な数値を、実際に固有値方程式$L_{ij}v^j=\kappa g_{ij}v^j$に代入します。** §4-cで求めた$L_{\theta\theta}=-a,\ L_{\phi\phi}=-a\sin^2\theta,\ L_{\theta\phi}=0$と、$g_{\theta\theta}=a^2,\ g_{\phi\phi}=a^2\sin^2\theta,\ g_{\theta\phi}=0$を見比べると、**驚くべきことに、$L$は$g$のちょうど$-1/a$倍になっています**：
+**ステップ5：球面の具体的な数値を、実際に固有値方程式に代入します。** 固有値方程式は $L_{ij}v^j=\kappa g_{ij}v^j$ です。§4-c で求めた $L$ と、計量 $g$ を並べます：
+
+$$
+L_{\theta\theta}=-a,\ L_{\phi\phi}=-a\sin^2\theta,\ L_{\theta\phi}=0,\qquad
+g_{\theta\theta}=a^2,\ g_{\phi\phi}=a^2\sin^2\theta,\ g_{\theta\phi}=0
+$$
+
+見比べると、驚くべきことに、$L$ は $g$ のちょうど $-1/a$ 倍になっています：
 
 $$
 L_{\theta\theta} = -a = -\frac1a\cdot a^2 = -\frac1a\,g_{\theta\theta},\qquad L_{\phi\phi} = -a\sin^2\theta = -\frac1a\cdot a^2\sin^2\theta = -\frac1a\,g_{\phi\phi}
