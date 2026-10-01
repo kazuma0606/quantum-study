@@ -1,4 +1,4 @@
-"""研究ノート用のアニメーションを生成するスクリプト。
+﻿"""研究ノート用のアニメーションを生成するスクリプト。
 
 実行（リポジトリのルートから）:
     uv run python 研究ノート/figures/make_animations.py
@@ -20,6 +20,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
+
+from matplotlib.patches import Rectangle
 
 from make_christoffel_figures import OUT  # 日本語フォント等の rcParams も設定される
 
@@ -642,7 +644,345 @@ def anim03_holonomy(mp4=False):
     plt.close(fig)
 
 
-ANIMS = {"anim01": anim01_parallel_transport, "anim02": anim02_mixed_partials, "anim03": anim03_holonomy}
+# ================================================================== 共通: GIF 書き出し
+def save_gif(fig, update, n_frames, stem, mp4=False, step=1):
+    frames = list(range(0, n_frames, step))
+    ani = animation.FuncAnimation(fig, update, frames=frames, blit=False)
+    path = OUT / f"{stem}.gif"
+    ani.save(path, writer=animation.PillowWriter(fps=10), dpi=55)
+    print(f"saved {path.name}: {path.stat().st_size / 1e6:.2f} MB, {len(frames)} frames @10fps")
+    if mp4:
+        ani2 = animation.FuncAnimation(fig, update, frames=list(range(n_frames)), blit=False)
+        p2 = OUT / f"{stem}.mp4"
+        ani2.save(p2, writer=animation.FFMpegWriter(fps=10, codec="libx264", extra_args=["-pix_fmt", "yuv420p", "-crf", "20"]), dpi=100)
+        print(f"saved {p2.name}: {p2.stat().st_size / 1e6:.2f} MB")
+    plt.close(fig)
+
+
+# ================================================================== anim04: 極座標の基底ベクトルの変化と Γ
+def anim04_polar_basis(mp4=False):
+    """点を動かすと基底ベクトルが変わる。その変化率を基底で展開した係数が Γ（有限差分で数値的に求める）。"""
+    def e_r(th):
+        return np.array([np.cos(th), np.sin(th)])
+
+    def e_th(r, th):
+        return r * np.array([-np.sin(th), np.cos(th)])
+
+    def sg(x):
+        """表示用: 浮動小数点の誤差（±1e-9 など）で '+0.000' と '-0.000' がちらつかないよう、0 は符号なしの 0.000 にする"""
+        return "0.000" if abs(x) < 5e-4 else f"{x:+.3f}"
+
+    def coeffs(d, r, th):  # d = c^r e_r + c^θ e_θ を解く
+        return np.linalg.solve(np.column_stack([e_r(th), e_th(r, th)]), d)
+
+    h = 1e-6
+
+    def gammas(r, th):
+        d_th_eth = (e_th(r, th + h) - e_th(r, th - h)) / (2 * h)
+        d_th_er = (e_r(th + h) - e_r(th - h)) / (2 * h)
+        d_r_eth = (e_th(r + h, th) - e_th(r - h, th)) / (2 * h)
+        return d_th_eth, d_th_er, d_r_eth, coeffs(d_th_eth, r, th), coeffs(d_th_er, r, th), coeffs(d_r_eth, r, th)
+
+    for r, th in ((1.5, 0.4), (0.8, 1.9), (2.3, 3.0)):  # 本文 Part VI §1: Γ^r_θθ=-r, Γ^θ_rθ=1/r, Γ^θ_θθ=0, Γ^r_rθ=0
+        _, _, _, c1, c2, c3 = gammas(r, th)
+        assert np.allclose(c1, [-r, 0], atol=1e-6) and np.allclose(c2, [0, 1 / r], atol=1e-6) and np.allclose(c3, [0, 1 / r], atol=1e-6)
+    print("[anim04] 有限差分で求めた係数が Γ^r_θθ=-r, Γ^θ_θθ=0, Γ^θ_rθ=1/r, Γ^r_rθ=0 に一致")
+
+    C_R, C_T, C_D = "#1f77b4", "#d62728", "#2ca02c"
+    fig = plt.figure(figsize=(12.8, 7.2), dpi=100, facecolor="white")
+    ax = fig.add_axes([0.03, 0.10, 0.55, 0.80])
+    for rr in (0.5, 1.0, 1.5, 2.0, 2.5):
+        a = np.linspace(0, np.pi, 200)
+        ax.plot(rr * np.cos(a), rr * np.sin(a), color="#dde3ec", lw=0.8)
+    for d in np.deg2rad(np.arange(0, 181, 20)):
+        ax.plot([0, 2.6 * np.cos(d)], [0, 2.6 * np.sin(d)], color="#dde3ec", lw=0.8)
+    ax.set_aspect("equal")
+    ax.set_xlim(-1.5, 2.7)
+    ax.set_ylim(-0.3, 2.9)
+    ax.axis("off")
+    ax.plot(0, 0, "ko", ms=4)
+    title = fig.text(0.5, 0.955, "", ha="center", fontsize=20, fontweight="bold")
+    t1 = fig.text(0.60, 0.78, "", fontsize=16)
+    t2 = fig.text(0.60, 0.68, "", fontsize=16)
+    t3 = fig.text(0.60, 0.58, "", fontsize=16)
+    t4 = fig.text(0.60, 0.47, "", fontsize=13.5, color="#555", va="top")
+    t5 = fig.text(0.60, 0.30, "", fontsize=13.5, color="#555", va="top")
+    fig.text(0.04, 0.045, "■ 青：$\\mathbf{e}_r$（長さ 1）　■ 赤：$\\mathbf{e}_\\theta$（長さ $r$）　■ 緑：その点での基底ベクトルの変化率（長さ・向きは実際のもの）",
+             fontsize=13, color="#333")
+    s = 0.6
+    n1, n2, hold = 44, 44, 8
+    tmp = []
+
+    def arrow(p, v, col, lw=3.0, z=4, alpha=1.0):
+        tmp.append(ax.annotate("", xy=p + s * v, xytext=p, arrowprops=dict(arrowstyle="-|>", color=col, lw=lw, alpha=alpha), zorder=z))
+
+    def update(f):
+        for t in tmp:
+            t.remove()
+        tmp.clear()
+        if f < n1 + hold:  # 前半: θ を動かす（r 固定）
+            r = 1.5
+            k = min(f, n1 - 1) / (n1 - 1)
+            th = np.deg2rad(20 + 100 * k)
+            ghosts = np.deg2rad(20 + 100 * np.linspace(0, k, 6))
+            for g in ghosts[:-1]:
+                p = r * e_r(g)
+                arrow(p, e_th(r, g), C_T, 1.6, 2, 0.25)
+                arrow(p, e_r(g), C_R, 1.6, 2, 0.25)
+            p = r * e_r(th)
+            arrow(p, e_r(th), C_R)
+            arrow(p, e_th(r, th), C_T)
+            d1, d2, _, c1, c2, _ = gammas(r, th)
+            tmp.append(ax.annotate("", xy=p + e_th(r, th) * s + s * d1, xytext=p + e_th(r, th) * s, arrowprops=dict(arrowstyle="-|>", color=C_D, lw=3.4), zorder=6))
+            a = np.linspace(np.deg2rad(20), th, 60)
+            tmp.append(ax.plot(r * np.cos(a), r * np.sin(a), color="#999", lw=1.2, ls="--")[0])
+            title.set_text("$\\theta$ 方向に動かす：基底ベクトルは回る")
+            t1.set_text(f"$\\partial_\\theta\\mathbf{{e}}_\\theta=\\Gamma^r{{}}_{{\\theta\\theta}}\\mathbf{{e}}_r+\\Gamma^\\theta{{}}_{{\\theta\\theta}}\\mathbf{{e}}_\\theta$")
+            t2.set_text(f"$\\Gamma^r{{}}_{{\\theta\\theta}}={sg(c1[0])}\\ \\ (=-r=-{r:.2f})$")
+            t3.set_text(f"$\\Gamma^\\theta{{}}_{{\\theta\\theta}}={sg(c1[1])}$")
+            # 変わるもの（デカルト成分）と、変わらないもの（Γ）の対比
+            t4.set_text(f"変わるもの：$\\partial_\\theta\\mathbf{{e}}_\\theta$ のデカルト成分\n$=({d1[0]:+.2f},\\ {d1[1]:+.2f})$（$\\theta={np.rad2deg(th):.0f}^\\circ$）")
+            t5.set_text("変わらないもの：展開係数 $\\Gamma$\n（$\\theta$ によらず $r$ だけで決まる）")
+        else:  # 後半: r を動かす（θ 固定）
+            th = np.deg2rad(40)
+            k = min(f - n1 - hold, n2 - 1) / (n2 - 1)
+            r = 0.8 + 1.2 * k
+            for rg in 0.8 + 1.2 * np.linspace(0, k, 6)[:-1]:
+                p = rg * e_r(th)
+                arrow(p, e_th(rg, th), C_T, 1.6, 2, 0.25)
+                arrow(p, e_r(th), C_R, 1.6, 2, 0.25)
+            p = r * e_r(th)
+            arrow(p, e_r(th), C_R)
+            arrow(p, e_th(r, th), C_T)
+            _, _, d3, _, _, c3 = gammas(r, th)
+            tmp.append(ax.annotate("", xy=p + e_th(r, th) * s + s * d3, xytext=p + e_th(r, th) * s, arrowprops=dict(arrowstyle="-|>", color=C_D, lw=3.4), zorder=6))
+            tmp.append(ax.plot([0, 2.5 * np.cos(th)], [0, 2.5 * np.sin(th)], color="#999", lw=1.2, ls="--")[0])
+            title.set_text("$r$ 方向に動かす：$\\mathbf{e}_\\theta$ の長さが変わる")
+            t1.set_text("$\\partial_r\\mathbf{e}_\\theta=\\Gamma^r{}_{r\\theta}\\mathbf{e}_r+\\Gamma^\\theta{}_{r\\theta}\\mathbf{e}_\\theta$")
+            t2.set_text(f"$\\Gamma^r{{}}_{{r\\theta}}={sg(c3[0])}$")
+            t3.set_text(f"$\\Gamma^\\theta{{}}_{{r\\theta}}={sg(c3[1])}\\ \\ (=1/r={1 / r:.3f})$")
+            t4.set_text("$\\mathbf{e}_\\theta$ は向きを変えず、$r$ に比例して\n長くなる（変化率は $\\mathbf{e}_\\theta/r$）")
+            t5.set_text("下の添字は対称：\n$\\Gamma^\\theta{}_{r\\theta}=\\Gamma^\\theta{}_{\\theta r}$（前半の $\\partial_\\theta\\mathbf{e}_r$ と同じ値）")
+        return []
+
+    save_gif(fig, update, n1 + hold + n2 + hold, "anim04_polar_basis", mp4)
+
+
+# ================================================================== anim05: δ による添字のすり替え
+def anim05_delta(mp4=False):
+    g = np.array([[2.0, 1.0, 0.0], [1.0, 3.0, 1.0], [0.0, 1.0, 2.0]])
+    gi = np.linalg.inv(g)
+    assert np.allclose(gi @ g, np.eye(3)), "g^{ik} g_{kj} = δ^i_j"
+    V = np.array([5.0, 7.0, 9.0])
+    assert np.allclose(np.eye(3) @ V, V)
+    print("[anim05] g^{ik}g_{kj}=δ^i_j、δ^i_j V^j=V^i を数値で確認済み")
+
+    CI, CJ, CK = "#1f77b4", "#2ca02c", "#d62728"
+    fig = plt.figure(figsize=(12.8, 7.2), dpi=100, facecolor="white")
+    ax = fig.add_axes([0.02, 0.22, 0.96, 0.62])
+    title = fig.text(0.5, 0.955, "", ha="center", fontsize=20, fontweight="bold")
+    l1 = fig.text(0.5, 0.135, "", ha="center", fontsize=17)
+    l2 = fig.text(0.5, 0.065, "", ha="center", fontsize=15, color="#555")
+
+    def grid(x0, y0, M, label, rows=(), cols=(), cell=None, hide=False, fmt="{:.2f}", band=None):
+        """3x3（または 3x1）の表。rows/cols を色帯で強調、cell=(i,j) を黄色で強調"""
+        nr, nc = M.shape
+        for i in range(nr):
+            for j in range(nc):
+                fc = "white"
+                if i in rows:
+                    fc = "#dbeafe"
+                if j in cols:
+                    fc = "#dcfce7" if i not in rows else "#d6f0e0"
+                if cell == (i, j):
+                    fc = "#fff0a0"
+                ax.add_patch(Rectangle((x0 + j, y0 - i - 1), 1, 1, fc=fc, ec="#555", lw=1.4, zorder=1))
+                if not (hide and cell != (i, j) and True):
+                    pass
+                ax.text(x0 + j + 0.5, y0 - i - 0.5, fmt.format(M[i, j]), ha="center", va="center", fontsize=16, zorder=3)
+        ax.text(x0 + nc / 2, y0 + 0.35, label, ha="center", fontsize=18)
+
+    n_cells, per = 9, 4
+    n_rows, per2 = 3, 4
+    holdA = 6
+    nA = n_cells * per + holdA
+    nB = n_rows * per2 + holdA
+
+    def update(f):
+        ax.clear()
+        ax.set_xlim(0, 16)
+        ax.set_ylim(0, 6.2)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        if f < nA:
+            title.set_text("計量 × 逆計量 $=\\delta$：和を取る $k$ が消え、$i,j$ が残る")
+            idx = min(f // per, n_cells - 1)
+            ph = f % per if f < n_cells * per else 3
+            i, j = divmod(idx, 3)
+            done = np.full((3, 3), np.nan)
+            for q in range(idx + (1 if ph >= 3 else 0)):
+                a, b = divmod(q, 3)
+                done[a, b] = (gi @ g)[a, b]
+            if f >= n_cells * per:
+                done = gi @ g
+            cur = (i, j) if f < n_cells * per else None
+            # 左: g^{ik}（行 i を強調）, 中: g_{kj}（列 j を強調）, 右: 結果 δ^i_j
+            grid(1.0, 5.2, gi, "$g^{ik}$", rows=(i,) if cur else ())
+            grid(6.0, 5.2, g, "$g_{kj}$", cols=(j,) if cur else ())
+            ax.text(5.0, 3.7, "×", fontsize=26, ha="center", va="center")
+            ax.text(10.2, 3.7, "＝", fontsize=26, ha="center", va="center")
+            for a in range(3):
+                for b in range(3):
+                    fc = "#fff0a0" if cur == (a, b) else "white"
+                    ax.add_patch(Rectangle((11.0 + b, 5.2 - a - 1), 1, 1, fc=fc, ec="#555", lw=1.4, zorder=1))
+                    if not np.isnan(done[a, b]):
+                        ax.text(11.0 + b + 0.5, 5.2 - a - 0.5, f"{done[a, b]:.0f}", ha="center", va="center", fontsize=18, fontweight="bold", zorder=3)
+            ax.text(12.5, 5.55, "$\\delta^i{}_j$", ha="center", fontsize=18)
+            if cur:
+                terms = [gi[i, k] * g[k, j] for k in range(3)]
+                if ph == 0:
+                    l1.set_text(f"$(i,j)=({i + 1},{j + 1})$：$g^{{ik}}$ の第 {i + 1} 行（青）と $g_{{kj}}$ の第 {j + 1} 列（緑）を、$k$ について足す")
+                else:
+                    l1.set_text(f"$\\sum_k g^{{{i + 1}k}}g_{{k{j + 1}}}=" + "+".join(f"({gi[i, k]:.2f})({g[k, j]:.0f})" for k in range(3)) + f"={sum(terms):.0f}$")
+                l2.set_text("$k$ は上下でペアになって和の中に消え、残った $i$（上）と $j$（下）が $\\delta^i{}_j$ の添字になる"
+                            + ("" if ph < 2 else f"　→ {'$i=j$ なので 1' if i == j else '$i\\neq j$ なので 0'}"))
+            else:
+                l1.set_text("結果は単位行列：$g^{ik}g_{kj}=\\delta^i{}_j$（対角は 1、それ以外は 0）")
+                l2.set_text("$\\delta^i{}_j$ は「$i=j$ のときだけ 1」。次は、これを掛けると添字がすり替わる様子を見る")
+        else:
+            title.set_text("$\\delta$ は添字のすり替え：$\\delta^i{}_jV^j=V^i$")
+            f2 = f - nA
+            idx = min(f2 // per2, n_rows - 1)
+            ph = f2 % per2 if f2 < n_rows * per2 else 3
+            i = idx
+            done = np.full(3, np.nan)
+            for q in range(idx + (1 if ph >= 3 else 0)):
+                done[q] = V[q]
+            if f2 >= n_rows * per2:
+                done = V.copy()
+            cur = i if f2 < n_rows * per2 else None
+            I3 = np.eye(3)
+            grid(1.0, 5.2, I3, "$\\delta^i{}_j$", rows=(cur,) if cur is not None else (), fmt="{:.0f}")
+            grid(6.0, 5.2, V.reshape(3, 1), "$V^j$", fmt="{:.0f}")
+            ax.text(5.0, 3.7, "×", fontsize=26, ha="center", va="center")
+            ax.text(8.2, 3.7, "＝", fontsize=26, ha="center", va="center")
+            for a in range(3):
+                fc = "#fff0a0" if cur == a else "white"
+                ax.add_patch(Rectangle((9.0, 5.2 - a - 1), 1, 1, fc=fc, ec="#555", lw=1.4, zorder=1))
+                if not np.isnan(done[a]):
+                    ax.text(9.5, 5.2 - a - 0.5, f"{done[a]:.0f}", ha="center", va="center", fontsize=18, fontweight="bold", zorder=3)
+            ax.text(9.5, 5.55, "$V^i$", ha="center", fontsize=18)
+            if cur is not None:
+                ax.add_patch(Rectangle((6.0, 5.2 - cur - 1), 1, 1, fc="#fde68a", ec="#d97706", lw=3, zorder=2))
+                ax.text(6.5, 5.2 - cur - 0.5, f"{V[cur]:.0f}", ha="center", va="center", fontsize=16, zorder=4)
+                if ph == 0:
+                    l1.set_text(f"$i={cur + 1}$：$\\delta^{{{cur + 1}}}{{}}_jV^j$ を $j$ について足す（行 {cur + 1}）")
+                else:
+                    l1.set_text(f"$\\delta^{{{cur + 1}}}{{}}_1V^1+\\delta^{{{cur + 1}}}{{}}_2V^2+\\delta^{{{cur + 1}}}{{}}_3V^3=" +
+                                "+".join(f"{int(I3[cur, j])}\\cdot{V[j]:.0f}" for j in range(3)) + f"={V[cur]:.0f}=V^{{{cur + 1}}}$")
+                l2.set_text("$j=i$ の項だけが生き残る（橙の枠）。上付きの $j$ が $i$ にすり替わった")
+            else:
+                l1.set_text("$\\delta^i{}_jV^j=V^i$：$\\delta$ を掛けて和を取ると、$V$ はそのまま、添字だけが $j\\to i$ に付け替わる")
+                l2.set_text("下付きに使えば $\\delta^i{}_jV_i=V_j$（$i\\to j$）。計量による添字の上げ下げも、この仕組み")
+        return []
+
+    save_gif(fig, update, nA + nB, "anim05_delta_substitution", mp4)
+
+
+# ================================================================== anim06: ガウス正規座標（付録 C）
+def anim06_gaussian_normal(mp4=False):
+    """平坦な (y,t) 時空（計量 dy²-dt²）で、曲がった断面 Σ: t=0.4y² から法線方向に測地線を伸ばす。隣の測地線との間隔 g(τ) が広がる。"""
+    c2 = 0.4
+
+    def X(y):
+        return np.array([y, c2 * y * y])
+
+    def n(y):  # Σ に「垂直」（ローレンツ計量）な、未来向きの単位ベクトル
+        s = 2 * c2 * y
+        return np.array([s, 1.0]) / np.sqrt(1 - s * s)
+
+    def eta(u, v):
+        return u[0] * v[0] - u[1] * v[1]
+
+    def point(y, tau):
+        return X(y) + tau * n(y)
+
+    h = 1e-5
+
+    def g_of(y, tau):  # 誘導計量 g(τ) = ḡ(∂_y point, ∂_y point)
+        d = (point(y + h, tau) - point(y - h, tau)) / (2 * h)
+        return eta(d, d)
+
+    for y in (0.0, 0.5, -0.7):
+        Xpp = np.array([0.0, 2 * c2])
+        nn = n(y)
+        assert abs(eta(nn, nn) + 1) < 1e-12 and abs(eta((X(y + h) - X(y - h)) / (2 * h), nn)) < 1e-6
+        Kij = eta((X(y + h) - 2 * X(y) + X(y - h)) / h**2, nn)  # K_ij = ḡ(X'', n)（C-1-4 と同じ定義）
+        dg = (g_of(y, 1e-3) - g_of(y, -1e-3)) / 2e-3
+        assert abs(dg - (-2 * Kij)) < 1e-4, f"∂τ g = -2K のはず: {dg} vs {-2 * Kij}"
+    print(f"[anim06] K_ij = ḡ(X'',n) = {Kij:+.4f}（y=-0.7）、∂τ g = -2K を数値で確認。y=0 では K=-0.8, ∂τ g=+1.6")
+
+    C_B, C_K = "#2563a8", "#d62728"
+    fig = plt.figure(figsize=(12.8, 7.2), dpi=100, facecolor="white")
+    ax = fig.add_axes([0.03, 0.14, 0.52, 0.72])
+    bx = fig.add_axes([0.66, 0.27, 0.31, 0.45])
+    ys = np.linspace(-1.1, 1.1, 300)
+    ax.plot(*np.array([X(y) for y in ys]).T, color="k", lw=3.2)
+    ax.text(1.05, c2 * 1.1**2 + 0.05, "$\\Sigma\\ (\\tau=0)$", fontsize=14)
+    ax.set_xlim(-1.6, 1.9)
+    ax.set_ylim(-0.25, 1.95)
+    ax.set_aspect("equal")
+    ax.set_xlabel("空間 $y$")
+    ax.set_ylabel("時間 $t$")
+    taus = np.linspace(0, 1.0, 60)
+    gs = np.array([g_of(0.0, t) for t in taus])
+    bx.plot(taus, gs, color="#bbb", lw=1.4)
+    bx.axhline(1, color="#888", lw=1, ls=":")
+    bx.plot(taus, 1 + 1.6 * taus, color="k", lw=1.3, ls="--")
+    bx.text(0.55, 1 + 1.6 * 0.55 - 0.18, "接線：傾き $-2K=+1.6$", fontsize=11.5, ha="left")
+    (curve,) = bx.plot([], [], color=C_K, lw=3.4)
+    (dot,) = bx.plot([], [], "o", color=C_K, ms=8)
+    bx.set_xlim(0, 1.0)
+    bx.set_ylim(0.8, gs.max() * 1.1)
+    bx.set_xlabel("$\\tau$（法線方向に進んだ固有時間）", fontsize=12)
+    bx.set_ylabel("$g(\\tau)$（隣り合う測地線の間隔$^2$）", fontsize=12)
+    bx.set_title("間隔が広がる：$\\partial_\\tau g>0$\n$\\Rightarrow K_{ij}=-\\frac{1}{2}\\partial_\\tau g_{ij}<0$", fontsize=12.5)
+    title = fig.text(0.5, 0.955, "ガウス正規座標：断面から法線方向に測地線を伸ばす", ha="center", fontsize=20, fontweight="bold")
+    l1 = fig.text(0.5, 0.075, "", ha="center", fontsize=15)
+    tmp = []
+    n_frames, hold = 70, 20
+    y_list = np.linspace(-1.0, 1.0, 11)
+
+    def update(f):
+        for t in tmp:
+            t.remove()
+        tmp.clear()
+        k = min(f, n_frames - hold - 1) / (n_frames - hold - 1)
+        tau = k * 1.0
+        for y in y_list:
+            a, b = point(y, 0), point(y, tau)
+            tmp.append(ax.plot([a[0], b[0]], [a[1], b[1]], color=C_B, lw=1.4, alpha=0.8)[0])
+        sl = np.array([point(y, tau) for y in ys])
+        tmp.append(ax.plot(sl[:, 0], sl[:, 1], color=C_B, lw=3.0)[0])
+        lab = point(0.7, tau)
+        tmp.append(ax.text(lab[0] + 0.1, lab[1] - 0.05, f"$\\Sigma_\\tau\\ (\\tau={tau:.2f})$", color=C_B, fontsize=13, ha="left", va="top"))
+        y1, y2 = -0.12, 0.12  # 近くの2本の測地線の間隔を矢印で示す
+        for yy, col in ((y1, C_K), (y2, C_K)):
+            tmp.append(ax.plot(*point(yy, tau), "o", color=C_K, ms=5, zorder=5)[0])
+        p1, p2 = point(y1, tau), point(y2, tau)
+        tmp.append(ax.annotate("", xy=p2 + [0, 0.07], xytext=p1 + [0, 0.07], arrowprops=dict(arrowstyle="<->", color=C_K, lw=2.2), zorder=6))
+        a1, a2 = point(y1, 0), point(y2, 0)
+        tmp.append(ax.annotate("", xy=a2 + [0, -0.09], xytext=a1 + [0, -0.09], arrowprops=dict(arrowstyle="<->", color="#444", lw=1.8), zorder=6))
+        i = int(round(k * (len(taus) - 1)))
+        curve.set_data(taus[: i + 1], gs[: i + 1])
+        dot.set_data([taus[i]], [gs[i]])
+        l1.set_text("断面ごとの法線方向の測地線（青）は、時間 $\\tau$ とともに間隔が広がる。赤の矢印は隣り合う2本の間隔（$\\tau=0$ の黒より広い）")
+        return []
+
+    save_gif(fig, update, n_frames, "anim06_gaussian_normal", mp4)
+
+
+ANIMS = {"anim01": anim01_parallel_transport, "anim02": anim02_mixed_partials, "anim03": anim03_holonomy, "anim04": anim04_polar_basis, "anim05": anim05_delta, "anim06": anim06_gaussian_normal}
 
 
 def main():

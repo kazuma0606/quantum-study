@@ -166,6 +166,12 @@ $$\fcolorbox{#3b6fb6}{white}{$\displaystyle\color{black}\ A^k{}_aJ^a{}_i=\colorb
 
 *① 計量 $\times$ 逆計量：上下でペアの $k$ は和で消え、$i,j$ が $\delta$ の添字に引き継がれる。② $\delta$ は $j=i$ の項だけを残し、添字をすり替える。③ 添字の上げ下げも、$g^{ij}g_{jk}=\delta^i{}_k$ で $j$ が消え、$k$ が $i$ にすり替わる操作。④ $AJ=I$（Part III §1）も、和を取った $a$ が消えて $\delta$ が残り、その $\delta$ が $\Gamma$ の添字 $k$ を $k'$ にすり替える。*
 
+同じことを、具体的な数値の行列で動かすと次のようになります（ループ再生）。前半は、$g^{ik}$ の第 $i$ 行と $g_{kj}$ の第 $j$ 列を $k$ について足すと、各成分が $\delta^i{}_j$（対角は 1、それ以外は 0）になる様子です。後半は、$\delta^i{}_jV^j$ の和のうち $j=i$ の項だけが生き残って $V^i$ になる様子です。
+
+![δ による添字のすり替え：計量×逆計量とδ×ベクトル](figures/anim05_delta_substitution.gif)
+
+*前半：$g=\begin{pmatrix}2&1&0\\1&3&1\\0&1&2\end{pmatrix}$ とその逆行列で、$\sum_kg^{ik}g_{kj}$ を成分ごとに計算する（$k$ は和で消える）。後半：$\delta^i{}_jV^j=V^i$（$V=(5,7,9)$）。どちらも数値で検算済みで、アニメーションの式は、実際の計算結果をそのまま表示している。*
+
 クリストッフェル記号の添字は、次のように読みます（① $\Gamma^k{}_{ij}$ の3つの席、② この節の公式の添字の行き先、③ 反変・共変微分でダミー添字 $i$ と自由添字 $k$ の入る場所が入れ替わる、Part IV §1）。
 
 ![クリストッフェル記号の添字の意味と、公式の添字の対応](figures/fig12_christoffel_indices.png)
@@ -1044,6 +1050,12 @@ $$
 $$
 
 （$\partial\mathbf e_\theta/\partial r=\frac1r\mathbf e_\theta$ も計算すると $\Gamma^\theta{}_{\theta r}=\frac1r$ となり、$\Gamma^\theta{}_{r\theta}=\Gamma^\theta{}_{\theta r}$ の対称性と一致します。）
+
+この計算を動かすと、次のようになります（ループ再生）。点を動かすと基底ベクトルが変わり、その変化率を基底 $\{\mathbf e_r,\mathbf e_\theta\}$ で展開した係数が $\Gamma$ です。前半は $\theta$ 方向に動かして $\Gamma^r{}_{\theta\theta}=-r$（$\partial_\theta\mathbf e_\theta$ が原点側を向く）、後半は $r$ 方向に動かして $\Gamma^\theta{}_{r\theta}=1/r$（$\mathbf e_\theta$ が向きを変えずに長くなる）を読み取ります。
+
+![極座標の基底ベクトルの変化と、そこから読み取るクリストッフェル記号](figures/anim04_polar_basis.gif)
+
+*画面に出ている $\Gamma$ の値は、基底ベクトルを有限差分で微分して基底で展開した、実際の数値。$\Gamma^r{}_{\theta\theta}=-r$、$\Gamma^\theta{}_{\theta\theta}=0$、$\Gamma^\theta{}_{r\theta}=1/r$、$\Gamma^r{}_{r\theta}=0$ に一致することを、スクリプトで確認している。*
 
 ## 2. 計量からの公式で検算する
 
@@ -4107,6 +4119,12 @@ $$
 ![ADM分解のラプス・シフトと、ガウス正規座標](figures/fig8_adm_slicing.png)
 
 *左：時間の流れ $\partial_t$ を、断面に垂直な成分 $N\,n$（ラプス）と断面に沿う成分 $N^ie_i$（シフト）に分解する。図は $(y,t)$ の平坦な時空図で、「垂直」はローレンツ計量の意味（見た目の直角ではない）。右：ガウス正規座標では断面から法線方向に測地線を伸ばす。隣り合う測地線の間隔が広がる（$\partial_tg_{ij}>0$）ので $K_{ij}=-\frac12\partial_tg_{ij}<0$。*
+
+右側のガウス正規座標を動かすと、次のようになります（ループ再生）。曲がった断面 $\Sigma$ から法線方向に測地線を伸ばし、隣り合う測地線の間隔 $g(\tau)$ が広がる様子と、そのグラフです。
+
+![ガウス正規座標：断面から法線方向に測地線を伸ばす](figures/anim06_gaussian_normal.gif)
+
+*$(y,t)$ の平坦な時空図（計量 $dy^2-dt^2$）で、$\Sigma:\ t=0.4y^2$ から法線方向に測地線を伸ばす。右のグラフが $g(\tau)$ で、$\tau=0$ での傾き $\partial_\tau g=-2K_{ij}=+1.6$（$K_{ij}=\bar g(X'',n)=-0.8$）に沿って増える。$\partial_\tau g=-2K_{ij}$ は、複数の点で数値的に確認している。*
 
 ### C-3-2. 発展方程式（真空・ガウス正規座標の場合）
 
