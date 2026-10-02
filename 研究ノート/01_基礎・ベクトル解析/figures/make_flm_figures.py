@@ -10,6 +10,7 @@
     flm03_polar_map.png              Part I §8 極座標の写像：どこで単射が崩れるか
     flm04_kernel_image.png           Part II 正則・非正則な行列、核と像、Ax=b の解の集合
     flm05_inverse_function.png       Part III 逆関数定理の条件と、局所と大域の違い
+    flm06_change_of_variables.png    Part V 変数変換 dx dy = r dr dθ の意味
 
 各図は、描く値が本文の主張と一致することを assert で確認してから保存する。
 """
@@ -298,7 +299,60 @@ def flm05():
     plt.close(fig)
 
 
-FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04, flm05=flm05)
+# ------------------------------------------------------------------------------------- flm06
+def flm06():
+    """Part V：変数変換。(r, θ) の小さな長方形は、面積 ≈ r Δr Δθ の小片に写る。"""
+    P = lambda r, th: np.stack([r * np.cos(th), r * np.sin(th)], -1)
+    fig, (ax, bx) = plt.subplots(1, 2, figsize=(14, 6.2), gridspec_kw=dict(width_ratios=[1, 1.05]))
+    dr, dth = 0.25, np.pi / 12
+    rs = np.arange(0, 2.0 + 1e-9, dr)
+    ths = np.arange(0, np.pi / 2 + 1e-9, dth)
+    for r0 in rs:
+        ax.plot([0, np.pi / 2], [r0, r0], color="#cccccc", lw=0.8)
+        Q = P(r0, np.linspace(0, np.pi / 2, 100))
+        bx.plot(Q[:, 0], Q[:, 1], color="#cccccc", lw=0.8)
+    for t0 in ths:
+        ax.plot([t0, t0], [0, 2], color="#cccccc", lw=0.8)
+        Q = P(np.linspace(0, 2, 50), t0)
+        bx.plot(Q[:, 0], Q[:, 1], color="#cccccc", lw=0.8)
+    cells = [(0.25, 2 * dth, C_A), (1.0, 2 * dth, C_B), (1.75, 2 * dth, C_BAD), (1.0, 4 * dth, "#2ca02c")]
+    rows = []
+    for r0, t0, col in cells:
+        s = np.linspace(0, 1, 60)
+        edge = np.concatenate([np.c_[r0 + s * dr, np.full(60, t0)], np.c_[np.full(60, r0 + dr), t0 + s * dth],
+                               np.c_[r0 + dr - s * dr, np.full(60, t0 + dth)], np.c_[np.full(60, r0), t0 + dth - s * dth]])
+        ax.fill(edge[:, 1], edge[:, 0], color=col, alpha=0.6)
+        img = P(edge[:, 0], edge[:, 1])
+        bx.fill(img[:, 0], img[:, 1], color=col, alpha=0.6)
+        area = shoelace_area(img)
+        rc = r0 + dr / 2
+        assert abs(area - rc * dr * dth) < 1e-6           # 面積は (中心の r) × Δr × Δθ（極座標では、ちょうど一致する）
+        rows.append((r0, col, area, rc * dr * dth))
+        c = img.mean(axis=0)
+        bx.annotate(f"{area:.3f}", c, c + np.array([0.18, 0.12]), fontsize=10, color=col,
+                    arrowprops=dict(arrowstyle="-", color=col, lw=0.8))
+    ax.text(0.03, 1.93, f"どの長方形も面積 $\\Delta r\\,\\Delta\\theta={dr * dth:.3f}$", fontsize=10, va="top")
+    ax.set_xlim(0, np.pi / 2), ax.set_ylim(0, 2)
+    ax.set_xticks([0, np.pi / 6, np.pi / 3, np.pi / 2]), ax.set_xticklabels(["$0$", "$\\pi/6$", "$\\pi/3$", "$\\pi/2$"])
+    ax.set_xlabel("$\\theta$"), ax.set_ylabel("$r$")
+    ax.set_title("定義域 $(r,\\theta)$：同じ大きさの長方形", fontsize=12)
+    bx.set_xlim(-0.05, 2.1), bx.set_ylim(-0.05, 2.1), bx.set_aspect("equal")
+    bx.set_xlabel("$x$"), bx.set_ylabel("$y$")
+    txt = "写った小片の面積（数字）$=r\\,\\Delta r\\,\\Delta\\theta$\n$r$ は小片の中心の半径。原点に近いほど小さい"
+    bx.text(0.03, 0.97, txt, transform=bx.transAxes, fontsize=10, va="top", bbox=dict(boxstyle="round", fc="white", ec="#ccc"))
+    bx.set_title("像 $(x,y)$：面積は $|\\det J|=r$ 倍になる", fontsize=12)
+    fig.suptitle("変数変換 $dx\\,dy=r\\,dr\\,d\\theta$ の意味（Part V §5）", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(OUT / "flm06_change_of_variables.png", dpi=150)
+    plt.close(fig)
+
+
+def shoelace_area(Pts):
+    x, y = Pts[:, 0], Pts[:, 1]
+    return 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
+
+
+FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04, flm05=flm05, flm06=flm06)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
