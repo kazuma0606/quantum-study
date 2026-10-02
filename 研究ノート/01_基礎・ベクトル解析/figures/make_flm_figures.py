@@ -9,6 +9,7 @@
     flm02_restriction_inverse.png    Part I §7 制限して全単射にし、逆写像を作る（√, arcsin, ln）
     flm03_polar_map.png              Part I §8 極座標の写像：どこで単射が崩れるか
     flm04_kernel_image.png           Part II 正則・非正則な行列、核と像、Ax=b の解の集合
+    flm05_inverse_function.png       Part III 逆関数定理の条件と、局所と大域の違い
 
 各図は、描く値が本文の主張と一致することを assert で確認してから保存する。
 """
@@ -231,7 +232,73 @@ def flm04():
     plt.close(fig)
 
 
-FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04)
+# ------------------------------------------------------------------------------------- flm05
+def flm05():
+    """Part III：逆関数定理の条件と、局所と大域の違い。"""
+    fig, axes = plt.subplots(2, 2, figsize=(14, 11))
+
+    # (a) f(x) = x + 2x^2 sin(1/x) の導関数
+    ax = axes[0, 0]
+    fp = lambda x: 1 + 4 * x * np.sin(1 / x) - 2 * np.cos(1 / x)
+    xs = np.concatenate([np.linspace(-0.1, -1e-5, 400001), np.linspace(1e-5, 0.1, 400001)])
+    ax.plot(xs, fp(xs), color=C_A, lw=0.4)
+    ax.plot(0, 1, "o", color=C_BAD, ms=8, zorder=5)
+    ax.axhline(0, color="#333", lw=1)
+    for n in (5, 10, 20):
+        xn = 1 / (2 * np.pi * n)
+        assert np.isclose(fp(xn), -1.0)          # 0 のいくらでも近くで f' = -1 < 0
+    ax.annotate("$f'(0)=1$", (0, 1), (0.02, 2.2), fontsize=12, color=C_BAD, arrowprops=dict(arrowstyle="-|>", color=C_BAD))
+    ax.set_xlim(-0.1, 0.1), ax.set_ylim(-1.6, 3.6)
+    ax.set_xlabel("$x$"), ax.set_ylabel("$f'(x)$")
+    ax.set_title("(a) $f(x)=x+2x^2\\sin(1/x)$ の導関数：$f'(0)=1$ だが、\n$0$ のすぐ近くで $f'<0$ になる（$C^1$ でない → 局所的にも単射でない）", fontsize=11)
+
+    # (b) x^3 と 立方根
+    ax = axes[0, 1]
+    xx = np.linspace(-1.4, 1.4, 400)
+    ax.plot(xx, xx**3, color=C_A, lw=3, label="$f(x)=x^3$（$f'(0)=0$）")
+    yy = np.linspace(-1.4, 1.4, 4001)
+    ax.plot(yy, np.cbrt(yy), color=C_B, lw=3, label="逆写像 $\\sqrt[3]{y}$（$y=0$ で微分できない）")
+    assert np.allclose(np.cbrt(yy) ** 3, yy)
+    ax.plot([0, 0], [-0.5, 0.5], color=C_BAD, lw=2, ls=":", label="$y=0$ での接線は垂直")
+    ax.plot(xx, xx, color="#999", ls="--", lw=1)
+    ax.axhline(0, color="#ddd", lw=1, zorder=0), ax.axvline(0, color="#ddd", lw=1, zorder=0)
+    ax.set_xlim(-1.4, 1.4), ax.set_ylim(-1.4, 1.4), ax.set_aspect("equal")
+    ax.legend(fontsize=9, loc="lower right")
+    ax.set_title("(b) $\\det J=0$ でも全単射のことはある。\nただし逆写像は微分できない（逆関数定理の結論が崩れる）", fontsize=11)
+
+    # (c)(d) 複素指数関数 (u, v) -> (e^u cos v, e^u sin v)
+    E = lambda u, v: (np.exp(u) * np.cos(v), np.exp(u) * np.sin(v))
+    ax, bx = axes[1, 0], axes[1, 1]
+    us = np.linspace(-1.0, 0.6, 9)
+    strips = [((-np.pi, np.pi), C_A, "-"), ((np.pi, 3 * np.pi), C_B, "--")]
+    for (v0, v1), col, ls in strips:
+        ax.fill_between([-1.0, 0.6], v0, v1, color=col, alpha=0.15)
+        for vv in np.linspace(v0, v1, 9):
+            ax.plot([-1.0, 0.6], [vv, vv], color=col, lw=0.8)
+            X, Y = E(np.linspace(-1.0, 0.6, 60), vv)
+            bx.plot(X, Y, color=col, lw=1.4 if ls == "-" else 1.0, ls=ls)
+        for u0 in us:
+            ax.plot([u0, u0], [v0, v1], color=col, lw=0.8)
+            X, Y = E(u0, np.linspace(v0, v1, 200))
+            bx.plot(X, Y, color=col, lw=1.4 if ls == "-" else 1.0, ls=ls)
+    p = (0.2, 0.7)
+    q = (0.2, 0.7 + 2 * np.pi)
+    ax.plot(*p, "o", color=C_A, ms=9), ax.plot(*q, "o", color=C_B, ms=9)
+    assert np.allclose(E(*p), E(*q))
+    bx.plot(*E(*p), "o", color="#222", ms=9)
+    bx.annotate("2つの点が\n同じ点に写る", E(*p), (E(*p)[0] + 0.3, E(*p)[1] + 0.5), fontsize=10,
+                arrowprops=dict(arrowstyle="-|>", color="#222"))
+    ax.set_xlabel("$u$"), ax.set_ylabel("$v$")
+    ax.set_yticks(np.arange(-1, 4) * np.pi), ax.set_yticklabels(["$-\\pi$", "$0$", "$\\pi$", "$2\\pi$", "$3\\pi$"])
+    ax.set_title("(c) 定義域：高さ $2\\pi$ の帯（青と橙）", fontsize=11)
+    bx.set_aspect("equal"), bx.set_xlim(-2.1, 2.1), bx.set_ylim(-2.1, 2.1)
+    bx.set_title("(d) $(u,v)\\mapsto(e^u\\cos v,\\ e^u\\sin v)$：どちらの帯も、同じ円環を覆う\n$\\det J=e^{2u}\\neq0$（どこでも局所的に全単射）だが、全体では単射でない", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "flm05_inverse_function.png", dpi=150)
+    plt.close(fig)
+
+
+FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04, flm05=flm05)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
