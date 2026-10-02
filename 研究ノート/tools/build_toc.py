@@ -1,8 +1,14 @@
-"""研究ノート/02_微分幾何/christoffel_riemann_intro.md の目次（全体と各 Part の小目次）とアンカーを生成・更新するスクリプト。
+"""研究ノートの目次（全体と各 Part の小目次）とアンカーを生成・更新するスクリプト。
 
 実行（リポジトリのルートから）:
-    uv run python 研究ノート/tools/build_toc.py            # 更新して書き込む
+    uv run python 研究ノート/tools/build_toc.py            # christoffel_riemann_intro.md を更新して書き込む
     uv run python 研究ノート/tools/build_toc.py --check    # 書き込まずに、整合性だけ検査する
+    uv run python 研究ノート/tools/build_toc.py 研究ノート/02_微分幾何/lie_derivative.md   # 別のノートを指定する
+
+節番号の付け方は2通りに対応する:
+  Part ごとの番号（"## 1." が Part ごとに 1 から始まる）       → アンカーは p{n}-1（既定）
+  ノート全体の通し番号（"## 12."、"## 0-3."、"### 2-1." など） → アンカーは s12、s0-3、s2-1
+  後者を使うノートには、本文のどこかに <!-- toc-style: global --> と書いておく。
 
 やること:
   1. 各見出し（# Part…, ## 1. …, ### 4-c. …, ## A-3. … など）の直前に、アンカー <a id="..."></a> を入れる
@@ -24,11 +30,13 @@ import sys
 from pathlib import Path
 
 FILE = Path(__file__).resolve().parent.parent / "02_微分幾何" / "christoffel_riemann_intro.md"
-ROMAN = {"0": 0, "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8, "IX": 9}
+ROMAN = {"0": 0, "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8, "IX": 9,
+         "X": 10, "XI": 11, "XII": 12, "XIII": 13, "XIV": 14, "XV": 15}
 
 LATEX = {r"\Gamma": "Γ", r"\partial": "∂", r"\nabla": "∇", r"\theta": "θ", r"\phi": "φ", r"\Omega": "Ω", r"\Sigma": "Σ",
          r"\ne": "≠", r"\sqrt": "√", r"\ln": "ln", r"\det": "det", r"\tilde": "~", r"\mathbf": "", r"\mathbb": "",
-         r"\operatorname": "", r"\bar": "", r"\varepsilon": "ε", r"\delta": "δ", r"\mu": "μ", r"\nu": "ν", r"\ast": "*"}
+         r"\operatorname": "", r"\bar": "", r"\varepsilon": "ε", r"\delta": "δ", r"\mu": "μ", r"\nu": "ν", r"\ast": "*",
+         r"\mathcal": "", r"\mathfrak": "", r"\mathrm": "", r"\text": "", r"\circ": "∘", r"\times": "×"}
 
 
 def plain(title):
@@ -44,11 +52,11 @@ def plain(title):
 
     t = re.sub(r"\$([^$]+)\$", conv, t)
     # Markdown の記号（_ * [ ]）が、リンク文字列の中で強調やリンクとして解釈されないようにする
-    t = t.replace("[", "(").replace("]", ")").replace("_", r"\_").replace("*", r"\*")
+    t = t.replace("[", r"\[").replace("]", r"\]").replace("_", r"\_").replace("*", r"\*")
     return t.strip()
 
 
-def classify(lines):
+def classify(lines, global_style=False):
     """各行を走査して、見出しの情報 [(行番号, レベル, id, 見出し文字列, 親 Part の id)] を返す"""
     out, warn = [], []
     part = None
@@ -95,6 +103,10 @@ def classify(lines):
                 hid = ms.group(1)
             elif text.endswith("まとめ"):
                 hid = f"{letter}-sum"
+        elif global_style:
+            ms = re.match(r"^(\d+(?:-\d+)*(?:-[a-z])?)\.", text)
+            if ms:
+                hid = f"s{ms.group(1)}"
         else:
             ms = re.match(r"^(\d+)(?:-([a-z]))?\.", text)
             if ms:
@@ -113,7 +125,7 @@ def build(text):
     t = re.sub(r'<a id="(?!toc")[^"]+"></a>\n\n', "", t)  # 目次の戻り先（toc）は手書きなので残す
     t = re.sub(r"<!-- part-toc:start -->\n.*?<!-- part-toc:end -->\n\n", "", t, flags=re.S)
     lines = t.split("\n")
-    heads, warn = classify(lines)
+    heads, warn = classify(lines, global_style="<!-- toc-style: global -->" in t)
 
     ids = [h[2] for h in heads]
     dup = {x for x in ids if ids.count(x) > 1}
@@ -171,7 +183,11 @@ def build(text):
 
 
 def main():
+    global FILE
     check = "--check" in sys.argv
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if args:
+        FILE = Path(args[0]).resolve()
     raw = FILE.read_bytes().decode("utf-8")
     new, heads, warn, nlinks = build(raw)
     n1 = sum(1 for h in heads if h[1] == 1)
