@@ -103,7 +103,7 @@ quantum/
 
 [lie_derivative.md](研究ノート/02_微分幾何/lie_derivative.md)（リー微分）にも、目次と、図7枚・動画（GIF）2本があります（流れの例、押し出しと引き戻し、流れで四角形を一周したずれ、面積と発散、キリングベクトル、クレローの関係など。ファイル名は `lie` で始まります）。
 
-[functions_linear_maps_derivatives_integrals.md](研究ノート/01_基礎・ベクトル解析/functions_linear_maps_derivatives_integrals.md)（関数・線形写像・微分・積分）にも、目次と図6枚があります（単射・全射の矢印図、極座標の写像、核と像、逆関数定理の条件、変数変換など。図は `研究ノート/01_基礎・ベクトル解析/figures/` にあります）。
+[functions_linear_maps_derivatives_integrals.md](研究ノート/01_基礎・ベクトル解析/functions_linear_maps_derivatives_integrals.md)（関数・線形写像・微分・積分）にも、目次と図9枚があります（単射・全射の矢印図、極座標の写像、核と像、逆関数定理の条件、変数変換、行列指数関数、ノルムと内積、フーリエ級数など。図は `研究ノート/01_基礎・ベクトル解析/figures/` にあります）。
 
 図と動画は matplotlib で生成しています。図によっては、本文の公式（ガウスの公式、余因子行列の規則、双曲面の計量など）が成り立つことを、スクリプト内で数値確認してから描いています。
 
@@ -151,7 +151,7 @@ uv run python 研究ノート/02_微分幾何/figures/make_appendix_figures.py  
 uv run python 研究ノート/02_微分幾何/figures/make_animations.py           # 動画（GIF）6本。--mp4 を付けると MP4 も出力（ffmpeg が必要）
 uv run python 研究ノート/02_微分幾何/figures/make_lie_figures.py          # リー微分のノートの図7枚（lie01〜lie07）
 uv run python 研究ノート/02_微分幾何/figures/make_lie_animations.py       # リー微分のノートの動画（GIF）2本
-uv run python 研究ノート/01_基礎・ベクトル解析/figures/make_flm_figures.py # 関数・線形写像・微分・積分のノートの図6枚（flm01〜flm06）
+uv run python 研究ノート/01_基礎・ベクトル解析/figures/make_flm_figures.py # 関数・線形写像・微分・積分のノートの図9枚（flm01〜flm09）
 ```
 
 `index_typeset.py` は、添字を1つずつ色分け・結線して描くための組版部品で、`make_index_figures.py` から使われます。

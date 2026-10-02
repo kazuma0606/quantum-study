@@ -12,6 +12,8 @@
     flm05_inverse_function.png       Part III 逆関数定理の条件と、局所と大域の違い
     flm06_change_of_variables.png    Part V 変数変換 dx dy = r dr dθ の意味
     flm07_matrix_exponential.png     Part VIII 行列指数関数：局所と大域、det e^{tA} = e^{t tr A}
+    flm08_norms.png                  Part IX ノルムの取り方と、微分が連続でないこと
+    flm09_inner_product_fourier.png  Part IX 内積で変わる勾配、フーリエ級数、パーセバルの等式
 
 各図は、描く値が本文の主張と一致することを assert で確認してから保存する。
 """
@@ -408,12 +410,115 @@ def flm07():
     plt.close(fig)
 
 
+# ------------------------------------------------------------------------------------- flm08
+def flm08():
+    """Part IX：ノルムの取り方。有限次元では同値、関数空間では結論が変わる。微分は連続でない。"""
+    fig, axes = plt.subplots(1, 3, figsize=(17, 5.4))
+
+    # (a) R^2 の単位球
+    ax = axes[0]
+    th = np.linspace(0, 2 * np.pi, 400)
+    ax.plot(np.cos(th), np.sin(th), color=C_A, lw=2.5, label="$|v|_2=1$（ふつうの長さ）")
+    ax.plot([1, 0, -1, 0, 1], [0, 1, 0, -1, 0], color=C_B, lw=2.5, label="$|v|_1=|v_1|+|v_2|=1$")
+    ax.plot([1, -1, -1, 1, 1], [1, 1, -1, -1, 1], color="#2ca02c", lw=2.5, label="$|v|_\\infty=\\max(|v_1|,|v_2|)=1$")
+    v = np.c_[np.cos(th), np.sin(th)] * np.random.default_rng(0).uniform(0.1, 2, (400, 1))
+    n1, n2, ni = np.abs(v).sum(1), np.hypot(v[:, 0], v[:, 1]), np.abs(v).max(1)
+    assert np.all(ni <= n2 + 1e-12) and np.all(n2 <= n1 + 1e-12) and np.all(n1 <= 2 * ni + 1e-12)   # 同値性
+    ax.set_aspect("equal"), ax.set_xlim(-1.6, 1.6), ax.set_ylim(-1.6, 1.6)
+    ax.axhline(0, color="#eee", lw=1, zorder=0), ax.axvline(0, color="#eee", lw=1, zorder=0)
+    ax.legend(fontsize=9, loc="lower center", bbox_to_anchor=(0.5, -0.02))
+    ax.set_title("(a) $\\mathbb{R}^2$ の3つのノルムの「単位円」\n形は違うが、互いに定数倍で挟める（同値）", fontsize=11)
+
+    # (b) x^n
+    ax = axes[1]
+    xs = np.linspace(0, 1, 400)
+    cmap = plt.get_cmap("viridis")
+    ns = [1, 2, 5, 10, 30, 100]
+    for k, n in enumerate(ns):
+        ax.plot(xs, xs**n, color=cmap(k / len(ns)), lw=2, label=f"$x^{{{n}}}$：$\\|\\cdot\\|_\\infty=1$、$\\|\\cdot\\|_2={1 / np.sqrt(2 * n + 1):.3f}$")
+        assert np.isclose(np.sqrt(np.trapezoid(xs ** (2 * n), xs)), 1 / np.sqrt(2 * n + 1), atol=2e-3)
+    ax.set_xlim(0, 1), ax.set_ylim(0, 1.05), ax.set_xlabel("$x$")
+    ax.legend(fontsize=8.5, loc="upper left")
+    ax.set_title("(b) $x^n$（$[0,1]$ 上）：$L^2$ ノルムでは $0$ に近づくが、\n最大値ノルムでは近づかない（ノルムで結論が変わる）", fontsize=11)
+
+    # (c) sin(nx)/n と、その導関数 cos(nx)
+    ax = axes[2]
+    xs = np.linspace(0, 2 * np.pi, 2000)
+    for n, col in [(2, C_A), (8, C_B), (24, "#2ca02c")]:
+        ax.plot(xs, np.sin(n * xs) / n, color=col, lw=2, label=f"$f_{{{n}}}=\\sin({n}x)/{n}$（最大値 $1/{n}$）")
+    ax.plot(xs, np.cos(24 * xs), color="#2ca02c", lw=0.8, alpha=0.5, label="$f_{24}'=\\cos(24x)$（最大値 $1$）")
+    ax.set_xlim(0, 2 * np.pi), ax.set_ylim(-1.15, 1.55), ax.set_xlabel("$x$")
+    ax.set_xticks([0, np.pi, 2 * np.pi]), ax.set_xticklabels(["$0$", "$\\pi$", "$2\\pi$"])
+    ax.legend(fontsize=8.5, loc="upper right", ncol=2)
+    ax.set_title("(c) $f_n\\to0$ でも $f_n'=\\cos(nx)$ は $0$ に近づかない：\n微分は、最大値ノルムについて連続でない", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "flm08_norms.png", dpi=150)
+    plt.close(fig)
+
+
+# ------------------------------------------------------------------------------------- flm09
+def flm09():
+    """Part IX：内積で変わる勾配、フーリエ級数（関数空間の座標）、パーセバルの等式。"""
+    fig, axes = plt.subplots(1, 3, figsize=(17, 5.6))
+
+    # (a) f(x,y) = x + y の勾配を、2つの内積で
+    ax = axes[0]
+    g = np.linspace(-1.5, 1.5, 7)
+    for c in np.linspace(-3, 3, 13):
+        ax.plot([-2, 2], [c + 2, c - 2], color="#dddddd", lw=1)
+    G = np.diag([1.0, 4.0])
+    grad_I = np.array([1.0, 1.0])
+    grad_G = np.linalg.solve(G, grad_I)
+    assert np.allclose(grad_G, [1, 0.25]) and np.isclose(grad_G @ G @ np.array([0.3, -0.7]), 0.3 - 0.7)   # <grad, v>_G = df(v)
+    p = np.array([0.0, 0.0])
+    arrow(ax, p, 0.9 * grad_I / np.linalg.norm(grad_I) * 1.2, C_A)
+    arrow(ax, p, 1.2 * grad_G / np.linalg.norm(grad_G), C_B)
+    ax.text(0.62, 0.95, "ふつうの内積での\n$\\mathrm{grad}\\,f=(1,1)$", color=C_A, fontsize=10)
+    ax.text(0.45, -0.38, "内積 $\\mathrm{diag}(1,4)$ での\n$\\mathrm{grad}\\,f=(1,\\ 1/4)$", color=C_B, fontsize=10)
+    ax.set_xlim(-1.5, 1.8), ax.set_ylim(-1.5, 1.8), ax.set_aspect("equal")
+    ax.set_title("(a) $f(x,y)=x+y$：同じ $df$ でも、内積が違うと\n$\\mathrm{grad}\\,f$（灰色の等高線に「垂直」な向き）が変わる", fontsize=11)
+
+    # (b) f(x) = x のフーリエ部分和
+    ax = axes[1]
+    xs = np.linspace(-np.pi, np.pi, 2000)
+    ax.plot(xs, xs, color="#222", lw=2.5, label="$f(x)=x$")
+    for N, col in [(1, C_A), (3, C_B), (10, "#2ca02c")]:
+        S = sum(2 * (-1) ** (k + 1) * np.sin(k * xs) / k for k in range(1, N + 1))
+        err = np.sqrt(np.trapezoid((xs - S) ** 2, xs))
+        exact = np.sqrt(2 * np.pi**3 / 3 - sum(4 * np.pi / k**2 for k in range(1, N + 1)))
+        assert abs(err - exact) < 1e-3                      # 誤差 = 残りの係数の2乗和の平方根（直交射影）
+        ax.plot(xs, S, color=col, lw=1.8, label=f"$N={N}$ までの和（$L^2$ 誤差 {err:.2f}）")
+    ax.set_xlim(-np.pi, np.pi), ax.set_ylim(-4, 4)
+    ax.set_xticks([-np.pi, 0, np.pi]), ax.set_xticklabels(["$-\\pi$", "$0$", "$\\pi$"])
+    ax.legend(fontsize=9, loc="upper left")
+    ax.set_title("(b) $x=\\sum_n\\frac{2(-1)^{n+1}}{n}\\sin nx$：フーリエ係数は、\n正規直交基底 $\\{\\sin nx/\\sqrt{\\pi}\\}$ での「座標」", fontsize=11)
+
+    # (c) パーセバル → π²/6
+    ax = axes[2]
+    Ns = np.arange(1, 201)
+    partial = np.cumsum(1 / Ns**2)
+    ax.plot(Ns, partial, color=C_A, lw=2, label="$\\sum_{n=1}^N 1/n^2$")
+    ax.axhline(np.pi**2 / 6, color=C_BAD, ls="--", lw=1.5, label="$\\pi^2/6\\approx1.6449$")
+    assert abs(partial[-1] - np.pi**2 / 6) < 1 / 199
+    ax.set_xscale("log"), ax.set_xlabel("$N$"), ax.set_ylim(0.9, 1.75)
+    ax.legend(fontsize=10, loc="lower right")
+    ax.set_title("(c) 長さの2乗 = 座標の2乗和（パーセバルの等式）から\n$\\sum1/n^2=\\pi^2/6$", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "flm09_inner_product_fourier.png", dpi=150)
+    plt.close(fig)
+
+
+def arrow(ax, p, v, color, lw=2.5):
+    ax.add_patch(FancyArrowPatch(p, p + v, arrowstyle="-|>", mutation_scale=16, color=color, lw=lw))
+
+
 def shoelace_area(Pts):
     x, y = Pts[:, 0], Pts[:, 1]
     return 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
 
 
-FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04, flm05=flm05, flm06=flm06, flm07=flm07)
+FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04, flm05=flm05, flm06=flm06, flm07=flm07,
+            flm08=flm08, flm09=flm09)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
