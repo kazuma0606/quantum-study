@@ -14,6 +14,7 @@
     lie07_clairaut.png         §31-1 球面の測地線とクレローの関係
     lie08_picard.png           付録A-4 逐次近似（x^2 ∂x）
     lie09_commuting_frames.png 付録B-5 可換な流れで作った座標と、可換でない枠
+    lie10_liouville.png        付録C-6 ハミルトンの流れは相空間の面積を保つ
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -480,7 +481,48 @@ def lie09():
     plt.close(fig)
 
 
-FIGS = dict(lie01=lie01, lie02=lie02, lie03=lie03, lie04=lie04, lie05=lie05, lie06=lie06, lie07=lie07, lie08=lie08, lie09=lie09)
+# ------------------------------------------------------------------------------------- lie10
+def lie10():
+    """付録C-6：相空間の円板を、ハミルトンの流れで運ぶ（調和振動子と振り子）。面積は変わらない。"""
+    th = np.linspace(0, 2 * np.pi, 600, endpoint=False)
+    cases = [
+        ("調和振動子  $H=\\frac{1}{2}(p^2+q^2)$", lambda q, p: 0.5 * (p**2 + q**2), lambda w: np.array([w[1], -w[0]]),
+         np.array([1.3, 0.0]), [0, 0.8, 1.6, 2.4], (-2.2, 2.2), (-2.2, 2.2)),
+        ("振り子  $H=\\frac{1}{2}p^2-\\cos q$", lambda q, p: 0.5 * p**2 - np.cos(q), lambda w: np.array([w[1], -np.sin(w[0])]),
+         np.array([0.0, 1.2]), [0, 2, 4, 6], (-np.pi, np.pi), (-2.6, 2.6)),
+    ]
+    Rb = 0.45
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6.2))
+    cmap = plt.get_cmap("viridis")
+    for ax, (title, H, F, c, times, xl, yl) in zip(axes, cases):
+        qq, pp = np.meshgrid(np.linspace(*xl, 300), np.linspace(*yl, 300))
+        ax.contour(qq, pp, H(qq, pp), levels=18, colors="#cccccc", linewidths=0.8, linestyles="solid")
+        B0 = c + Rb * np.c_[np.cos(th), np.sin(th)]
+        A0 = shoelace(B0)
+        rows = []
+        for k, T in enumerate(times):
+            BT = B0 if T == 0 else np.array([solve_ivp(lambda _, w: F(w), [0, T], b, rtol=1e-11, atol=1e-12).y[:, -1] for b in B0])
+            A = shoelace(BT)
+            assert abs(A - A0) < 2e-5        # リウヴィルの定理：相空間の面積は変わらない
+            col = cmap(k / (len(times) - 0.5))
+            ax.fill(BT[:, 0], BT[:, 1], color=col, alpha=0.55)
+            ax.plot(BT[:, 0], BT[:, 1], color=col, lw=1.2)
+            cen = BT.mean(axis=0)
+            ax.text(*cen, f"$t={T:g}$", fontsize=10, ha="center", va="center", color="white" if k < 2 else "black")
+            rows.append(f"$t={T:g}$：{A:.4f}")
+        ax.text(0.02, 0.03, "面積\n" + "\n".join(rows), transform=ax.transAxes, fontsize=10, va="bottom",
+                bbox=dict(boxstyle="round", fc="white", ec="#ccc"))
+        ax.set_xlim(*xl), ax.set_ylim(*yl), ax.set_aspect("equal")
+        ax.set_xlabel("$q$（位置）"), ax.set_ylabel("$p$（運動量）")
+        ax.set_title(title, fontsize=12)
+    fig.suptitle("ハミルトンの流れは、相空間の面積を保つ（付録C-2、リウヴィルの定理）。灰色の線は $H$ の等高線", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(OUT / "lie10_liouville.png", dpi=150)
+    plt.close(fig)
+
+
+FIGS = dict(lie01=lie01, lie02=lie02, lie03=lie03, lie04=lie04, lie05=lie05, lie06=lie06, lie07=lie07, lie08=lie08, lie09=lie09,
+            lie10=lie10)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
