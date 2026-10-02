@@ -101,12 +101,15 @@ quantum/
 - 添字の読み方の図：自由添字とダミー添字、δ による添字のすり替え、$\Gamma$ とリーマン曲率テンソルの添字の意味
 - 目次、各 Part の小目次、表、Mermaid の図、重要な公式の白いカード
 
+[lie_derivative.md](研究ノート/02_微分幾何/lie_derivative.md)（リー微分）にも、目次と、図7枚・動画（GIF）2本があります（流れの例、押し出しと引き戻し、流れで四角形を一周したずれ、面積と発散、キリングベクトル、クレローの関係など。ファイル名は `lie` で始まります）。
+
 図と動画は matplotlib で生成しています。図によっては、本文の公式（ガウスの公式、余因子行列の規則、双曲面の計量など）が成り立つことを、スクリプト内で数値確認してから描いています。
 
 目次と小目次は、見出しから自動で生成します（見出しを直したあとに実行します）。
 
 ```bash
-uv run python 研究ノート/tools/build_toc.py
+uv run python 研究ノート/tools/build_toc.py                                        # クリストッフェル記号のノート
+uv run python 研究ノート/tools/build_toc.py 研究ノート/02_微分幾何/lie_derivative.md   # リー微分のノート
 ```
 
 ### ノートの表示について
@@ -143,6 +146,8 @@ uv run python 研究ノート/02_微分幾何/figures/make_cofactor_figure.py   
 uv run python 研究ノート/02_微分幾何/figures/make_index_figures.py         # 図10〜13（添字の読み方）
 uv run python 研究ノート/02_微分幾何/figures/make_appendix_figures.py      # 図14〜22（付録A・B・C）
 uv run python 研究ノート/02_微分幾何/figures/make_animations.py           # 動画（GIF）6本。--mp4 を付けると MP4 も出力（ffmpeg が必要）
+uv run python 研究ノート/02_微分幾何/figures/make_lie_figures.py          # リー微分のノートの図7枚（lie01〜lie07）
+uv run python 研究ノート/02_微分幾何/figures/make_lie_animations.py       # リー微分のノートの動画（GIF）2本
 ```
 
 `index_typeset.py` は、添字を1つずつ色分け・結線して描くための組版部品で、`make_index_figures.py` から使われます。
