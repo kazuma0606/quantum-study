@@ -8,6 +8,7 @@
     flm01_injective_surjective.png   Part I §4 単射・全射・全単射の矢印図
     flm02_restriction_inverse.png    Part I §7 制限して全単射にし、逆写像を作る（√, arcsin, ln）
     flm03_polar_map.png              Part I §8 極座標の写像：どこで単射が崩れるか
+    flm04_kernel_image.png           Part II 正則・非正則な行列、核と像、Ax=b の解の集合
 
 各図は、描く値が本文の主張と一致することを assert で確認してから保存する。
 """
@@ -159,7 +160,78 @@ def flm03():
     plt.close(fig)
 
 
-FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03)
+# ------------------------------------------------------------------------------------- flm04
+def flm04():
+    """Part II：正則な行列（面積が |det| 倍）、正則でない行列（核と像）、Ax=b の解の集合（特解＋核）。"""
+    fig, axes = plt.subplots(1, 3, figsize=(16.5, 5.6))
+    sq = np.array([[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]], float)
+    g = np.linspace(-3, 3, 13)
+
+    # (a) 正則
+    ax = axes[0]
+    A = np.array([[2.0, 1.0], [0.5, 1.5]])
+    for c in g:
+        for P in (np.c_[np.full(50, c), np.linspace(-3, 3, 50)], np.c_[np.linspace(-3, 3, 50), np.full(50, c)]):
+            Q = P @ A.T
+            ax.plot(Q[:, 0], Q[:, 1], color="#dddddd", lw=0.8)
+    ax.fill(sq[:, 0], sq[:, 1], color=C_A, alpha=0.35)
+    S = sq @ A.T
+    ax.fill(S[:, 0], S[:, 1], color=C_B, alpha=0.45)
+    area = 0.5 * abs(np.dot(S[:-1, 0], np.roll(S[:-1, 1], -1)) - np.dot(S[:-1, 1], np.roll(S[:-1, 0], -1)))
+    assert np.isclose(area, abs(np.linalg.det(A)))
+    ax.text(0.5, 0.5, "面積 1", ha="center", va="center", fontsize=10)
+    ax.text(*(S[:-1].mean(axis=0) + [0.35, 0.25]), f"面積 $|\\det A|={abs(np.linalg.det(A)):g}$", ha="center", fontsize=10)
+    ax.set_title("$\\det A\\neq0$：全単射。正方形は平行四辺形に写り、\n面積は $|\\det A|$ 倍", fontsize=11)
+    ax.set_xlim(-1, 4), ax.set_ylim(-1, 3), ax.set_aspect("equal")
+    ax.text(0.02, 0.02, "$A$ の行：$(2,\\ 1)$、$(0.5,\\ 1.5)$", transform=ax.transAxes, fontsize=11)
+
+    # (b) 正則でない：核と像
+    ax = axes[1]
+    B = np.array([[1.0, 2.0], [2.0, 4.0]])
+    assert abs(np.linalg.det(B)) < 1e-12
+    k = np.array([-2.0, 1.0]) / np.sqrt(5)       # 核の向き
+    im = np.array([1.0, 2.0]) / np.sqrt(5)       # 像の向き
+    assert np.allclose(B @ k, 0)
+    ts = np.linspace(-4, 4, 2)
+    ax.plot(ts * k[0], ts * k[1], color=C_BAD, lw=3, label="核 $\\ker B$（すべて $0$ に写る）")
+    ax.plot(ts * im[0], ts * im[1], color=C_B, lw=3, label="像 $\\mathrm{im}\\,B$（平面全体がこの直線に）")
+    S = sq @ B.T
+    ax.fill(sq[:, 0], sq[:, 1], color=C_A, alpha=0.35, label="正方形")
+    ax.plot(S[:, 0], S[:, 1], color=C_B, lw=6, alpha=0.5, solid_capstyle="round")
+    for s in [-1.5, -0.75, 0.75, 1.5]:
+        ax.plot(*(s * k), "o", color=C_BAD, ms=6)
+    ax.plot(0, 0, "o", color="#222", ms=7)
+    ax.set_title("$\\det B=0$：単射でも全射でもない。核の方向が\nつぶれ、平面が直線に写る（面積 0）", fontsize=11)
+    ax.set_xlim(-2.5, 3.5), ax.set_ylim(-2, 3), ax.set_aspect("equal")
+    ax.legend(fontsize=9, loc="lower right")
+    ax.text(0.02, 0.92, "$B$ の行：$(1,\\ 2)$、$(2,\\ 4)$", transform=ax.transAxes, fontsize=11)
+
+    # (c) Bx = b の解の集合
+    ax = axes[2]
+    b = np.array([3.0, 6.0])
+    xp = np.array([3.0, 0.0])
+    assert np.allclose(B @ xp, b)
+    for s in np.linspace(-2, 2, 5):
+        assert np.allclose(B @ (xp + s * np.array([-2.0, 1.0])), b)
+    ts = np.linspace(-8, 8, 2)
+    ax.plot(ts * k[0], ts * k[1], color=C_BAD, lw=2, ls="--", label="核（$Bx=0$ の解）")
+    line = xp + np.outer(np.linspace(-8, 8, 2), k)
+    ax.plot(line[:, 0], line[:, 1], color="#7b2fbf", lw=3, label="$Bx=b$ の解（特解＋核）")
+    ax.plot(*xp, "o", color="#7b2fbf", ms=8)
+    ax.annotate("特解 $x_p=(3,0)$", xp, xp + [0.1, 0.5], fontsize=10, color="#7b2fbf")
+    ax.annotate("", xy=xp, xytext=(0, 0), arrowprops=dict(arrowstyle="-|>", color="#7b2fbf", lw=1.5))
+    ax.plot(0, 0, "o", color="#222", ms=6)
+    ax.set_title("$Bx=b$（$b=(3,6)$）の解は、核を特解の分だけ\n平行移動した直線", fontsize=11)
+    ax.set_xlim(-2.5, 4.5), ax.set_ylim(-2, 3), ax.set_aspect("equal")
+    ax.legend(fontsize=9, loc="lower left")
+    for ax in axes:
+        ax.axhline(0, color="#eee", lw=1, zorder=0), ax.axvline(0, color="#eee", lw=1, zorder=0)
+    fig.tight_layout()
+    fig.savefig(OUT / "flm04_kernel_image.png", dpi=150)
+    plt.close(fig)
+
+
+FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
