@@ -12,6 +12,7 @@
     lie05_divergence.png       §27 流れによる面積の変化と発散
     lie06_killing.png          §30・§31 平面と球面のキリングベクトル
     lie07_clairaut.png         §31-1 球面の測地線とクレローの関係
+    lie08_picard.png           付録A-4 逐次近似（x^2 ∂x）
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -377,7 +378,39 @@ def lie07():
     plt.close(fig)
 
 
-FIGS = dict(lie01=lie01, lie02=lie02, lie03=lie03, lie04=lie04, lie05=lie05, lie06=lie06, lie07=lie07)
+# ------------------------------------------------------------------------------------- lie08
+def lie08():
+    """付録A-4：X = x^2 ∂x の逐次近似。x0 = 1。"""
+    import sympy as sp
+
+    t, s = sp.symbols("t s")
+    it = [sp.Integer(1)]
+    for _ in range(7):
+        it.append(sp.expand(1 + sp.integrate(it[-1].subs(t, s) ** 2, (s, 0, t))))
+    exact_series = sp.series(1 / (1 - t), t, 0, 8).removeO()
+    for k in range(1, 8):  # k 回目の近似は、正しい解のテイラー展開と t^k の項まで一致する
+        diff = sp.Poly(sp.expand(it[k] - exact_series), t).all_coeffs()[::-1]
+        assert all(c == 0 for c in diff[: k + 1])
+    tt = np.linspace(0, 0.95, 300)
+    fig, ax = plt.subplots(figsize=(9.5, 5.4))
+    ax.axvspan(0, 1 / 8, color="#cde6c7", alpha=0.7, label="付録A-3 で存在が保証される範囲 $t\\leq 1/(8x_0)$")
+    ax.axvline(1.0, color=C_GRAY, ls="--", lw=1.2)
+    ax.text(1.008, 5, "発散する時刻 $t=1/x_0$", ha="left", va="center", rotation=90, fontsize=10, color="#555")
+    cmap = plt.get_cmap("viridis")
+    for k in range(8):
+        f = sp.lambdify(t, it[k], "numpy")
+        ax.plot(tt, f(tt) + 0 * tt, color=cmap(k / 8), lw=1.6, label=f"$x^{{({k})}}(t)$" if k in (0, 1, 2, 3, 7) else None)
+    ax.plot(tt, 1 / (1 - tt), color=C_BR, lw=3, label="正しい解 $x_0/(1-tx_0)$")
+    ax.set_xlim(0, 1.06), ax.set_ylim(0, 10)
+    ax.set_xlabel("$t$"), ax.set_ylabel("$x$")
+    ax.legend(fontsize=9, loc="upper left")
+    ax.set_title("$\\dot x=x^2,\\ x_0=1$ の逐次近似：$k$ 回目の近似は、解のテイラー展開と $t^k$ の項まで一致する", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "lie08_picard.png", dpi=150)
+    plt.close(fig)
+
+
+FIGS = dict(lie01=lie01, lie02=lie02, lie03=lie03, lie04=lie04, lie05=lie05, lie06=lie06, lie07=lie07, lie08=lie08)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
