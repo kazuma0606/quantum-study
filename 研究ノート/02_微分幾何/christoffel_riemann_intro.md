@@ -29,6 +29,7 @@
   - [2. なぜΓ^k\_ijV^iの中でi≠jなのか（表記上の理由と、意味上の理由）](#p4-2)
   - [3. 微分のいろいろ：どれが「座標に依らない」のか](#p4-3)
   - [4. なぜ外微分dにはΓの補正が要らないのか（rotとdivの非対称性の正体）](#p4-4)
+  - [5. 一般のテンソルの共変微分と、計量の共変微分がゼロであること](#p4-5)
 - [Part V：測地線方程式（応用として）](#p5)
   - [1. 「まっすぐな線」を任意の座標で書く](#p5-1)
   - [2. 測地線方程式は特性方程式では解けない](#p5-2)
@@ -1064,6 +1065,9 @@ $$
 - [2. なぜΓ^k\_ijV^iの中でi≠jなのか（表記上の理由と、意味上の理由）](#p4-2)
 - [3. 微分のいろいろ：どれが「座標に依らない」のか](#p4-3)
 - [4. なぜ外微分dにはΓの補正が要らないのか（rotとdivの非対称性の正体）](#p4-4)
+- [5. 一般のテンソルの共変微分と、計量の共変微分がゼロであること](#p4-5)
+  - [5-a. 一般の規則](#p4-5a)
+  - [5-b. 計量の共変微分はゼロ](#p4-5b)
 
 <!-- part-toc:end -->
 
@@ -1316,6 +1320,112 @@ $$
 
 **これが、[微分形式のノート](../03_多様体・微分形式・トポロジー/differential_forms_hodge_star.md)で見た「$\operatorname{rot}=d$は計量不要、$\operatorname{div}=\star d\star$は計量が必要」という非対称性の、本当の理由です。**
 
+<a id="p4-5"></a>
+
+## 5. 一般のテンソルの共変微分と、計量の共変微分がゼロであること
+
+ここまでは、添字が1個の量（反変ベクトル、共変ベクトル）の共変微分を扱ってきました。この節では添字が2個以上の量に広げ、Part VII 以降と付録で繰り返し使う2つの事実をまとめます。
+
+<a id="p4-5a"></a>
+
+### 5-a. 一般の規則
+
+**規則**：テンソルの共変微分は、偏微分に、添字1個ごとの補正項を足したものです。
+
+- 上付き添字1個ごとに、$+\Gamma$ の項が1つ付く（Part IV §1）
+- 下付き添字1個ごとに、$-\Gamma$ の項が1つ付く（Part IV §2）
+
+添字が2個の場合は、次のとおりです。
+
+$$
+\boxed{\nabla_lT_{ij}=\partial_lT_{ij}-\Gamma^k{}_{il}T_{kj}-\Gamma^k{}_{jl}T_{ik}}\qquad(\text{下付き2個：}(0,2)\text{型})
+$$
+
+$$
+\nabla_iT^l{}_j=\partial_iT^l{}_j+\Gamma^l{}_{mi}T^m{}_j-\Gamma^m{}_{ji}T^l{}_m\qquad(\text{上付き1個・下付き1個：}(1,1)\text{型})
+$$
+
+$(1,1)$ 型は、曲率の定義に使うので、Part VII §2 で詳しく導出します。$(0,2)$ 型は、同じ方法で導けます。
+
+**$(0,2)$ 型の確認**：任意のベクトル $V^i,W^j$ から、スカラー $f:=T_{ij}V^iW^j$ を作ります。スカラーの共変微分は偏微分と同じなので $\nabla_lf=\partial_lf$ です。左辺を、積の微分則で展開します：
+
+$$
+\nabla_lf=(\nabla_lT_{ij})V^iW^j+T_{ij}(\nabla_lV^i)W^j+T_{ij}V^i(\nabla_lW^j)
+$$
+
+反変ベクトルの共変微分 $\nabla_lV^i=\partial_lV^i+\Gamma^i{}_{kl}V^k$ と $\nabla_lW^j=\partial_lW^j+\Gamma^j{}_{kl}W^k$ を代入します：
+
+$$
+\nabla_lf=(\nabla_lT_{ij})V^iW^j+T_{ij}(\partial_lV^i)W^j+T_{ij}\Gamma^i{}_{kl}V^kW^j+T_{ij}V^i(\partial_lW^j)+T_{ij}V^i\Gamma^j{}_{kl}W^k
+$$
+
+一方、$\partial_lf$ は普通の積の微分で、
+
+$$
+\partial_lf=(\partial_lT_{ij})V^iW^j+T_{ij}(\partial_lV^i)W^j+T_{ij}V^i(\partial_lW^j)
+$$
+
+です。2式を等号で結ぶと、$\partial_lV^i$ と $\partial_lW^j$ を含む項は両辺に共通なので消えます：
+
+$$
+(\nabla_lT_{ij})V^iW^j+T_{ij}\Gamma^i{}_{kl}V^kW^j+T_{ij}\Gamma^j{}_{kl}V^iW^k=(\partial_lT_{ij})V^iW^j
+$$
+
+左辺の第2項と第3項を、$V^iW^j$ の形にそろえます。第2項ではダミー添字 $i$ と $k$ の名前を、第3項ではダミー添字 $j$ と $k$ の名前を入れ替えます：
+
+$$
+\big(\nabla_lT_{ij}+\Gamma^k{}_{il}T_{kj}+\Gamma^k{}_{jl}T_{ik}\big)V^iW^j=(\partial_lT_{ij})V^iW^j
+$$
+
+$V^i,W^j$ は任意なので、係数を比べて移項すると、上の囲みの式が得られます。
+
+<a id="p4-5b"></a>
+
+### 5-b. 計量の共変微分はゼロ
+
+$$
+\boxed{\nabla_lg_{ij}=0,\qquad\nabla_lg^{ij}=0}
+$$
+
+**$g_{ij}$について**：(0,2) 型の規則で $T=g$ とすると、
+
+$$
+\nabla_lg_{ij}=\partial_lg_{ij}-\Gamma^k{}_{il}g_{kj}-\Gamma^k{}_{jl}g_{ik}
+$$
+
+です。一方、Part II の (3-1) は、添字の名前を $(k,l)\to(l,k)$ と付け替えると、
+
+$$
+\partial_lg_{ij}=\Gamma^k{}_{li}g_{kj}+\Gamma^k{}_{lj}g_{ik}
+$$
+
+です。$\Gamma$ の下2添字の対称性（$\Gamma^k{}_{li}=\Gamma^k{}_{il}$、$\Gamma^k{}_{lj}=\Gamma^k{}_{jl}$）から、これは上の式の $\Gamma$ の項とちょうど一致するので、$\nabla_lg_{ij}=0$ です。
+
+(3-1) は、Part II で $\Gamma$ の公式を導いたときの出発点でした。つまり $\nabla g=0$ は新しい仮定ではなく、$\Gamma$ の定義 $\partial_j\mathbf e_i=\Gamma^k{}_{ij}\mathbf e_k$ から $g_{ij}=\mathbf e_i\cdot\mathbf e_j$ の微分を計算したときの式を、共変微分の言葉で言い直したものです。
+
+**$g^{ij}$について**：まず、$\delta^i{}_j$ の共変微分がゼロであることを確認します。$(1,1)$ 型の規則で $T=\delta$ とすると、$\partial_i\delta^q{}_j=0$ なので、
+
+$$
+\nabla_i\delta^q{}_j=\Gamma^q{}_{mi}\delta^m{}_j-\Gamma^m{}_{ji}\delta^q{}_m=\Gamma^q{}_{ji}-\Gamma^q{}_{ji}=0
+$$
+
+です（$\delta$ は添字をすり替えます。Part II §2）。次に、$g^{ik}g_{kj}=\delta^i{}_j$ の両辺を共変微分し、積の微分則を使います：
+
+$$
+(\nabla_lg^{ik})g_{kj}+g^{ik}(\nabla_lg_{kj})=\nabla_l\delta^i{}_j=0
+$$
+
+第2項は $\nabla_lg_{kj}=0$ で消えるので $(\nabla_lg^{ik})g_{kj}=0$ です。両辺に $g^{jm}$ を掛けて $j$ について和を取ると、$\nabla_lg^{im}=0$ が得られます。
+
+**帰結**：計量と逆計量は共変微分の外に出せます。したがって、添字の上げ下げと縮約は、共変微分と交換できます。例えば、
+
+$$
+\nabla_l\big(g^{ij}T_{ij}\big)=g^{ij}\nabla_lT_{ij}
+$$
+
+です（積の微分則で展開すると、$g^{ij}$ を微分した項がゼロになるため）。この性質は、次の Part VII §2-a と、付録A〜Cの導出で使います。
+
+
 ---
 
 <a id="p5"></a>
@@ -1551,6 +1661,7 @@ $$
 
 - [1. クリストッフェル記号はなぜテンソルでないのか](#p7-1)
 - [2. 共変微分の非可換性として曲率を定義する](#p7-2)
+  - [2-a. 添字を下げた曲率テンソルと、その対称性](#p7-2a)
 - [3. 幾何学的な意味（並行移動）](#p7-3)
 
 <!-- part-toc:end -->
@@ -1559,7 +1670,60 @@ $$
 
 ## 1. クリストッフェル記号はなぜテンソルでないのか
 
-もしデカルト座標のように $\Gamma=0$ にできる座標が存在するなら（実際、平坦な空間では常に存在します）、テンソルの変換則（線形・同次）に従う量なら、1つの座標系でゼロならどの座標系でもゼロのはずです。しかし極座標では $\Gamma\ne0$ でした。これは、$\Gamma$ の座標変換則が**線形でない**（2階微分を含む余分な項が付く）ことを意味します。この「余分な項」こそが、Part IIIで見た $A^k{}_a\partial_jJ^a{}_i$ という構成の中に、Aとその微分の掛け算という非線形な要素として埋め込まれています。
+もしデカルト座標のように $\Gamma=0$ にできる座標が存在するなら（実際、平坦な空間では常に存在します）、テンソルの変換則（線形・同次）に従う量なら、1つの座標系でゼロならどの座標系でもゼロのはずです。しかし極座標では $\Gamma\ne0$ でした。これは、$\Gamma$ の座標変換則が**線形でない**（2階微分を含む余分な項が付く）ことを意味します。
+
+この「余分な項」の正体を、実際に導出して確認します。
+
+**記法**：旧座標を $q^p$、新座標を $q'^i$ とし、座標の変換を次のヤコビ行列と、その逆行列で表します。
+
+$$
+J'^p{}_i:=\frac{\partial q^p}{\partial q'^i},\qquad A'^k{}_p:=\frac{\partial q'^k}{\partial q^p},\qquad A'^k{}_pJ'^p{}_i=\delta^k{}_i
+$$
+
+新旧の基底ベクトルは、連鎖律から $\mathbf e'_i=J'^m{}_i\,\mathbf e_m$ の関係にあります。
+
+**ステップ1**：$\mathbf e'_i$ を新座標 $q'^j$ で微分します。積の微分で2項に分かれます：
+
+$$
+\frac{\partial\mathbf e'_i}{\partial q'^j}=\frac{\partial J'^m{}_i}{\partial q'^j}\,\mathbf e_m+J'^m{}_i\,\frac{\partial\mathbf e_m}{\partial q'^j}
+$$
+
+**ステップ2**：第2項の $\partial\mathbf e_m/\partial q'^j$ を、連鎖律 $\dfrac{\partial}{\partial q'^j}=J'^n{}_j\dfrac{\partial}{\partial q^n}$ と、旧座標での $\Gamma$ の定義 $\dfrac{\partial\mathbf e_m}{\partial q^n}=\Gamma^p{}_{mn}\mathbf e_p$ で書き換えます。第1項は、ダミー添字の名前を $m\to p$ に付け替えます：
+
+$$
+\frac{\partial\mathbf e'_i}{\partial q'^j}=\Big(\frac{\partial J'^p{}_i}{\partial q'^j}+J'^m{}_iJ'^n{}_j\,\Gamma^p{}_{mn}\Big)\mathbf e_p
+$$
+
+**ステップ3**：右辺の $\mathbf e_p$ を、新しい基底 $\mathbf e'_k$ で書き直します（$\mathbf e_p=A'^k{}_p\,\mathbf e'_k$）。左辺は新座標での $\Gamma$ の定義 $\dfrac{\partial\mathbf e'_i}{\partial q'^j}=\Gamma'^k{}_{ij}\mathbf e'_k$ なので、係数を比べると：
+
+$$
+\boxed{\Gamma'^k{}_{ij}=A'^k{}_p\,J'^m{}_i\,J'^n{}_j\,\Gamma^p{}_{mn}+A'^k{}_p\,\frac{\partial^2q^p}{\partial q'^i\,\partial q'^j}}
+$$
+
+ここで、$\dfrac{\partial J'^p{}_i}{\partial q'^j}=\dfrac{\partial^2q^p}{\partial q'^j\partial q'^i}$ を使いました。
+
+**読み方**：
+
+- **第1項**は、テンソルの変換則そのものです（上付き1個に $A'$、下付き2個に $J'$ が掛かる）。
+- **第2項**が、余分な項です。旧座標の $\Gamma$ を含まず、**座標どうしの関係の2階微分**だけで決まります。これがあるので、$\Gamma$ はテンソルではありません。
+- 座標変換が1次式（$q^p=M^p{}_iq'^i+c^p$）なら、2階微分がゼロなので、余分な項は消えます。$\Gamma$ は、線形な座標変換の範囲ではテンソルのように振る舞います。
+- 旧座標をデカルト座標（$\Gamma=0$）に取ると、第1項が消えて $\Gamma'^k{}_{ij}=A'^k{}_p\,\partial_jJ'^p{}_i$ が残ります。これは Part III §1 で導出した公式そのものです。
+
+**共変微分が、この余分な項を打ち消すこと**：$\partial_jV^k$ を新座標に変換すると、$V'^k=A'^k{}_pV^p$ の微分から余分な項が出ます。逆行列の微分（Part III §2）$\dfrac{\partial A'^k{}_m}{\partial q'^j}=-A'^k{}_p\,\dfrac{\partial J'^p{}_i}{\partial q'^j}\,A'^i{}_m$ を使うと、その項は
+
+$$
+-A'^k{}_q\,\frac{\partial^2q^q}{\partial q'^j\partial q'^m}\,A'^m{}_pV^p
+$$
+
+です。一方、$\Gamma'^k{}_{ij}V'^i$ に含まれる第2項の寄与は、符号が逆で同じ形になり、
+
+$$
++A'^k{}_q\,\frac{\partial^2q^q}{\partial q'^i\partial q'^j}\,A'^i{}_pV^p
+$$
+
+です。2つの和はゼロになるので、$\nabla_jV^k=\partial_jV^k+\Gamma^k{}_{ij}V^i$ は、全体として正しくテンソルの変換則に従います。**$\Gamma$ は、偏微分の「余分な項」を打ち消すために、わざとテンソルでない形で設計されている量**だ、ということです。
+
+なお、付録A-11では、第二基本形式 $L_{ij}$ について同じ計算を行い、$\mathbf n$ との内積を取ることで、余分な項が消えることを確認します。
 
 <a id="p7-2"></a>
 
@@ -1734,6 +1898,78 @@ $$
 ![リーマン曲率テンソルの添字の意味と、添字の帳簿チェック](figures/fig13_riemann_indices.png)
 
 *① $R^l{}_{kij}V^k$ は、入力の成分 $k$ を、結果の成分 $l$ に写します。$i,j$ は動く順序で、入れ替えると符号が反転します。② 公式のどの項でも、$l$ は上に1個、$k,i,j$ は下に1個ずつ現れ、ダミー添字 $m$ は上下のペアで消えます。③ 各項の、どこにどの文字があるかを表にした「帳簿」です。添字の付け間違いに気づく検算に使えます。*
+
+<a id="p7-2a"></a>
+
+### 2-a. 添字を下げた曲率テンソルと、その対称性
+
+曲率の添字を下げたものを、次のように定義します：
+
+$$
+R_{lkij}:=g_{lm}R^m{}_{kij}
+$$
+
+逆に、$R^l{}_{kij}=g^{lm}R_{mkij}$ です。Part VIII §3 では、球面の成分 $R_{\theta\phi\theta\phi}=g_{\theta\theta}R^\theta{}_{\phi\theta\phi}$ として使います。
+
+**最後の2つの添字 $(i,j)$ について反対称**：定義 $(\nabla_i\nabla_j-\nabla_j\nabla_i)V^l=R^l{}_{kij}V^k$ で $i\leftrightarrow j$ を入れ替えると、左辺の符号だけが反転します。したがって、
+
+$$
+R^l{}_{kij}=-R^l{}_{kji},\qquad R_{lkij}=-R_{lkji}
+$$
+
+です。
+
+**最初の2つの添字 $(l,k)$ について反対称**：
+
+$$
+R_{lkij}=-R_{klij}
+$$
+
+これは、前者のように定義から見えるものではなく、$\nabla g=0$（Part IV §5-b）を使って示します。
+
+任意のベクトル場 $V^l$ から、スカラー $s:=g_{lm}V^lV^m$ を作ります。スカラーの2階共変微分は、共変ベクトルの規則（Part IV §2）から
+
+$$
+\nabla_i\nabla_js=\partial_i\partial_js-\Gamma^k{}_{ji}\partial_ks
+$$
+
+で、$i,j$ について対称なので、
+
+$$
+(\nabla_i\nabla_j-\nabla_j\nabla_i)s=0
+$$
+
+です。一方、$\nabla g=0$ から $g_{lm}$ は共変微分の外に出せるので、積の微分則を2回使うと、
+
+$$
+\nabla_i\nabla_js=g_{lm}\Big[(\nabla_i\nabla_jV^l)V^m+(\nabla_jV^l)(\nabla_iV^m)+(\nabla_iV^l)(\nabla_jV^m)+V^l(\nabla_i\nabla_jV^m)\Big]
+$$
+
+です。$i\leftrightarrow j$ を入れ替えて引くと、中央の2項は $i,j$ について対称なので消えます。残る項に曲率の定義を代入すると：
+
+$$
+0=g_{lm}\big(R^l{}_{kij}V^k\big)V^m+g_{lm}V^l\big(R^m{}_{kij}V^k\big)=2R_{lkij}V^lV^k
+$$
+
+（2つの項は、ダミー添字の名前を付け替えると同じになります。）これが任意の $V$ で成り立つので、$V$ に基底ベクトルを代入して成分を取り出します。
+
+- $V=\mathbf e_l$（$l$ 番目の基底）：$R_{llij}=0$（和は取りません）
+- $V=\mathbf e_l+\mathbf e_k$：$R_{llij}+R_{lkij}+R_{klij}+R_{kkij}=0$
+
+1つ目から $R_{llij}=R_{kkij}=0$ なので、2つ目は $R_{lkij}+R_{klij}=0$ になります。これで $R_{lkij}=-R_{klij}$ が示されました。
+
+**帰結1：2次元では、独立な成分は1つ**。2つの反対称性から、$l=k$ または $i=j$ の成分はゼロです。2次元で残る成分は、$(l,k)$ と $(i,j)$ がどちらも $(1,2)$ か $(2,1)$ の場合だけで、
+
+$$
+R_{1212}=-R_{2112}=-R_{1221}=R_{2121}
+$$
+
+のように、すべて $\pm R_{1212}$ です。Part VIII §3 で、球面の曲率の独立な成分が1つだったのは、この理由によります。
+
+**帰結2：リッチテンソルとの関係**：Part IX で定義するリッチテンソル $R_{kj}:=R^i{}_{kij}$ は、逆計量を使って $R_{kj}=g^{il}R_{lkij}$ と書けます。
+
+**一般の $n$ 次元の独立成分の数**：$n$ 次元では、上の2つの反対称性だけでは足りません。さらに、ペア交換対称性 $R_{lkij}=R_{ijlk}$ と、第一ビアンキ恒等式を使うと、独立な成分の数は $n^2(n^2-1)/12$ になります（$n=2$ で1個、$n=3$ で6個、$n=4$ で20個）。この2つは、このノートの導出では使わないので、証明は省略します。
+
 
 <a id="p7-3"></a>
 
@@ -2965,7 +3201,7 @@ $$
 \boxed{\nabla_lT_{ij}=\partial_lT_{ij}-\Gamma^k{}_{il}T_{kj}-\Gamma^k{}_{jl}T_{ik}}
 $$
 
-これはPart VII §2の一般規則（下付き添字ごとに$-\Gamma$の項が1つずつ付く）の、下付き添字が2個の場合です。Part VII §2と同じ方法で確認します。
+これはPart IV §5-aの一般規則（下付き添字ごとに$-\Gamma$の項が1つずつ付く）の、下付き添字が2個の場合です（本編にも同じ導出があります）。Part VII §2と同じ方法で確認します。
 
 任意のベクトル$V^i,W^j$を使って、スカラー$f:=T_{ij}V^iW^j$を作ります。スカラーの共変微分は偏微分と同じなので、$\nabla_lf=\partial_lf$です。
 
@@ -3017,7 +3253,7 @@ $$
 \boxed{\nabla_lg_{ij}=0,\qquad\nabla_lg^{ij}=0}
 $$
 
-詳しくは[リッチテンソルのノート](ricci_tensor_einstein_equations.md)の Part II で扱うので、ここでは簡易的な証明に止めます。Part II（およびA-2）で導出した関係式
+本編のPart IV §5-bに、Part IIの(3-1)から直接示す短い証明があります。詳しくは[リッチテンソルのノート](ricci_tensor_einstein_equations.md)の Part II で扱うので、ここでは簡易的な証明に止めます。Part II（およびA-2）で導出した関係式
 
 $$
 2\Gamma^m{}_{ab}g_{mc}=\partial_ag_{bc}+\partial_bg_{ac}-\partial_cg_{ab}\tag{B.1}
@@ -4556,7 +4792,7 @@ $$
 \bar R_{\mu\nu\alpha\beta}=-\bar R_{\nu\mu\alpha\beta}
 $$
 
-を使います。一般の多様体での証明は[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part II-b §7-b で扱うので、ここでは簡易的な証明に止めます。
+を使います。本編のPart VII §2-aに、同じ内容の導出があります。一般の多様体での証明は[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part II-b §7-b で扱うので、ここでは簡易的な証明に止めます。
 
 任意のベクトル場$V^\mu$から、スカラー$s:=\bar g_{\mu\nu}V^\mu V^\nu$を作ります。スカラーについては、$\bar\nabla_\alpha\bar\nabla_\beta s=\partial_\alpha\partial_\beta s-\bar\Gamma^\lambda{}_{\beta\alpha}\partial_\lambda s$（B-0-1と同じ規則で、$\partial_\beta s$を下付き添字1個の量として共変微分）が$\alpha,\beta$について対称なので、
 
