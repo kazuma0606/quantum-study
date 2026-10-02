@@ -11,6 +11,7 @@
     flm04_kernel_image.png           Part II 正則・非正則な行列、核と像、Ax=b の解の集合
     flm05_inverse_function.png       Part III 逆関数定理の条件と、局所と大域の違い
     flm06_change_of_variables.png    Part V 変数変換 dx dy = r dr dθ の意味
+    flm07_matrix_exponential.png     Part VIII 行列指数関数：局所と大域、det e^{tA} = e^{t tr A}
 
 各図は、描く値が本文の主張と一致することを assert で確認してから保存する。
 """
@@ -347,12 +348,72 @@ def flm06():
     plt.close(fig)
 
 
+# ------------------------------------------------------------------------------------- flm07
+def flm07():
+    """Part VIII：行列指数関数。回転の生成子での局所と大域、det e^{tA} = e^{t tr A}。"""
+    from scipy.linalg import expm, logm
+
+    J = np.array([[0.0, -1.0], [1.0, 0.0]])
+    fig, axes = plt.subplots(1, 3, figsize=(17, 5.4))
+
+    # (a) t ↦ e^{tJ} の成分
+    ax = axes[0]
+    ts = np.linspace(0, 4 * np.pi, 600)
+    E = np.array([expm(t * J) for t in ts])
+    assert np.allclose(E[:, 0, 0], np.cos(ts)) and np.allclose(E[:, 1, 0], np.sin(ts))
+    ax.plot(ts, E[:, 0, 0], color=C_A, lw=2.5, label="$(e^{tJ})_{11}=\\cos t$")
+    ax.plot(ts, E[:, 1, 0], color=C_B, lw=2.5, label="$(e^{tJ})_{21}=\\sin t$")
+    for k in range(3):
+        assert np.allclose(expm(2 * np.pi * k * J), np.eye(2))
+        ax.plot(2 * np.pi * k, 1, "o", color=C_BAD, ms=9, zorder=5)
+    ax.text(2 * np.pi, 1.12, "$t=0,\\ 2\\pi,\\ 4\\pi$ で、どれも $e^{tJ}=I$", ha="center", fontsize=10, color=C_BAD)
+    ax.set_xticks(np.arange(0, 5) * np.pi), ax.set_xticklabels(["$0$", "$\\pi$", "$2\\pi$", "$3\\pi$", "$4\\pi$"])
+    ax.set_ylim(-1.3, 1.4), ax.set_xlabel("$t$")
+    ax.legend(fontsize=9, loc="lower left")
+    ax.set_title("(a) $t\\mapsto e^{tJ}$（回転）：$e^{2\\pi J}=e^{0}=I$ で、\n$\\exp$ は全体では単射でない", fontsize=11)
+
+    # (b) log(e^{tJ}) の係数
+    ax = axes[1]
+    ts2 = np.linspace(-2 * np.pi + 0.01, 2 * np.pi - 0.01, 801)
+    coef = np.array([logm(expm(t * J)).real[1, 0] for t in ts2])
+    inside = np.abs(ts2) < np.pi - 1e-6
+    assert np.allclose(coef[inside], ts2[inside], atol=1e-6)            # (-π, π) では log(e^{tJ}) = tJ
+    ax.axvspan(-np.pi, np.pi, color="#cde6c7", alpha=0.6, label="$\\log(e^{tJ})=tJ$ となる範囲 $|t|<\\pi$")
+    ax.plot(ts2, ts2, color="#999", ls="--", lw=1, label="$t$（元の係数）")
+    jump = np.where(np.abs(np.diff(coef)) > 1)[0]
+    segs = np.split(np.arange(len(ts2)), jump + 1)
+    for i, sg in enumerate(segs):
+        ax.plot(ts2[sg], coef[sg], color=C_A, lw=2.5, label="$\\log(e^{tJ})$ の係数（主値）" if i == 0 else None)
+    ax.set_xticks(np.arange(-2, 3) * np.pi), ax.set_xticklabels(["$-2\\pi$", "$-\\pi$", "$0$", "$\\pi$", "$2\\pi$"])
+    ax.set_yticks(np.arange(-2, 3) * np.pi), ax.set_yticklabels(["$-2\\pi$", "$-\\pi$", "$0$", "$\\pi$", "$2\\pi$"])
+    ax.set_xlabel("$t$"), ax.legend(fontsize=9, loc="upper left")
+    ax.set_title("(b) 対数は、$0$ の近くでだけ $\\exp$ の逆写像になる\n（逆関数定理の「局所的な」逆写像）", fontsize=11)
+
+    # (c) det e^{tA} と e^{t tr A}
+    ax = axes[2]
+    rng = np.random.default_rng(7)
+    A = rng.normal(size=(3, 3)) * 0.6
+    ts3 = np.linspace(-1.5, 1.5, 200)
+    d1 = np.array([np.linalg.det(expm(t * A)) for t in ts3])
+    d2 = np.exp(ts3 * np.trace(A))
+    assert np.allclose(d1, d2, rtol=1e-9)
+    ax.plot(ts3, d1, color=C_A, lw=5, alpha=0.5, label="$\\det e^{tA}$")
+    ax.plot(ts3, d2, color=C_BAD, lw=1.8, ls="--", label="$e^{t\\,\\mathrm{tr}A}$")
+    ax.plot(ts3, 1 + ts3 * np.trace(A), color="#7b2fbf", lw=1.5, ls=":", label="$t=0$ での接線 $1+t\\,\\mathrm{tr}A$")
+    ax.set_xlabel("$t$"), ax.set_ylim(0, max(d1.max(), 1) * 1.05)
+    ax.legend(fontsize=9, loc="upper right")
+    ax.set_title(f"(c) $\\det e^{{tA}}=e^{{t\\,\\mathrm{{tr}}A}}$（ランダムな $3\\times3$ 行列、$\\mathrm{{tr}}A={np.trace(A):.2f}$）。\n$t=0$ での傾き $\\mathrm{{tr}}A$ が $D\\det_I[A]$", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "flm07_matrix_exponential.png", dpi=150)
+    plt.close(fig)
+
+
 def shoelace_area(Pts):
     x, y = Pts[:, 0], Pts[:, 1]
     return 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
 
 
-FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04, flm05=flm05, flm06=flm06)
+FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04, flm05=flm05, flm06=flm06, flm07=flm07)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
