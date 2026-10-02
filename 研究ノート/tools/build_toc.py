@@ -36,7 +36,14 @@ ROMAN = {"0": 0, "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, 
 LATEX = {r"\Gamma": "Γ", r"\partial": "∂", r"\nabla": "∇", r"\theta": "θ", r"\phi": "φ", r"\Omega": "Ω", r"\Sigma": "Σ",
          r"\ne": "≠", r"\sqrt": "√", r"\ln": "ln", r"\det": "det", r"\tilde": "~", r"\mathbf": "", r"\mathbb": "",
          r"\operatorname": "", r"\bar": "", r"\varepsilon": "ε", r"\delta": "δ", r"\mu": "μ", r"\nu": "ν", r"\ast": "*",
-         r"\mathcal": "", r"\mathfrak": "", r"\mathrm": "", r"\text": "", r"\circ": "∘", r"\times": "×"}
+         r"\mathcal": "", r"\mathfrak": "", r"\mathrm": "", r"\text": "", r"\circ": "∘", r"\times": "×",
+         r"\to": "→", r"\mapsto": "↦", r"\langle": "⟨", r"\rangle": "⟩", r"\omega": "ω", r"\star": "⋆", r"\Delta": "Δ",
+         r"\alpha": "α", r"\beta": "β", r"\lambda": "λ", r"\sigma": "σ", r"\psi": "ψ", r"\chi": "χ", r"\rho": "ρ",
+         r"\leq": "≤", r"\geq": "≥", r"\le": "≤", r"\ge": "≥", r"\infty": "∞", r"\cdot": "·", r"\ker": "ker",
+         r"\operatorname{im}": "im", r"\subset": "⊂", r"\in": "∈", r"\cap": "∩", r"\cup": "∪", r"\iff": "⇔", r"\Rightarrow": "⇒",
+         # 短い記号（\in, \le, \cdot）が、長い記号の先頭に一致しないように、長い記号も登録しておく（長い順に置換する）
+         r"\int": "∫", r"\inf": "inf", r"\left": "", r"\right": "", r"\cdots": "⋯", r"\ldots": "…", r"\dots": "…",
+         r"\mathbb R": "ℝ", r"\mathbb C": "ℂ", r"\mathbb Z": "ℤ", r"\mathbb N": "ℕ", r"\mathbb Q": "ℚ"}
 
 
 def plain(title):
