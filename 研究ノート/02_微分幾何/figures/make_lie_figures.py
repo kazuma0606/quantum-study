@@ -13,6 +13,7 @@
     lie06_killing.png          §30・§31 平面と球面のキリングベクトル
     lie07_clairaut.png         §31-1 球面の測地線とクレローの関係
     lie08_picard.png           付録A-4 逐次近似（x^2 ∂x）
+    lie09_commuting_frames.png 付録B-5 可換な流れで作った座標と、可換でない枠
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -410,7 +411,76 @@ def lie08():
     plt.close(fig)
 
 
-FIGS = dict(lie01=lie01, lie02=lie02, lie03=lie03, lie04=lie04, lie05=lie05, lie06=lie06, lie07=lie07, lie08=lie08)
+# ------------------------------------------------------------------------------------- lie09
+def lie09():
+    """付録B-5：可換な流れ（回転と拡大）で作った座標の網と、可換でない枠（極座標の単位ベクトル）。"""
+    fig, axes = plt.subplots(1, 2, figsize=(13, 6.2))
+
+    # 左：F(t,u) = φ^X_t φ^Y_u (1,0) = (e^u cos t, e^u sin t)
+    ax = axes[0]
+    F = lambda t, u: np.array([np.exp(u) * np.cos(t), np.exp(u) * np.sin(t)])
+    us = np.linspace(-1.0, 0.8, 10)
+    ts = np.linspace(0, 2 * np.pi, 25)
+    tt, uu = np.linspace(0, 2 * np.pi, 300), np.linspace(-1.0, 0.8, 100)
+    for u in us:
+        P = F(tt, u)
+        ax.plot(P[0], P[1], color="#cfcfcf", lw=1)
+    for t in ts:
+        P = F(t, uu)
+        ax.plot(P[0], P[1], color="#cfcfcf", lw=1)
+    # 可換な四角形：p から X で t、Y で s、X で −t、Y で −s
+    t0, u0, dt, du = 0.35, -0.2, 0.9, 0.55
+    legs = [((t0, t0 + dt), (u0, u0)), ((t0 + dt, t0 + dt), (u0, u0 + du)), ((t0 + dt, t0), (u0 + du, u0 + du)), ((t0, t0), (u0 + du, u0))]
+    cols, lss = [C_X, C_Y, C_X, C_Y], ["-", "-", "--", "--"]
+    for (ta, ua), c, ls in zip(legs, cols, lss):
+        P = F(np.linspace(*ta, 60), np.linspace(*ua, 60))
+        ax.plot(P[0], P[1], color=c, lw=2.6, ls=ls)
+        m = 30
+        ax.annotate("", xy=P[:, m + 1], xytext=P[:, m - 1], arrowprops=dict(arrowstyle="-|>", color=c, lw=2))
+    p = F(t0, u0)
+    end = F(t0, u0)          # 4本の後に戻る点（座標 (t, u) で見れば、正確に元に戻る）
+    assert np.allclose(end, p)
+    ax.plot(*p, "o", color="#222", ms=7), ax.text(*(p + [0.06, -0.12]), "$p$", fontsize=14)
+    ax.plot([], [], color=C_X, lw=2.6, label="$X=-y\\,\\partial_x+x\\,\\partial_y$（回転）の流れ")
+    ax.plot([], [], color=C_Y, lw=2.6, label="$Y=x\\,\\partial_x+y\\,\\partial_y$（拡大）の流れ")
+    ax.legend(fontsize=9, loc="lower left")
+    ax.set_xlim(-2.4, 2.4), ax.set_ylim(-2.4, 2.4), ax.set_aspect("equal"), ax.set_xticks([]), ax.set_yticks([])
+    ax.set_title("$[X,Y]=0$：四角形は閉じ、流れが座標 $(t,u)=(\\theta,\\ \\ln r)$ を作る", fontsize=12)
+
+    # 右：極座標の単位ベクトル e_r = ∂r, e_θ = (1/r)∂θ
+    ax = axes[1]
+    r0, th0, e = 1.0, 0.25, 0.7
+    pol = lambda r, th: np.array([r * np.cos(th), r * np.sin(th)])
+    th1 = th0 + e / (r0 + e)
+    th2 = th1 - e / r0
+    legs = [(np.linspace(r0, r0 + e, 60), np.full(60, th0)),
+            (np.full(60, r0 + e), np.linspace(th0, th1, 60)),
+            (np.linspace(r0 + e, r0, 60), np.full(60, th1)),
+            (np.full(60, r0), np.linspace(th1, th2, 60))]
+    for (rr, tth), c, ls in zip(legs, cols, lss):
+        P = pol(rr, tth)
+        ax.plot(P[0], P[1], color=c, lw=2.6, ls=ls)
+        m = 30
+        ax.annotate("", xy=P[:, m + 1], xytext=P[:, m - 1], arrowprops=dict(arrowstyle="-|>", color=c, lw=2))
+    p, q = pol(r0, th0), pol(r0, th2)
+    gap_len = r0 * (th0 - th2)
+    assert abs(gap_len - e * e / (r0 + e)) < 1e-12   # ずれの長さ e²/(r0+e) ≈ e²/r0 = ts|[X,Y]|
+    ax.plot(*p, "o", color="#222", ms=7), ax.text(*(p + [0.05, -0.12]), "$p$", fontsize=14)
+    ax.plot(*q, "s", color=C_BR, ms=6), ax.text(*(q + [-0.2, -0.1]), "$q$", fontsize=14, color=C_BR)
+    ang = np.linspace(0, np.pi / 2 + 0.6, 100)
+    for rr in [r0, r0 + e]:
+        ax.plot(rr * np.cos(ang), rr * np.sin(ang), color="#ddd", lw=1, zorder=0)
+    ax.plot([], [], color=C_X, lw=2.6, label="$\\hat e_r=\\partial_r$ の流れ")
+    ax.plot([], [], color=C_Y, lw=2.6, label="$\\hat e_\\theta=\\frac{1}{r}\\partial_\\theta$ の流れ")
+    ax.legend(fontsize=9, loc="upper right")
+    ax.set_xlim(-0.6, 2.0), ax.set_ylim(-0.6, 2.0), ax.set_aspect("equal"), ax.set_xticks([]), ax.set_yticks([])
+    ax.set_title("$[\\hat e_r,\\hat e_\\theta]=-r^{-2}\\,\\partial_\\theta\\neq0$：四角形は閉じない", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(OUT / "lie09_commuting_frames.png", dpi=150)
+    plt.close(fig)
+
+
+FIGS = dict(lie01=lie01, lie02=lie02, lie03=lie03, lie04=lie04, lie05=lie05, lie06=lie06, lie07=lie07, lie08=lie08, lie09=lie09)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
