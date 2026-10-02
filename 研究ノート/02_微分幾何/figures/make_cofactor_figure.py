@@ -1,4 +1,4 @@
-"""Part III §4（余因子行列）用の図を生成するスクリプト。
+"""補遺 §2（余因子行列）用の図を生成するスクリプト。
 
 実行（リポジトリのルートから）:
     uv run python 研究ノート/02_微分幾何/figures/make_cofactor_figure.py

@@ -15,7 +15,7 @@ Mermaid は GitHub と VS Code（Markdown Preview Mermaid Support 拡張）で�
 | `fig7_cylinder_unrolled.png` | Part VIII §4-e | 円柱は切り開けるので内在的に平坦 |
 | `fig5_sphere_basis_triangle.png` | Part VIII §5 の末尾 | 球面の基底ベクトル／直角3つの三角形（§1〜3 から移動） |
 | `fig8_adm_slicing.png` | 付録C C-3-1 | ラプス・シフト／ガウス正規座標 |
-| `fig9_cofactor_matrix.png` | Part III §4-c の末尾 | 余因子行列の9成分と、消す行・列（生成は `make_cofactor_figure.py`） |
+| `fig9_cofactor_matrix.png` | 補遺 §2-c の末尾 | 余因子行列の9成分と、消す行・列（生成は `make_cofactor_figure.py`） |
 
 挿入の書き方（本文は `研究ノート/02_微分幾何/` にあるので、相対パスは `figures/...` です）：
 
@@ -107,7 +107,7 @@ flowchart TD
 ```mermaid
 flowchart LR
     P1["Part I-II<br/>Γ の定義と公式"]
-    P3["Part III<br/>ヤコビアンからの導出<br/>共変発散"]
+    P3["Part III<br/>ヤコビアンからの導出"]
     P4["Part IV<br/>共変微分"]
     P5["Part V<br/>測地線・キリングベクトル"]
     P6["Part VI<br/>極座標の例"]

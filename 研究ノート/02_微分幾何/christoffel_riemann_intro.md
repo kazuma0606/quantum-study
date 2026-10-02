@@ -22,8 +22,6 @@
 - [Part III：別の定義（ヤコビアンの2階微分から）](#p3)
   - [1. Γ^k\_ij=A^k\_a∂\_jJ^a\_i の詳細な導出](#p3-1)
   - [2. 逆行列の微分と、Γ との関係](#p3-2)
-  - [3. 共変発散とは何か（Γ^i\_ij=∂\_jln√|g| の導出）](#p3-3)
-  - [4. 補足：逆ヤコビ行列 A=J^-1 を成分で作る（余因子行列）](#p3-4)
 - [Part IV：共変微分](#p4)
   - [1. ベクトル成分の「正しい微分」](#p4-1)
   - [2. なぜΓ^k\_ijV^iの中でi≠jなのか（表記上の理由と、意味上の理由）](#p4-2)
@@ -51,6 +49,9 @@
   - [5. 実際に計算し、両者の一致を確認する](#p8-5)
 - [Part IX：リッチテンソル・スカラー曲率（簡単な紹介のみ）](#p9)
 - [まとめ：全体の位置づけ](#summary)
+- [補遺：Part III から移した、共変発散と余因子行列](#supp)
+  - [1. 共変発散とは何か（Γ^i\_ij=∂\_jln√|g| の導出）](#supp-1)
+  - [2. 補足：逆ヤコビ行列 A=J^-1 を成分で作る（余因子行列）](#supp-2)
 - [付録A：ガウス・コダッツィ方程式の証明](#appA)
   - [A-0. 記法の確認（略記で式を追えなくならないように）](#A-0)
   - [A-1. 準備：曲面をR^3の中に置く](#A-1)
@@ -134,26 +135,28 @@
 flowchart LR
     P0["Part 0<br/>読み方・記号"]
     P1["Part I-II<br/>Γ の定義と公式"]
-    P3["Part III<br/>ヤコビアンからの導出<br/>共変発散・余因子行列"]
+    P3["Part III<br/>ヤコビアンからの導出"]
     P4["Part IV<br/>共変微分"]
     P5["Part V<br/>測地線・キリングベクトル"]
     P6["Part VI<br/>極座標の例"]
     P7["Part VII<br/>リーマン曲率テンソル"]
     P8["Part VIII<br/>球面の例・ガウス曲率"]
     P9["Part IX<br/>リッチテンソル"]
+    S["補遺<br/>共変発散・余因子行列"]
     A["付録A<br/>ガウス・コダッツィ方程式"]
     B["付録B<br/>ボネの定理"]
     C["付録C<br/>ADM 拘束条件"]
 
     P0 --> P1
     P1 --> P3 --> P4 --> P5
+    P3 -.-> S
     P4 --> P6 --> P7 --> P8 --> P9
     P8 --> A --> B
     A --> C
     P9 --> C
 ```
 
-Part I〜II で、クリストッフェル記号の定義と、計量からの公式を導きます。Part III は、別の定義（ヤコビアンの2階微分から）と、共変発散、余因子行列を扱います。Part IV は共変微分、Part V は測地線という応用です。Part VI で極座標の例（$\Gamma\ne0$ でも空間は平坦）、Part VII でリーマン曲率テンソル、Part VIII で球面の例（曲がった空間）を扱い、Part IX でリッチテンソルを紹介します。
+Part I〜II で、クリストッフェル記号の定義と、計量からの公式を導きます。Part III は、別の定義（ヤコビアンの2階微分から）を扱います（共変発散と余因子行列は、本編末尾の補遺に置きました）。Part IV は共変微分、Part V は測地線という応用です。Part VI で極座標の例（$\Gamma\ne0$ でも空間は平坦）、Part VII でリーマン曲率テンソル、Part VIII で球面の例（曲がった空間）を扱い、Part IX でリッチテンソルを紹介します。
 
 <a id="p0-4"></a>
 
@@ -454,14 +457,6 @@ $$\fcolorbox{#3b6fb6}{white}{$\displaystyle\color{black}\ A^k{}_aJ^a{}_i=\colorb
 
 - [1. Γ^k\_ij=A^k\_a∂\_jJ^a\_i の詳細な導出](#p3-1)
 - [2. 逆行列の微分と、Γ との関係](#p3-2)
-- [3. 共変発散とは何か（Γ^i\_ij=∂\_jln√|g| の導出）](#p3-3)
-  - [3-a. 添字の置き換えを、1ステップずつ丁寧に追う（混乱しやすいのでここだけ念入りに）](#p3-3a)
-- [4. 補足：逆ヤコビ行列 A=J^-1 を成分で作る（余因子行列）](#p3-4)
-  - [4-a. 記号と定義](#p3-4a)
-  - [4-b. 9成分をすべて書く](#p3-4b)
-  - [4-c. 取り除く行・列を色で見る](#p3-4c)
-  - [4-d. なぜ J~ J=(det J)I になるのか](#p3-4d)
-  - [4-e. 具体例](#p3-4e)
 
 <!-- part-toc:end -->
 
@@ -551,516 +546,7 @@ $$
 
 **天下り的な一致ではなく、$AJ=I$を微分するだけの計算から、$\Gamma^k{}_{ij}$が必然的に内側に現れることが確認できました。**
 
-<a id="p3-3"></a>
-
-## 3. 共変発散とは何か（$\Gamma^i{}_{ij}=\partial_j\ln\sqrt{|g|}$ の導出）
-
-**共変微分の簡単な復習**（詳しくはこの後のPart IVで扱いますが、この節でも使うので先に一言だけ確認しておきます）：ベクトルの成分をそのまま$\partial_jV^k$と微分しても、座標変換に対して正しく振る舞う量（テンソル）にはなりません。基底ベクトル$\mathbf e_k$自身が場所によって変化する分を補正する必要があり、その補正込みの微分が**共変微分**です：
-
-$$
-\nabla_jV^k := \partial_jV^k+\Gamma^k{}_{mj}V^m
-$$
-
-（$\Gamma^k{}_{mj}V^m$の部分が、まさに「基底が変化する効果」の補正項です。詳しい導出はPart IVを参照してください。）
-
-<a id="p3-3a"></a>
-
-### 3-a. 添字の置き換えを、1ステップずつ丁寧に追う（混乱しやすいのでここだけ念入りに）
-
-出発点の式の添字の役割を、まず確認します：
-
-$$
-\nabla_jV^k = \partial_jV^k+\Gamma^k{}_{mj}V^m
-$$
-
-- $j,k$：**自由な添字**（外から具体的な値を指定する）
-- $m$：**ダミー添字**（$\Gamma^k{}_{mj}V^m$の中で、$m=1,2,3$について和が取られている、つまり本当は $\sum_m\Gamma^k{}_{mj}V^m$ という意味）
-
-**ステップ1：$j=k=i$ を代入する（$j$と$k$だけを置き換え、$m$には一切触れない）**
-
-$$
-\nabla_iV^i = \partial_iV^i+\Gamma^i{}_{mi}V^m
-$$
-
-$m$は「消えた」のではなく、**この時点でもまだ、和を取られたまま残っています**。
-
-**ステップ2：$\Gamma^i{}_{mi}$という記号をよく見る**
-
-上付きの$i$と、下付き2番目の$i$が、**同じ文字で2回**出てきています。これも「同じ添字が式の中に2回出たら和を取る」という、これまで何度も使ってきたルールの対象です。つまり$\Gamma^i{}_{mi}$自体が、実は
-
-$$
-\Gamma^i{}_{mi} = \sum_{i=1}^3\Gamma^i{}_{mi} = \Gamma^1{}_{m1}+\Gamma^2{}_{m2}+\Gamma^3{}_{m3}
-$$
-
-という、**$i$についてすでに和が取られた量**になっています。**この時点で、式の中には「$m$についての和」と「$i$についての和（$\Gamma$の中）」という、2種類の和が入れ子で存在しています。**
-
-**ステップ3：ダミー添字$m$を、$j$に付け替える**
-
-$m$はダミー添字なので、Part 0 §5 で確認した通り、自由に名前を変えられます（$j$という文字は、$j=i$と置き換えた時点で「自由な添字」としての役目を終えているので、ここで改めてダミー添字の名前として再利用できます）：
-
-$$
-\Gamma^i{}_{mi}V^m \ \longrightarrow\ \Gamma^i{}_{ji}V^j
-$$
-
-**ステップ4：$\Gamma$の下2つの添字は対称（$\Gamma^k{}_{ij}=\Gamma^k{}_{ji}$）なので、順番を入れ替える**
-
-$$
-\Gamma^i{}_{ji} = \Gamma^i{}_{ij}
-$$
-
-（下付き添字の対称性は、クリストッフェル記号の定義そのものが持つ性質です。）これで最終形になります：
-
-$$
-\Gamma^i{}_{ji}V^j = \Gamma^i{}_{ij}V^j
-$$
-
-**最終的に得られる式と、そこに含まれる添字の状態**：
-
-$$
-\nabla_iV^i = \partial_iV^i+\Gamma^i{}_{ij}V^j
-$$
-
-- $i$：$\partial_iV^i$の中、および$\Gamma^i{}_{ij}$の上付き＋下付き1番目、の**2箇所**で登場 → **$i$について和**（合計3種類、$x,y,z$方向の発散を全部足し合わせる、という発散本来の役割）
-- $j$：$\Gamma^i{}_{ij}$の下付き2番目と$V^j$、の**2箇所**で登場 → **$j$について和**（$\Gamma$の効果を、ベクトル$V$の各成分に対して足し合わせる、という補正項の役割）
-
-**つまり、この式には「$i$についての和」と「$j$についての和」という、役割の異なる2つの和が独立に入れ子になって存在しています。** 最初の$j=k=i$という置き換えだけを見ると$m$が消えたように感じますが、実際には**①$m$はダミー添字として生き残ったまま$j$に改名され、②置き換えの結果$\Gamma$の中に新たに$i$についての和が追加で生まれた**、という2つの出来事が同時に起きていた、というのが正確な流れです。
-
-これを、$j=k=i$と置いて$i$について和を取ったもの
-
-$$
-\nabla_iV^i := \partial_iV^i+\Gamma^i{}_{ij}V^j
-$$
-
-を**共変発散**と呼びます。単なる成分の微分の和$\partial_iV^i$だけでは、基底ベクトルが場所ごとに変化する効果（$\Gamma$の項）を見落とすため、これでは正しい（テンソルとして意味を持つ）発散になりません。
-
-**$\Gamma^i{}_{ij}$を計算します。** 標準公式$\Gamma^k{}_{ij}=\frac12g^{kl}(\partial_ig_{jl}+\partial_jg_{il}-\partial_lg_{ij})$で$k=i$と置き、$i$について和を取ります：
-
-$$
-\Gamma^i{}_{ij} = \frac12g^{il}\big(\partial_ig_{jl}+\partial_jg_{il}-\partial_lg_{ij}\big)
-$$
-
-**第1項と第3項は打ち消し合います**。第3項は、ダミー添字 $i,l$ を入れ替え、$g$ の対称性 $g_{ij}=g_{ji}$ を使うと、第1項と一致するからです：
-
-$$
-g^{il}\partial_lg_{ij}\ \longrightarrow\ g^{li}\partial_ig_{lj}=g^{il}\partial_ig_{jl}
-$$
-
-したがって：
-
-$$
-\Gamma^i{}_{ij} = \frac12g^{il}\partial_jg_{il}\tag{†}
-$$
-
-**ここでJacobiの公式を使います。** 正則行列$M(q)$に対して、次が成り立ちます（導出は、この直後に振り返ります）：
-
-$$
-\boxed{\partial_j\ln|\det M| = \operatorname{tr}(M^{-1}\partial_jM)}
-$$
-
-**導出を簡単に振り返ります**。$M+dM=M(I+M^{-1}dM)$ と書けるので、行列式の積の性質から、
-
-$$
-\det(M+dM)=\det M\cdot\det\!\big(I+M^{-1}dM\big)
-$$
-
-です。微小な行列 $\varepsilon X$ については、固有値の積を展開すれば、次の近似が出ます。
-
-$$
-\det(I+\varepsilon X)\approx1+\varepsilon\operatorname{tr}X
-$$
-
-これを使うと、
-
-$$
-\det(M+dM)\approx\det M\Big(1+\operatorname{tr}\big(M^{-1}dM\big)\Big)
-$$
-
-となります。両辺から $\det M$ を引いて $\det M$ で割れば、次の式が得られます。
-
-$$
-\frac{d(\det M)}{\det M}=\operatorname{tr}\big(M^{-1}dM\big)
-$$
-
-$d(\det M)$と$\det(dM)$は異なる量です。$f(M):=\det M$と、$\det$を1つの関数の名前と見なします：
-
-$$
-d(\det M) = df(M) = f(M+dM)-f(M) = \det(M+dM)-\det M\qquad(\text{1次近似の範囲で})
-$$
-
-**これは、すでに知っている「関数の微分（全微分）」の定義そのもの**です。たとえば $f(x)=x^2$ なら、
-
-$$
-df=f(x+dx)-f(x)=2x\,dx
-$$
-
-となります。まったく同じ発想を、関数 $\det$ と、変数が「行列 $M$」という対象に当てはめただけです。つまり $d(\det M)$ は、「$M$ を $dM$ だけ動かしたときの、$\det$ の出力の変化分」を表す、ごく普通の微分です。
-
-**一方、$\det(dM)$**は、$dM$という行列**そのもの**を、そのまま行列式の公式に代入して計算した、**まったく別の計算**です（$f(x)=x^2$のときの$f(dx)=(dx)^2$に対応する量で、$df=f(x+dx)-f(x)$とは最初から問うている問題が違います）：
-
-$$
-\det(dM) = \det\begin{pmatrix}dM_{11}&dM_{12}\\dM_{21}&dM_{22}\end{pmatrix}
-$$
-
-（$2\times2$の例。）この式は「$M+dM$の行列式から$\det M$を引く」という操作を一切経ていません。
-
-**なぜこの2つが一致しないのか（多重線形性）**：行列式$\det M$は、$M$の**各行（各列）ごとには線形**ですが、行列$M$**全体**に対しては線形ではありません（多重線形、というのはこの意味です）。$\det M$は、$M$の各行を引数とする**多変数の関数**だと思えば、$df=f(M+dM)-f(M)$を計算する際には、**各引数（各行）ごとに、1つずつ微小変化させた項を足し合わせる**必要があるのは自然なことです。これは、多変数の積を微分するときに積の微分公式（$d(uv)=du\cdot v+u\cdot dv$）を使うのと同じ状況です：
-
-$$
-d(\det M) = \sum_{i=1}^n\det(\mathbf r_1,\dots,\mathbf r_{i-1},\,d\mathbf r_i,\,\mathbf r_{i+1},\dots,\mathbf r_n)
-$$
-
-（ここで $\mathbf r_i$ は $M$ の $i$ 行目で、$d\mathbf r_i$ はその行だけを微小変化させたものです。「1行だけ微分し、残りはそのまま」という行列式を、行の数だけ作って足すのが、正しい計算です。）この計算を最後まで実行すると、結果がたまたま $\operatorname{tr}(M^{-1}dM)$ という、$dM$ を外に出せる形にまとまります。「$d$ が最初から $\det$ の外にいて、中身をそのまま $dM$ に置き換えられる」わけではありません。
-
-**1変数の場合で確認すると、この区別がはっきりします**：$f(x)=x^2$ を考えると、$d(x^2)=(x+dx)^2-x^2=2x\,dx$（1次近似）です。一方、$(dx)^2$は$dx$という数を2乗しただけの、まったく別の量（しかも2次の微小量で、通常の微分の議論では無視される桁）です：
-
-$$
-\boxed{d(x^2) = 2x\,dx \quad\ne\quad (dx)^2}
-$$
-
-「$d(x^2)$ の中の $x^2$ に、そのまま $dx$ を代入すれば $(dx)^2$ になる」わけではありません。$d(x^2)=2x\,dx$ は、微分係数 $2x$ が掛かった上での結果です。
-
-今回の関係
-
-$$
-d(\det M)=\det M\cdot\operatorname{tr}\big(M^{-1}dM\big)
-$$
-
-も、これとまったく同じ構造です。$\det(dM)$（$M$ の位置に直接 $dM$ を入れたもの）とは、根本的に違う量です。
-
-**なぜ「$d(\det M)/\det M$」が「$\ln|\det M|$ の微分」と同じ意味になるのか**（連鎖律の確認）。高校数学の公式を思い出します。
-
-$$
-\frac{d}{dx}\ln|x|=\frac1x
-$$
-
-ここで $u:=\det M$ と置くと、$\ln|\det M(q)|=\ln|u|$ は、「$u$ の関数」に「$u=\det M(q)$ という $q$ の関数」を代入した合成関数です。連鎖律を使うと：
-
-$$
-\frac{d}{dq^j}\ln|u| = \frac{d\ln|u|}{du}\cdot\frac{du}{dq^j} = \frac1u\cdot\frac{du}{dq^j} = \frac1{\det M}\cdot\frac{\partial_j(\det M)}{1}
-$$
-
-つまり、
-
-$$
-\partial_j\ln|\det M|=\frac{\partial_j(\det M)}{\det M}
-$$
-
-です。これは、「$1/x$ の形の式は、$\ln|x|$ を微分したものだ」という1変数の関係を、$x$ の代わりに、座標 $q^j$ に依存する量 $\det M$ に当てはめただけです。したがって、$d(\det M)/\det M=\operatorname{tr}(M^{-1}dM)$ は、$d(\ln|\det M|)=\operatorname{tr}(M^{-1}dM)$ と同じ意味です。
-
-（**注**：ここでの$d$は、微分形式の外微分とは別の、素朴な「微小変化・微分」という意味で使っています。）
-
-**なぜ(†)にこの公式が使えるのか**：$(†)$の$g^{il}\partial_jg_{il}$は、$i,l$の両方について和を取っている量です。これは行列の積$g^{-1}(\partial_jg)$の**トレース**（対角成分の和）そのものです：
-
-$$
-\operatorname{tr}\big(g^{-1}\partial_jg\big) = \sum_i\big(g^{-1}\partial_jg\big)_{ii} = \sum_{i,l}g^{il}(\partial_jg)_{li} = g^{il}\partial_jg_{il}
-$$
-
-（行列の積$(g^{-1}\partial_jg)_{ii}=\sum_lg^{il}(\partial_jg)_{li}$を$i$について足したものが、まさにトレースの定義です。）つまり**$(†)$の右辺は、もともとトレースの形をしていた**わけです（$\ln$はまだ出てきていません）。ここにJacobiの公式（$M=g$を代入）を適用すると：
-
-$$
-g^{il}\partial_jg_{il} = \operatorname{tr}(g^{-1}\partial_jg) = \partial_j\ln|\det g|
-$$
-
-**ここで初めて$\ln$が登場します**（Jacobiの公式自体が「トレース＝$\ln|\det|$の微分」という中身を持つ公式だからです）。
-
-**記号「$|g|$」の正確な意味（脇道）**：$|g|$ は $|\det g|$ の略で、外側が絶対値、内側が $\det g$（符号付きの行列式）という、2段構えの記号です。$\det$ は消えているわけではなく、$|g|$ という表記の中にずっと含まれています。
-
-**なぜ絶対値が必要か**：$\det g$ 自体は、符号を持ちうる数です。普段扱う正定値の計量（たとえば球座標の $g_{ij}$）では常に正ですが、一般相対論のミンコフスキー計量 $\eta=\operatorname{diag}(-1,1,1,1)$ のような不定値計量では、$\det\eta=-1$ と負になります。体積要素 $\sqrt{|g|}$ は、本来「空間の伸縮率」という、符号を持たない正の量であるべきなので、負の数の平方根にならないよう、あらかじめ絶対値を取って符号を無視しています。
-
-これを踏まえて、$\ln|\det g|=2\ln\sqrt{|g|}$（$\ln x^2=2\ln x$と同じ、指数法則）なので：
-
-$$
-\boxed{\Gamma^i{}_{ij} = \frac12g^{il}\partial_jg_{il} = \frac12\partial_j\ln|\det g| = \partial_j\ln\sqrt{|g|}}
-$$
-
-**共変発散が、$\operatorname{div}$の一般公式（[計量テンソルと共変反変_まとめ](計量テンソルと共変反変_まとめ.md)）と一致することの確認**：
-
-$$
-\nabla_iV^i = \partial_iV^i+\Gamma^i{}_{ij}V^j = \partial_iV^i+(\partial_j\ln\sqrt{|g|})V^j
-$$
-
-一方、一般座標での発散の公式$\dfrac1{\sqrt{|g|}}\partial_i(\sqrt{|g|}V^i)$を積の微分で展開すると：
-
-$$
-\frac1{\sqrt{|g|}}\partial_i\big(\sqrt{|g|}V^i\big) = (\partial_i\ln\sqrt{|g|})V^i+\partial_iV^i
-$$
-
-**両者は（ダミー添字$i,j$の違いを除いて）完全に一致します**：
-
-$$
-\boxed{\frac1{\sqrt{|g|}}\partial_i\big(\sqrt{|g|}V^i\big) = \partial_iV^i+\Gamma^i{}_{ij}V^j}
-$$
-
-体積要素を使った発散の公式は、この**共変発散**の特別な場合だったことが、こうして正確に確認できました。
-
-<a id="p3-4"></a>
-
-## 4. 補足：逆ヤコビ行列 $A=J^{-1}$ を成分で作る（余因子行列）
-
-この Part では、$A=J^{-1}$（$AJ=I$）を「$J$ の逆行列」として使ってきました。ここでは、$3\times3$ の場合に $A$ の各成分が $J$ の成分からどう作られるのかを、**余因子行列**を使って系統的にまとめます。
-
-<a id="p3-4a"></a>
-
-### 4-a. 記号と定義
-
-成分を具体的に書くときは、行番号と列番号を、次のように決めます。
-
-- $J^a{}_i$ は、$a$（デカルト成分）を行番号、$i$（曲線座標）を列番号として、$J_{ai}$ と書きます。
-- $A^i{}_a$ は、$i$ を行番号、$a$ を列番号として、$A_{ia}$ と書きます。$A$ は逆行列なので、行と列の役割が $J$ と入れ替わります。
-
-$J$ を行列で書くと：
-
-$$
-J=\begin{pmatrix}J_{11}&J_{12}&J_{13}\\J_{21}&J_{22}&J_{23}\\J_{31}&J_{32}&J_{33}\end{pmatrix}\qquad(\text{行}=\text{デカルト成分 }a,\ \ \text{列}=\text{曲線座標 }i)
-$$
-
-$J$ の列は、基底ベクトル $\mathbf e_i$ のデカルト成分です。逆行列 $A$ の行は、$\nabla q^i$（座標関数の勾配）のデカルト成分です。$A^i{}_a=\partial q^i/\partial x^a$ なので、$AJ=I$ は、次の関係を表しています。
-
-$$
-\nabla q^i\cdot\mathbf e_j=\delta^i{}_j
-$$
-
-**① 小行列式**：$J$ から $i$ 行と $j$ 列を取り除いた $2\times2$ 行列の行列式を $\Delta_{ij}$ と書きます。例えば：
-
-$$
-\Delta_{21}=\begin{vmatrix}J_{12}&J_{13}\\J_{32}&J_{33}\end{vmatrix}=J_{12}J_{33}-J_{13}J_{32}\qquad(2\text{行と }1\text{列を取り除いた})
-$$
-
-**② 余因子**：$(-1)^{i+j}\Delta_{ij}$ です。符号 $(-1)^{i+j}$ は市松模様になります：
-
-$$
-\big((-1)^{i+j}\big)=\begin{pmatrix}+&-&+\\-&+&-\\+&-&+\end{pmatrix}
-$$
-
-**③ 余因子行列 $\tilde J$**（**転置に注意**）：
-
-$$
-\boxed{\tilde J_{ij}:=(-1)^{i+j}\,\Delta_{ji}}
-$$
-
-$\Delta$ の添字が $ji$ と逆になっています。つまり、$\tilde J$ の $(i,j)$ 成分を作るには、$J$ の「$j$ 行 $i$ 列」を取り除く、ということです。
-
-（教科書によっては、余因子 $(-1)^{i+j}\Delta_{ij}$ をそのまま並べた行列を余因子行列と呼び、その転置を随伴行列と呼びます。ここでは、$J\tilde J=(\det J)\,I$ が素直に書けるよう、転置済みの方を $\tilde J$ と書きます。）
-
-**④ 逆行列**：
-
-$$
-\boxed{A=J^{-1}=\frac1{\det J}\,\tilde J,\qquad A_{ij}=\frac{\tilde J_{ij}}{\det J}=\frac{(-1)^{i+j}\,\Delta_{ji}}{\det J}}
-$$
-
-添字をこの Part の記法に戻すと、次のようになります：
-
-$$
-A^i{}_a=\frac{(-1)^{i+a}\,\Delta_{ai}}{\det J}\qquad(\Delta_{ai}：J\text{ のデカルト成分 }a\text{ の行と、曲線座標 }i\text{ の列を取り除いた小行列式})
-$$
-
-<a id="p3-4b"></a>
-
-### 4-b. 9成分をすべて書く
-
-$\tilde J_{ij}$ ごとに、「どの行・列を取り除くか」「符号」「残った $2\times2$ の（主対角の積）$-$（反対角の積）」をまとめます：
-
-| $\tilde J_{ij}$ | 取り除く（$j$ 行 $i$ 列） | 符号 | 残った $2\times2$ の主対角の積 $-$ 反対角の積 |
-|---|---|---|---|
-| $\tilde J_{11}$ | 1行1列 | $+$ | $J_{22}J_{33}-J_{23}J_{32}$ |
-| $\tilde J_{12}$ | 2行1列 | $-$ | $J_{12}J_{33}-J_{13}J_{32}$ |
-| $\tilde J_{13}$ | 3行1列 | $+$ | $J_{12}J_{23}-J_{13}J_{22}$ |
-| $\tilde J_{21}$ | 1行2列 | $-$ | $J_{21}J_{33}-J_{23}J_{31}$ |
-| $\tilde J_{22}$ | 2行2列 | $+$ | $J_{11}J_{33}-J_{13}J_{31}$ |
-| $\tilde J_{23}$ | 3行2列 | $-$ | $J_{11}J_{23}-J_{13}J_{21}$ |
-| $\tilde J_{31}$ | 1行3列 | $+$ | $J_{21}J_{32}-J_{22}J_{31}$ |
-| $\tilde J_{32}$ | 2行3列 | $-$ | $J_{11}J_{32}-J_{12}J_{31}$ |
-| $\tilde J_{33}$ | 3行3列 | $+$ | $J_{11}J_{22}-J_{12}J_{21}$ |
-
-行列の形に並べると：
-
-$$
-\tilde J=\begin{pmatrix}
-J_{22}J_{33}-J_{23}J_{32} & -(J_{12}J_{33}-J_{13}J_{32}) & J_{12}J_{23}-J_{13}J_{22}\\
--(J_{21}J_{33}-J_{23}J_{31}) & J_{11}J_{33}-J_{13}J_{31} & -(J_{11}J_{23}-J_{13}J_{21})\\
-J_{21}J_{32}-J_{22}J_{31} & -(J_{11}J_{32}-J_{12}J_{31}) & J_{11}J_{22}-J_{12}J_{21}
-\end{pmatrix}
-$$
-
-**覚え方**：
-
-1. $\tilde J_{ij}$ を作るときは、$J$ の **$j$ 行 $i$ 列**を消す（$i,j$ が逆）。対角成分 $\tilde J_{ii}$ だけは $i$ 行 $i$ 列を消すので、逆になっていることが見えません。
-2. 残った $2\times2$ を「左上 $\times$ 右下 $-$ 右上 $\times$ 左下」で計算する（行・列の順序は元のまま）。
-3. 符号は市松模様（$(i,j)$ 成分の符号は $(-1)^{i+j}$）。
-
-$\det J$ は、$J$ の第1行に沿った展開（余因子展開）です。$\tilde J_{j1}$ は $J_{1j}$ の余因子なので：
-
-$$
-\det J=J_{11}\tilde J_{11}+J_{12}\tilde J_{21}+J_{13}\tilde J_{31}
-$$
-
-<a id="p3-4c"></a>
-
-### 4-c. 取り除く行・列を色で見る
-
-灰色が取り除く行と列、赤が残った $2\times2$ です。**$\tilde J_{12}$ と $\tilde J_{21}$ で、取り除く行・列が入れ替わっている**ことに注目してください。
-
-**$\tilde J_{11}$**（1行1列を取り除く）：
-
-$$
-\left(\begin{array}{ccc}
-\color{gray}J_{11}&\color{gray}J_{12}&\color{gray}J_{13}\\
-\color{gray}J_{21}&\color{red}J_{22}&\color{red}J_{23}\\
-\color{gray}J_{31}&\color{red}J_{32}&\color{red}J_{33}
-\end{array}\right)
-\ \Longrightarrow\ 
-\tilde J_{11}=(+1)\begin{vmatrix}\color{red}J_{22}&\color{red}J_{23}\\\color{red}J_{32}&\color{red}J_{33}\end{vmatrix}
-=J_{22}J_{33}-J_{23}J_{32}
-$$
-
-**$\tilde J_{12}$**（**2行1列**を取り除く）：
-
-$$
-\left(\begin{array}{ccc}
-\color{gray}J_{11}&\color{red}J_{12}&\color{red}J_{13}\\
-\color{gray}J_{21}&\color{gray}J_{22}&\color{gray}J_{23}\\
-\color{gray}J_{31}&\color{red}J_{32}&\color{red}J_{33}
-\end{array}\right)
-\ \Longrightarrow\ 
-\tilde J_{12}=(-1)\begin{vmatrix}\color{red}J_{12}&\color{red}J_{13}\\\color{red}J_{32}&\color{red}J_{33}\end{vmatrix}
-=-(J_{12}J_{33}-J_{13}J_{32})
-$$
-
-**$\tilde J_{21}$**（**1行2列**を取り除く）：
-
-$$
-\left(\begin{array}{ccc}
-\color{gray}J_{11}&\color{gray}J_{12}&\color{gray}J_{13}\\
-\color{red}J_{21}&\color{gray}J_{22}&\color{red}J_{23}\\
-\color{red}J_{31}&\color{gray}J_{32}&\color{red}J_{33}
-\end{array}\right)
-\ \Longrightarrow\ 
-\tilde J_{21}=(-1)\begin{vmatrix}\color{red}J_{21}&\color{red}J_{23}\\\color{red}J_{31}&\color{red}J_{33}\end{vmatrix}
-=-(J_{21}J_{33}-J_{23}J_{31})
-$$
-
-**$\tilde J_{22}$**（2行2列を取り除く）：
-
-$$
-\left(\begin{array}{ccc}
-\color{red}J_{11}&\color{gray}J_{12}&\color{red}J_{13}\\
-\color{gray}J_{21}&\color{gray}J_{22}&\color{gray}J_{23}\\
-\color{red}J_{31}&\color{gray}J_{32}&\color{red}J_{33}
-\end{array}\right)
-\ \Longrightarrow\ 
-\tilde J_{22}=(+1)\begin{vmatrix}\color{red}J_{11}&\color{red}J_{13}\\\color{red}J_{31}&\color{red}J_{33}\end{vmatrix}
-=J_{11}J_{33}-J_{13}J_{31}
-$$
-
-9成分すべてを、$\tilde J$ の並びのまま図にすると次のようになります。
-
-![余因子行列の9成分と、消す行・列](figures/fig9_cofactor_matrix.png)
-
-*$\tilde J$ の $(i,j)$ の位置に $\tilde J_{ij}$ を作る様子です。灰色の十字が消す行と列（$J$ の $j$ 行 $i$ 列）、赤が残った $2\times2$ です。枠の色は符号 $(-1)^{i+j}$（青が $+$、紫が $-$）で、市松模様になっています。$\tilde J_{ij}$ が消すのは $J$ の $(j,i)$ 側（転置）ですが、対角成分は $i=j$ なので違いが見えません。*
-
-<a id="p3-4d"></a>
-
-### 4-d. なぜ $J\tilde J=(\det J)\,I$ になるのか
-
-$\tilde J_{jk}=(-1)^{j+k}\Delta_{kj}$ なので、積の $(i,k)$ 成分は：
-
-$$
-(J\tilde J)_{ik}=\sum_{j=1}^3J_{ij}\,\tilde J_{jk}=\sum_{j=1}^3(-1)^{k+j}\,J_{ij}\,\Delta_{kj}
-$$
-
-$\Delta_{kj}$ は「$k$ 行を取り除いた」小行列式なので、$J$ の第 $k$ 行の中身には依りません。したがって、この和は「**$J$ の第 $k$ 行を第 $i$ 行で置き換えた行列**」の、第 $k$ 行に沿った余因子展開そのものです：
-
-- **$i=k$ のとき**：置き換えても $J$ のままなので、和は $\det J$ になります。
-- **$i\ne k$ のとき**：置き換えた行列は同じ行を2本持つので、行列式は $0$ になります。
-
-$$
-(J\tilde J)_{ik}=(\det J)\,\delta_{ik}\qquad\Longrightarrow\qquad J\tilde J=(\det J)\,I\qquad\Longrightarrow\qquad J^{-1}=\frac{\tilde J}{\det J}\quad(\det J\ne0)
-$$
-
-**具体的に確かめる**（$3\times3$）。$(i,k)=(1,1)$ は第1行の展開そのものです：
-
-$$
-J_{11}\tilde J_{11}+J_{12}\tilde J_{21}+J_{13}\tilde J_{31}
-=J_{11}(J_{22}J_{33}-J_{23}J_{32})-J_{12}(J_{21}J_{33}-J_{23}J_{31})+J_{13}(J_{21}J_{32}-J_{22}J_{31})=\det J
-$$
-
-$(i,k)=(2,1)$ は、第1行の $J_{1j}$ の代わりに第2行の $J_{2j}$ を入れたもので、項がすべて打ち消し合います：
-
-$$
-\begin{aligned}
-J_{21}\tilde J_{11}+J_{22}\tilde J_{21}+J_{23}\tilde J_{31}
-&=J_{21}(J_{22}J_{33}-J_{23}J_{32})-J_{22}(J_{21}J_{33}-J_{23}J_{31})+J_{23}(J_{21}J_{32}-J_{22}J_{31})\\
-&=J_{21}J_{22}J_{33}-J_{21}J_{23}J_{32}-J_{22}J_{21}J_{33}+J_{22}J_{23}J_{31}+J_{23}J_{21}J_{32}-J_{23}J_{22}J_{31}=0
-\end{aligned}
-$$
-
-この議論は $n\times n$ でもそのまま成り立ちます（小行列式が $(n-1)\times(n-1)$ になるだけです）。
-
-<a id="p3-4e"></a>
-
-### 4-e. 具体例
-
-**(a) 2次元の極座標**（$x=r\cos\theta,\ y=r\sin\theta$、$q^1=r,\ q^2=\theta$）。$2\times2$ では、取り除いて残るのは1成分だけなので $\tilde J=\begin{pmatrix}J_{22}&-J_{12}\\-J_{21}&J_{11}\end{pmatrix}$ です：
-
-$$
-J=\begin{pmatrix}\cos\theta&-r\sin\theta\\\sin\theta&r\cos\theta\end{pmatrix},\quad
-\det J=r,\quad
-\tilde J=\begin{pmatrix}r\cos\theta&r\sin\theta\\-\sin\theta&\cos\theta\end{pmatrix}
-$$
-
-$$
-A=\frac{\tilde J}{\det J}=\begin{pmatrix}\cos\theta&\sin\theta\\-\dfrac{\sin\theta}r&\dfrac{\cos\theta}r\end{pmatrix}
-$$
-
-Part IV §2 の例③で $r=\sqrt{x^2+y^2},\ \theta=\arctan(y/x)$ を直接微分して求めた $A^r{}_x,A^r{}_y,A^\theta{}_x,A^\theta{}_y$ と一致します。
-
-**(b) 3次元の球座標**（$x=r\sin\theta\cos\phi,\ y=r\sin\theta\sin\phi,\ z=r\cos\theta$、$q^1=r,\ q^2=\theta,\ q^3=\phi$）：
-
-$$
-J=\begin{pmatrix}
-\sin\theta\cos\phi & r\cos\theta\cos\phi & -r\sin\theta\sin\phi\\
-\sin\theta\sin\phi & r\cos\theta\sin\phi & r\sin\theta\cos\phi\\
-\cos\theta & -r\sin\theta & 0
-\end{pmatrix},\qquad \det J=r^2\sin\theta
-$$
-
-第1列の余因子 $\tilde J_{11},\tilde J_{21},\tilde J_{31}$ を、上の表の通りに計算します：
-
-$$
-\begin{aligned}
-\tilde J_{11}&=J_{22}J_{33}-J_{23}J_{32}=(r\cos\theta\sin\phi)(0)-(r\sin\theta\cos\phi)(-r\sin\theta)=r^2\sin^2\theta\cos\phi\\
-\tilde J_{21}&=-(J_{21}J_{33}-J_{23}J_{31})=-\big(0-(r\sin\theta\cos\phi)\cos\theta\big)=r\sin\theta\cos\theta\cos\phi\\
-\tilde J_{31}&=J_{21}J_{32}-J_{22}J_{31}=(\sin\theta\sin\phi)(-r\sin\theta)-(r\cos\theta\sin\phi)\cos\theta=-r\sin\phi
-\end{aligned}
-$$
-
-$\det J=r^2\sin\theta$ で割ると、$A$ の第1列（$x$ で偏微分したもの）が得られます：
-
-$$
-A_{11}=\frac{\tilde J_{11}}{\det J}=\sin\theta\cos\phi,\qquad
-A_{21}=\frac{\cos\theta\cos\phi}r,\qquad
-A_{31}=-\frac{\sin\phi}{r\sin\theta}
-$$
-
-これは $A^r{}_x=\partial r/\partial x=x/r=\sin\theta\cos\phi$ や $A^\phi{}_x=\partial\phi/\partial x=-y/(x^2+y^2)=-\sin\phi/(r\sin\theta)$ と一致します。残りの列も同様で、全成分は次のようになります：
-
-$$
-A=\begin{pmatrix}
-\sin\theta\cos\phi & \sin\theta\sin\phi & \cos\theta\\[2pt]
-\dfrac{\cos\theta\cos\phi}r & \dfrac{\cos\theta\sin\phi}r & -\dfrac{\sin\theta}r\\[6pt]
--\dfrac{\sin\phi}{r\sin\theta} & \dfrac{\cos\phi}{r\sin\theta} & 0
-\end{pmatrix}
-$$
-
-$A$ の第3行は、$\sin\theta=0$（北極・南極）で発散します。これは、極で $\phi$ が定まらない座標特異点に対応していて、そこでは $\det J=r^2\sin\theta=0$ です。
-
-また、$g_{ij}=J^a{}_iJ^a{}_j$ から $\det g=(\det J)^2$ なので、
-
-$$
-\sqrt{|g|}=|\det J|=r^2\sin\theta
-$$
-
-です。この Part の §3 で出てきた $\sqrt{|g|}$ は、$J$ の行列式の絶対値に等しい、ということです。
+共変発散（$\Gamma^i{}_{ij}=\partial_j\ln\sqrt{|g|}$）と、逆ヤコビ行列 $A$ を余因子行列で具体的に作る方法は、本編末尾の補遺で扱います（Part IV 以降を読むために必須ではありません）。
 
 ---
 
@@ -1157,7 +643,7 @@ $$
 A^r{}_x=\frac xr=\cos\theta,\ A^r{}_y=\frac yr=\sin\theta,\qquad A^\theta{}_x=-\frac{\sin\theta}r,\ A^\theta{}_y=\frac{\cos\theta}r
 $$
 
-（Part III §4 の余因子行列を使っても同じ$A$が得られます。）
+（補遺 §2 の余因子行列を使っても同じ$A$が得られます。）
 
 **Part III §1で導出した$\Gamma^k{}_{ij}=A^k{}_a\partial_jJ^a{}_i$を使って、$\Gamma^r{}_{\theta\theta}$と$\Gamma^\theta{}_{r\theta}$を計算します。**
 
@@ -1314,7 +800,7 @@ $$
 
 **これが結論です。** 反対称化した共変微分（本来「一般座標で正しい$\operatorname{rot}$」を作ろうとした量）は、**一般のどんな座標系でも**、$\Gamma$を一切使わない外微分$d$と完全に一致します。デカルト座標だから$\Gamma$が消えていたのではなく、**「反対称化する」という操作そのものが、$\Gamma$の対称性によって自動的に$\Gamma$を消去する**、というのが正確な理由です。
 
-一方、$\operatorname{div}$（Part III §3 で扱った共変発散）は、反対称化ではなく縮約（$i=j$ と置いて和を取る）なので、この打ち消しが起きません。その結果、次の形で $\Gamma$（$=\sqrt{|g|}$ の微分）が生き残ります。
+一方、$\operatorname{div}$（補遺 §1 で扱った共変発散）は、反対称化ではなく縮約（$i=j$ と置いて和を取る）なので、この打ち消しが起きません。その結果、次の形で $\Gamma$（$=\sqrt{|g|}$ の微分）が生き残ります。
 
 $$
 \Gamma^i{}_{ij}=\partial_j\ln\sqrt{|g|}
@@ -2574,6 +2060,545 @@ flowchart TD
 | 空間は曲がっているか | 曲がっていない（座標が曲線的なだけ） | 曲がっている |
 
 今回の要点は、**「計量さえ与えられれば、クリストッフェル記号も曲率テンソルも、追加の仮定なしに完全に計算で決まる」**という点と、**「クリストッフェル記号がゼロでないことと、空間が曲がっていることはまったく別の話」**という点の2つでした。極座標という平坦な例と、球面という曲がった例を並べて実際に手を動かして計算することで、この違いが数字として体感できたと思います。一般相対論はこの続き（$R_{ij}$、$R$、そして物質のエネルギー・運動量テンソルを結びつけるアインシュタイン方程式）にありますが、そこは今回は扱わず、高階テンソルの入り口として、この位置で一区切りにします。
+
+---
+
+<a id="supp"></a>
+
+# 補遺：Part III から移した、共変発散と余因子行列
+
+<!-- part-toc:start -->
+
+**この補遺の内容**
+
+- [1. 共変発散とは何か（Γ^i\_ij=∂\_jln√|g| の導出）](#supp-1)
+  - [1-a. 添字の置き換えを、1ステップずつ丁寧に追う（混乱しやすいのでここだけ念入りに）](#supp-1a)
+- [2. 補足：逆ヤコビ行列 A=J^-1 を成分で作る（余因子行列）](#supp-2)
+  - [2-a. 記号と定義](#supp-2a)
+  - [2-b. 9成分をすべて書く](#supp-2b)
+  - [2-c. 取り除く行・列を色で見る](#supp-2c)
+  - [2-d. なぜ J~ J=(det J)I になるのか](#supp-2d)
+  - [2-e. 具体例](#supp-2e)
+
+<!-- part-toc:end -->
+
+Part III（ヤコビアンからの導出）の続きにあたる、2つの寄り道です。本編の流れ（Part II → III → IV）からは外れるので、ここに移しました。
+
+- **§1 共変発散**：$\Gamma^i{}_{ij}=\partial_j\ln\sqrt{|g|}$ の導出です。Part IV §4 の最後で結果を使います。
+- **§2 余因子行列**：逆ヤコビ行列 $A=J^{-1}$ を、成分から具体的に作る方法です。Part IV §2 の例で触れています。
+
+どちらも、Part IV 以降を読むために必須ではありません。
+
+<a id="supp-1"></a>
+
+## 1. 共変発散とは何か（$\Gamma^i{}_{ij}=\partial_j\ln\sqrt{|g|}$ の導出）
+
+**共変微分の簡単な復習**（詳しくはPart IVで扱いますが、この節でも使うので先に一言だけ確認しておきます）：ベクトルの成分をそのまま$\partial_jV^k$と微分しても、座標変換に対して正しく振る舞う量（テンソル）にはなりません。基底ベクトル$\mathbf e_k$自身が場所によって変化する分を補正する必要があり、その補正込みの微分が**共変微分**です：
+
+$$
+\nabla_jV^k := \partial_jV^k+\Gamma^k{}_{mj}V^m
+$$
+
+（$\Gamma^k{}_{mj}V^m$の部分が、まさに「基底が変化する効果」の補正項です。詳しい導出はPart IVを参照してください。）
+
+<a id="supp-1a"></a>
+
+### 1-a. 添字の置き換えを、1ステップずつ丁寧に追う（混乱しやすいのでここだけ念入りに）
+
+出発点の式の添字の役割を、まず確認します：
+
+$$
+\nabla_jV^k = \partial_jV^k+\Gamma^k{}_{mj}V^m
+$$
+
+- $j,k$：**自由な添字**（外から具体的な値を指定する）
+- $m$：**ダミー添字**（$\Gamma^k{}_{mj}V^m$の中で、$m=1,2,3$について和が取られている、つまり本当は $\sum_m\Gamma^k{}_{mj}V^m$ という意味）
+
+**ステップ1：$j=k=i$ を代入する（$j$と$k$だけを置き換え、$m$には一切触れない）**
+
+$$
+\nabla_iV^i = \partial_iV^i+\Gamma^i{}_{mi}V^m
+$$
+
+$m$は「消えた」のではなく、**この時点でもまだ、和を取られたまま残っています**。
+
+**ステップ2：$\Gamma^i{}_{mi}$という記号をよく見る**
+
+上付きの$i$と、下付き2番目の$i$が、**同じ文字で2回**出てきています。これも「同じ添字が式の中に2回出たら和を取る」という、これまで何度も使ってきたルールの対象です。つまり$\Gamma^i{}_{mi}$自体が、実は
+
+$$
+\Gamma^i{}_{mi} = \sum_{i=1}^3\Gamma^i{}_{mi} = \Gamma^1{}_{m1}+\Gamma^2{}_{m2}+\Gamma^3{}_{m3}
+$$
+
+という、**$i$についてすでに和が取られた量**になっています。**この時点で、式の中には「$m$についての和」と「$i$についての和（$\Gamma$の中）」という、2種類の和が入れ子で存在しています。**
+
+**ステップ3：ダミー添字$m$を、$j$に付け替える**
+
+$m$はダミー添字なので、Part 0 §5 で確認した通り、自由に名前を変えられます（$j$という文字は、$j=i$と置き換えた時点で「自由な添字」としての役目を終えているので、ここで改めてダミー添字の名前として再利用できます）：
+
+$$
+\Gamma^i{}_{mi}V^m \ \longrightarrow\ \Gamma^i{}_{ji}V^j
+$$
+
+**ステップ4：$\Gamma$の下2つの添字は対称（$\Gamma^k{}_{ij}=\Gamma^k{}_{ji}$）なので、順番を入れ替える**
+
+$$
+\Gamma^i{}_{ji} = \Gamma^i{}_{ij}
+$$
+
+（下付き添字の対称性は、クリストッフェル記号の定義そのものが持つ性質です。）これで最終形になります：
+
+$$
+\Gamma^i{}_{ji}V^j = \Gamma^i{}_{ij}V^j
+$$
+
+**最終的に得られる式と、そこに含まれる添字の状態**：
+
+$$
+\nabla_iV^i = \partial_iV^i+\Gamma^i{}_{ij}V^j
+$$
+
+- $i$：$\partial_iV^i$の中、および$\Gamma^i{}_{ij}$の上付き＋下付き1番目、の**2箇所**で登場 → **$i$について和**（合計3種類、$x,y,z$方向の発散を全部足し合わせる、という発散本来の役割）
+- $j$：$\Gamma^i{}_{ij}$の下付き2番目と$V^j$、の**2箇所**で登場 → **$j$について和**（$\Gamma$の効果を、ベクトル$V$の各成分に対して足し合わせる、という補正項の役割）
+
+**つまり、この式には「$i$についての和」と「$j$についての和」という、役割の異なる2つの和が独立に入れ子になって存在しています。** 最初の$j=k=i$という置き換えだけを見ると$m$が消えたように感じますが、実際には**①$m$はダミー添字として生き残ったまま$j$に改名され、②置き換えの結果$\Gamma$の中に新たに$i$についての和が追加で生まれた**、という2つの出来事が同時に起きていた、というのが正確な流れです。
+
+これを、$j=k=i$と置いて$i$について和を取ったもの
+
+$$
+\nabla_iV^i := \partial_iV^i+\Gamma^i{}_{ij}V^j
+$$
+
+を**共変発散**と呼びます。単なる成分の微分の和$\partial_iV^i$だけでは、基底ベクトルが場所ごとに変化する効果（$\Gamma$の項）を見落とすため、これでは正しい（テンソルとして意味を持つ）発散になりません。
+
+**$\Gamma^i{}_{ij}$を計算します。** 標準公式$\Gamma^k{}_{ij}=\frac12g^{kl}(\partial_ig_{jl}+\partial_jg_{il}-\partial_lg_{ij})$で$k=i$と置き、$i$について和を取ります：
+
+$$
+\Gamma^i{}_{ij} = \frac12g^{il}\big(\partial_ig_{jl}+\partial_jg_{il}-\partial_lg_{ij}\big)
+$$
+
+**第1項と第3項は打ち消し合います**。第3項は、ダミー添字 $i,l$ を入れ替え、$g$ の対称性 $g_{ij}=g_{ji}$ を使うと、第1項と一致するからです：
+
+$$
+g^{il}\partial_lg_{ij}\ \longrightarrow\ g^{li}\partial_ig_{lj}=g^{il}\partial_ig_{jl}
+$$
+
+したがって：
+
+$$
+\Gamma^i{}_{ij} = \frac12g^{il}\partial_jg_{il}\tag{†}
+$$
+
+**ここでJacobiの公式を使います。** 正則行列$M(q)$に対して、次が成り立ちます（導出は、この直後に振り返ります）：
+
+$$
+\boxed{\partial_j\ln|\det M| = \operatorname{tr}(M^{-1}\partial_jM)}
+$$
+
+**導出を簡単に振り返ります**。$M+dM=M(I+M^{-1}dM)$ と書けるので、行列式の積の性質から、
+
+$$
+\det(M+dM)=\det M\cdot\det\!\big(I+M^{-1}dM\big)
+$$
+
+です。微小な行列 $\varepsilon X$ については、固有値の積を展開すれば、次の近似が出ます。
+
+$$
+\det(I+\varepsilon X)\approx1+\varepsilon\operatorname{tr}X
+$$
+
+これを使うと、
+
+$$
+\det(M+dM)\approx\det M\Big(1+\operatorname{tr}\big(M^{-1}dM\big)\Big)
+$$
+
+となります。両辺から $\det M$ を引いて $\det M$ で割れば、次の式が得られます。
+
+$$
+\frac{d(\det M)}{\det M}=\operatorname{tr}\big(M^{-1}dM\big)
+$$
+
+$d(\det M)$と$\det(dM)$は異なる量です。$f(M):=\det M$と、$\det$を1つの関数の名前と見なします：
+
+$$
+d(\det M) = df(M) = f(M+dM)-f(M) = \det(M+dM)-\det M\qquad(\text{1次近似の範囲で})
+$$
+
+**これは、すでに知っている「関数の微分（全微分）」の定義そのもの**です。たとえば $f(x)=x^2$ なら、
+
+$$
+df=f(x+dx)-f(x)=2x\,dx
+$$
+
+となります。まったく同じ発想を、関数 $\det$ と、変数が「行列 $M$」という対象に当てはめただけです。つまり $d(\det M)$ は、「$M$ を $dM$ だけ動かしたときの、$\det$ の出力の変化分」を表す、ごく普通の微分です。
+
+**一方、$\det(dM)$**は、$dM$という行列**そのもの**を、そのまま行列式の公式に代入して計算した、**まったく別の計算**です（$f(x)=x^2$のときの$f(dx)=(dx)^2$に対応する量で、$df=f(x+dx)-f(x)$とは最初から問うている問題が違います）：
+
+$$
+\det(dM) = \det\begin{pmatrix}dM_{11}&dM_{12}\\dM_{21}&dM_{22}\end{pmatrix}
+$$
+
+（$2\times2$の例。）この式は「$M+dM$の行列式から$\det M$を引く」という操作を一切経ていません。
+
+**なぜこの2つが一致しないのか（多重線形性）**：行列式$\det M$は、$M$の**各行（各列）ごとには線形**ですが、行列$M$**全体**に対しては線形ではありません（多重線形、というのはこの意味です）。$\det M$は、$M$の各行を引数とする**多変数の関数**だと思えば、$df=f(M+dM)-f(M)$を計算する際には、**各引数（各行）ごとに、1つずつ微小変化させた項を足し合わせる**必要があるのは自然なことです。これは、多変数の積を微分するときに積の微分公式（$d(uv)=du\cdot v+u\cdot dv$）を使うのと同じ状況です：
+
+$$
+d(\det M) = \sum_{i=1}^n\det(\mathbf r_1,\dots,\mathbf r_{i-1},\,d\mathbf r_i,\,\mathbf r_{i+1},\dots,\mathbf r_n)
+$$
+
+（ここで $\mathbf r_i$ は $M$ の $i$ 行目で、$d\mathbf r_i$ はその行だけを微小変化させたものです。「1行だけ微分し、残りはそのまま」という行列式を、行の数だけ作って足すのが、正しい計算です。）この計算を最後まで実行すると、結果がたまたま $\operatorname{tr}(M^{-1}dM)$ という、$dM$ を外に出せる形にまとまります。「$d$ が最初から $\det$ の外にいて、中身をそのまま $dM$ に置き換えられる」わけではありません。
+
+**1変数の場合で確認すると、この区別がはっきりします**：$f(x)=x^2$ を考えると、$d(x^2)=(x+dx)^2-x^2=2x\,dx$（1次近似）です。一方、$(dx)^2$は$dx$という数を2乗しただけの、まったく別の量（しかも2次の微小量で、通常の微分の議論では無視される桁）です：
+
+$$
+\boxed{d(x^2) = 2x\,dx \quad\ne\quad (dx)^2}
+$$
+
+「$d(x^2)$ の中の $x^2$ に、そのまま $dx$ を代入すれば $(dx)^2$ になる」わけではありません。$d(x^2)=2x\,dx$ は、微分係数 $2x$ が掛かった上での結果です。
+
+今回の関係
+
+$$
+d(\det M)=\det M\cdot\operatorname{tr}\big(M^{-1}dM\big)
+$$
+
+も、これとまったく同じ構造です。$\det(dM)$（$M$ の位置に直接 $dM$ を入れたもの）とは、根本的に違う量です。
+
+**なぜ「$d(\det M)/\det M$」が「$\ln|\det M|$ の微分」と同じ意味になるのか**（連鎖律の確認）。高校数学の公式を思い出します。
+
+$$
+\frac{d}{dx}\ln|x|=\frac1x
+$$
+
+ここで $u:=\det M$ と置くと、$\ln|\det M(q)|=\ln|u|$ は、「$u$ の関数」に「$u=\det M(q)$ という $q$ の関数」を代入した合成関数です。連鎖律を使うと：
+
+$$
+\frac{d}{dq^j}\ln|u| = \frac{d\ln|u|}{du}\cdot\frac{du}{dq^j} = \frac1u\cdot\frac{du}{dq^j} = \frac1{\det M}\cdot\frac{\partial_j(\det M)}{1}
+$$
+
+つまり、
+
+$$
+\partial_j\ln|\det M|=\frac{\partial_j(\det M)}{\det M}
+$$
+
+です。これは、「$1/x$ の形の式は、$\ln|x|$ を微分したものだ」という1変数の関係を、$x$ の代わりに、座標 $q^j$ に依存する量 $\det M$ に当てはめただけです。したがって、$d(\det M)/\det M=\operatorname{tr}(M^{-1}dM)$ は、$d(\ln|\det M|)=\operatorname{tr}(M^{-1}dM)$ と同じ意味です。
+
+（**注**：ここでの$d$は、微分形式の外微分とは別の、素朴な「微小変化・微分」という意味で使っています。）
+
+**なぜ(†)にこの公式が使えるのか**：$(†)$の$g^{il}\partial_jg_{il}$は、$i,l$の両方について和を取っている量です。これは行列の積$g^{-1}(\partial_jg)$の**トレース**（対角成分の和）そのものです：
+
+$$
+\operatorname{tr}\big(g^{-1}\partial_jg\big) = \sum_i\big(g^{-1}\partial_jg\big)_{ii} = \sum_{i,l}g^{il}(\partial_jg)_{li} = g^{il}\partial_jg_{il}
+$$
+
+（行列の積$(g^{-1}\partial_jg)_{ii}=\sum_lg^{il}(\partial_jg)_{li}$を$i$について足したものが、まさにトレースの定義です。）つまり**$(†)$の右辺は、もともとトレースの形をしていた**わけです（$\ln$はまだ出てきていません）。ここにJacobiの公式（$M=g$を代入）を適用すると：
+
+$$
+g^{il}\partial_jg_{il} = \operatorname{tr}(g^{-1}\partial_jg) = \partial_j\ln|\det g|
+$$
+
+**ここで初めて$\ln$が登場します**（Jacobiの公式自体が「トレース＝$\ln|\det|$の微分」という中身を持つ公式だからです）。
+
+**記号「$|g|$」の正確な意味（脇道）**：$|g|$ は $|\det g|$ の略で、外側が絶対値、内側が $\det g$（符号付きの行列式）という、2段構えの記号です。$\det$ は消えているわけではなく、$|g|$ という表記の中にずっと含まれています。
+
+**なぜ絶対値が必要か**：$\det g$ 自体は、符号を持ちうる数です。普段扱う正定値の計量（たとえば球座標の $g_{ij}$）では常に正ですが、一般相対論のミンコフスキー計量 $\eta=\operatorname{diag}(-1,1,1,1)$ のような不定値計量では、$\det\eta=-1$ と負になります。体積要素 $\sqrt{|g|}$ は、本来「空間の伸縮率」という、符号を持たない正の量であるべきなので、負の数の平方根にならないよう、あらかじめ絶対値を取って符号を無視しています。
+
+これを踏まえて、$\ln|\det g|=2\ln\sqrt{|g|}$（$\ln x^2=2\ln x$と同じ、指数法則）なので：
+
+$$
+\boxed{\Gamma^i{}_{ij} = \frac12g^{il}\partial_jg_{il} = \frac12\partial_j\ln|\det g| = \partial_j\ln\sqrt{|g|}}
+$$
+
+**共変発散が、$\operatorname{div}$の一般公式（[計量テンソルと共変反変_まとめ](計量テンソルと共変反変_まとめ.md)）と一致することの確認**：
+
+$$
+\nabla_iV^i = \partial_iV^i+\Gamma^i{}_{ij}V^j = \partial_iV^i+(\partial_j\ln\sqrt{|g|})V^j
+$$
+
+一方、一般座標での発散の公式$\dfrac1{\sqrt{|g|}}\partial_i(\sqrt{|g|}V^i)$を積の微分で展開すると：
+
+$$
+\frac1{\sqrt{|g|}}\partial_i\big(\sqrt{|g|}V^i\big) = (\partial_i\ln\sqrt{|g|})V^i+\partial_iV^i
+$$
+
+**両者は（ダミー添字$i,j$の違いを除いて）完全に一致します**：
+
+$$
+\boxed{\frac1{\sqrt{|g|}}\partial_i\big(\sqrt{|g|}V^i\big) = \partial_iV^i+\Gamma^i{}_{ij}V^j}
+$$
+
+体積要素を使った発散の公式は、この**共変発散**の特別な場合だったことが、こうして正確に確認できました。
+
+<a id="supp-2"></a>
+
+## 2. 補足：逆ヤコビ行列 $A=J^{-1}$ を成分で作る（余因子行列）
+
+Part III では、$A=J^{-1}$（$AJ=I$）を「$J$ の逆行列」として使ってきました。ここでは、$3\times3$ の場合に $A$ の各成分が $J$ の成分からどう作られるのかを、**余因子行列**を使って系統的にまとめます。
+
+<a id="supp-2a"></a>
+
+### 2-a. 記号と定義
+
+成分を具体的に書くときは、行番号と列番号を、次のように決めます。
+
+- $J^a{}_i$ は、$a$（デカルト成分）を行番号、$i$（曲線座標）を列番号として、$J_{ai}$ と書きます。
+- $A^i{}_a$ は、$i$ を行番号、$a$ を列番号として、$A_{ia}$ と書きます。$A$ は逆行列なので、行と列の役割が $J$ と入れ替わります。
+
+$J$ を行列で書くと：
+
+$$
+J=\begin{pmatrix}J_{11}&J_{12}&J_{13}\\J_{21}&J_{22}&J_{23}\\J_{31}&J_{32}&J_{33}\end{pmatrix}\qquad(\text{行}=\text{デカルト成分 }a,\ \ \text{列}=\text{曲線座標 }i)
+$$
+
+$J$ の列は、基底ベクトル $\mathbf e_i$ のデカルト成分です。逆行列 $A$ の行は、$\nabla q^i$（座標関数の勾配）のデカルト成分です。$A^i{}_a=\partial q^i/\partial x^a$ なので、$AJ=I$ は、次の関係を表しています。
+
+$$
+\nabla q^i\cdot\mathbf e_j=\delta^i{}_j
+$$
+
+**① 小行列式**：$J$ から $i$ 行と $j$ 列を取り除いた $2\times2$ 行列の行列式を $\Delta_{ij}$ と書きます。例えば：
+
+$$
+\Delta_{21}=\begin{vmatrix}J_{12}&J_{13}\\J_{32}&J_{33}\end{vmatrix}=J_{12}J_{33}-J_{13}J_{32}\qquad(2\text{行と }1\text{列を取り除いた})
+$$
+
+**② 余因子**：$(-1)^{i+j}\Delta_{ij}$ です。符号 $(-1)^{i+j}$ は市松模様になります：
+
+$$
+\big((-1)^{i+j}\big)=\begin{pmatrix}+&-&+\\-&+&-\\+&-&+\end{pmatrix}
+$$
+
+**③ 余因子行列 $\tilde J$**（**転置に注意**）：
+
+$$
+\boxed{\tilde J_{ij}:=(-1)^{i+j}\,\Delta_{ji}}
+$$
+
+$\Delta$ の添字が $ji$ と逆になっています。つまり、$\tilde J$ の $(i,j)$ 成分を作るには、$J$ の「$j$ 行 $i$ 列」を取り除く、ということです。
+
+（教科書によっては、余因子 $(-1)^{i+j}\Delta_{ij}$ をそのまま並べた行列を余因子行列と呼び、その転置を随伴行列と呼びます。ここでは、$J\tilde J=(\det J)\,I$ が素直に書けるよう、転置済みの方を $\tilde J$ と書きます。）
+
+**④ 逆行列**：
+
+$$
+\boxed{A=J^{-1}=\frac1{\det J}\,\tilde J,\qquad A_{ij}=\frac{\tilde J_{ij}}{\det J}=\frac{(-1)^{i+j}\,\Delta_{ji}}{\det J}}
+$$
+
+添字を Part III の記法に戻すと、次のようになります：
+
+$$
+A^i{}_a=\frac{(-1)^{i+a}\,\Delta_{ai}}{\det J}\qquad(\Delta_{ai}：J\text{ のデカルト成分 }a\text{ の行と、曲線座標 }i\text{ の列を取り除いた小行列式})
+$$
+
+<a id="supp-2b"></a>
+
+### 2-b. 9成分をすべて書く
+
+$\tilde J_{ij}$ ごとに、「どの行・列を取り除くか」「符号」「残った $2\times2$ の（主対角の積）$-$（反対角の積）」をまとめます：
+
+| $\tilde J_{ij}$ | 取り除く（$j$ 行 $i$ 列） | 符号 | 残った $2\times2$ の主対角の積 $-$ 反対角の積 |
+|---|---|---|---|
+| $\tilde J_{11}$ | 1行1列 | $+$ | $J_{22}J_{33}-J_{23}J_{32}$ |
+| $\tilde J_{12}$ | 2行1列 | $-$ | $J_{12}J_{33}-J_{13}J_{32}$ |
+| $\tilde J_{13}$ | 3行1列 | $+$ | $J_{12}J_{23}-J_{13}J_{22}$ |
+| $\tilde J_{21}$ | 1行2列 | $-$ | $J_{21}J_{33}-J_{23}J_{31}$ |
+| $\tilde J_{22}$ | 2行2列 | $+$ | $J_{11}J_{33}-J_{13}J_{31}$ |
+| $\tilde J_{23}$ | 3行2列 | $-$ | $J_{11}J_{23}-J_{13}J_{21}$ |
+| $\tilde J_{31}$ | 1行3列 | $+$ | $J_{21}J_{32}-J_{22}J_{31}$ |
+| $\tilde J_{32}$ | 2行3列 | $-$ | $J_{11}J_{32}-J_{12}J_{31}$ |
+| $\tilde J_{33}$ | 3行3列 | $+$ | $J_{11}J_{22}-J_{12}J_{21}$ |
+
+行列の形に並べると：
+
+$$
+\tilde J=\begin{pmatrix}
+J_{22}J_{33}-J_{23}J_{32} & -(J_{12}J_{33}-J_{13}J_{32}) & J_{12}J_{23}-J_{13}J_{22}\\
+-(J_{21}J_{33}-J_{23}J_{31}) & J_{11}J_{33}-J_{13}J_{31} & -(J_{11}J_{23}-J_{13}J_{21})\\
+J_{21}J_{32}-J_{22}J_{31} & -(J_{11}J_{32}-J_{12}J_{31}) & J_{11}J_{22}-J_{12}J_{21}
+\end{pmatrix}
+$$
+
+**覚え方**：
+
+1. $\tilde J_{ij}$ を作るときは、$J$ の **$j$ 行 $i$ 列**を消す（$i,j$ が逆）。対角成分 $\tilde J_{ii}$ だけは $i$ 行 $i$ 列を消すので、逆になっていることが見えません。
+2. 残った $2\times2$ を「左上 $\times$ 右下 $-$ 右上 $\times$ 左下」で計算する（行・列の順序は元のまま）。
+3. 符号は市松模様（$(i,j)$ 成分の符号は $(-1)^{i+j}$）。
+
+$\det J$ は、$J$ の第1行に沿った展開（余因子展開）です。$\tilde J_{j1}$ は $J_{1j}$ の余因子なので：
+
+$$
+\det J=J_{11}\tilde J_{11}+J_{12}\tilde J_{21}+J_{13}\tilde J_{31}
+$$
+
+<a id="supp-2c"></a>
+
+### 2-c. 取り除く行・列を色で見る
+
+灰色が取り除く行と列、赤が残った $2\times2$ です。**$\tilde J_{12}$ と $\tilde J_{21}$ で、取り除く行・列が入れ替わっている**ことに注目してください。
+
+**$\tilde J_{11}$**（1行1列を取り除く）：
+
+$$
+\left(\begin{array}{ccc}
+\color{gray}J_{11}&\color{gray}J_{12}&\color{gray}J_{13}\\
+\color{gray}J_{21}&\color{red}J_{22}&\color{red}J_{23}\\
+\color{gray}J_{31}&\color{red}J_{32}&\color{red}J_{33}
+\end{array}\right)
+\ \Longrightarrow\ 
+\tilde J_{11}=(+1)\begin{vmatrix}\color{red}J_{22}&\color{red}J_{23}\\\color{red}J_{32}&\color{red}J_{33}\end{vmatrix}
+=J_{22}J_{33}-J_{23}J_{32}
+$$
+
+**$\tilde J_{12}$**（**2行1列**を取り除く）：
+
+$$
+\left(\begin{array}{ccc}
+\color{gray}J_{11}&\color{red}J_{12}&\color{red}J_{13}\\
+\color{gray}J_{21}&\color{gray}J_{22}&\color{gray}J_{23}\\
+\color{gray}J_{31}&\color{red}J_{32}&\color{red}J_{33}
+\end{array}\right)
+\ \Longrightarrow\ 
+\tilde J_{12}=(-1)\begin{vmatrix}\color{red}J_{12}&\color{red}J_{13}\\\color{red}J_{32}&\color{red}J_{33}\end{vmatrix}
+=-(J_{12}J_{33}-J_{13}J_{32})
+$$
+
+**$\tilde J_{21}$**（**1行2列**を取り除く）：
+
+$$
+\left(\begin{array}{ccc}
+\color{gray}J_{11}&\color{gray}J_{12}&\color{gray}J_{13}\\
+\color{red}J_{21}&\color{gray}J_{22}&\color{red}J_{23}\\
+\color{red}J_{31}&\color{gray}J_{32}&\color{red}J_{33}
+\end{array}\right)
+\ \Longrightarrow\ 
+\tilde J_{21}=(-1)\begin{vmatrix}\color{red}J_{21}&\color{red}J_{23}\\\color{red}J_{31}&\color{red}J_{33}\end{vmatrix}
+=-(J_{21}J_{33}-J_{23}J_{31})
+$$
+
+**$\tilde J_{22}$**（2行2列を取り除く）：
+
+$$
+\left(\begin{array}{ccc}
+\color{red}J_{11}&\color{gray}J_{12}&\color{red}J_{13}\\
+\color{gray}J_{21}&\color{gray}J_{22}&\color{gray}J_{23}\\
+\color{red}J_{31}&\color{gray}J_{32}&\color{red}J_{33}
+\end{array}\right)
+\ \Longrightarrow\ 
+\tilde J_{22}=(+1)\begin{vmatrix}\color{red}J_{11}&\color{red}J_{13}\\\color{red}J_{31}&\color{red}J_{33}\end{vmatrix}
+=J_{11}J_{33}-J_{13}J_{31}
+$$
+
+9成分すべてを、$\tilde J$ の並びのまま図にすると次のようになります。
+
+![余因子行列の9成分と、消す行・列](figures/fig9_cofactor_matrix.png)
+
+*$\tilde J$ の $(i,j)$ の位置に $\tilde J_{ij}$ を作る様子です。灰色の十字が消す行と列（$J$ の $j$ 行 $i$ 列）、赤が残った $2\times2$ です。枠の色は符号 $(-1)^{i+j}$（青が $+$、紫が $-$）で、市松模様になっています。$\tilde J_{ij}$ が消すのは $J$ の $(j,i)$ 側（転置）ですが、対角成分は $i=j$ なので違いが見えません。*
+
+<a id="supp-2d"></a>
+
+### 2-d. なぜ $J\tilde J=(\det J)\,I$ になるのか
+
+$\tilde J_{jk}=(-1)^{j+k}\Delta_{kj}$ なので、積の $(i,k)$ 成分は：
+
+$$
+(J\tilde J)_{ik}=\sum_{j=1}^3J_{ij}\,\tilde J_{jk}=\sum_{j=1}^3(-1)^{k+j}\,J_{ij}\,\Delta_{kj}
+$$
+
+$\Delta_{kj}$ は「$k$ 行を取り除いた」小行列式なので、$J$ の第 $k$ 行の中身には依りません。したがって、この和は「**$J$ の第 $k$ 行を第 $i$ 行で置き換えた行列**」の、第 $k$ 行に沿った余因子展開そのものです：
+
+- **$i=k$ のとき**：置き換えても $J$ のままなので、和は $\det J$ になります。
+- **$i\ne k$ のとき**：置き換えた行列は同じ行を2本持つので、行列式は $0$ になります。
+
+$$
+(J\tilde J)_{ik}=(\det J)\,\delta_{ik}\qquad\Longrightarrow\qquad J\tilde J=(\det J)\,I\qquad\Longrightarrow\qquad J^{-1}=\frac{\tilde J}{\det J}\quad(\det J\ne0)
+$$
+
+**具体的に確かめる**（$3\times3$）。$(i,k)=(1,1)$ は第1行の展開そのものです：
+
+$$
+J_{11}\tilde J_{11}+J_{12}\tilde J_{21}+J_{13}\tilde J_{31}
+=J_{11}(J_{22}J_{33}-J_{23}J_{32})-J_{12}(J_{21}J_{33}-J_{23}J_{31})+J_{13}(J_{21}J_{32}-J_{22}J_{31})=\det J
+$$
+
+$(i,k)=(2,1)$ は、第1行の $J_{1j}$ の代わりに第2行の $J_{2j}$ を入れたもので、項がすべて打ち消し合います：
+
+$$
+\begin{aligned}
+J_{21}\tilde J_{11}+J_{22}\tilde J_{21}+J_{23}\tilde J_{31}
+&=J_{21}(J_{22}J_{33}-J_{23}J_{32})-J_{22}(J_{21}J_{33}-J_{23}J_{31})+J_{23}(J_{21}J_{32}-J_{22}J_{31})\\
+&=J_{21}J_{22}J_{33}-J_{21}J_{23}J_{32}-J_{22}J_{21}J_{33}+J_{22}J_{23}J_{31}+J_{23}J_{21}J_{32}-J_{23}J_{22}J_{31}=0
+\end{aligned}
+$$
+
+この議論は $n\times n$ でもそのまま成り立ちます（小行列式が $(n-1)\times(n-1)$ になるだけです）。
+
+<a id="supp-2e"></a>
+
+### 2-e. 具体例
+
+**(a) 2次元の極座標**（$x=r\cos\theta,\ y=r\sin\theta$、$q^1=r,\ q^2=\theta$）。$2\times2$ では、取り除いて残るのは1成分だけなので $\tilde J=\begin{pmatrix}J_{22}&-J_{12}\\-J_{21}&J_{11}\end{pmatrix}$ です：
+
+$$
+J=\begin{pmatrix}\cos\theta&-r\sin\theta\\\sin\theta&r\cos\theta\end{pmatrix},\quad
+\det J=r,\quad
+\tilde J=\begin{pmatrix}r\cos\theta&r\sin\theta\\-\sin\theta&\cos\theta\end{pmatrix}
+$$
+
+$$
+A=\frac{\tilde J}{\det J}=\begin{pmatrix}\cos\theta&\sin\theta\\-\dfrac{\sin\theta}r&\dfrac{\cos\theta}r\end{pmatrix}
+$$
+
+Part IV §2 の例③で $r=\sqrt{x^2+y^2},\ \theta=\arctan(y/x)$ を直接微分して求めた $A^r{}_x,A^r{}_y,A^\theta{}_x,A^\theta{}_y$ と一致します。
+
+**(b) 3次元の球座標**（$x=r\sin\theta\cos\phi,\ y=r\sin\theta\sin\phi,\ z=r\cos\theta$、$q^1=r,\ q^2=\theta,\ q^3=\phi$）：
+
+$$
+J=\begin{pmatrix}
+\sin\theta\cos\phi & r\cos\theta\cos\phi & -r\sin\theta\sin\phi\\
+\sin\theta\sin\phi & r\cos\theta\sin\phi & r\sin\theta\cos\phi\\
+\cos\theta & -r\sin\theta & 0
+\end{pmatrix},\qquad \det J=r^2\sin\theta
+$$
+
+第1列の余因子 $\tilde J_{11},\tilde J_{21},\tilde J_{31}$ を、上の表の通りに計算します：
+
+$$
+\begin{aligned}
+\tilde J_{11}&=J_{22}J_{33}-J_{23}J_{32}=(r\cos\theta\sin\phi)(0)-(r\sin\theta\cos\phi)(-r\sin\theta)=r^2\sin^2\theta\cos\phi\\
+\tilde J_{21}&=-(J_{21}J_{33}-J_{23}J_{31})=-\big(0-(r\sin\theta\cos\phi)\cos\theta\big)=r\sin\theta\cos\theta\cos\phi\\
+\tilde J_{31}&=J_{21}J_{32}-J_{22}J_{31}=(\sin\theta\sin\phi)(-r\sin\theta)-(r\cos\theta\sin\phi)\cos\theta=-r\sin\phi
+\end{aligned}
+$$
+
+$\det J=r^2\sin\theta$ で割ると、$A$ の第1列（$x$ で偏微分したもの）が得られます：
+
+$$
+A_{11}=\frac{\tilde J_{11}}{\det J}=\sin\theta\cos\phi,\qquad
+A_{21}=\frac{\cos\theta\cos\phi}r,\qquad
+A_{31}=-\frac{\sin\phi}{r\sin\theta}
+$$
+
+これは $A^r{}_x=\partial r/\partial x=x/r=\sin\theta\cos\phi$ や $A^\phi{}_x=\partial\phi/\partial x=-y/(x^2+y^2)=-\sin\phi/(r\sin\theta)$ と一致します。残りの列も同様で、全成分は次のようになります：
+
+$$
+A=\begin{pmatrix}
+\sin\theta\cos\phi & \sin\theta\sin\phi & \cos\theta\\[2pt]
+\dfrac{\cos\theta\cos\phi}r & \dfrac{\cos\theta\sin\phi}r & -\dfrac{\sin\theta}r\\[6pt]
+-\dfrac{\sin\phi}{r\sin\theta} & \dfrac{\cos\phi}{r\sin\theta} & 0
+\end{pmatrix}
+$$
+
+$A$ の第3行は、$\sin\theta=0$（北極・南極）で発散します。これは、極で $\phi$ が定まらない座標特異点に対応していて、そこでは $\det J=r^2\sin\theta=0$ です。
+
+また、$g_{ij}=J^a{}_iJ^a{}_j$ から $\det g=(\det J)^2$ なので、
+
+$$
+\sqrt{|g|}=|\det J|=r^2\sin\theta
+$$
+
+です。この補遺の §1 で出てきた $\sqrt{|g|}$ は、$J$ の行列式の絶対値に等しい、ということです。
 
 ---
 

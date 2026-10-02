@@ -14,8 +14,8 @@
 見出しを増やす・直す・番号を振り直したときは、もう一度実行すれば目次が更新される（何度実行しても同じ結果になる）。
 
 アンカー名の規則:
-  Part n          → p{n}（Part 0 は p0）、付録 → appA / appB / appC、まとめ → summary
-  Part の節 "## 2."      → p{n}-2        小項目 "### 4-c." → p{n}-4c
+  Part n          → p{n}（Part 0 は p0）、付録 → appA / appB / appC、補遺 → supp、まとめ → summary
+  Part の節 "## 2."      → p{n}-2        小項目 "### 4-c." → p{n}-4c（補遺は supp-2、supp-2c）
   付録の節 "## A-3." / "### B-2-5." → A-3 / B-2-5、付録の「まとめ」→ A-sum / B-sum / C-sum
 """
 
@@ -79,6 +79,9 @@ def classify(lines):
             elif text.startswith("まとめ"):
                 part = "summary"
                 out.append((i, 1, part, text, part))
+            elif text.startswith("補遺："):
+                part = "supp"
+                out.append((i, 1, part, text, part))
             else:
                 warn.append(f"L{i + 1}: 想定外の # 見出し: {text[:40]}")
             continue
@@ -125,7 +128,8 @@ def build(text):
         items = [(h[1], h[2], h[3]) for h in heads if h[4] == part and h[1] > 1]
         if not items:
             continue
-        rows = ["<!-- part-toc:start -->", "", "**この Part の内容**" if part.startswith("p") else "**この付録の内容**", ""]
+        label = {"supp": "**この補遺の内容**"}.get(part, "**この Part の内容**" if part.startswith("p") else "**この付録の内容**")
+        rows = ["<!-- part-toc:start -->", "", label, ""]
         for level, hid2, title in items:
             rows.append(f"{'  ' * (level - 2)}- [{plain(title)}](#{hid2})")
         rows += ["", "<!-- part-toc:end -->", ""]
