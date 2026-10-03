@@ -86,7 +86,7 @@ $$
 
 - 接空間は3次元の実ベクトル空間で、§4 から、指数写像による像は $SU(2)$ 全体です。
 - **パウリ行列とは、この3次元の空間（トレースゼロのエルミート行列の全体）の基底**です。$i$ を掛ければ、接空間 $T_ISU(2)$ の基底になります。Part II で、エルミート行列の一般形から具体的に作ります。
-- Part VI では、$A=-\frac\theta2\,\hat n\cdot\vec\sigma$ とした形 $U=\exp\!\big(-i\frac\theta2\,\hat n\cdot\vec\sigma\big)$ を扱います。
+- Part VII では、$A=-\frac\theta2\,\hat n\cdot\vec\sigma$ とした形 $U=\exp\!\big(-i\frac\theta2\,\hat n\cdot\vec\sigma\big)$ を扱います。
 
 ---
 
@@ -194,7 +194,7 @@ $$
 
 - $M$ がエルミートなら、係数はすべて実数です（エルミート行列どうしの積のトレースは実数：$\operatorname{tr}(\sigma_iM)$ の複素共役は $\operatorname{tr}\big((\sigma_iM)^\dagger\big)=\operatorname{tr}(M\sigma_i)=\operatorname{tr}(\sigma_iM)$）。エルミート $2\times2$ 行列の全体は、$\{I,\sigma_x,\sigma_y,\sigma_z\}$ を基底とする、4次元の実ベクトル空間です。
 - 係数を複素数まで許せば、この式は**任意の $2\times2$ 複素行列**で成り立ちます。$2\times2$ 複素行列の全体は複素4次元で、$\{I,\sigma_x,\sigma_y,\sigma_z\}$ はその基底です。例えば $\begin{pmatrix}0&1\\0&0\end{pmatrix}=\frac12(\sigma_x+i\sigma_y)$ です。
-- 量子ビットの状態を表す密度行列 $\rho$ は、トレースが $1$ のエルミート行列なので、$\rho=\frac12\big(I+\vec r\cdot\vec\sigma\big)$ と書けます。この $\vec r$ が、ブロッホ球の点（ブロッホベクトル）になります（後の Part で扱います）。
+- 量子ビットの状態を表す密度行列 $\rho$ は、トレースが $1$ のエルミート行列なので、$\rho=\frac12\big(I+\vec r\cdot\vec\sigma\big)$ と書けます。この $\vec r$ が、ブロッホ球の点（ブロッホベクトル）になります（Part VI §6）。
 
 ![エルミート行列の基底と、直交性](figures/pauli02_basis.png)
 
@@ -213,9 +213,9 @@ $$
 | 固有値 $+1$ の固有ベクトル | $\frac1{\sqrt2}(1,1)$ | $\frac1{\sqrt2}(1,i)$ | $(1,0)$ | 直接確かめられる |
 | 固有値 $-1$ の固有ベクトル | $\frac1{\sqrt2}(1,-1)$ | $\frac1{\sqrt2}(1,-i)$ | $(0,1)$ | 直接確かめられる |
 
-**固有値が $\pm1$ になる理由**：$\sigma\mathbf v=\lambda\mathbf v$ なら、$\mathbf v=\sigma^2\mathbf v=\lambda^2\mathbf v$ なので $\lambda^2=1$、つまり $\lambda=\pm1$ です。さらに、2つの固有値の和はトレース $0$ なので、$+1$ と $-1$ が1つずつです。同じ議論は、単位ベクトル $\hat n$ についての $\hat n\cdot\vec\sigma$ にも使えます（後の Part で、その固有ベクトルがブロッホ球の点になることを見ます）。
+**固有値が $\pm1$ になる理由**：$\sigma\mathbf v=\lambda\mathbf v$ なら、$\mathbf v=\sigma^2\mathbf v=\lambda^2\mathbf v$ なので $\lambda^2=1$、つまり $\lambda=\pm1$ です。さらに、2つの固有値の和はトレース $0$ なので、$+1$ と $-1$ が1つずつです。同じ議論は、単位ベクトル $\hat n$ についての $\hat n\cdot\vec\sigma$ にも使えます（Part VI で、その固有ベクトルがブロッホ球の点になることを見ます）。
 
-**$\sigma_i$ 自身は $SU(2)$ の元ではない**：$\det\sigma_i=-1$ なので、$\sigma_i$ はユニタリですが $SU(2)$ には入りません。一方、$i\sigma_i$ は $\det(i\sigma_i)=i^2\cdot(-1)=1$ で $SU(2)$ の元です。これは、Part VI の回転 $\exp(-i\frac\theta2\hat n\cdot\vec\sigma)$ で $\theta=-\pi$ としたもの（符号を除いて、角度 $\pi$ の回転）にあたります。
+**$\sigma_i$ 自身は $SU(2)$ の元ではない**：$\det\sigma_i=-1$ なので、$\sigma_i$ はユニタリですが $SU(2)$ には入りません。一方、$i\sigma_i$ は $\det(i\sigma_i)=i^2\cdot(-1)=1$ で $SU(2)$ の元です。これは、Part VII の回転 $\exp(-i\frac\theta2\hat n\cdot\vec\sigma)$ で $\theta=-\pi$ としたもの（符号を除いて、角度 $\pi$ の回転）にあたります。
 
 ---
 
@@ -386,8 +386,8 @@ $$
 
 この公式から、次のことがすぐに分かります。
 
-- **2乗**：$\vec b=\vec a$ とすると $\vec a\times\vec a=0$ なので、$(\vec a\cdot\vec\sigma)^2=|\vec a|^2I$ です。特に単位ベクトル $\hat n$ なら $(\hat n\cdot\vec\sigma)^2=I$ で、Part II §6 と同じ議論から、固有値は $\pm1$ です。Part VI の指数関数の計算でも、この性質を使います。
-- **交換子は外積**：$[\vec a\cdot\vec\sigma,\vec b\cdot\vec\sigma]=2i\,(\vec a\times\vec b)\cdot\vec\sigma$ です（$\vec b\cdot\vec a=\vec a\cdot\vec b$、$\vec b\times\vec a=-\vec a\times\vec b$ なので、内積の部分が打ち消し合います）。パウリ行列の交換関係は、3次元の外積と同じ構造をしています。これが、$SU(2)$ が3次元の回転と結びつく理由の1つです（Part VI）。
+- **2乗**：$\vec b=\vec a$ とすると $\vec a\times\vec a=0$ なので、$(\vec a\cdot\vec\sigma)^2=|\vec a|^2I$ です。特に単位ベクトル $\hat n$ なら $(\hat n\cdot\vec\sigma)^2=I$ で、Part II §6 と同じ議論から、固有値は $\pm1$ です。Part VI の固有ベクトルと、Part VII の指数関数の計算で、この性質を使います。
+- **交換子は外積**：$[\vec a\cdot\vec\sigma,\vec b\cdot\vec\sigma]=2i\,(\vec a\times\vec b)\cdot\vec\sigma$ です（$\vec b\cdot\vec a=\vec a\cdot\vec b$、$\vec b\times\vec a=-\vec a\times\vec b$ なので、内積の部分が打ち消し合います）。パウリ行列の交換関係は、3次元の外積と同じ構造をしています。これが、$SU(2)$ が3次元の回転と結びつく理由の1つです（Part VII）。
 - **反交換子は内積**：$\{\vec a\cdot\vec\sigma,\vec b\cdot\vec\sigma\}=2(\vec a\cdot\vec b)I$ です。特に、$\vec a\perp\vec b$ なら、$\vec a\cdot\vec\sigma$ と $\vec b\cdot\vec\sigma$ は反交換します。
 
 ## 4. 四元数との対応
@@ -406,7 +406,130 @@ $$
 
 ---
 
-# Part VI：パウリ行列が作る群・代数のまとめ
+# Part VI：$\hat n\cdot\vec\sigma$ の固有ベクトルとブロッホ球
+
+Part V §3 で、単位ベクトル $\hat n$ について $(\hat n\cdot\vec\sigma)^2=I$ が分かりました。この Part では、$\hat n\cdot\vec\sigma$ の固有ベクトルを求め、**量子ビットのすべての状態が、球面上の点で表せる**（ブロッホ球）ことを導きます。以下、$|0\rangle=\begin{pmatrix}1\\0\end{pmatrix}$、$|1\rangle=\begin{pmatrix}0\\1\end{pmatrix}$ と書きます（$\sigma_z$ の固有値 $+1,-1$ の固有ベクトル）。
+
+## 1. 固有値は $\pm1$
+
+$\hat n\cdot\vec\sigma$ はエルミートで、$(\hat n\cdot\vec\sigma)^2=I$、$\operatorname{tr}(\hat n\cdot\vec\sigma)=0$ です。Part II §6 と同じ議論（$\lambda^2=1$ で、2つの固有値の和が $0$）から、固有値は $+1$ と $-1$ が1つずつです。
+
+## 2. 固有ベクトルを求める
+
+単位ベクトルを球座標で $\hat n=(\sin\theta\cos\phi,\ \sin\theta\sin\phi,\ \cos\theta)$（$0\leq\theta\leq\pi$）と書くと、Part II §3 の形から
+
+$$
+\hat n\cdot\vec\sigma=\begin{pmatrix}\cos\theta&\sin\theta\,e^{-i\phi}\\ \sin\theta\,e^{i\phi}&-\cos\theta\end{pmatrix}
+$$
+
+です（$n_x\pm in_y=\sin\theta\,e^{\pm i\phi}$）。固有値 $+1$ の固有ベクトル $(v_1,v_2)$ は、1行目から $(\cos\theta-1)v_1+\sin\theta\,e^{-i\phi}v_2=0$、つまり
+
+$$
+\frac{v_2}{v_1}=\frac{1-\cos\theta}{\sin\theta}\,e^{i\phi}=\frac{2\sin^2(\theta/2)}{2\sin(\theta/2)\cos(\theta/2)}\,e^{i\phi}=e^{i\phi}\tan\frac\theta2
+$$
+
+を満たします（半角の公式 $1-\cos\theta=2\sin^2\frac\theta2$、$\sin\theta=2\sin\frac\theta2\cos\frac\theta2$）。長さを $1$ にそろえると：
+
+$$
+\boxed{|{+}\hat n\rangle=\cos\frac\theta2\,|0\rangle+e^{i\phi}\sin\frac\theta2\,|1\rangle,\qquad |{-}\hat n\rangle=\sin\frac\theta2\,|0\rangle-e^{i\phi}\cos\frac\theta2\,|1\rangle}
+$$
+
+$|{-}\hat n\rangle$ は、$\theta\to\pi-\theta$、$\phi\to\phi+\pi$（**反対側の点** $-\hat n$）とした $|{+}({-}\hat n)\rangle$ と同じです。$\hat n$ を $x,y,z$ 軸の方向にとると、Part II §6 の表の固有ベクトルが出てきます：
+
+| $\hat n$ | $(\theta,\phi)$ | $\vert {+}\hat n\rangle$ | よく使う名前 |
+|---|---|---|---|
+| $+z$ | $(0,\ -)$ | $\vert 0\rangle$ | |
+| $-z$ | $(\pi,\ -)$ | $\vert 1\rangle$ | |
+| $+x$ | $(\pi/2,\ 0)$ | $\frac1{\sqrt2}(\vert 0\rangle+\vert 1\rangle)$ | $\vert {+}\rangle$ |
+| $-x$ | $(\pi/2,\ \pi)$ | $\frac1{\sqrt2}(\vert 0\rangle-\vert 1\rangle)$ | $\vert {-}\rangle$ |
+| $+y$ | $(\pi/2,\ \pi/2)$ | $\frac1{\sqrt2}(\vert 0\rangle+i\vert 1\rangle)$ | $\vert {+i}\rangle$ |
+| $-y$ | $(\pi/2,\ -\pi/2)$ | $\frac1{\sqrt2}(\vert 0\rangle-i\vert 1\rangle)$ | $\vert {-i}\rangle$ |
+
+## 3. すべての状態は、球面上の1点で表せる（ブロッホ球）
+
+逆に、長さ $1$ の任意の状態 $|\psi\rangle=\alpha|0\rangle+\beta|1\rangle$（$|\alpha|^2+|\beta|^2=1$）を考えます。量子力学では、全体に掛かる位相 $e^{i\gamma}$（**大域位相**）は観測できないので、$|\psi\rangle$ と $e^{i\gamma}|\psi\rangle$ は同じ状態です。そこで $\alpha$ が $0$ 以上の実数になるように位相をそろえると、$|\alpha|^2+|\beta|^2=1$ から
+
+$$
+\alpha=\cos\frac\theta2,\qquad \beta=e^{i\phi}\sin\frac\theta2\qquad(0\leq\theta\leq\pi)
+$$
+
+と書けます。これは §2 の $|{+}\hat n\rangle$ そのものです。したがって、
+
+$$
+\boxed{\text{量子ビットの状態（大域位相を除く）}\ \longleftrightarrow\ \text{単位球面上の点 }\hat n}
+$$
+
+という1対1の対応があります。この球面を**ブロッホ球**と呼びます。
+
+![ブロッホ球](figures/pauli05_bloch_sphere.png)
+
+*ブロッホ球と、§2 の表の6つの状態です。北極が $|0\rangle$、南極が $|1\rangle$、赤道上の $\pm x$ が $|{\pm}\rangle$、$\pm y$ が $|{\pm i}\rangle$ です。一般の状態 $\cos\frac\theta2|0\rangle+e^{i\phi}\sin\frac\theta2|1\rangle$ は、北極からの角度 $\theta$、経度 $\phi$ の点 $\hat n$ に対応します。図を描くときに、6つの点が $\hat n\cdot\vec\sigma$ の固有値 $+1$ の固有状態であることを確かめています。*
+
+**補足（極は座標特異点）**：$\theta=0$（北極、$|0\rangle$）と $\theta=\pi$（南極、$|1\rangle$）では $\phi$ が決まりません（$\sin\frac\theta2$ や $\cos\frac\theta2$ が $0$ になり、$e^{i\phi}$ が効かなくなる）。これは、球座標の極が座標特異点であるのと同じ現象で、状態そのものに特別なことは起きていません（[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part I §5、Part IX §1）。
+
+**補足（リーマン球面）**：比 $\beta/\alpha=e^{i\phi}\tan\frac\theta2$ は、$\hat n$ を使うと $\dfrac{n_x+in_y}{1+n_z}$ で、[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md#p5-3)の南極からの立体射影 $\sigma_S$ を複素数で書いたものです。大域位相を除いた量子ビットの状態の空間は、多様体のノートの Part V §3 の**リーマン球面 $\mathbb{CP}^1$** と同じものです。
+
+## 4. パウリ行列の期待値は $\hat n$
+
+状態 $|{+}\hat n\rangle$ でのパウリ行列の期待値を計算します。$|\psi\rangle=\alpha|0\rangle+\beta|1\rangle$ について
+
+$$
+\langle\sigma_z\rangle=|\alpha|^2-|\beta|^2,\qquad
+\langle\sigma_x\rangle=\bar\alpha\beta+\bar\beta\alpha=2\operatorname{Re}(\bar\alpha\beta),\qquad
+\langle\sigma_y\rangle=-i\bar\alpha\beta+i\bar\beta\alpha=2\operatorname{Im}(\bar\alpha\beta)
+$$
+
+です（$\langle A\rangle:=\langle\psi|A|\psi\rangle$）。$\alpha=\cos\frac\theta2$、$\beta=e^{i\phi}\sin\frac\theta2$ を代入すると、$\bar\alpha\beta=e^{i\phi}\sin\frac\theta2\cos\frac\theta2=\frac12e^{i\phi}\sin\theta$ なので、
+
+$$
+\boxed{\big(\langle\sigma_x\rangle,\ \langle\sigma_y\rangle,\ \langle\sigma_z\rangle\big)=(\sin\theta\cos\phi,\ \sin\theta\sin\phi,\ \cos\theta)=\hat n}
+$$
+
+です。**ブロッホ球の点 $\hat n$ は、パウリ行列の期待値を並べたベクトル**でもあります。
+
+これを Part II §5 の展開に当てはめると、状態 $|{+}\hat n\rangle$ への射影（密度行列）は
+
+$$
+|{+}\hat n\rangle\langle{+}\hat n|=\tfrac12\operatorname{tr}\big(|{+}\hat n\rangle\langle{+}\hat n|\big)\,I+\sum_i\tfrac12\langle{+}\hat n|\sigma_i|{+}\hat n\rangle\,\sigma_i=\frac12\big(I+\hat n\cdot\vec\sigma\big)
+$$
+
+です（$\operatorname{tr}\big(\sigma_i|\psi\rangle\langle\psi|\big)=\langle\psi|\sigma_i|\psi\rangle$、$\operatorname{tr}|\psi\rangle\langle\psi|=1$ を使いました）。
+
+## 5. なぜ半角 $\theta/2$ なのか：直交する状態は対蹠点
+
+2つの状態 $|{+}\hat n\rangle$、$|{+}\hat m\rangle$ の重なりは、§4 の射影の式から
+
+$$
+|\langle{+}\hat m|{+}\hat n\rangle|^2=\langle{+}\hat n|\Big(\frac12\big(I+\hat m\cdot\vec\sigma\big)\Big)|{+}\hat n\rangle=\frac12\big(1+\hat m\cdot\hat n\big)=\cos^2\frac\Theta2
+$$
+
+です（$\Theta$ は $\hat n$ と $\hat m$ のなす角。2つ目の等号で §4 の期待値 $\langle\vec\sigma\rangle=\hat n$ を使いました）。
+
+- $\Theta=0$（同じ点）なら重なりは $1$、$\Theta=\pi$（**反対側の点**）なら $0$ です。**直交する2つの状態は、ブロッホ球の対蹠点**にあります（$|0\rangle$ と $|1\rangle$、$|{+}\rangle$ と $|{-}\rangle$ など）。
+- 状態ベクトルの空間では直交（角度 $90^\circ$）なのに、球面上では反対側（角度 $180^\circ$）になります。状態の角度は、球面上の角度の半分で、これが $|{+}\hat n\rangle$ に半角 $\theta/2$ が現れる理由です。
+- この式は測定の確率でもあります。状態 $|{+}\hat n\rangle$ で $\hat m\cdot\vec\sigma$ を測ると、$+1$ が出る確率は $\frac12(1+\hat m\cdot\hat n)$ です。例えば $\sigma_z$ を測ると、$|0\rangle$（$+1$）が出る確率は $\cos^2\frac\theta2$ です。
+
+## 6. 密度行列と、ブロッホ球の内側
+
+いくつかの状態を確率的に混ぜた**混合状態**は、密度行列 $\rho$（トレース $1$ で、固有値が $0$ 以上のエルミート行列）で表します（[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)）。Part II §5 の展開から
+
+$$
+\rho=\frac12\big(I+\vec r\cdot\vec\sigma\big),\qquad \vec r=\big(\operatorname{tr}(\rho\sigma_x),\ \operatorname{tr}(\rho\sigma_y),\ \operatorname{tr}(\rho\sigma_z)\big)
+$$
+
+と書け、$\vec r$ を**ブロッホベクトル**と呼びます。
+
+- **固有値**：$\vec r\cdot\vec\sigma$ の固有値は $\pm|\vec r|$（§1 と同じ議論で、$(\vec r\cdot\vec\sigma)^2=|\vec r|^2I$）なので、$\rho$ の固有値は $\frac12(1\pm|\vec r|)$ です。これが $0$ 以上であることから、$|\vec r|\leq1$、つまり**ブロッホベクトルは球の内側（球面を含む）にあります**。
+- **純粋状態は球面上**：$\operatorname{tr}\rho^2=\frac14\operatorname{tr}\big(I+2\vec r\cdot\vec\sigma+|\vec r|^2I\big)=\frac12(1+|\vec r|^2)$ で、これが $1$（純粋状態）になるのは $|\vec r|=1$ のときです。§4 の $|{+}\hat n\rangle\langle{+}\hat n|$ は $\vec r=\hat n$ にあたります。
+- **完全な混合状態は中心**：$\vec r=0$ なら $\rho=\frac12I$ で、どの方向に測っても $\pm1$ が半分ずつ出ます。
+
+![半角の関係と、混合状態](figures/pauli06_half_angle_mixed.png)
+
+*(a) 2つの状態の重なり $|\langle{+}\hat m|{+}\hat n\rangle|^2$ を、球面上の角度 $\Theta$ に対して描いたものです。曲線 $\cos^2(\Theta/2)$ の上に、ランダムな2状態の数値計算が乗ります。$\Theta=180^\circ$（対蹠点）で $0$、つまり直交します。(b) ランダムな混合状態の純度 $\operatorname{tr}\rho^2$ と固有値を、ブロッホベクトルの長さ $|\vec r|$ に対して描いたものです。固有値 $\frac12(1-|\vec r|)$ が負にならない範囲が $|\vec r|\leq1$ で、$|\vec r|=1$ が純粋状態です。図を描くときに、§2〜§6 の式（固有ベクトル、期待値、射影、立体射影との対応、重なり、密度行列の展開と固有値）を、ランダムな状態で確かめています。*
+
+---
+
+# Part VII：パウリ行列が作る群・代数のまとめ
 
 ## 1. リー代数 $\mathfrak{su}(2)$（無限小の生成子として）
 

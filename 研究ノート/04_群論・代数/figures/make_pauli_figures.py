@@ -9,6 +9,8 @@
     pauli02_basis.png           Part II 基底 {I, σx, σy, σz} の成分、M と n の対応、直交性 ½tr(σiσj)=δij
     pauli03_product_table.png   Part IV 積の表 σiσj と、x→y→z の循環（ε_ijk）
     pauli04_dot_cross.png       Part V (a·σ)(b·σ) = (a·b)I + i(a×b)·σ の係数
+    pauli05_bloch_sphere.png    Part VI ブロッホ球（6つの点と、一般の状態の θ, φ）
+    pauli06_half_angle_mixed.png  Part VI 半角 |⟨+m|+n⟩|² = cos²(Θ/2)、密度行列の純度と固有値
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -281,7 +283,157 @@ def pauli04():
     plt.close(fig)
 
 
-FIGS = dict(pauli01=pauli01, pauli02=pauli02, pauli03=pauli03, pauli04=pauli04)
+# ------------------------------------------------------------------------------------- pauli05
+def ket_n(th, ph):
+    """n·σ の固有値 +1 の固有ベクトル |+n⟩ = cos(θ/2)|0⟩ + e^{iφ} sin(θ/2)|1⟩"""
+    return np.array([np.cos(th / 2), np.exp(1j * ph) * np.sin(th / 2)])
+
+
+def nvec(th, ph):
+    return np.array([np.sin(th) * np.cos(ph), np.sin(th) * np.sin(ph), np.cos(th)])
+
+
+def check_bloch_formulas():
+    """Part VI の式を、ランダムな方向で確かめる"""
+    rng = np.random.default_rng(7)
+    for _ in range(50):
+        th, ph = rng.uniform(0.05, np.pi - 0.05), rng.uniform(-np.pi, np.pi)
+        n = nvec(th, ph)
+        N = n[0] * SX + n[1] * SY + n[2] * SZ
+        assert np.allclose(N, [[np.cos(th), np.sin(th) * np.exp(-1j * ph)], [np.sin(th) * np.exp(1j * ph), -np.cos(th)]])
+        vp = ket_n(th, ph)
+        vm = np.array([np.sin(th / 2), -np.exp(1j * ph) * np.cos(th / 2)])
+        assert np.allclose(N @ vp, vp) and np.allclose(N @ vm, -vm)                        # 固有値 ±1 の固有ベクトル
+        assert np.allclose(vm, ket_n(np.pi - th, ph + np.pi))                               # −1 は対蹠点の状態
+        assert np.allclose([np.vdot(vp, S @ vp) for S in (SX, SY, SZ)], n)                  # ⟨σ⟩ = n
+        assert np.allclose(np.outer(vp, vp.conj()), 0.5 * (np.eye(2) + N))                  # |+n⟩⟨+n| = ½(I + n·σ)
+        assert np.isclose(vp[1] / vp[0], (n[0] + 1j * n[1]) / (1 + n[2]))                   # β/α = 南極からの立体射影
+        th2, ph2 = rng.uniform(0, np.pi), rng.uniform(-np.pi, np.pi)
+        m = nvec(th2, ph2)
+        assert np.isclose(abs(np.vdot(ket_n(th2, ph2), vp)) ** 2, (1 + n @ m) / 2)          # |⟨+m|+n⟩|² = (1+n·m)/2
+        # 任意の状態は、大域位相を除いて |+n⟩
+        psi = rng.normal(size=2) + 1j * rng.normal(size=2)
+        psi /= np.linalg.norm(psi)
+        psi0 = psi * np.exp(-1j * np.angle(psi[0]))
+        t0, p0 = 2 * np.arccos(psi0[0].real), np.angle(psi0[1])
+        assert np.allclose(psi0, ket_n(t0, p0))
+
+
+def pauli05():
+    """Part VI：ブロッホ球。6つの点と、一般の状態 cos(θ/2)|0⟩ + e^{iφ} sin(θ/2)|1⟩。"""
+    check_bloch_formulas()
+    six = [((0, 0, 1), "$|0\\rangle$", (0, 0.06, 0.12)), ((0, 0, -1), "$|1\\rangle$", (0, 0.06, -0.2)),
+           ((1, 0, 0), "$|{+}\\rangle$", (0.05, 0.12, -0.22)), ((-1, 0, 0), "$|{-}\\rangle$", (-0.15, 0, 0.05)),
+           ((0, 1, 0), "$|{+i}\\rangle$", (0.02, 0.1, 0.02)), ((0, -1, 0), "$|{-i}\\rangle$", (0, -0.25, 0.04))]
+    for v, _, _ in six:                                                                       # 6点が対応する固有状態
+        v = np.array(v, float)
+        th, ph = np.arccos(v[2]), np.arctan2(v[1], v[0])
+        N = v[0] * SX + v[1] * SY + v[2] * SZ
+        assert np.allclose(N @ ket_n(th, ph), ket_n(th, ph))
+    fig = plt.figure(figsize=(9, 8.4))
+    ax = fig.add_subplot(1, 1, 1, projection="3d")
+    u, w = np.meshgrid(np.linspace(0, np.pi, 30), np.linspace(0, 2 * np.pi, 60))
+    ax.plot_surface(np.sin(u) * np.cos(w), np.sin(u) * np.sin(w), np.cos(u), color="#dbe6f2", alpha=0.18, linewidth=0)
+    t = np.linspace(0, 2 * np.pi, 200)
+    ax.plot(np.cos(t), np.sin(t), 0, color="#aaaaaa", lw=0.8)
+    ax.plot(np.cos(t), 0 * t, np.sin(t), color="#cccccc", lw=0.6)
+    for e, lab in zip(np.eye(3), ("$x$", "$y$", "$z$")):
+        ax.plot(*np.array([-1.3 * e, 1.3 * e]).T, color="#999999", lw=0.8)
+        ax.text(*(1.55 * e), lab, fontsize=13, color="#666")
+    for v, lab, off in six:
+        v = np.array(v, float)
+        ax.scatter(*v, color=C_A, s=45, depthshade=False)
+        ax.text(*(v * 1.12 + np.array(off)), lab, fontsize=14, color=C_A)
+    th, ph = np.radians(55), np.radians(40)
+    n = nvec(th, ph)
+    ax.quiver(0, 0, 0, *n, color=C_BAD, lw=2.5, arrow_length_ratio=0.1)
+    ax.plot([0, n[0]], [0, n[1]], [0, 0], color=C_BAD, lw=0.8, ls="--")
+    ax.plot([n[0], n[0]], [n[1], n[1]], [0, n[2]], color=C_BAD, lw=0.8, ls=":")
+    tt = np.linspace(0, th, 40)
+    ax.plot(0.35 * np.sin(tt) * np.cos(ph), 0.35 * np.sin(tt) * np.sin(ph), 0.35 * np.cos(tt), color="#333", lw=1.2)
+    ax.text(0.1, 0.12, 0.42, "$\\theta$", fontsize=13)
+    pp = np.linspace(0, ph, 40)
+    ax.plot(0.45 * np.cos(pp), 0.45 * np.sin(pp), 0 * pp, color="#333", lw=1.2)
+    ax.text(0.5, 0.2, -0.05, "$\\phi$", fontsize=13)
+    ax.text(*(n * 1.15 + np.array([0, 0.05, 0.05])), "$\\vec n$", fontsize=14, color=C_BAD)
+    ax.set_box_aspect((1, 1, 1)), ax.set_axis_off(), ax.view_init(elev=18, azim=30)
+    ax.set_xlim(-1.1, 1.1), ax.set_ylim(-1.1, 1.1), ax.set_zlim(-1.1, 1.1)
+    ax.set_title("ブロッホ球：状態 $\\cos\\frac{\\theta}{2}|0\\rangle+e^{i\\phi}\\sin\\frac{\\theta}{2}|1\\rangle$ は\n"
+                 "$\\hat n\\cdot\\vec\\sigma$ の固有値 $+1$ の固有状態で、球面上の点 $\\vec n=(\\sin\\theta\\cos\\phi,\\ \\sin\\theta\\sin\\phi,\\ \\cos\\theta)$ に対応する",
+                 fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "pauli05_bloch_sphere.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+# ------------------------------------------------------------------------------------- pauli06
+def pauli06():
+    """Part VI：(a) 半角 |⟨+m|+n⟩|² = cos²(Θ/2)、(b) 密度行列 ρ = ½(I + r·σ) の純度と固有値。"""
+    rng = np.random.default_rng(11)
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+    ax = axes[0]
+    Th = np.linspace(0, np.pi, 300)
+    ax.plot(np.degrees(Th), np.cos(Th / 2) ** 2, color=C_A, lw=2.5, label="$\\cos^2(\\Theta/2)=(1+\\hat n\\cdot\\hat m)/2$")
+    pts = []
+    for _ in range(60):
+        a1, b1, a2, b2 = rng.uniform(0, np.pi), rng.uniform(-np.pi, np.pi), rng.uniform(0, np.pi), rng.uniform(-np.pi, np.pi)
+        n, m = nvec(a1, b1), nvec(a2, b2)
+        ov = abs(np.vdot(ket_n(a2, b2), ket_n(a1, b1))) ** 2
+        ang = np.arccos(np.clip(n @ m, -1, 1))
+        assert np.isclose(ov, np.cos(ang / 2) ** 2)
+        pts.append((np.degrees(ang), ov))
+    pts = np.array(pts)
+    ax.plot(pts[:, 0], pts[:, 1], "o", color=C_BAD, ms=5, label="ランダムな2状態（数値計算）")
+    ax.annotate("対蹠点（$\\Theta=180^\\circ$）\n→ 直交する状態", xy=(180, 0), xytext=(128, 0.6), fontsize=10,
+                arrowprops=dict(arrowstyle="-|>", color="#333"))
+    ax.annotate("$\\Theta=90^\\circ$ → $1/2$\n（例：$|0\\rangle$ と $|{+}\\rangle$）", xy=(90, 0.5), xytext=(20, 0.25), fontsize=10,
+                arrowprops=dict(arrowstyle="-|>", color="#333"))
+    assert np.isclose(abs(np.vdot(ket_n(0, 0), ket_n(np.pi / 2, 0))) ** 2, 0.5)
+    assert np.isclose(abs(np.vdot(ket_n(0, 0), ket_n(np.pi, 0))) ** 2, 0)
+    ax.set_xlim(0, 182), ax.set_ylim(-0.03, 1.05), ax.set_xticks([0, 45, 90, 135, 180])
+    ax.set_xlabel("球面上の2点 $\\hat n,\\hat m$ のなす角 $\\Theta$ [度]"), ax.set_ylabel("$|\\langle +m|+n\\rangle|^2$")
+    ax.legend(fontsize=10, loc="upper right")
+    ax.set_title("(a) 状態の重なりは、球面上の角度の半分 $\\Theta/2$ で決まる\n（状態ベクトルの角度は、ブロッホ球の角度の半分）", fontsize=11)
+
+    ax = axes[1]
+    r = np.linspace(0, 1.25, 300)
+    ax.axvspan(1, 1.25, color="#f3d1d1", alpha=0.6)
+    ax.text(1.02, 0.12, "$|\\vec r|>1$：\n固有値が負になり\n密度行列でない", fontsize=10, color=C_BAD)
+    ax.plot(r, (1 + r**2) / 2, color=C_A, lw=2.5, label="純度 $\\mathrm{tr}\\,\\rho^2=(1+|\\vec r|^2)/2$")
+    ax.plot(r, (1 + r) / 2, color=C_B, lw=2, ls="--", label="固有値 $(1+|\\vec r|)/2$")
+    ax.plot(r, (1 - r) / 2, color=C_B, lw=2, ls=":", label="固有値 $(1-|\\vec r|)/2$")
+    rs, pur = [], []
+    for _ in range(80):                                                                      # ランダムな混合状態
+        k = rng.integers(1, 4)
+        w = rng.dirichlet(np.ones(k))
+        rho = np.zeros((2, 2), complex)
+        for wi in w:
+            a, b = rng.uniform(0, np.pi), rng.uniform(-np.pi, np.pi)
+            v = ket_n(a, b)
+            rho += wi * np.outer(v, v.conj())
+        rv = np.array([np.trace(S @ rho).real for S in (SX, SY, SZ)])
+        assert np.allclose(rho, 0.5 * (np.eye(2) + rv[0] * SX + rv[1] * SY + rv[2] * SZ))   # ρ = ½(I + r·σ)
+        lam = np.linalg.eigvalsh(rho)
+        R = np.linalg.norm(rv)
+        assert R <= 1 + 1e-12 and np.allclose(sorted(lam), [(1 - R) / 2, (1 + R) / 2])
+        assert np.isclose(np.trace(rho @ rho).real, (1 + R**2) / 2)
+        rs.append(R), pur.append(np.trace(rho @ rho).real)
+    ax.plot(rs, pur, "o", color=C_BAD, ms=4, label="ランダムな混合状態（数値計算）")
+    ax.axvline(1, color="#888", lw=1)
+    ax.text(0.97, 1.08, "純粋状態\n（球面上）", fontsize=10, ha="right")
+    ax.annotate("完全な混合状態 $\\rho=I/2$\n（球の中心）", xy=(0, 0.5), xytext=(0.06, 0.3), fontsize=10,
+                arrowprops=dict(arrowstyle="-|>", color="#333"))
+    ax.set_xlim(0, 1.25), ax.set_ylim(-0.15, 1.25)
+    ax.set_xlabel("ブロッホベクトルの長さ $|\\vec r|$"), ax.legend(fontsize=9.5, loc="upper left")
+    ax.set_title("(b) 密度行列 $\\rho=\\frac{1}{2}(I+\\vec r\\cdot\\vec\\sigma)$：固有値 $\\frac{1}{2}(1\\pm|\\vec r|)\\geq0$ から $|\\vec r|\\leq1$\n"
+                 "球面上（$|\\vec r|=1$）が純粋状態、内側が混合状態", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "pauli06_half_angle_mixed.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+FIGS = dict(pauli01=pauli01, pauli02=pauli02, pauli03=pauli03, pauli04=pauli04, pauli05=pauli05, pauli06=pauli06)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
