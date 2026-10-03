@@ -43,7 +43,8 @@ LATEX = {r"\Gamma": "Γ", r"\partial": "∂", r"\nabla": "∇", r"\theta": "θ",
          r"\operatorname{im}": "im", r"\subset": "⊂", r"\in": "∈", r"\cap": "∩", r"\cup": "∪", r"\iff": "⇔", r"\Rightarrow": "⇒",
          # 短い記号（\in, \le, \cdot）が、長い記号の先頭に一致しないように、長い記号も登録しておく（長い順に置換する）
          r"\int": "∫", r"\inf": "inf", r"\left": "", r"\right": "", r"\cdots": "⋯", r"\ldots": "…", r"\dots": "…",
-         r"\mathbb R": "ℝ", r"\mathbb C": "ℂ", r"\mathbb Z": "ℤ", r"\mathbb N": "ℕ", r"\mathbb Q": "ℚ"}
+         r"\mathbb R": "ℝ", r"\mathbb C": "ℂ", r"\mathbb Z": "ℤ", r"\mathbb N": "ℕ", r"\mathbb Q": "ℚ",
+         r"\hat n": "n̂", r"\hat": "", r"\vec\sigma": "σ", r"\vec": "", r"\pm": "±", r"\mp": "∓"}
 
 
 def plain(title):

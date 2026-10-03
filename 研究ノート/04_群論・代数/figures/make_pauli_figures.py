@@ -11,6 +11,7 @@
     pauli04_dot_cross.png       Part V (a·σ)(b·σ) = (a·b)I + i(a×b)·σ の係数
     pauli05_bloch_sphere.png    Part VI ブロッホ球（6つの点と、一般の状態の θ, φ）
     pauli06_half_angle_mixed.png  Part VI 半角 |⟨+m|+n⟩|² = cos²(Θ/2)、密度行列の純度と固有値
+    pauli07_rotation_double_cover.png  Part VII U(θ) によるブロッホベクトルの回転と、二重被覆（U(2π) = −I）
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -433,7 +434,108 @@ def pauli06():
     plt.close(fig)
 
 
-FIGS = dict(pauli01=pauli01, pauli02=pauli02, pauli03=pauli03, pauli04=pauli04, pauli05=pauli05, pauli06=pauli06)
+# ------------------------------------------------------------------------------------- pauli07
+def U_rot(n, th):
+    """U = exp(-iθ n·σ/2) = cos(θ/2) I − i sin(θ/2) n·σ"""
+    N = n[0] * SX + n[1] * SY + n[2] * SZ
+    return np.cos(th / 2) * np.eye(2) - 1j * np.sin(th / 2) * N
+
+
+def rodrigues(n, th, r):
+    return np.cos(th) * r + np.sin(th) * np.cross(n, r) + (1 - np.cos(th)) * (n @ r) * n
+
+
+def bloch_of(psi):
+    return np.array([np.vdot(psi, S @ psi).real for S in (SX, SY, SZ)])
+
+
+def check_rotation_formulas():
+    """Part VII の式を、ランダムな軸・角度で確かめる"""
+    rng = np.random.default_rng(13)
+    dot = lambda v: v[0] * SX + v[1] * SY + v[2] * SZ
+    for _ in range(40):
+        n = rng.normal(size=3)
+        n /= np.linalg.norm(n)
+        th = rng.uniform(-7, 7)
+        N = dot(n)
+        U = U_rot(n, th)
+        assert np.allclose(expm(-1j * th / 2 * N), U)                                     # 閉じた形
+        a, b = np.cos(th / 2) - 1j * n[2] * np.sin(th / 2), (n[1] - 1j * n[0]) * np.sin(th / 2)
+        assert np.allclose(U, [[a, -np.conj(b)], [b, np.conj(a)]])                          # [[a,-b*],[b,a*]] の形
+        assert np.allclose(U.conj().T @ U, np.eye(2)) and np.isclose(np.linalg.det(U), 1)
+        r = rng.normal(size=3)
+        assert np.allclose(U @ dot(r) @ U.conj().T, dot(rodrigues(n, th, r)))              # U(r·σ)U† = (R r)·σ
+        assert np.allclose((-U) @ dot(r) @ (-U).conj().T, dot(rodrigues(n, th, r)))        # −U も同じ回転
+        m = rng.normal(size=3)
+        m /= np.linalg.norm(m)
+        th2 = rng.uniform(-7, 7)
+        U2 = U_rot(m, th2)
+        R_of = lambda W: np.array([[0.5 * np.trace(S @ W @ T @ W.conj().T).real for T in (SX, SY, SZ)] for S in (SX, SY, SZ)])
+        assert np.allclose(R_of(U @ U2), R_of(U) @ R_of(U2))                               # 準同型
+    for n in np.eye(3):
+        assert np.allclose(U_rot(n, 2 * np.pi), -np.eye(2)) and np.allclose(U_rot(n, 4 * np.pi), np.eye(2))
+
+
+def pauli07():
+    """Part VII：(a) U(θ) でブロッホベクトルが n のまわりに回る、(b) θ = 2π で U = −I（二重被覆）。"""
+    check_rotation_formulas()
+    fig = plt.figure(figsize=(16, 6.6))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1, 1.25])
+
+    ax = fig.add_subplot(gs[0, 0], projection="3d")
+    u, w = np.meshgrid(np.linspace(0, np.pi, 30), np.linspace(0, 2 * np.pi, 60))
+    ax.plot_surface(np.sin(u) * np.cos(w), np.sin(u) * np.sin(w), np.cos(u), color="#dbe6f2", alpha=0.15, linewidth=0)
+    t = np.linspace(0, 2 * np.pi, 200)
+    ax.plot(np.cos(t), np.sin(t), 0, color="#bbbbbb", lw=0.7)
+    for e, lab in zip(np.eye(3), ("$x$", "$y$", "$z$")):
+        ax.plot(*np.array([-1.2 * e, 1.2 * e]).T, color="#aaaaaa", lw=0.7)
+        ax.text(*(1.35 * e), lab, fontsize=12, color="#666")
+    n = nvec(np.radians(50), np.radians(20))
+    psi0 = np.array([1, 0], complex)                                                       # |0⟩
+    ths = np.linspace(0, 2 * np.pi, 200)
+    traj = np.array([bloch_of(U_rot(n, th) @ psi0) for th in ths])
+    assert np.allclose(traj, np.array([rodrigues(n, th, np.array([0, 0, 1.0])) for th in ths]))
+    ax.plot(*traj.T, color=C_B, lw=2.5, label="$U(\\theta)|0\\rangle$ のブロッホベクトル（$0\\leq\\theta\\leq2\\pi$）")
+    ax.quiver(0, 0, 0, *(1.25 * n), color=C_BAD, lw=2.5, arrow_length_ratio=0.08)
+    ax.text(*(1.35 * n), "回転軸 $\\hat n$", color=C_BAD, fontsize=12)
+    for th, lab in [(0, "$\\theta=0$（$|0\\rangle$）"), (np.pi / 2, "$\\theta=\\pi/2$"), (np.pi, "$\\theta=\\pi$")]:
+        p = bloch_of(U_rot(n, th) @ psi0)
+        ax.scatter(*p, color="#222", s=30, depthshade=False)
+        ax.text(*(p * 1.1 + np.array([0, 0.05, 0.05])), lab, fontsize=10)
+    c = (n @ np.array([0, 0, 1.0])) * n
+    ax.plot(*np.array([[0, 0, 0], c]).T, color=C_BAD, lw=0.8, ls=":")
+    ax.set_box_aspect((1, 1, 1)), ax.set_axis_off(), ax.view_init(elev=20, azim=-40)
+    ax.set_xlim(-1.1, 1.1), ax.set_ylim(-1.1, 1.1), ax.set_zlim(-1.1, 1.1)
+    ax.legend(fontsize=9.5, loc="lower left")
+    ax.set_title("(a) $U(\\theta)=e^{-i\\theta\\,\\hat n\\cdot\\vec\\sigma/2}$ を掛けると、ブロッホベクトルは\n"
+                 "軸 $\\hat n$ のまわりに角度 $\\theta$ だけ回る（$\\hat n$ を軸とする円錐の上を動く）", fontsize=11)
+
+    ax = fig.add_subplot(gs[0, 1])
+    th = np.linspace(0, 4 * np.pi, 600)
+    z = np.array([0, 0, 1.0])
+    plus = np.array([1, 1], complex) / np.sqrt(2)
+    trU = np.array([0.5 * np.trace(U_rot(z, x)).real for x in th])
+    bx = np.array([bloch_of(U_rot(z, x) @ plus)[0] for x in th])
+    assert np.allclose(trU, np.cos(th / 2)) and np.allclose(bx, np.cos(th))
+    ax.plot(th / np.pi, trU, color=C_A, lw=2.5, label="$\\frac{1}{2}\\mathrm{tr}\\,U(\\theta)=\\cos\\frac{\\theta}{2}$（$SU(2)$ の側。周期 $4\\pi$）")
+    ax.plot(th / np.pi, bx, color=C_B, lw=2.2, ls="--", label="$U(\\theta)|{+}\\rangle$ のブロッホベクトルの $x$ 成分 $=\\cos\\theta$（周期 $2\\pi$）")
+    ax.axvline(2, color=C_BAD, lw=1, ls=":")
+    ax.axvline(4, color="#333", lw=1, ls=":")
+    ax.annotate("$\\theta=2\\pi$：$U=-I$（状態は $-1$ 倍）\nブロッホ球の上では元の位置", xy=(2, -1), xytext=(0.05, -1.42),
+                fontsize=10, color=C_BAD, arrowprops=dict(arrowstyle="-|>", color=C_BAD))
+    ax.text(4.07, 0.55, "$\\theta=4\\pi$：\n$U=I$", fontsize=10, color="#333")
+    ax.axhline(0, color="#ccc", lw=0.8)
+    ax.set_xlim(0, 4.6), ax.set_ylim(-1.5, 1.55), ax.set_xticks([0, 1, 2, 3, 4], ["$0$", "$\\pi$", "$2\\pi$", "$3\\pi$", "$4\\pi$"])
+    ax.set_xlabel("回転角 $\\theta$（軸 $z$）"), ax.legend(fontsize=9.5, loc="upper center")
+    ax.set_title("(b) 二重被覆：ブロッホ球の上の回転は $2\\pi$ で元に戻るが、$U(2\\pi)=-I$。\n"
+                 "$U$ と $-U$ が同じ回転を表し、$U$ が $I$ に戻るのは $4\\pi$", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "pauli07_rotation_double_cover.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+FIGS = dict(pauli01=pauli01, pauli02=pauli02, pauli03=pauli03, pauli04=pauli04, pauli05=pauli05, pauli06=pauli06,
+            pauli07=pauli07)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
