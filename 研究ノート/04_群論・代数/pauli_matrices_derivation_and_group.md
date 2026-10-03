@@ -92,6 +92,8 @@ $$
 
 # Part II：導出方法1 ―トレースゼロのエルミート行列の基底として
 
+Part I で、$SU(2)$ の生成子が住む空間は「トレースゼロのエルミート $2\times2$ 行列」の全体だと分かりました。この Part では、この空間に座標軸を入れて、パウリ行列を具体的に作ります。
+
 ## 1. 一般のエルミート $2\times2$ 行列を書き下す
 
 エルミート行列 $M=M^\dagger$ の一般形を考えます。対角成分は実数でなければならず（$M_{ii}=M_{ii}^*$）、非対角成分は互いに複素共役でなければなりません（$M_{12}=M_{21}^*$）：
@@ -100,7 +102,7 @@ $$
 M = \begin{pmatrix}a & b-ic\\ b+ic & d\end{pmatrix}\qquad(a,b,c,d\in\mathbb R)
 $$
 
-（$M_{12}=b-ic$ と実部・虚部に分けて書いています。）
+（左下の成分を $M_{21}=b+ic$ と実部・虚部に分けて書いています。）
 
 ## 2. トレースゼロの条件を課す
 
@@ -112,27 +114,108 @@ $$
 
 **自由パラメータは実数3個**（$a,b,c$）になりました。
 
-## 3. これを3つの基底行列に分解する
+## 3. 3つの基底行列に分解する
 
-$M$ を $a,b,c$ それぞれの係数でくくり出します：
+以下、$x,y,z$ の順に並べるため、$b,c,a$ を $n_x,n_y,n_z$ と書き直します。$M$ をそれぞれの係数でくくり出すと：
 
 $$
-M = a\begin{pmatrix}1&0\\0&-1\end{pmatrix} + b\begin{pmatrix}0&1\\1&0\end{pmatrix} + c\begin{pmatrix}0&-i\\i&0\end{pmatrix}
+M=\begin{pmatrix}n_z&n_x-in_y\\ n_x+in_y&-n_z\end{pmatrix}
+=n_x\begin{pmatrix}0&1\\1&0\end{pmatrix}+n_y\begin{pmatrix}0&-i\\i&0\end{pmatrix}+n_z\begin{pmatrix}1&0\\0&-1\end{pmatrix}
 $$
 
 この3つの行列こそが、**パウリ行列**です：
 
 $$
-\boxed{\sigma_z=\begin{pmatrix}1&0\\0&-1\end{pmatrix},\qquad \sigma_x=\begin{pmatrix}0&1\\1&0\end{pmatrix},\qquad \sigma_y=\begin{pmatrix}0&-i\\i&0\end{pmatrix}}
+\boxed{\sigma_x=\begin{pmatrix}0&1\\1&0\end{pmatrix},\qquad \sigma_y=\begin{pmatrix}0&-i\\i&0\end{pmatrix},\qquad \sigma_z=\begin{pmatrix}1&0\\0&-1\end{pmatrix}}
 $$
 
-つまり：
+つまり、$\vec n=(n_x,n_y,n_z)\in\mathbb R^3$、$\vec\sigma=(\sigma_x,\sigma_y,\sigma_z)$ として：
 
 $$
-\boxed{M = a\sigma_z+b\sigma_x+c\sigma_y}
+\boxed{M = n_x\sigma_x+n_y\sigma_y+n_z\sigma_z=\vec n\cdot\vec\sigma}
 $$
 
-**任意のトレースゼロ・エルミート$2\times2$行列は、必ずこの3つの行列の実数係数の組み合わせとして、一意に書けます。** これがパウリ行列の最も構造的な正体で、「都合よく発明された行列」ではなく、**$SU(2)$の生成子が住む3次元の実ベクトル空間に、自然な座標軸を1本ずつ入れただけ**、というのが正確な理解です。
+**トレースゼロのエルミート $2\times2$ 行列 $M$ と、3次元の実ベクトル $\vec n$ が、1対1に対応します。** パウリ行列は「都合よく発明された行列」ではなく、$SU(2)$ の生成子が住む3次元の実ベクトル空間に、自然な座標軸を1本ずつ入れただけ、というのが正確な理解です（「1対1」であること、つまり $\vec n$ が $M$ から一通りに決まることは、§4 で確かめます）。
+
+**$\sigma_y$ の符号について**：$\sigma_y$ の右上が $-i$ なのは、左下の成分 $M_{21}$ の虚部を $n_y$ と選んだからです。右上の虚部を $n_y$ と選ぶと $\sigma_y$ の符号が反対になりますが、その場合は $\sigma_x\sigma_y=-i\sigma_z$ となり、Part IV の交換関係 $[\sigma_x,\sigma_y]=2i\sigma_z$（スピン角運動量 $\vec S=\frac\hbar2\vec\sigma$ の $[S_x,S_y]=i\hbar S_z$）と符号が合いません。$x,y,z$ の右手系の順序と、交換関係の符号がそろうように、この選び方が標準になっています。
+
+## 4. 「一通りに書ける」ことの証明：トレースで係数を取り出す
+
+**行列の内積**：$2\times2$ 行列 $A,B$ に対して
+
+$$
+\langle A,B\rangle:=\operatorname{tr}(A^\dagger B)=\sum_{k,l}\overline{A_{kl}}\,B_{kl}
+$$
+
+と定めると、これは4つの成分を並べたベクトルどうしの（複素）内積と同じです（**ヒルベルト・シュミット内積**）。$A$ がエルミートなら $A^\dagger=A$ なので、$\langle A,B\rangle=\operatorname{tr}(AB)$ です。
+
+**パウリ行列は互いに直交している**：成分の位置を見ると、$\sigma_z$ は対角成分だけ、$\sigma_x$ と $\sigma_y$ は非対角成分だけを持ちます。そのため $\sigma_z$ と $\sigma_x,\sigma_y$ の内積は $0$ です。$\sigma_x$ と $\sigma_y$ は位置が同じですが、位相が違います：
+
+$$
+\langle\sigma_x,\sigma_y\rangle=\overline{1}\cdot(-i)+\overline{1}\cdot i=0,\qquad
+\langle\sigma_i,\sigma_i\rangle=|{\pm1}|^2+|{\pm1}|^2\ \text{または}\ |{\pm i}|^2+|{\pm i}|^2=2
+$$
+
+まとめると
+
+$$
+\boxed{\operatorname{tr}(\sigma_i\sigma_j)=2\delta_{ij}}
+$$
+
+**係数の取り出し**：$M=\sum_jn_j\sigma_j$ に左から $\sigma_i$ を掛けてトレースを取ると、
+
+$$
+\operatorname{tr}(\sigma_iM)=\sum_jn_j\operatorname{tr}(\sigma_i\sigma_j)=2n_i,\qquad\text{つまり}\qquad\boxed{n_i=\tfrac12\operatorname{tr}(\sigma_iM)}
+$$
+
+です。係数が $M$ から一通りに決まるので、$M=\vec n\cdot\vec\sigma$ という表し方は一通りです。特に、$\sum_jn_j\sigma_j=0$ なら $n_i=0$ なので、3つのパウリ行列は1次独立です。
+
+**例**：$M=\begin{pmatrix}1&2-i\\2+i&-1\end{pmatrix}$ なら、
+
+$$
+\begin{aligned}
+n_x&=\tfrac12\operatorname{tr}(\sigma_xM)=\tfrac12\operatorname{tr}\begin{pmatrix}2+i&-1\\1&2-i\end{pmatrix}=2\\
+n_y&=\tfrac12\operatorname{tr}(\sigma_yM)=\tfrac12\operatorname{tr}\begin{pmatrix}1-2i&i\\i&1+2i\end{pmatrix}=1\\
+n_z&=\tfrac12\operatorname{tr}(\sigma_zM)=\tfrac12\,(1+1)=1
+\end{aligned}
+$$
+
+で、$M=2\sigma_x+\sigma_y+\sigma_z$ です（§3 の形と見比べると、$n_x=\operatorname{Re}M_{21}$、$n_y=\operatorname{Im}M_{21}$、$n_z=M_{11}$ で、確かに一致します）。
+
+## 5. 単位行列を加えると、エルミート行列全体の基底になる
+
+トレースゼロでない一般のエルミート行列も、単位行列 $I$ を加えれば書けます。$\operatorname{tr}(I\cdot I)=2$、$\operatorname{tr}(I\sigma_i)=\operatorname{tr}\sigma_i=0$ なので、$I$ もパウリ行列と直交していて、§4 と同じ計算から
+
+$$
+\boxed{M=\tfrac12\operatorname{tr}(M)\,I+\sum_i\tfrac12\operatorname{tr}(\sigma_iM)\,\sigma_i}
+$$
+
+です。
+
+- $M$ がエルミートなら、係数はすべて実数です（エルミート行列どうしの積のトレースは実数：$\operatorname{tr}(\sigma_iM)$ の複素共役は $\operatorname{tr}\big((\sigma_iM)^\dagger\big)=\operatorname{tr}(M\sigma_i)=\operatorname{tr}(\sigma_iM)$）。エルミート $2\times2$ 行列の全体は、$\{I,\sigma_x,\sigma_y,\sigma_z\}$ を基底とする、4次元の実ベクトル空間です。
+- 係数を複素数まで許せば、この式は**任意の $2\times2$ 複素行列**で成り立ちます。$2\times2$ 複素行列の全体は複素4次元で、$\{I,\sigma_x,\sigma_y,\sigma_z\}$ はその基底です。例えば $\begin{pmatrix}0&1\\0&0\end{pmatrix}=\frac12(\sigma_x+i\sigma_y)$ です。
+- 量子ビットの状態を表す密度行列 $\rho$ は、トレースが $1$ のエルミート行列なので、$\rho=\frac12\big(I+\vec r\cdot\vec\sigma\big)$ と書けます。この $\vec r$ が、ブロッホ球の点（ブロッホベクトル）になります（後の Part で扱います）。
+
+![エルミート行列の基底と、直交性](figures/pauli02_basis.png)
+
+*(a) 基底 $\{I,\sigma_x,\sigma_y,\sigma_z\}$ の成分です。$\sigma_z$ は対角成分だけ、$\sigma_x$ は非対角の実数、$\sigma_y$ は非対角の純虚数で、成分の位置と位相がすべて違います。(b) §4 の例 $M=2\sigma_x+\sigma_y+\sigma_z$ と、対応するベクトル $\vec n=(2,1,1)$ です。(c) 内積 $\frac12\operatorname{tr}(A^\dagger B)$ を表にすると単位行列になり、4つの行列が互いに直交していることが分かります。図を描くときに、ランダムな複素行列が §5 の式で展開できること、エルミート行列なら係数が実数になることを確かめています。*
+
+## 6. パウリ行列の基本性質
+
+| 性質 | $\sigma_x$ | $\sigma_y$ | $\sigma_z$ | 理由 |
+|---|---|---|---|---|
+| エルミート $\sigma^\dagger=\sigma$ | ○ | ○ | ○ | 作り方から |
+| 2乗すると単位行列 $\sigma^2=I$ | ○ | ○ | ○ | 直接計算（例：$\sigma_y^2$ の対角成分は $(-i)\cdot i=1$ と $i\cdot(-i)=1$） |
+| ユニタリ $\sigma^\dagger\sigma=I$ | ○ | ○ | ○ | エルミートで、かつ $\sigma^2=I$ |
+| トレース | $0$ | $0$ | $0$ | 作り方から |
+| 行列式 | $-1$ | $-1$ | $-1$ | 直接計算 |
+| 固有値 | $\pm1$ | $\pm1$ | $\pm1$ | 下の説明 |
+| 固有値 $+1$ の固有ベクトル | $\frac1{\sqrt2}(1,1)$ | $\frac1{\sqrt2}(1,i)$ | $(1,0)$ | 直接確かめられる |
+| 固有値 $-1$ の固有ベクトル | $\frac1{\sqrt2}(1,-1)$ | $\frac1{\sqrt2}(1,-i)$ | $(0,1)$ | 直接確かめられる |
+
+**固有値が $\pm1$ になる理由**：$\sigma\mathbf v=\lambda\mathbf v$ なら、$\mathbf v=\sigma^2\mathbf v=\lambda^2\mathbf v$ なので $\lambda^2=1$、つまり $\lambda=\pm1$ です。さらに、2つの固有値の和はトレース $0$ なので、$+1$ と $-1$ が1つずつです。同じ議論は、単位ベクトル $\hat n$ についての $\hat n\cdot\vec\sigma$ にも使えます（後の Part で、その固有ベクトルがブロッホ球の点になることを見ます）。
+
+**$\sigma_i$ 自身は $SU(2)$ の元ではない**：$\det\sigma_i=-1$ なので、$\sigma_i$ はユニタリですが $SU(2)$ には入りません。一方、$i\sigma_i$ は $\det(i\sigma_i)=i^2\cdot(-1)=1$ で $SU(2)$ の元です。これは、Part VI の回転 $\exp(-i\frac\theta2\hat n\cdot\vec\sigma)$ で $\theta=-\pi$ としたもの（符号を除いて、角度 $\pi$ の回転）にあたります。
 
 ---
 
