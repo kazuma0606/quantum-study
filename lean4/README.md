@@ -14,7 +14,7 @@
 | ファイル | 内容 | 対応ノート |
 |---|---|---|
 | `QuantumStudy/Pauli.lean` | パウリ行列の定義と、積の表（σi² = I、σxσy = iσz など9通り）、交換関係 [σi, σj] = 2iε_ijk σk（3つ）、反交換関係（3つ）、トレース | [パウリ行列](../研究ノート/04_群論・代数/pauli_matrices_derivation_and_group.md) |
-| `QuantumStudy/DetExpTrace.lean` | det(e^A) = e^{tr A} の、対角化できる行列とエルミート行列の場合（det(e^{cH}) = e^{c tr H}、トレースゼロなら det(e^{itH}) = 1）と、「1つの U からは tr = 0 は出ない」反例。一般の行列（Jacobi の公式）は今後の課題で、Mathlib v4.28.0 にもまだない | [det(e^A)=e^{tr A} の証明](../研究ノート/04_群論・代数/det_exp_trace_proof.md) |
+| `QuantumStudy/DetExpTrace.lean` | det(e^A) = e^{tr A} を、**一般の複素正方行列**について証明（`det_exp`。ノートの証明2：行列式の微分可能性、単位行列での微分 = トレース、微分方程式 f′ = (tr A) f）。対角化できる行列・エルミート行列の場合（ノートの証明1）と、「1つの U からは tr = 0 は出ない」反例も含む。Mathlib v4.28.0 では TODO になっている定理 | [det(e^A)=e^{tr A} の証明](../研究ノート/04_群論・代数/det_exp_trace_proof.md) |
 
 `QuantumStudy.lean` で import したモジュールが、`lake build` のビルド対象になります。
 

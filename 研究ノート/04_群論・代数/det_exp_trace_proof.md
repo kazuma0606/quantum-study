@@ -2,7 +2,7 @@
 
 この公式は、[パウリ行列のノート](pauli_matrices_derivation_and_group.md) Part I で「$SU(2)$ の条件 $\det U=1$ には $\operatorname{tr}A=0$ が必要」として使った根拠である（ただし、その使い方には注意が必要で、最後の節で述べる）。証明に使う道具は、これまでの議論の中で既に手に入れたものだけで足りる。
 
-**関連ファイル**：数値検証 [test_det_exp_trace.py](../../notebooks/foundations/09_matrix_mechanics/test_det_exp_trace.py)（pytest。このノートの各主張に対応するテストがある）、形式証明 [DetExpTrace.lean](../../lean4/QuantumStudy/DetExpTrace.lean)（Lean 4 + Mathlib。対角化できる行列とエルミート行列の場合を証明済み。一般の行列は今後の課題で、Mathlib v4.28.0 にもまだない）。
+**関連ファイル**：数値検証 [test_det_exp_trace.py](../../notebooks/foundations/09_matrix_mechanics/test_det_exp_trace.py)（pytest。このノートの各主張に対応するテストがある）、形式証明 [DetExpTrace.lean](../../lean4/QuantumStudy/DetExpTrace.lean)（Lean 4 + Mathlib。証明1に沿った対角化できる行列・エルミート行列の場合と、証明2に沿った一般の複素正方行列の場合 `det_exp` を証明済み）。
 
 ---
 
