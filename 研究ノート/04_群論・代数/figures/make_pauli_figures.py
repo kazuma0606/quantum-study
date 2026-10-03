@@ -7,6 +7,8 @@
 出力（このスクリプトと同じ figures/ ディレクトリ）:
     pauli01_tangent_space.png   Part I U(1) で見る接空間と、SU(2) の元の固有値 e^{±iα}
     pauli02_basis.png           Part II 基底 {I, σx, σy, σz} の成分、M と n の対応、直交性 ½tr(σiσj)=δij
+    pauli03_product_table.png   Part IV 積の表 σiσj と、x→y→z の循環（ε_ijk）
+    pauli04_dot_cross.png       Part V (a·σ)(b·σ) = (a·b)I + i(a×b)·σ の係数
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -170,7 +172,116 @@ def pauli02():
     plt.close(fig)
 
 
-FIGS = dict(pauli01=pauli01, pauli02=pauli02)
+# ------------------------------------------------------------------------------------- pauli03
+def pauli03():
+    """Part IV：積の表 σiσj と、x→y→z の循環（ε_ijk）。"""
+    S = {"x": SX, "y": SY, "z": SZ}
+    names = ["x", "y", "z"]
+    eps = {("x", "y", "z"): 1, ("y", "z", "x"): 1, ("z", "x", "y"): 1,
+           ("x", "z", "y"): -1, ("z", "y", "x"): -1, ("y", "x", "z"): -1}
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6.2), gridspec_kw=dict(width_ratios=[1.15, 1]))
+
+    ax = axes[0]
+    for r, i in enumerate(names):
+        for c, j in enumerate(names):
+            P = S[i] @ S[j]
+            if i == j:
+                assert np.allclose(P, np.eye(2))
+                txt, fc = "$I$", "#dddddd"
+            else:
+                k = [m for m in names if m not in (i, j)][0]
+                e = eps[(i, j, k)]
+                assert np.allclose(P, e * 1j * S[k])                                     # σiσj = i ε_ijk σk
+                assert np.allclose(S[i] @ S[j] - S[j] @ S[i], 2j * e * S[k])               # 交換関係
+                assert np.allclose(S[i] @ S[j] + S[j] @ S[i], 0)                          # 反交換関係
+                txt = f"$+i\\sigma_{k}$" if e > 0 else f"$-i\\sigma_{k}$"
+                fc = "#cfe2f3" if e > 0 else "#fde3c8"
+            ax.add_patch(plt.Rectangle((c, 2 - r), 1, 1, fc=fc, ec="#555", lw=1.2))
+            ax.text(c + 0.5, 2 - r + 0.5, txt, ha="center", va="center", fontsize=18)
+    for k, m in enumerate(names):
+        ax.text(k + 0.5, 3.12, f"$\\sigma_{m}$", ha="center", fontsize=15)
+        ax.text(-0.15, 2 - k + 0.5, f"$\\sigma_{m}$", ha="right", va="center", fontsize=15)
+    ax.text(1.5, 3.55, "右から掛ける $\\sigma_j$", ha="center", fontsize=11, color="#555")
+    ax.text(-0.75, 1.5, "左の $\\sigma_i$", ha="center", va="center", rotation=90, fontsize=11, color="#555")
+    ax.set_xlim(-1.0, 3.2), ax.set_ylim(-0.2, 3.8), ax.set_aspect("equal"), ax.axis("off")
+    ax.set_title("(a) 積の表 $\\sigma_i\\sigma_j=\\delta_{ij}I+i\\varepsilon_{ijk}\\sigma_k$\n（青：$+i$、橙：$-i$。表は対角線について反対称）", fontsize=11)
+
+    # (b) 循環図
+    ax = axes[1]
+    ang = {"x": 90, "y": -30, "z": 210}
+    pos = {m: np.array([np.cos(np.radians(a)), np.sin(np.radians(a))]) for m, a in ang.items()}
+    for m in names:
+        ax.add_patch(plt.Circle(pos[m], 0.22, fc="white", ec=C_A, lw=2.5, zorder=3))
+        ax.text(*pos[m], f"$\\sigma_{m}$", ha="center", va="center", fontsize=18, zorder=4)
+    for a_, b_ in [("x", "y"), ("y", "z"), ("z", "x")]:
+        p, q = pos[a_], pos[b_]
+        d = (q - p) / np.linalg.norm(q - p)
+        ax.annotate("", xy=q - 0.26 * d, xytext=p + 0.26 * d,
+                    arrowprops=dict(arrowstyle="-|>", color=C_A, lw=2.5, connectionstyle="arc3,rad=-0.25", mutation_scale=22))
+    ax.text(0, 0.02, "矢印の向きに\n2つ掛けると\n残りの $+i$ 倍", ha="center", va="center", fontsize=11, color=C_A)
+    ax.text(0, -1.45, "例：$\\sigma_x\\sigma_y=+i\\sigma_z$、$\\sigma_y\\sigma_z=+i\\sigma_x$、$\\sigma_z\\sigma_x=+i\\sigma_y$\n"
+            "逆向き：$\\sigma_y\\sigma_x=-i\\sigma_z$ など（$\\varepsilon_{ijk}$ の符号）",
+            ha="center", va="center", fontsize=11)
+    ax.set_xlim(-1.7, 1.7), ax.set_ylim(-1.9, 1.5), ax.set_aspect("equal"), ax.axis("off")
+    ax.set_title("(b) $x\\to y\\to z\\to x$ の循環：$\\varepsilon_{xyz}=\\varepsilon_{yzx}=\\varepsilon_{zxy}=+1$\n逆回りは $-1$、同じ添字を含むと $0$", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "pauli03_product_table.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+# ------------------------------------------------------------------------------------- pauli04
+def pauli04():
+    """Part V：(a·σ)(b·σ) = (a·b)I + i(a×b)·σ。係数を ½tr で取り出して確かめる。"""
+    a = np.array([1.2, 0.3, 0.2])
+    b = np.array([0.2, 1.0, 0.6])
+    dot = lambda v: v[0] * SX + v[1] * SY + v[2] * SZ
+    P = dot(a) @ dot(b)
+    c0 = 0.5 * np.trace(P)
+    ck = np.array([0.5 * np.trace(S @ P) for S in (SX, SY, SZ)])
+    assert np.isclose(c0, a @ b) and np.allclose(ck, 1j * np.cross(a, b))                  # 係数 = a·b と i(a×b)
+    assert np.allclose(P, (a @ b) * np.eye(2) + 1j * dot(np.cross(a, b)))
+    assert np.allclose(dot(a) @ dot(a), (a @ a) * np.eye(2))                                # (a·σ)² = |a|² I
+    assert np.allclose(dot(a) @ dot(b) - dot(b) @ dot(a), 2j * dot(np.cross(a, b)))         # [a·σ, b·σ] = 2i(a×b)·σ
+    assert np.allclose(dot(a) @ dot(b) + dot(b) @ dot(a), 2 * (a @ b) * np.eye(2))          # {a·σ, b·σ} = 2(a·b)I
+    # 四元数：𝐢 = -iσx など。(−i a·σ)(−i b·σ) は純四元数の積 (−a·b, a×b)
+    Q = (-1j * dot(a)) @ (-1j * dot(b))
+    assert np.allclose(Q, -(a @ b) * np.eye(2) + (-1j) * dot(np.cross(a, b)))
+
+    fig = plt.figure(figsize=(15, 6.2))
+    ax = fig.add_subplot(1, 2, 1, projection="3d")
+    cr = np.cross(a, b)
+    for v, col, lab in [(a, C_A, "$\\vec a$"), (b, C_B, "$\\vec b$"), (cr, C_BAD, "$\\vec a\\times\\vec b$")]:
+        ax.quiver(0, 0, 0, *v, color=col, lw=3, arrow_length_ratio=0.1)
+        ax.text(*(v * 1.12), lab, color=col, fontsize=13)
+    for e in np.eye(3):
+        ax.quiver(0, 0, 0, *(1.3 * e), color="#bbbbbb", lw=1, arrow_length_ratio=0.05)
+    ax.set_xlim(-0.2, 1.3), ax.set_ylim(-0.2, 1.3), ax.set_zlim(-0.2, 1.3)
+    ax.set_box_aspect((1, 1, 1)), ax.set_axis_off(), ax.view_init(elev=22, azim=-50)
+    ax.set_title(f"(a) $\\vec a=(1.2,0.3,0.2)$、$\\vec b=(0.2,1.0,0.6)$\n"
+                 f"$\\vec a\\cdot\\vec b={a @ b:.2f}$、$\\vec a\\times\\vec b=({cr[0]:.2f},{cr[1]:.2f},{cr[2]:.2f})$", fontsize=11)
+
+    ax = fig.add_subplot(1, 2, 2)
+    labels = ["$I$ の係数\n（実部）", "$\\sigma_x$ の係数\n（虚部）", "$\\sigma_y$ の係数\n（虚部）", "$\\sigma_z$ の係数\n（虚部）"]
+    vals = [c0.real, *ck.imag]
+    target = [a @ b, *cr]
+    cols = [C_A, C_BAD, C_BAD, C_BAD]
+    ax.bar(range(4), vals, color=cols, alpha=0.75, width=0.6)
+    ax.scatter(range(4), target, marker="_", s=900, color="#222", linewidths=2.5, zorder=3,
+               label="直接計算した $\\vec a\\cdot\\vec b$ と $\\vec a\\times\\vec b$ の成分")
+    for k, v in enumerate(vals):
+        ax.text(k, v + (0.04 if v >= 0 else -0.08), f"{v:.2f}", ha="center", fontsize=11)
+    ax.axhline(0, color="#888", lw=1)
+    ax.set_xticks(range(4), labels, fontsize=10.5)
+    ax.legend(fontsize=10, loc="lower left")
+    ax.set_ylim(-0.85, 1.3)
+    ax.set_title("(b) 積 $(\\vec a\\cdot\\vec\\sigma)(\\vec b\\cdot\\vec\\sigma)$ を $\\{I,\\sigma_x,\\sigma_y,\\sigma_z\\}$ で展開した係数\n"
+                 "（$\\frac{1}{2}\\mathrm{tr}$ で取り出す）：$I$ の係数 $=\\vec a\\cdot\\vec b$、$\\vec\\sigma$ の係数 $=i\\,\\vec a\\times\\vec b$", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "pauli04_dot_cross.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+FIGS = dict(pauli01=pauli01, pauli02=pauli02, pauli03=pauli03, pauli04=pauli04)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)

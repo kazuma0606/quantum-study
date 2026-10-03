@@ -265,6 +265,14 @@ $$
 
 天下り的に信じるのではなく、実際に行列の掛け算で確認します。3組の組み合わせ（$xy,yz,zx$、循環的な並び）をすべて計算します。
 
+**記号 $\varepsilon_{ijk}$（レヴィ＝チヴィタ記号）**：添字 $i,j,k$ は $x,y,z$ のどれかで、
+
+$$
+\varepsilon_{xyz}=\varepsilon_{yzx}=\varepsilon_{zxy}=+1,\qquad \varepsilon_{xzy}=\varepsilon_{zyx}=\varepsilon_{yxz}=-1,\qquad \text{同じ添字を含むものは }0
+$$
+
+と定めます。$x\to y\to z\to x$ の順に回る並びが $+1$、逆回りが $-1$ です。$[\sigma_i,\sigma_j]=2i\varepsilon_{ijk}\sigma_k$ は $k$ について和を取る式ですが、$i\ne j$ のとき $0$ でないのは、$i,j$ のどちらとも違う $k$ の1項だけです。3次元の外積も、同じ記号で $(\vec a\times\vec b)_k=\sum_{i,j}\varepsilon_{ijk}a_ib_j$ と書けます（Part V §3 で使います）。
+
 ## 1. $[\sigma_x,\sigma_y]$
 
 $$
@@ -321,9 +329,21 @@ $[\sigma_i,\sigma_i]=0$ は自明（$\sigma_i\sigma_i-\sigma_i\sigma_i=0$）で�
 
 **以上3通りの直接計算により、$[\sigma_i,\sigma_j]=2i\varepsilon_{ijk}\sigma_k$ が成り立つことを確認しました。** 天下り的な公式ではなく、$2\times2$の具体的な行列の積を計算するだけで導ける、代数的に完結した事実です。
 
+## 5. まとめ：積の表
+
+§1〜§3 の計算と $\sigma_i^2=I$（Part II §6）をまとめると、9通りの積は次の図のようになります。
+
+![パウリ行列の積の表](figures/pauli03_product_table.png)
+
+*(a) 左の $\sigma_i$ と右の $\sigma_j$ の積 $\sigma_i\sigma_j$ です。対角線は $I$、それ以外は残りの1つの $\pm i$ 倍で、表は対角線について反対称です（$i\ne j$ なら $\sigma_j\sigma_i=-\sigma_i\sigma_j$）。(b) $x\to y\to z\to x$ の向きに2つ掛けると残りの $+i$ 倍、逆向きなら $-i$ 倍で、この符号が $\varepsilon_{ijk}$ です。図を描くときに、9通りの積と、交換関係・反交換関係を数値で確かめています。*
+
+この表の9通りの積、3つの交換関係、3つの反交換関係は、Lean でも証明しています（[Pauli.lean](../../lean4/QuantumStudy/Pauli.lean)）。
+
 ---
 
-# Part V：おまけ ―反交換関係とクリフォード代数
+# Part V：反交換関係と積の一般公式 ―内積と外積―
+
+## 1. 反交換関係
 
 パウリ行列には、交換関係とペアになる**反交換関係**もあります：
 
@@ -331,15 +351,58 @@ $$
 \boxed{\{\sigma_i,\sigma_j\} := \sigma_i\sigma_j+\sigma_j\sigma_i = 2\delta_{ij}I}
 $$
 
-例えば $\{\sigma_x,\sigma_y\}=\sigma_x\sigma_y+\sigma_y\sigma_x=i\sigma_z+(-i\sigma_z)=0$（Part IVの計算結果を使うだけ）、$\{\sigma_x,\sigma_x\}=2\sigma_x^2=2I$（$\sigma_x^2=I$ から）。
+例えば $\{\sigma_x,\sigma_y\}=\sigma_x\sigma_y+\sigma_y\sigma_x=i\sigma_z+(-i\sigma_z)=0$（Part IVの計算結果を使うだけ）、$\{\sigma_x,\sigma_x\}=2\sigma_x^2=2I$（$\sigma_x^2=I$ から）です。
 
-交換関係と反交換関係を組み合わせると：
+## 2. 積の一般公式
+
+交換関係と反交換関係を足して2で割ると、
 
 $$
-\sigma_i\sigma_j = \frac12\{\sigma_i,\sigma_j\}+\frac12[\sigma_i,\sigma_j] = \delta_{ij}I+i\varepsilon_{ijk}\sigma_k
+\boxed{\sigma_i\sigma_j = \frac12\{\sigma_i,\sigma_j\}+\frac12[\sigma_i,\sigma_j] = \delta_{ij}I+i\varepsilon_{ijk}\sigma_k}
 $$
 
-というパウリ行列の積の一般公式が得られます（交換子と反交換子を足すと、2つの積のうち片方が2倍、引くと差になる、という単純な代数）。この反交換関係 $\{\sigma_i,\sigma_j\}=2\delta_{ij}I$ は、**クリフォード代数**と呼ばれる代数構造の定義そのものであり、パウリ行列はクリフォード代数の最小次元での具体的な表現（行列表現）になっています。ディラック方程式のガンマ行列も、次元は違いますが同じクリフォード代数の仲間です。
+です（$\frac12(\sigma_i\sigma_j+\sigma_j\sigma_i)+\frac12(\sigma_i\sigma_j-\sigma_j\sigma_i)=\sigma_i\sigma_j$）。これは、Part IV §5 の積の表を1本の式にまとめたものです。
+
+## 3. ベクトルとの積：内積と外積が同時に現れる
+
+実ベクトル $\vec a$ について、$\vec a\cdot\vec\sigma:=a_x\sigma_x+a_y\sigma_y+a_z\sigma_z$ と書きます。§2 の公式から
+
+$$
+(\vec a\cdot\vec\sigma)(\vec b\cdot\vec\sigma)=\sum_{i,j}a_ib_j\,\sigma_i\sigma_j=\sum_{i,j}a_ib_j\big(\delta_{ij}I+i\varepsilon_{ijk}\sigma_k\big)
+=\Big(\sum_ia_ib_i\Big)I+i\sum_k\Big(\sum_{i,j}\varepsilon_{ijk}a_ib_j\Big)\sigma_k
+$$
+
+です。1つ目の括弧は内積 $\vec a\cdot\vec b$、2つ目の括弧は外積の成分 $(\vec a\times\vec b)_k$（Part IV の冒頭）なので、
+
+$$
+\boxed{(\vec a\cdot\vec\sigma)(\vec b\cdot\vec\sigma)=(\vec a\cdot\vec b)\,I+i\,(\vec a\times\vec b)\cdot\vec\sigma}
+$$
+
+です。パウリ行列で表した2つのベクトルの積は、**内積（$I$ の係数）と外積（$\vec\sigma$ の係数）を同時に含みます**。
+
+![ベクトルとの積：内積と外積](figures/pauli04_dot_cross.png)
+
+*(a) 例として選んだ2つのベクトル $\vec a,\vec b$ と、その外積 $\vec a\times\vec b$ です。(b) 積 $(\vec a\cdot\vec\sigma)(\vec b\cdot\vec\sigma)$ を、Part II §5 の方法（$\frac12\operatorname{tr}$）で $\{I,\sigma_x,\sigma_y,\sigma_z\}$ に展開した係数です。$I$ の係数は実数で内積 $\vec a\cdot\vec b$ に、$\vec\sigma$ の係数は純虚数で $i\,\vec a\times\vec b$ に一致します（黒い線が、直接計算した値）。図を描くときに、下の3つの系と四元数の対応（§4）も数値で確かめています。*
+
+この公式から、次のことがすぐに分かります。
+
+- **2乗**：$\vec b=\vec a$ とすると $\vec a\times\vec a=0$ なので、$(\vec a\cdot\vec\sigma)^2=|\vec a|^2I$ です。特に単位ベクトル $\hat n$ なら $(\hat n\cdot\vec\sigma)^2=I$ で、Part II §6 と同じ議論から、固有値は $\pm1$ です。Part VI の指数関数の計算でも、この性質を使います。
+- **交換子は外積**：$[\vec a\cdot\vec\sigma,\vec b\cdot\vec\sigma]=2i\,(\vec a\times\vec b)\cdot\vec\sigma$ です（$\vec b\cdot\vec a=\vec a\cdot\vec b$、$\vec b\times\vec a=-\vec a\times\vec b$ なので、内積の部分が打ち消し合います）。パウリ行列の交換関係は、3次元の外積と同じ構造をしています。これが、$SU(2)$ が3次元の回転と結びつく理由の1つです（Part VI）。
+- **反交換子は内積**：$\{\vec a\cdot\vec\sigma,\vec b\cdot\vec\sigma\}=2(\vec a\cdot\vec b)I$ です。特に、$\vec a\perp\vec b$ なら、$\vec a\cdot\vec\sigma$ と $\vec b\cdot\vec\sigma$ は反交換します。
+
+## 4. 四元数との対応
+
+[四元数とパウリ行列のノート](quaternions_pauli_matrices.md)では、四元数の単位を $\mathbf i=-i\sigma_x,\ \mathbf j=-i\sigma_y,\ \mathbf k=-i\sigma_z$ と行列で表しました。§3 の公式にこの対応を当てはめると、
+
+$$
+(-i\,\vec a\cdot\vec\sigma)(-i\,\vec b\cdot\vec\sigma)=-(\vec a\cdot\vec\sigma)(\vec b\cdot\vec\sigma)=-(\vec a\cdot\vec b)\,I+(\vec a\times\vec b)\cdot(-i\vec\sigma)
+$$
+
+です。左辺は、実部が $0$ の四元数 $a_x\mathbf i+a_y\mathbf j+a_z\mathbf k$ と $b_x\mathbf i+b_y\mathbf j+b_z\mathbf k$ の積で、右辺は実部 $-\vec a\cdot\vec b$、虚部 $\vec a\times\vec b$ の四元数です。これは、四元数のノートの Part VI の積の公式 $(a+\mathbf u)(b+\mathbf v)=(ab-\mathbf u\cdot\mathbf v)+(a\mathbf v+b\mathbf u+\mathbf u\times\mathbf v)$ で、実部 $a=b=0$ としたものと一致します。例えば $\vec a=(1,0,0)$、$\vec b=(0,1,0)$ とすると、$\mathbf{ij}=\mathbf k$ です。
+
+## 5. クリフォード代数（関連する話題）
+
+反交換関係 $\{\sigma_i,\sigma_j\}=2\delta_{ij}I$ は、**クリフォード代数**と呼ばれる代数構造の定義そのもので、パウリ行列は、クリフォード代数の最小次元での具体的な表現（行列表現）になっています。ディラック方程式のガンマ行列も、次元は違いますが同じクリフォード代数の仲間です（[一般化パウリ行列のノート](generalized_pauli_and_sun_generators.md)の Part V）。
 
 ---
 
