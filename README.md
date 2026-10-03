@@ -49,6 +49,7 @@ quantum/
 |---|---|
 | [計量テンソルと共変反変_まとめ](研究ノート/02_微分幾何/計量テンソルと共変反変_まとめ.md) | 計量テンソルによるベクトル解析の一般化 |
 | [球座標の計量テンソル計算例](研究ノート/02_微分幾何/球座標の計量テンソル計算例.md) | 3次元極座標での計量テンソルの具体的計算 |
+| [ヤコビ行列から見るラプラス・ベルトラミ作用素](研究ノート/02_微分幾何/laplace_beltrami_from_jacobian_matrix.md) | デカルトのラプラシアンとの整合（Jacobiの公式）、非対角の例、部分積分からの導出 |
 | [christoffel_riemann_intro](研究ノート/02_微分幾何/christoffel_riemann_intro.md) | クリストッフェル記号とリーマン曲率テンソル（付録A〜C、図・動画つき） |
 | [ricci_tensor_einstein_equations](研究ノート/02_微分幾何/ricci_tensor_einstein_equations.md) | リッチテンソル・スカラー曲率・アインシュタイン方程式 |
 | [lie_derivative](研究ノート/02_微分幾何/lie_derivative.md) | リー微分（流れに沿った、座標に依らない微分） |
