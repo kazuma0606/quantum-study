@@ -94,6 +94,10 @@ $$
 
 **注意：$A$ の成分は、$J$ の成分の逆数ではありません。** 例えば $\partial x/\partial r=\cos\theta$ ですが、$\partial r/\partial x$ は $1/\cos\theta$ ではなく $\cos\theta$ です。$\partial x/\partial r$ は「$\theta$ を固定して $r$ を動かす」微分、$\partial r/\partial x$ は「$y$ を固定して $x$ を動かす」微分で、固定するものが違うからです。$A$ の各成分は、$J$ の**ほかの成分**（小行列式）と $\det J$ から決まります。このように成分が絡み合っているため、$A$ を微分すると、Part II §4 の (14) のように、$J$ の微分が行列の積の形で現れます。
 
+![極座標の接ベクトルと勾配、∂x/∂r と ∂r/∂x](figures/lb01_tangent_vs_gradient.png)
+
+*(a) $J$ の列は、接ベクトル $\mathbf e_r=\partial\mathbf x/\partial r$（長さ $1$）と $\mathbf e_\theta=\partial\mathbf x/\partial\theta$（長さ $r$）です。(b) $A=J^{-1}$ の行は、勾配 $\nabla r$（長さ $1$）と $\nabla\theta$（長さ $1/r$）で、等高線（円と放射状の直線）に垂直です。極座標は座標曲線が直交するので $\nabla\theta$ と $\mathbf e_\theta$ は同じ向きですが、長さは逆数どうしで、$\nabla\theta\cdot\mathbf e_\theta=1$ です（(a)(b) は同じ縮尺です）。(c) $\partial x/\partial r$ は「$\theta$ を固定して $r$ を動かす」ときの $x$ の変化率、$\partial r/\partial x$ は「$y$ を固定して $x$ を動かす」ときの $r$ の変化率で、どちらも $\cos\theta$ です（橙の破線は $r$ 一定の円弧で、$\Delta r$ は動かす量 $L$ が小さいときの近似です）。図を描くときに、各点で $AJ=I$ と成分の値を数値微分で確かめています。*
+
 ## 3. $\nabla_x=A^T\nabla_q$
 
 関数 $f$ を $q$ の関数とみて $x^i$ で微分すると、連鎖律より
@@ -372,6 +376,10 @@ $$
 
 $g$ も $g^{-1}$ も**非対角成分が残ります**。
 
+![斜交座標の接ベクトルと勾配](figures/lb02_oblique_coordinates.png)
+
+*灰色の鉛直線が $u$ 一定、放物線が $v$ 一定の線です。(a) $J$ の列 $\mathbf e_u=(1,-2u)$、$\mathbf e_v=(0,1)$ は、座標曲線の接線方向です。(b) $A$ の行 $\nabla u=(1,0)$、$\nabla v=(2u,1)$ は、等高線に垂直です。(c) $u=1$ の点で4本を重ねたものです。$\nabla u\perp\mathbf e_v$、$\nabla v\perp\mathbf e_u$ で、$\nabla u\cdot\mathbf e_u=\nabla v\cdot\mathbf e_v=1$（$AJ=I$）ですが、$\mathbf e_u$ と $\mathbf e_v$ は直交せず（$g_{uv}=\mathbf e_u\cdot\mathbf e_v=-2u$）、$\nabla u$ と $\mathbf e_u$ の向きもずれます。座標曲線が直交する座標では $\nabla q^j=\mathbf e_j/|\mathbf e_j|^2$ で、$\nabla q^j$ と $\mathbf e_j$ は同じ向きになるので（図 lb01）、このずれは斜交座標に特有です。*
+
 ## 2. 係数 $C_k$ を直接計算する
 
 $A$ の成分のうち、$q$ に依存するのは $A_{vx}=\partial v/\partial x=2u$ だけで、$\partial_uA_{vx}=2$ です。
@@ -459,6 +467,12 @@ $$
 が得られます。
 
 同じ議論から、ベクトル場の発散が $\operatorname{div}V=\dfrac1{\sqrt g}\partial_j\big(\sqrt g\,V^j\big)$ であることも出ます。
+
+**発散の式の $\sqrt g$ の意味**：$\sqrt g\,d^nq$ は小さなセルの体積で、座標 $q^j$ が一定の面を流れ $V$ が通り抜ける量は、$\sqrt g\,V^j$ に、その面に沿った座標の幅（$q^j$ 以外の $dq$ の積）を掛けたものです。したがって $\partial_j(\sqrt g\,V^j)\,d^nq$ は、向かい合う面を出る量と入る量の差で、それをセルの体積 $\sqrt g\,d^nq$ で割ったものが発散です。
+
+![極座標のセルを出入りする流れ](figures/lb03_polar_cell_flux.png)
+
+*(a) 極座標の小さなセル（$r$ から $r+dr$、$\theta$ から $\theta+d\theta$）です。内側の辺の長さは $r\,d\theta$、外側の辺は $(r+dr)\,d\theta$ で、面積は $\sqrt g\,dr\,d\theta=r\,dr\,d\theta$ です。$r$ 方向の流れが辺を通る量は、$V^r$ に辺の長さ $\sqrt g\,d\theta$ を掛けた $\sqrt g\,V^r\,d\theta$ です。(b) $V=\mathbf e_r/r$ は外側ほど弱くなりますが、外側の辺が長い分だけ、通る量は内側と同じです。出る量と入る量が等しく、$\operatorname{div}V=\frac1r\partial_r\big(r\cdot\frac1r\big)=0$ です。(c) $V=\mathbf e_r$ は大きさが一定ですが、外側の辺が長い分だけ出る量が多く、$\operatorname{div}V=\frac1r\partial_r(r\cdot1)=\frac1r$ です。図を描くときに、セルの周りの線積分で出入りの差を計算して $\iint\operatorname{div}V\,\sqrt g\,dr\,d\theta$ と一致すること、デカルト座標で計算した発散と一致することを確かめています。*
 
 ## 4. Part II との関係
 
