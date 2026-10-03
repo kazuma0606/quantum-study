@@ -7,6 +7,7 @@
 出力（このスクリプトと同じ figures/ ディレクトリ）:
     mani01_charts.png          Part I §4・§5 円の2枚の地図、球面の立体射影と座標変換 u ↦ u/|u|²
     mani02_not_manifolds.png   Part I §7 多様体でない例（2本の直線の交点、二重円錐の頂点）
+    mani03_regular_value.png   Part II 正則値定理：等位集合、球面の接平面、正則値は十分条件
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -145,7 +146,69 @@ def mani02():
     plt.close(fig)
 
 
-FIGS = dict(mani01=mani01, mani02=mani02)
+# ------------------------------------------------------------------------------------- mani03
+def mani03():
+    """Part II：正則値定理。等位集合 x²−z²=c、球面の接平面 = ker DF、正則値は十分条件。"""
+    fig = plt.figure(figsize=(17, 5.8))
+
+    # (a) F(x,z) = x^2 - z^2 の等位集合
+    ax = fig.add_subplot(1, 3, 1)
+    xs = np.linspace(-2, 2, 400)
+    X, Z = np.meshgrid(xs, xs)
+    Fv = X**2 - Z**2
+    levels = [-1.5, -0.75, 0.75, 1.5]
+    cs = ax.contour(X, Z, Fv, levels=levels, colors=[C_B, C_B, C_A, C_A], linewidths=1.8)
+    ax.clabel(cs, fmt=lambda v: f"$c={v:g}$", fontsize=9)
+    ax.plot([-2, 2], [-2, 2], color=C_BAD, lw=2.5)
+    ax.plot([-2, 2], [2, -2], color=C_BAD, lw=2.5, label="$c=0$：交わる2本の直線（多様体でない）")
+    ax.plot(0, 0, "o", color=C_BAD, ms=9)
+    for (px, pz) in [(1.2247, 0.0), (0.0, 1.2247), (1.0, 0.5)]:
+        g = np.array([2 * px, -2 * pz])
+        assert np.linalg.norm(g) > 0
+        ax.annotate("", xy=(px + 0.25 * g[0], pz + 0.25 * g[1]), xytext=(px, pz),
+                    arrowprops=dict(arrowstyle="-|>", color="#555", lw=1.4))
+    ax.text(0.08, -0.35, "原点で $DF=0$", color=C_BAD, fontsize=10)
+    ax.set_aspect("equal"), ax.set_xlim(-2, 2), ax.set_ylim(-2, 2)
+    ax.set_xlabel("$x$"), ax.set_ylabel("$z$")
+    ax.legend(fontsize=9, loc="lower center", bbox_to_anchor=(0.5, -0.02))
+    ax.set_title("(a) $F=x^2-z^2$ の等位集合 $F^{-1}(c)$：\n$c\\neq0$ は滑らかな曲線（矢印は勾配）", fontsize=11)
+
+    # (b) 球面の接平面 = ker DF
+    ax = fig.add_subplot(1, 3, 2, projection="3d")
+    u, v = np.meshgrid(np.linspace(0, np.pi, 30), np.linspace(0, 2 * np.pi, 60))
+    ax.plot_surface(np.sin(u) * np.cos(v), np.sin(u) * np.sin(v), np.cos(u), color="#dbe6f2", alpha=0.4, linewidth=0)
+    p = np.array([1.0, 2.0, 2.0]) / 3
+    grad = 2 * p
+    e1 = np.array([-2.0, 1.0, 0.0]); e1 /= np.linalg.norm(e1)
+    e2 = np.cross(p, e1)
+    assert abs(grad @ e1) < 1e-12 and abs(grad @ e2) < 1e-12        # 接平面 = ker DF_p = {v : p·v = 0}
+    s, tt = np.meshgrid(np.linspace(-0.6, 0.6, 2), np.linspace(-0.6, 0.6, 2))
+    P = p[:, None, None] + e1[:, None, None] * s + e2[:, None, None] * tt
+    ax.plot_surface(*P, color=C_A, alpha=0.35, linewidth=0)
+    ax.quiver(*p, *(0.5 * grad), color=C_BAD, linewidth=2, arrow_length_ratio=0.2)
+    ax.quiver(*p, *(0.5 * e1), color="#222", linewidth=1.5, arrow_length_ratio=0.2)
+    ax.quiver(*p, *(0.5 * e2), color="#222", linewidth=1.5, arrow_length_ratio=0.2)
+    ax.text(*(p + 0.55 * grad), "$\\nabla F=2p$", color=C_BAD, fontsize=11)
+    ax.set_xlim(-1, 1), ax.set_ylim(-1, 1), ax.set_zlim(-1, 1)
+    ax.set_box_aspect((1, 1, 1)), ax.set_axis_off(), ax.view_init(elev=20, azim=20)
+    ax.set_title("(b) 球面 $F^{-1}(1)$（$F=|x|^2$）の接平面（青）：\n$T_pS^2=\\ker DF_p=\\{v:\\ p\\cdot v=0\\}$", fontsize=11)
+
+    # (c) 正則値は十分条件
+    ax = fig.add_subplot(1, 3, 3)
+    r = np.linspace(0, 1.6, 400)
+    ax.plot(r, r**2 - 1, color=C_A, lw=2.5, label="$F_1=r^2-1$：$r=1$ で傾き $2\\neq0$")
+    ax.plot(r, (r**2 - 1) ** 2, color=C_B, lw=2.5, label="$F_2=(r^2-1)^2$：$r=1$ で傾き $0$")
+    ax.axhline(0, color="#333", lw=1)
+    ax.plot(1, 0, "o", color=C_BAD, ms=9)
+    ax.set_xlabel("$r=\\sqrt{x^2+y^2}$"), ax.set_ylim(-1.1, 2.0)
+    ax.legend(fontsize=9, loc="upper left")
+    ax.set_title("(c) どちらも $F^{-1}(0)$ は同じ単位円（多様体）。\n$F_2$ では $0$ は正則値でないが、それでも多様体", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "mani03_regular_value.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+FIGS = dict(mani01=mani01, mani02=mani02, mani03=mani03)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
