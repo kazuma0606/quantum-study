@@ -9,6 +9,9 @@
     mani02_not_manifolds.png   Part I §7 多様体でない例（2本の直線の交点、二重円錐の頂点）
     mani03_regular_value.png   Part II 正則値定理：等位集合、球面の接平面、正則値は十分条件
     mani04_tissot.png          Part VI ティソーの指示楕円（メルカトル図法とランベルト正積図法）
+    mani05_riemann_sphere.png  Part V §3 リーマン球面：ζ 平面の格子、座標変換 1/ζ̄（裏返る）と 1/ζ（正則）
+    mani06_theorema_egregium.png  Part VI §6 円柱は広げられるが球面は広げられない（三角形の内角、舟形の隙間）
+    mani07_singularities.png   Part IX §1 座標特異点と真の特異点（球面の極、シュワルツシルト時空の地平線と中心）
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -276,7 +279,243 @@ def mani04():
     plt.close(fig)
 
 
-FIGS = dict(mani01=mani01, mani02=mani02, mani03=mani03, mani04=mani04)
+# ------------------------------------------------------------------------------------- mani05
+def mani05():
+    """Part V §3：リーマン球面。ζ 平面の格子は北極を通る円になる。1/ζ̄ は裏返し、1/ζ は向きを保つ。"""
+    fig = plt.figure(figsize=(20, 5.6))
+    gs = fig.add_gridspec(1, 4, width_ratios=[1.35, 1, 1, 1])
+
+    # (a) ζ 平面の直線 u1 = c、u2 = c を球面に写す
+    ax = fig.add_subplot(gs[0, 0], projection="3d")
+    a, b = np.meshgrid(np.linspace(0, np.pi, 40), np.linspace(0, 2 * np.pi, 80))
+    ax.plot_surface(np.sin(a) * np.cos(b), np.sin(a) * np.sin(b), np.cos(a), color="#eef2f7", alpha=0.25, linewidth=0)
+    s = np.tan(np.linspace(-np.pi / 2 + 1e-3, np.pi / 2 - 1e-3, 600))      # 直線全体（両端は北極に近づく）
+    Np = np.array([0, 0, 1.0])
+    for c in [-2, -1, -0.5, 0, 0.5, 1, 2]:
+        for k, col in [(0, C_A), (1, C_B)]:
+            u = np.zeros((len(s), 2))
+            u[:, k], u[:, 1 - k] = c, s
+            P = sigma_N_inv(u)
+            nrm = np.cross(P[100] - Np, P[400] - Np)
+            assert np.allclose((P - Np) @ nrm, 0, atol=1e-9)              # 北極を通る平面の上 → 球面上の円
+            ax.plot(*P.T, color=col, lw=1.3, alpha=0.9)
+    ax.scatter(*Np, color=C_BAD, s=40, depthshade=False)
+    ax.text(0.05, 0, 1.12, "$N$（$\\zeta=\\infty$）", color=C_BAD, fontsize=11)
+    ax.scatter(0, 0, -1, color="#222", s=25, depthshade=False)
+    ax.text(0.05, 0, -1.25, "$S$（$\\zeta=0$）", fontsize=10)
+    ax.set_box_aspect((1, 1, 1)), ax.set_axis_off(), ax.view_init(elev=18, azim=-55)
+    ax.set_title("(a) $\\zeta$ 平面の格子（青：$u_1$ 一定、橙：$u_2$ 一定）を\n球面に写すと、北極 $N$ を通る円になり、直角に交わる", fontsize=11)
+
+    # (b)〜(d) 正方形の格子と文字 F を、1/ζ̄ と 1/ζ で写す
+    z0, side = 1.6j, 0.6                       # 虚軸の上：1/ζ は拡大縮小だけ、1/ζ̄ は上下の反転（の近似）
+    loc = lambda p, q: z0 + side * ((p - 0.5) + 1j * (q - 0.5))
+    tt = np.linspace(0, 1, 60)
+    grid = [loc(np.full_like(tt, g), tt) for g in np.linspace(0, 1, 5)] + [loc(tt, np.full_like(tt, g)) for g in np.linspace(0, 1, 5)]
+    glyph = [loc(np.full_like(tt, 0.3), 0.15 + 0.7 * tt), loc(0.3 + 0.45 * tt, np.full_like(tt, 0.85)), loc(0.3 + 0.3 * tt, np.full_like(tt, 0.5))]
+    edge = np.concatenate([loc(tt, 0 * tt), loc(1 + 0 * tt, tt), loc(1 - tt, 1 + 0 * tt), loc(0 * tt, 1 - tt)])   # 反時計回り
+
+    # 座標変換の確認：1/ζ̄ は σ_S∘σ_N^{-1}、1/ζ は南極側を裏返した地図 η=(x−iy)/(1+z)
+    U = np.stack([edge.real, edge.imag], axis=-1)
+    P = sigma_N_inv(U)
+    assert np.allclose(sigma_S(P) @ [1, 1j], 1 / np.conj(edge))
+    assert np.allclose((P[:, 0] - 1j * P[:, 1]) / (1 + P[:, 2]), 1 / edge)
+    assert np.isclose(-1 / z0**2, abs(1 / z0**2))                     # z0 での 1/ζ の微分は正の実数（回転なし）
+    area = lambda w: 0.5 * np.sum(w.real * np.roll(w.imag, -1) - w.imag * np.roll(w.real, -1))
+    assert area(edge) > 0 and area(1 / edge) > 0 and area(1 / np.conj(edge)) < 0      # 1/ζ̄ だけ向きが逆
+    h = 1e-6
+    for zz in edge[::25]:
+        for fn, sgn in [(lambda w: 1 / w, 1), (lambda w: 1 / np.conj(w), -1)]:
+            du, dv = (fn(zz + h) - fn(zz)) / h, (fn(zz + 1j * h) - fn(zz)) / h
+            Jm = np.array([[du.real, dv.real], [du.imag, dv.imag]])
+            assert np.isclose(abs(du), abs(dv), rtol=1e-4) and abs(np.vdot(du, dv).real) < 1e-4 * abs(du) ** 2   # 角度を保つ
+            assert np.sign(np.linalg.det(Jm)) == sgn
+
+    for ax_i, fn, title, col in [(2, lambda w: w, "(b) $\\zeta$ 平面の正方形の格子と、文字 F", "#333"),
+                                 (3, lambda w: 1 / np.conj(w), "(c) $\\sigma_S$ のままの座標変換 $1/\\bar{\\zeta}$：\n角度は保つが、F が裏返る（正則でない）", C_BAD),
+                                 (4, lambda w: 1 / w, "(d) 裏返した地図 $\\eta$ への座標変換 $\\eta=1/\\zeta$：\nF は裏返らない（正則）", C_A)]:
+        ax = fig.add_subplot(gs[0, ax_i - 1])
+        for g in grid:
+            w = fn(g)
+            ax.plot(w.real, w.imag, color="#aaaaaa", lw=1)
+        for g in glyph:
+            w = fn(g)
+            ax.plot(w.real, w.imag, color=col, lw=3.5, solid_capstyle="round")
+        w = fn(edge)
+        cx, cy, span = w.real.mean(), w.imag.mean(), 0.62 * max(np.ptp(w.real), np.ptp(w.imag))
+        ax.set_xlim(cx - span, cx + span), ax.set_ylim(cy - span, cy + span), ax.set_aspect("equal")
+        ax.set_xlabel("実部"), ax.set_ylabel("虚部")
+        ax.set_title(title, fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "mani05_riemann_sphere.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+# ------------------------------------------------------------------------------------- mani06
+def mani06():
+    """Part VI §6：円柱は平面に広げられるが、球面は広げられない（舟形の隙間、三角形の内角の和）。"""
+    fig = plt.figure(figsize=(17, 11.5))
+    gs = fig.add_gridspec(2, 3, height_ratios=[1, 0.9])
+
+    # (a) 円柱と、その上の螺旋（測地線）
+    R, cpitch, H = 1.0, 2.6 / (2 * np.pi), 2.6
+    ax = fig.add_subplot(gs[0, 0], projection="3d")
+    a, hh = np.meshgrid(np.linspace(0, 2 * np.pi, 60), np.linspace(0, H, 2))
+    ax.plot_surface(R * np.cos(a), R * np.sin(a), hh, color="#dbe6f2", alpha=0.35, linewidth=0)
+    for h0 in np.linspace(0, H, 5):
+        ax.plot(R * np.cos(a[0]), R * np.sin(a[0]), np.full(60, h0), color="#aaaaaa", lw=0.8)
+    for a0 in np.linspace(0, 2 * np.pi, 9)[:-1]:
+        ax.plot([R * np.cos(a0)] * 2, [R * np.sin(a0)] * 2, [0, H], color="#aaaaaa", lw=0.8)
+    ax.plot([R, R], [0, 0], [0, H], color=C_BAD, lw=2.5)
+    s = np.linspace(0, 2 * np.pi, 300)
+    helix = np.stack([R * np.cos(s), R * np.sin(s), cpitch * s], axis=-1)
+    ax.plot(*helix.T, color=C_A, lw=2.5)
+    ax.set_box_aspect((1, 1, 1.2)), ax.set_axis_off(), ax.view_init(elev=15, azim=-50)
+    ax.set_title("(a) 円柱を、赤い線で切り開く。\n青い螺旋は、円柱の上の測地線", fontsize=11)
+
+    # 円柱の計量：座標 (s, h) で ds² = R² ds² + dh²（平坦）、螺旋の長さは広げても同じ
+    J = np.stack([np.stack([-R * np.sin(s), R * np.cos(s), 0 * s], -1), np.stack([0 * s, 0 * s, 1 + 0 * s], -1)], -2)
+    G = np.einsum("nia,nja->nij", J, J)
+    assert np.allclose(G, np.diag([R**2, 1.0]))
+    L3 = np.sum(np.linalg.norm(np.diff(helix, axis=0), axis=1))
+    assert np.isclose(L3, 2 * np.pi * np.hypot(R, cpitch), rtol=1e-4)
+
+    # (b) 広げた円柱：長方形、螺旋は直線
+    ax = fig.add_subplot(gs[0, 1])
+    for h0 in np.linspace(0, H, 5):
+        ax.plot([0, 2 * np.pi * R], [h0, h0], color="#aaaaaa", lw=0.8)
+    for a0 in np.linspace(0, 2 * np.pi, 9):
+        ax.plot([R * a0] * 2, [0, H], color="#aaaaaa", lw=0.8)
+    ax.plot([0, 0], [0, H], color=C_BAD, lw=2.5), ax.plot([2 * np.pi * R] * 2, [0, H], color=C_BAD, lw=2.5)
+    ax.plot(R * s, cpitch * s, color=C_A, lw=2.5)
+    ax.set_aspect("equal"), ax.set_xlim(-0.3, 2 * np.pi * R + 0.3), ax.set_ylim(-0.3, H + 0.3)
+    ax.set_xlabel("$R\\phi$（円周に沿った長さ）"), ax.set_ylabel("高さ $h$")
+    ax.set_title("(b) 広げると、隙間も重なりもない長方形になり、\n螺旋は直線になる（長さもそのまま。$K=0$）", fontsize=11)
+
+    # (c) 球面の三角形（八分円）
+    ax = fig.add_subplot(gs[0, 2], projection="3d")
+    a, b = np.meshgrid(np.linspace(0, np.pi, 40), np.linspace(0, 2 * np.pi, 80))
+    ax.plot_surface(np.sin(a) * np.cos(b), np.sin(a) * np.sin(b), np.cos(a), color="#eef2f7", alpha=0.25, linewidth=0)
+    a, b = np.meshgrid(np.linspace(0, np.pi / 2, 20), np.linspace(0, np.pi / 2, 20))
+    ax.plot_surface(np.sin(a) * np.cos(b), np.sin(a) * np.sin(b), np.cos(a), color=C_B, alpha=0.6, linewidth=0)
+    V = np.eye(3)
+    angles = []
+    for i in range(3):
+        p, q, r_ = V[i], V[(i + 1) % 3], V[(i + 2) % 3]
+        tt = np.linspace(0, np.pi / 2, 60)
+        arc = np.cos(tt)[:, None] * p + np.sin(tt)[:, None] * q        # 大円の弧
+        ax.plot(*arc.T, color="#333", lw=2)
+        tq, tr = q - (q @ p) * p, r_ - (r_ @ p) * p                    # 頂点 p での、2辺の接ベクトル
+        angles.append(np.degrees(np.arccos(tq @ tr / np.linalg.norm(tq) / np.linalg.norm(tr))))
+    th_ = np.linspace(0, np.pi / 2, 400)
+    area = np.trapezoid(np.sin(th_), th_) * (np.pi / 2)                  # ∬ sinθ dθ dφ
+    assert np.allclose(angles, 90) and np.isclose(area, np.pi / 2, rtol=1e-5)
+    assert np.isclose(np.radians(sum(angles)) - np.pi, 1.0 * area, rtol=1e-5)   # 内角の和 − π = K × 面積
+    ax.set_box_aspect((1, 1, 1)), ax.set_axis_off(), ax.view_init(elev=22, azim=40)
+    ax.set_title("(c) 球面の三角形（八分円）：3つの角がすべて直角で、\n内角の和は $270^\\circ$。超過分 $90^\\circ=K\\times$面積（$K=1$、面積 $\\pi/2$）", fontsize=11)
+
+    # (d) 舟形（ゴア）に切って広げた球面
+    ax = fig.add_subplot(gs[1, :])
+    n = 12
+    w = np.pi / n                                                       # 舟形の半分の幅
+    lam = np.linspace(-np.pi / 2, np.pi / 2, 400)
+    total_area = 0.0
+    for k in range(n):
+        xc = -np.pi + (2 * k + 1) * w
+        ax.fill(np.concatenate([xc + w * np.cos(lam), xc - w * np.cos(lam[::-1])]), np.concatenate([lam, lam[::-1]]),
+                color=C_A, alpha=0.35, lw=0)
+        ax.plot(xc + w * np.cos(lam), lam, color=C_A, lw=1), ax.plot(xc - w * np.cos(lam), lam, color=C_A, lw=1)
+        ax.plot([xc, xc], [-np.pi / 2, np.pi / 2], color="#888", lw=0.6)
+        for la0 in np.radians([-60, -30, 0, 30, 60]):
+            ax.plot([xc - w * np.cos(la0), xc + w * np.cos(la0)], [la0, la0], color="#888", lw=0.6)
+        total_area += np.trapezoid(2 * w * np.cos(lam), lam)
+    assert np.isclose(total_area, 4 * np.pi, rtol=1e-4)                 # 面積の合計は球面の面積 4π
+    edge_len = np.trapezoid(np.sqrt(1 + (w * np.sin(lam)) ** 2), lam)
+    assert edge_len > np.pi                                             # 舟形の縁の経線は、本当の長さ π より長い
+    for la0 in [30, 60]:
+        gap = 2 * np.pi - n * 2 * w * np.cos(np.radians(la0))
+        assert np.isclose(gap, 2 * np.pi * (1 - np.cos(np.radians(la0))))   # 隙間の合計は枚数によらない
+    ax.annotate("", xy=(-np.pi + 2 * w, np.radians(60)), xytext=(-np.pi + 2 * w + 0.45, np.radians(101)),
+                arrowprops=dict(arrowstyle="-|>", color=C_BAD, lw=1.4))
+    ax.text(-np.pi + 2 * w + 0.5, np.radians(101), "隙間（緯度 $60^\\circ$ で合計 $2\\pi(1-\\cos 60^\\circ)=\\pi$）", color=C_BAD, fontsize=10, va="center")
+    ax.set_aspect("equal"), ax.set_xlim(-np.pi - 0.1, np.pi + 0.1), ax.set_ylim(-np.pi / 2 - 0.1, np.pi / 2 + 0.38)
+    ax.set_xticks(np.radians([-180, -90, 0, 90, 180])), ax.set_xticklabels(["-180°", "-90°", "0°", "90°", "180°"])
+    ax.set_yticks(np.radians([-90, -60, -30, 0, 30, 60, 90])), ax.set_yticklabels(["-90°", "-60°", "-30°", "0°", "30°", "60°", "90°"])
+    ax.set_xlabel("経度"), ax.set_ylabel("緯度")
+    ax.set_title("(d) 球面を 12 枚の舟形に切って広げたもの（各舟形の中央の経線と、緯線の長さ、面積は正しい）：\n"
+                 "高緯度ほど隙間が開く。隙間の合計は緯度 $\\lambda$ で $2\\pi(1-\\cos\\lambda)$ で、舟形を細くしても減らない", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "mani06_theorema_egregium.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+# ------------------------------------------------------------------------------------- mani07
+def mani07():
+    """Part IX §1：座標特異点と真の特異点。球面の極と、シュワルツシルト時空の地平線・中心。"""
+    fig, axes = plt.subplots(1, 3, figsize=(21, 5.8), gridspec_kw=dict(width_ratios=[1.15, 1, 1]))
+
+    # (a) 球面：√|g| は地図ごとに違うが、K=1 はどこでも同じ
+    ax = axes[0]
+    th = np.linspace(1e-3, np.pi - 1e-3, 400)
+    sph, nN, nS = np.sin(th), 4 * np.sin(th / 2) ** 4, 4 * np.cos(th / 2) ** 4
+
+    def vol(inv, u, h=1e-6):
+        Ju = (inv(u + [h, 0]) - inv(u - [h, 0])) / (2 * h)
+        Jv = (inv(u + [0, h]) - inv(u - [0, h])) / (2 * h)
+        return np.sqrt(np.sum(Ju**2, -1) * np.sum(Jv**2, -1) - np.sum(Ju * Jv, -1) ** 2)
+
+    sigma_S_inv = lambda v: (lambda s: np.concatenate([2 * v / (s + 1), (1 - s) / (s + 1)], axis=-1))(np.sum(v**2, axis=-1, keepdims=True))
+    P = np.stack([np.sin(th), 0 * th, np.cos(th)], -1)
+    assert np.allclose(sigma_S_inv(sigma_S(P)), P)
+    assert np.allclose(vol(sigma_N_inv, sigma_N(P)), nN, rtol=1e-4, atol=1e-6)    # σ_N の地図：4/(1+|u|²)² = 4 sin⁴(θ/2)
+    assert np.allclose(vol(sigma_S_inv, sigma_S(P)), nS, rtol=1e-4, atol=1e-6)    # σ_S の地図：4 cos⁴(θ/2)
+    deg = np.degrees(th)
+    ax.plot(deg, sph, color="#333", lw=2.5, label="球座標 $(\\theta,\\phi)$：$\\sin\\theta$（両極で 0）")
+    ax.plot(deg, nN, color=C_A, lw=2.2, ls="--", label="地図 $\\sigma_N$：$4\\sin^4(\\theta/2)$（北極は地図の外）")
+    ax.plot(deg, nS, color=C_B, lw=2.2, ls="-.", label="地図 $\\sigma_S$：$4\\cos^4(\\theta/2)$（南極は地図の外）")
+    ax.axhline(1, color=C_BAD, lw=2.5, label="ガウス曲率 $K=1$（座標によらない）")
+    ax.set_xlim(0, 180), ax.set_ylim(-0.1, 4.9), ax.set_xticks([0, 45, 90, 135, 180])
+    ax.set_xticklabels(["0°\n北極", "45°", "90°\n赤道", "135°", "180°\n南極"])
+    ax.set_xlabel("北極からの角度 $\\theta$"), ax.legend(fontsize=9, loc="upper center")
+    ax.set_title("(a) 単位球面：体積要素 $\\sqrt{|g|}$ は地図ごとに違い、0 になる点も違う。\n"
+                 "どの点も、どれかの地図では普通の点で、$K$ も一定 → 極は座標特異点", fontsize=11)
+
+    # (b) シュワルツシルト時空（r_s = 1 の単位）
+    ax = axes[1]
+    f = lambda r: 1 - 1 / r
+    rng = np.random.default_rng(1)
+    for _ in range(20):
+        r0, dv, dr = rng.uniform(0.3, 3), rng.normal(), rng.normal()
+        dt = dv - dr / f(r0)                                            # EF 座標 v = t + r*（dr*/dr = 1/f）
+        assert np.isclose(-f(r0) * dt**2 + dr**2 / f(r0), -f(r0) * dv**2 + 2 * dv * dr)
+    for r in [np.linspace(0.3, 0.995, 200), np.linspace(1.005, 3, 300)]:
+        ax.plot(r, 1 / f(r), color=C_B, lw=2.5, label="シュワルツシルト座標の $g_{rr}=1/(1-r_s/r)$" if r[0] > 1 else None)
+    r = np.linspace(0.3, 3, 400)
+    ax.plot(r, -f(r), color=C_A, lw=2.2, ls="--", label="EF 座標の $g_{vv}=-(1-r_s/r)$（$g_{vr}=1$）：有限")
+    ax.axvline(1, color="#777", lw=1.2, ls=":")
+    ax.text(1.04, -4.6, "地平線 $r=r_s$", color="#555", fontsize=10)
+    ax.set_xlim(0.3, 3), ax.set_ylim(-5.5, 8), ax.axhline(0, color="#ccc", lw=0.8)
+    ax.set_xlabel("$r/r_s$"), ax.legend(fontsize=9, loc="upper right")
+    ax.set_title("(b) シュワルツシルト時空の計量の成分（$r_s=1$ の単位）：\n"
+                 "$g_{rr}$ は地平線で発散するが、EF 座標の成分は有限 → 座標特異点", fontsize=11)
+
+    # (c) 曲率の不変量（対数目盛り）
+    ax = axes[2]
+    r = np.geomspace(0.05, 3, 400)
+    kr = 12 / r**6
+    assert np.isclose(np.interp(1.0, r, kr), 12, rtol=1e-3)
+    ax.loglog(r, kr, color=C_BAD, lw=2.5, label="$R_{abcd}R^{abcd}=12r_s^2/r^6$（どの座標でも同じ値）")
+    ax.axvline(1, color="#777", lw=1.2, ls=":")
+    ax.plot(1, 12, "o", color=C_BAD, ms=8)
+    ax.text(0.92, 2.5, "地平線 $r=r_s$ で $12/r_s^4$（有限）", color="#555", fontsize=10, ha="right")
+    ax.text(0.12, 3e7, "$r\\to0$ で発散", color=C_BAD, fontsize=10)
+    ax.set_xlim(0.05, 3), ax.set_xlabel("$r/r_s$（対数目盛り）"), ax.legend(fontsize=9, loc="upper right")
+    ax.set_title("(c) 曲率の不変量（対数目盛り）：$r=r_s$ では有限、\n$r\\to0$ で発散 → 真の特異点は $r=0$", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "mani07_singularities.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+FIGS = dict(mani01=mani01, mani02=mani02, mani03=mani03, mani04=mani04, mani05=mani05, mani06=mani06, mani07=mani07)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
