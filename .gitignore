@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Lean (Lake の作業フォルダ。Mathlib を含み数 GB になる)
+.lake/

@@ -55,6 +55,15 @@ Pkg.add("Yao")  # 量子回路フレームワーク
 
 `PyCall` が入っているため Julia から Python を呼ぶことも可能。
 
+## Lean 4 環境
+
+研究ノートの命題の形式証明は `lean4/`（Lake プロジェクト、ライブラリ名 `QuantumStudy`）に置く。詳細は `lean4/README.md`。
+
+- 版: Lean v4.28.0 / Mathlib v4.28.0（elan の既定も v4.28.0）
+- ビルド: `cd lean4 && lake build`（`QuantumStudy.lean` で import したモジュールが対象）
+- 1ファイルの検査: `cd lean4 && lake env lean QuantumStudy/Pauli.lean`
+- `lean4/.lake/`（Mathlib を含み約 6.5GB）はコミットしない。新しい環境では `lake exe cache get` で取得する
+
 ## 関連プロジェクト
 
 ### Favnir (`C:\Users\yoshi\favnir`)
