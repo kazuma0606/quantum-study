@@ -8,6 +8,7 @@
     mani01_charts.png          Part I §4・§5 円の2枚の地図、球面の立体射影と座標変換 u ↦ u/|u|²
     mani02_not_manifolds.png   Part I §7 多様体でない例（2本の直線の交点、二重円錐の頂点）
     mani03_regular_value.png   Part II 正則値定理：等位集合、球面の接平面、正則値は十分条件
+    mani04_tissot.png          Part VI ティソーの指示楕円（メルカトル図法とランベルト正積図法）
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -208,7 +209,74 @@ def mani03():
     plt.close(fig)
 
 
-FIGS = dict(mani01=mani01, mani02=mani02, mani03=mani03)
+# ------------------------------------------------------------------------------------- mani04
+def sphere_circle(lat0, lon0, rho, n=120):
+    """中心（緯度 lat0、経度 lon0）から角距離 rho の、球面上の小円を (lat, lon) の配列で返す"""
+    c = np.array([np.cos(lat0) * np.cos(lon0), np.cos(lat0) * np.sin(lon0), np.sin(lat0)])
+    e = np.cross([0, 0, 1.0], c)
+    e = e / np.linalg.norm(e) if np.linalg.norm(e) > 1e-9 else np.array([1.0, 0, 0])
+    f = np.cross(c, e)
+    t = np.linspace(0, 2 * np.pi, n)
+    P = np.cos(rho) * c[:, None] + np.sin(rho) * (np.cos(t) * e[:, None] + np.sin(t) * f[:, None])
+    assert np.allclose(np.arccos(np.clip(c @ P, -1, 1)), rho)          # 中心からの角距離が一定（球面上の円）
+    return np.arcsin(P[2]), np.arctan2(P[1], P[0])
+
+
+def mani04():
+    """Part VI：ティソーの指示楕円。メルカトル図法（正角）とランベルト正積図法。"""
+    merc = lambda lat, lon: (lon, np.log(np.tan(np.pi / 4 + lat / 2)))      # Y = -ln tan(θ/2)、θ = π/2 − 緯度
+    lamb = lambda lat, lon: (lon, np.sin(lat))                              # Y = cos θ = sin(緯度)
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6.4), gridspec_kw=dict(width_ratios=[1, 1, 0.85]))
+    rho = np.radians(7)
+    centers = [(np.radians(la), np.radians(lo)) for la in (0, 30, 60, 75) for lo in (-120, -40, 40, 120)]
+    for ax, proj, title, ylim in [(axes[0], merc, "(a) メルカトル図法（正角）：円は円のまま、\n高緯度ほど大きくなる", (-2.7, 2.7)),
+                                  (axes[1], lamb, "(b) ランベルト正積図法：面積は同じだが、\n高緯度ほど南北につぶれる", (-1.05, 1.05))]:
+        for lo in np.radians(np.arange(-180, 181, 30)):
+            la = np.radians(np.linspace(-80, 80, 100))
+            X, Yv = proj(la, np.full_like(la, lo))
+            ax.plot(X, Yv, color="#dddddd", lw=0.8)
+        for la0 in np.radians(np.arange(-75, 76, 15)):
+            lo = np.radians(np.linspace(-180, 180, 200))
+            X, Yv = proj(np.full_like(lo, la0), lo)
+            ax.plot(X, Yv, color="#dddddd", lw=0.8)
+        areas = []
+        for la0, lo0 in centers:
+            la, lo = sphere_circle(la0, lo0, rho)
+            X, Yv = proj(la, lo)
+            ax.fill(X, Yv, color=C_BAD, alpha=0.55)
+            areas.append(0.5 * abs(np.dot(X, np.roll(Yv, -1)) - np.dot(Yv, np.roll(X, -1))))
+        areas = np.array(areas)
+        if proj is lamb:
+            assert np.ptp(areas) / areas.mean() < 1e-2          # 正積：どの緯度でも面積が同じ
+        else:
+            eq = areas[:4].mean()
+            assert abs(areas[4:8].mean() / eq - 1 / np.cos(np.radians(30)) ** 2) < 0.05   # 面積は sec²(緯度) 倍
+        ax.set_xlim(-np.pi, np.pi), ax.set_ylim(*ylim)
+        ax.set_xticks(np.radians([-180, -90, 0, 90, 180])), ax.set_xticklabels(["-180°", "-90°", "0°", "90°", "180°"])
+        ax.set_xlabel("経度 $X=\\phi$"), ax.set_title(title, fontsize=11)
+        ax.set_aspect("equal")
+    axes[0].set_ylabel("$Y=\\ln\\tan(\\pi/4+\\lambda/2)$")
+    axes[1].set_ylabel("$Y=\\sin\\lambda$")
+
+    ax = axes[2]
+    lat = np.linspace(0, 80, 200)
+    sec = 1 / np.cos(np.radians(lat))
+    ax.plot(lat, sec, color=C_A, lw=2.5, label="メルカトル：長さの倍率 $\\sec\\lambda$（東西＝南北）")
+    ax.plot(lat, sec**2, color=C_A, lw=2.5, ls="--", label="メルカトル：面積の倍率 $\\sec^2\\lambda$")
+    ax.plot(lat, sec, color=C_B, lw=2, ls=":", label="ランベルト：東西の倍率 $\\sec\\lambda$")
+    ax.plot(lat, 1 / sec, color=C_B, lw=2, ls="-.", label="ランベルト：南北の倍率 $\\cos\\lambda$（積は1）")
+    ax.axvline(72, color="#999", lw=1)
+    ax.text(71, 20, "グリーンランド付近\n（緯度 72°）", fontsize=9, color="#555", ha="right")
+    ax.set_yscale("log"), ax.set_xlim(0, 80), ax.set_ylim(0.15, 40)
+    ax.set_xlabel("緯度 $\\lambda$ [度]"), ax.legend(fontsize=8.5, loc="upper left")
+    ax.set_title("(c) 赤道に対する倍率（対数目盛り）", fontsize=11)
+    fig.suptitle("ティソーの指示楕円：球面上の同じ大きさの円（半径 7°）を、それぞれの地図に写したもの（Part VI §5）", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(OUT / "mani04_tissot.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+FIGS = dict(mani01=mani01, mani02=mani02, mani03=mani03, mani04=mani04)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
