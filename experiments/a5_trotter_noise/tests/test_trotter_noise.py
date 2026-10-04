@@ -288,3 +288,20 @@ def test_time_reversal_hypothesis_is_false() -> None:
     psi0 = _product_state(rng.uniform(0.3, 2.8, 3), np.zeros(3))
     c1 = tn.first_order_coefficient(A, B, psi0, tn.op_on(tn.Z, 0, 3), 2.0)
     assert abs(c1) > 5e-3, c1
+
+
+def test_small_c1_of_real_states_is_specific_to_N3_t2() -> None:
+    """実数の積状態で c_1 が小さかったのは、N=3・t=2 がたまたま共通の零点の近くだったため（一般の性質ではない）。
+    (a) 同じ実数の状態でも、時刻を変えると |c_1| の最大は t=2 での値の5倍を超える（t=2 だけが特別に小さい）。
+    (b) N=3 の実数の積状態では、c_1(t) が t = 1.9〜2.2 の間で符号を変える（状態によらない共通の零点）。"""
+    A, B = tn.tfim_parts(3)
+    Z0 = tn.op_on(tn.Z, 0, 3)
+    rng = np.random.default_rng(5)
+    ts = np.linspace(0.05, 6, 120)
+    for _ in range(5):
+        psi0 = _product_state(rng.uniform(0.3, 2.8, 3), np.zeros(3))
+        c = [tn.first_order_coefficient(A, B, psi0, Z0, t) for t in ts]
+        assert max(map(abs, c)) > 5 * abs(tn.first_order_coefficient(A, B, psi0, Z0, 2.0))
+        c_lo = tn.first_order_coefficient(A, B, psi0, Z0, 1.9)
+        c_hi = tn.first_order_coefficient(A, B, psi0, Z0, 2.2)
+        assert c_lo * c_hi < 0, (c_lo, c_hi)
