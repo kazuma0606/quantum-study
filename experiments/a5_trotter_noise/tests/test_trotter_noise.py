@@ -339,3 +339,53 @@ def test_lie_has_cancellation_valley_strang_does_not() -> None:
         assert min(lie) < 0.1, f"1次、p={p}：谷がない（最小の R = {min(lie):.2f}）"
         strang = [_ratio(tn.run_point(3, 2.0, 2, n, p)) for n in range(3, 41)]
         assert min(strang) > 0.9, f"2次、p={p}：打ち消し合いがある（最小の R = {min(strang):.2f}）"
+
+
+# ------------------------------------------------------------------ 大きな N の道具の検証（状態ベクトル・軌跡法・Qiskit Aer）
+def test_large_n_statevector_matches_dense() -> None:
+    """large_n のゲートの形の計算（ZZ は位相、横磁場は1量子ビットの回転）が、密度行列側の行列と一致する。"""
+    import large_n as ln
+
+    for N in (2, 3, 4):
+        A, B = tn.tfim_parts(N)
+        psi0 = np.zeros(2**N, dtype=complex)
+        psi0[0] = 1
+        for order in (1, 2):
+            dense = np.linalg.matrix_power(tn.step_unitary(A, B, 1.3 / 6, order), 6) @ psi0
+            assert np.allclose(ln.trotter_state(N, 1.3, order, 6, psi0), dense)
+        assert np.allclose(ln.exact_state(N, 1.3, psi0), expm(-1j * (A + B) * 1.3) @ psi0)
+
+
+def test_trajectories_match_density_matrix() -> None:
+    """軌跡法の平均が、密度行列の正確な値と統計誤差（4σ）の範囲で一致する（N=3、p=0.02）。"""
+    import large_n as ln
+
+    for order in (1, 2):
+        dm = tn.run_point(3, 2.0, order, 6, 0.02)
+        tr = ln.run_point_large(3, 2.0, order, 6, 0.02, trajectories=3000, seed=order)
+        assert abs(tr.infidelity - dm.infidelity) < 4 * tr.infidelity_sem + 1e-3, (tr.infidelity, dm.infidelity)
+        assert abs(tr.z_noise_part - dm.z_noise_part) < 4 * tr.z_sem + 1e-3, (tr.z_noise_part, dm.z_noise_part)
+
+
+def test_aer_circuit_gives_same_optimum() -> None:
+    """Qiskit Aer の密度行列シミュレータ（実際の回路、雑音は CNOT ごと）でも、不忠実度の最適な n* が
+    こちらの計算（雑音はステップの最後）と同じになる（N=4、p = 0.001, 0.005, 0.02）。"""
+    import aer_check
+    from qiskit_aer import AerSimulator
+    from qiskit_aer.noise import NoiseModel, depolarizing_error
+    from scipy.sparse.linalg import expm_multiply
+
+    N, t = 4, 2.0
+    psi0 = np.zeros(2**N, dtype=complex)
+    psi0[0] = 1
+    exact = expm_multiply(-1j * t * aer_check.hamiltonian(N).to_matrix(sparse=True), psi0)
+    for p in (0.001, 0.005, 0.02):
+        noise = NoiseModel()
+        noise.add_all_qubit_quantum_error(depolarizing_error(p, 2), ["cx"])
+        sim = AerSimulator(method="density_matrix", noise_model=noise)
+        for order in (1, 2):
+            aer = [1 - np.real(np.vdot(exact, np.asarray(sim.run(aer_check.trotter_circuit(N, t, order, n), shots=1)
+                                                          .result().data()["density_matrix"]) @ exact))
+                   for n in range(2, 17)]
+            ours = [tn.run_point(N, t, order, n, p).infidelity for n in range(2, 17)]
+            assert int(np.argmin(aer)) == int(np.argmin(ours)), f"p={p}, 次数{order}：Aer {np.argmin(aer) + 2}、こちら {np.argmin(ours) + 2}"

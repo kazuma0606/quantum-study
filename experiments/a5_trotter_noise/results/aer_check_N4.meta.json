@@ -1,0 +1,25 @@
+{
+  "args": {
+    "qubits": [
+      4
+    ],
+    "ps": [
+      0.001,
+      0.005,
+      0.02
+    ],
+    "orders": [
+      1,
+      2
+    ],
+    "nmin": 2,
+    "nmax": 16,
+    "t": 2.0
+  },
+  "utc": "20261004T111501Z",
+  "elapsed_sec": 0.2,
+  "qiskit": "2.5.2",
+  "qiskit_aer": "0.17.2",
+  "noise": "各 CNOT の後に2量子ビット脱分極（NoiseModel）",
+  "method": "AerSimulator density_matrix"
+}
