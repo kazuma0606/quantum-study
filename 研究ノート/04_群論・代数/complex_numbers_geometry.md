@@ -127,19 +127,54 @@ $$
 
 $U(1)$ の生成子（リー代数）は、$e^{i\theta}$ の $\theta$ に関する微分を $\theta=0$ で取ったもの、つまり単なる「$i$」（虚数単位）そのものです。以前の $\mathfrak{su}(2)$（パウリ行列が生成子）の議論と対応させると、$\mathfrak u(1)$ の生成子はたった1つ、$i$（あるいは行列表現なら $J$）だけです。
 
+**$e^{i\theta}$ から広がる先**：この「単位円の上を回る」$e^{i\theta}$ は、次のような話題すべての出発点になっています。
+
+| 話題 | $e^{i\theta}$ の役割 | 関連するノート・ノートブック |
+|---|---|---|
+| 回転 | $z\mapsto e^{i\theta}z$ が平面の回転 | Part II・IV、[テイラー展開のノートブック](../../notebooks/foundations/00_taylor_series/01_taylor_euler.ipynb) §4 |
+| 微分方程式 | $\frac{d}{d\theta}e^{i\theta}=ie^{i\theta}$（微分すると $90^\circ$ 回る） | [行列の指数関数と交換子のノート](matrix_exponential_commutator_bch_trotter.md) |
+| リー群・リー代数 | $U(1)$ とその生成子 $i$ | この Part |
+| フーリエ変換・波動 | $e^{ikx}$ を基底として関数を分解する | [関数・線形写像・微分・積分のノート](../01_基礎・ベクトル解析/functions_linear_maps_derivatives_integrals.md) Part IX |
+| 量子力学の位相 | 状態の全体の位相 $e^{i\theta}|\psi\rangle$、時間発展 $e^{-iEt/\hbar}$ | [パウリ行列のノート](pauli_matrices_derivation_and_group.md) |
+
+**$\mathbb C$ から $SO(3)$ へ**：絶対値1の複素数が $U(1)\cong S^1$（円周）だったのと同じように、絶対値1の四元数は $S^3$（3次元球面）をなし、それが $SU(2)$ と同じ群になります。さらに $SU(2)$ は、3次元の回転群 $SO(3)$ を「2重に覆う」群です。
+
+$$
+\mathbb C\ \longrightarrow\ \mathbb H\ (\text{四元数})\ \longrightarrow\ SU(2)\cong S^3\ \xrightarrow{\ 2\text{対}1\ }\ SO(3)
+$$
+
+詳しくは、[四元数とパウリ行列のノート](quaternions_pauli_matrices.md)と、[パウリ行列のノート](pauli_matrices_derivation_and_group.md)の Part VII（ブロッホ球の回転と二重被覆）にあります。$U(1)$、$SU(2)$、$SO(3)$ が群の分類のどこにいるかは、[古典群と例外型リー群のノート](classical_and_exceptional_lie_groups.md)にまとめました。
+
 ---
 
 # Part VII：この先の学び方（Needhamの本について）
 
-Tristan Needham著『Visual Complex Analysis』（Oxford University Press）という本が、今回の視点（複素数を幾何学的対象として捉える）を出発点に据えた、標準的な複素解析の教科書とはかなり異質な構成になっています。第1章のタイトルがまさに「Geometry and Complex Arithmetic」で、以降も
+Tristan Needham著『Visual Complex Analysis』（Oxford University Press）という本が、今回の視点（複素数を幾何学的対象として捉える）を出発点に据えた、標準的な複素解析の教科書とはかなり異質な構成になっています。出版社自身が「計算よりも幾何学を説明の中心に置く」と紹介していて、2023年の25周年版では、多くの図に説明が追加されています。章立ては次のとおりです。
 
-- Complex Functions as Transformations（複素関数を変換として捉える）
-- Möbius Transformations and Inversion
-- Differentiation: The Amplitwist Concept（微分を「拡大＋回転」として捉える）
+| 章 | タイトル | 内容 |
+|---|---|---|
+| 1 | Geometry and Complex Arithmetic | 複素数の演算を幾何学として見る（このノートの Part I〜IV） |
+| 2 | Complex Functions as Transformations | 複素関数を、平面を変形する写像として見る |
+| 3 | Möbius Transformations and Inversion | メビウス変換と反転 |
+| 4 | Differentiation: The Amplitwist Concept | 微分を「拡大（amplification）＋回転（twist）」として捉える |
+| 5 | Further Geometry of Differentiation | 微分の幾何学の続き |
+| 6 | Non-Euclidean Geometry | 非ユークリッド幾何 |
+| 7 | Winding Numbers and Topology | 回転数とトポロジー |
+| 8 | Complex Integration: Cauchy's Theorem | 複素積分とコーシーの定理 |
+| 9 | Cauchy's Formula and Its Applications | コーシーの積分公式とその応用 |
+| 10〜12 | Vector Fields / Flows and Harmonic Functions | ベクトル場・流れ・調和関数 |
 
-という、計算よりも幾何学的直感を軸にした構成が続きます。
+第4章の「微分＝拡大＋回転」は、[関数・線形写像・微分・積分のノート](../01_基礎・ベクトル解析/functions_linear_maps_derivatives_integrals.md)の Part III §5（ヤコビ行列は点ごとの局所的なゆがみ）の、複素関数の場合にあたります（複素数として微分できる関数のヤコビ行列は、いつも $\begin{pmatrix}a&-b\\b&a\end{pmatrix}$ の形、つまり拡大＋回転）。第8・9章は、[べき級数と収束半径のノート](../01_基礎・ベクトル解析/power_series_radius_of_convergence.md)で「複素解析で証明する」と予告した事実の証明にあたります。
 
-日本語で基礎を固めたい場合は、宮地秀樹『複素解析』（日本評論社）のような、複素数平面・極形式から始める入門書を並行して使うと、幾何学的な直感と厳密な理論の両方を補強できます。
+**日本語の本**：Needham で「複素数とは何か」を掴み、日本語の標準的な教科書で厳密な理論を補う、という順番がよいと思われます。
+
+| 本 | 特徴 |
+|---|---|
+| 宮地秀樹『複素解析』（日本評論社、日評ベーシック・シリーズ） | 複素数・複素平面・極形式から始まる。自習書として使いやすい |
+| 出來光夫・澤野嘉宏・野井貴弘『［詳解］複素解析学』 | 複素数平面から体系的に進める。もう少ししっかり複素解析まで進みたいとき |
+| 笠原乾吉『複素解析 1変数解析関数』 | 正則関数からリーマン面、ポアンカレ計量、楕円関数まで。「複素解析の世界そのもの」に興味があるとき |
+
+[学習ロードマップ](../../docs/learning_roadmap.md)の候補17（複素解析）に着手するときの出発点にします。
 
 ---
 
