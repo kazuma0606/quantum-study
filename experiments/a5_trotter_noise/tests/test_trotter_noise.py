@@ -243,3 +243,48 @@ def test_lie_local_optimum_is_a_cancellation_point() -> None:
         tp, npart = best.z_trotter_part, best.z_noise_part
         assert tp * npart < 0, best
         assert best.local_err < 0.3 * min(abs(tp), abs(npart)), best
+
+
+# ------------------------------------------------------------------ 1次の誤差の係数（導出した式の検証）
+def _product_state(thetas, phases) -> np.ndarray:
+    from functools import reduce
+    return reduce(np.kron, [np.array([np.cos(a / 2), np.exp(1j * b) * np.sin(a / 2)]) for a, b in zip(thetas, phases)])
+
+
+def test_first_order_coefficient_formula() -> None:
+    """導出した c_1 の式が、数値の (誤差) × n / t と一致する（ランダムな積状態と観測量、N=2〜4、n=2000）。"""
+    rng = np.random.default_rng(21)
+    for _ in range(12):
+        N = int(rng.integers(2, 5))
+        A, B = tn.tfim_parts(N, J=float(rng.uniform(0.5, 1.5)), g=float(rng.uniform(0.5, 1.5)))
+        psi0 = _product_state(rng.uniform(0.2, 2.9, N), rng.uniform(0, 2 * np.pi, N))
+        O = tn.op_on([tn.Z, tn.X][int(rng.integers(2))], int(rng.integers(N)), N)
+        t, n = float(rng.uniform(0.5, 2.5)), 2000
+        exact = expm(-1j * (A + B) * t) @ psi0
+        psi = np.linalg.matrix_power(tn.step_unitary(A, B, t / n, 1), n) @ psi0
+        err = np.real(psi.conj() @ O @ psi) - np.real(exact.conj() @ O @ exact)
+        c1 = tn.first_order_coefficient(A, B, psi0, O, t)
+        assert abs(err * n / t - c1) < 0.02 + 0.02 * abs(c1), f"式と合わない：N={N}, t={t:.3f}, 数値 {err * n / t:.4f}, 式 {c1:.4f}"
+
+
+def test_layden_condition_gives_zero_first_order() -> None:
+    """O が A（ZZ の項）と交換し、初期状態が A の固有状態（計算基底の状態）なら c_1 = 0（乱数で反例を探す）。"""
+    rng = np.random.default_rng(23)
+    for _ in range(40):
+        N = int(rng.integers(2, 5))
+        A, B = tn.tfim_parts(N, J=float(rng.uniform(0.3, 2)), g=float(rng.uniform(0.3, 2)))
+        psi0 = np.zeros(2**N, dtype=complex)
+        psi0[int(rng.integers(2**N))] = 1
+        O = tn.op_on(tn.Z, int(rng.integers(N)), N)
+        assert abs(tn.first_order_coefficient(A, B, psi0, O, float(rng.uniform(0.3, 3)))) < 1e-12
+
+
+def test_time_reversal_hypothesis_is_false() -> None:
+    """反例の固定：「ハミルトニアン・初期状態・観測量がすべて実数なら c_1 = 0」は成り立たない。
+    実数の積状態から <Z_0> を測ると、c_1 は小さいが 0 ではない（N=3、t=2、角度は乱数の種 5）。
+    以前この仮説が成り立つように見えたのは、c_1 が小さく、n ≤ 160 では δ² の項がまだ勝っていたため。"""
+    A, B = tn.tfim_parts(3)
+    rng = np.random.default_rng(5)
+    psi0 = _product_state(rng.uniform(0.3, 2.8, 3), np.zeros(3))
+    c1 = tn.first_order_coefficient(A, B, psi0, tn.op_on(tn.Z, 0, 3), 2.0)
+    assert abs(c1) > 5e-3, c1

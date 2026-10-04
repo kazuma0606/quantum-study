@@ -147,3 +147,19 @@ def run_point(n_qubits: int, t: float, order: int, n_steps: int, p: float,
     return Result(n_qubits, t, J, g, order, n_steps, p, 2 * (n_qubits - 1) * n_steps,
                   1 - fid, abs(z - z_exact), trotter_err, trotter_bound(A, B, t, n_steps, order),
                   z_exact, z_clean - z_exact, z - z_clean)
+
+
+# ------------------------------------------------------------------------------ 1次の誤差の係数
+def first_order_coefficient(A: Matrix, B: Matrix, psi0: Matrix, O: Matrix, t: float) -> float:
+    """1次の分解 U_1(δ)^n（δ = t/n）で測った <O> の誤差の、δ について1次の係数 c_1：
+        <O>_{U_1^n} - <O>_exact = c_1 δ + O(δ²)
+        c_1 = -(i/2) ( <ψ(t)|[A, O]|ψ(t)> - <ψ_0|[A, O(t)]|ψ_0> ),   O(t) = e^{iHt} O e^{-iHt}
+    導出：U_1^n = e^{-iBδ/2} U_2^n e^{iBδ/2}（U_2 はストラング分解で、誤差は O(δ²)）。両端の e^{±iBδ/2} を
+    δ の1次まで展開し、B(t) - B = -(A(t) - A)（H = A + B は保存）を使う。
+    O が A と交換すれば第1項が、ψ_0 が A の固有状態なら第2項が消える（両方満たせば c_1 = 0。Layden の条件）。"""
+    U = expm(-1j * (A + B) * t)
+    psit = U @ psi0
+    Ot = U.conj().T @ O @ U
+    term_end = psit.conj() @ (A @ O - O @ A) @ psit
+    term_start = psi0.conj() @ (A @ Ot - Ot @ A) @ psi0
+    return float(np.real(-0.5j * (term_end - term_start)))
