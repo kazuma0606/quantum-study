@@ -322,3 +322,20 @@ def test_exponent_depends_on_metric() -> None:
     got = {(r["metric"], r["order"]): r["s_model"] for r in res}
     for key in [("trace_dist", 1), ("trace_dist", 2), ("infidelity", 1), ("infidelity", 2), ("local_err", 1)]:
         assert abs(got[key] - exponents.EXPECTED[key]) < 0.04, f"{key}: {got[key]} と予想 {exponents.EXPECTED[key]:.3f}"
+
+
+# ------------------------------------------------------------------ 打ち消し合いの領域
+def _ratio(r) -> float:
+    d = abs(r.z_trotter_part) + abs(r.z_noise_part)
+    return abs(r.z_trotter_part + r.z_noise_part) / d if d > 0 else 1.0
+
+
+def test_lie_has_cancellation_valley_strang_does_not() -> None:
+    """局所的な量 <Z_0>（N=3、t=2）で：
+    1次では、どの p でも打ち消し合いの谷（R < 0.1 となる n）がある。
+    2次では、n ≥ 3 で打ち消し合いが起きない（R > 0.9、トロッター部分と雑音部分が同じ符号）。"""
+    for p in (2e-4, 1e-3, 5e-3, 2e-2):
+        lie = [_ratio(tn.run_point(3, 2.0, 1, n, p)) for n in range(1, 41)]
+        assert min(lie) < 0.1, f"1次、p={p}：谷がない（最小の R = {min(lie):.2f}）"
+        strang = [_ratio(tn.run_point(3, 2.0, 2, n, p)) for n in range(3, 41)]
+        assert min(strang) > 0.9, f"2次、p={p}：打ち消し合いがある（最小の R = {min(strang):.2f}）"
