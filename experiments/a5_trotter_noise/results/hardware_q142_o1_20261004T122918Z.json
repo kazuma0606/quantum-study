@@ -1,0 +1,103 @@
+{
+  "args": {
+    "N": 2,
+    "order": 1,
+    "ns": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "t": 2.0,
+    "shots": 8000,
+    "backend": "ibm_fez",
+    "tag": "q142_o1",
+    "dd": null,
+    "twirl": false,
+    "qubits": [
+      142,
+      143
+    ],
+    "dry_run": false
+  },
+  "backend": "ibm_fez",
+  "qubits": [
+    142,
+    143
+  ],
+  "job_id": "db14d8hb694s73drp710",
+  "submitted_utc": "2026-10-04T12:29:18.292118+00:00",
+  "finished_utc": "2026-10-04T12:30:03.717903+00:00",
+  "usage_quantum_seconds": 36,
+  "readout_e0": 0.005125000000000046,
+  "readout_e1": 0.008125000000000049,
+  "calibration": {
+    "pair_errors": {
+      "142-143": 0.001544829778008877
+    },
+    "readout_errors": {
+      "142": 0.0069580078125,
+      "143": 0.0057373046875
+    },
+    "t1_us": {
+      "142": 156.13082232960775,
+      "143": 178.10978621531535
+    },
+    "t2_us": {
+      "142": 218.5908769767486,
+      "143": 153.20047043496663
+    }
+  },
+  "sampler_options": {
+    "dynamical_decoupling": null,
+    "twirling_gates": false
+  },
+  "two_qubit_gates": {
+    "trotter_N2_o1_n1": 2,
+    "trotter_N2_o1_n2": 4,
+    "trotter_N2_o1_n3": 6,
+    "trotter_N2_o1_n4": 8,
+    "trotter_N2_o1_n5": 10,
+    "trotter_N2_o1_n6": 12,
+    "trotter_N2_o1_n7": 14,
+    "trotter_N2_o1_n8": 16,
+    "trotter_N2_o1_n9": 18,
+    "trotter_N2_o1_n10": 20,
+    "trotter_N2_o1_n11": 22,
+    "trotter_N2_o1_n12": 24,
+    "trotter_N2_o1_n13": 26,
+    "trotter_N2_o1_n14": 28,
+    "cal_0": 0,
+    "cal_1": 0
+  },
+  "depths": {
+    "trotter_N2_o1_n1": 16,
+    "trotter_N2_o1_n2": 28,
+    "trotter_N2_o1_n3": 40,
+    "trotter_N2_o1_n4": 52,
+    "trotter_N2_o1_n5": 64,
+    "trotter_N2_o1_n6": 76,
+    "trotter_N2_o1_n7": 88,
+    "trotter_N2_o1_n8": 100,
+    "trotter_N2_o1_n9": 112,
+    "trotter_N2_o1_n10": 124,
+    "trotter_N2_o1_n11": 136,
+    "trotter_N2_o1_n12": 148,
+    "trotter_N2_o1_n13": 160,
+    "trotter_N2_o1_n14": 172,
+    "cal_0": 1,
+    "cal_1": 2
+  },
+  "qiskit": "2.5.2",
+  "qiskit_ibm_runtime": "0.50.0"
+}

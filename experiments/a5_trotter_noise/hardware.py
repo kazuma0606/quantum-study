@@ -101,12 +101,14 @@ def main() -> None:
     ap.add_argument("--tag", default="pilot")
     ap.add_argument("--dd", default=None, help="動的デカップリングの系列（XY4、XpXm など）。省略で使わない")
     ap.add_argument("--twirl", action="store_true", help="2量子ビットゲートのパウリ・ツイリングを使う")
+    ap.add_argument("--qubits", type=int, nargs="+", default=None, help="使う物理量子ビットの鎖（省略で CZ 誤差の和が最小の鎖）")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
     service = QiskitRuntimeService(instance="open-instance")
     backend = service.backend(args.backend) if args.backend else service.least_busy(operational=True, simulator=False)
-    chain = best_chain(backend, args.N)
+    chain = args.qubits if args.qubits else best_chain(backend, args.N)
+    assert len(chain) == args.N, f"--qubits の数 {len(chain)} が N={args.N} と合わない"
     pm = generate_preset_pass_manager(optimization_level=1, backend=backend, initial_layout=chain)
 
     logical = [measured_trotter_circuit(args.N, args.t, args.order, n) for n in args.ns] + calibration_circuits(args.N)
