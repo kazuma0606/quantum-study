@@ -99,6 +99,12 @@ quantum/
 |---|---|
 | [normalizing_flows_introduction](研究ノート/06_確率・統計/normalizing_flows_introduction.md) | 正規化フロー入門（確率密度の変数変換、基底分布の選び方、MCMC・拡散モデル・最適輸送との関係） |
 
+### 07_数値計算
+
+| ノート | 内容 |
+|---|---|
+| [vandermonde_finite_difference_spectral](研究ノート/07_数値計算/vandermonde_finite_difference_spectral.md) | ヴァンデルモンド行列と、関数を行列にする2つの方法（差分法・スペクトル法、クランク・ニコルソン法とトーマス法、スレーター行列式・ラフリン波動関数） |
+
 学習の候補と今後の計画は、[docs/learning_roadmap.md](docs/learning_roadmap.md) と [docs/roadmap.md](docs/roadmap.md) にあります。
 
 ### 図・動画・目次の入った長編ノート
