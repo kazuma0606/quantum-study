@@ -121,6 +121,7 @@ class Result:
     z_trotter_part: float = 0.0  # <Z_0>（雑音なしのトロッター積）- z_exact（符号つき）
     z_noise_part: float = 0.0    # <Z_0>（雑音あり）- <Z_0>（雑音なし）（符号つき）
     # local_err = |z_trotter_part + z_noise_part|。2つの符号が逆だと打ち消し合う
+    trace_dist: float = 0.0    # トレース距離 ½‖ρ - |ψ_exact><ψ_exact|‖_1（状態全体、距離として）
 
 
 def run_point(n_qubits: int, t: float, order: int, n_steps: int, p: float,
@@ -146,7 +147,8 @@ def run_point(n_qubits: int, t: float, order: int, n_steps: int, p: float,
     trotter_err = opnorm(U_n - U_exact)
     return Result(n_qubits, t, J, g, order, n_steps, p, 2 * (n_qubits - 1) * n_steps,
                   1 - fid, abs(z - z_exact), trotter_err, trotter_bound(A, B, t, n_steps, order),
-                  z_exact, z_clean - z_exact, z - z_clean)
+                  z_exact, z_clean - z_exact, z - z_clean,
+                  0.5 * float(np.sum(np.abs(np.linalg.eigvalsh(rho - np.outer(psi_exact, psi_exact.conj()))))))
 
 
 # ------------------------------------------------------------------------------ 1次の誤差の係数

@@ -305,3 +305,20 @@ def test_small_c1_of_real_states_is_specific_to_N3_t2() -> None:
         c_lo = tn.first_order_coefficient(A, B, psi0, Z0, 1.9)
         c_hi = tn.first_order_coefficient(A, B, psi0, Z0, 2.2)
         assert c_lo * c_hi < 0, (c_lo, c_hi)
+
+
+# ------------------------------------------------------------------ 指標ごとの指数 n* ∝ p^s
+def test_exponent_depends_on_metric() -> None:
+    """モデルの n*（連続的な予測）の p に対する指数が、指標と次数で予想どおりに変わる（N=2）：
+    トレース距離 -1/(k+1)、不忠実度 -1/(2k+1)、局所的な量（Layden の条件で q=2）-1/3。許容幅 0.04。"""
+    from dataclasses import asdict
+
+    import analyze
+    import exponents
+
+    ps = [0.0005, 0.001, 0.002, 0.005, 0.01, 0.02]
+    rows = [asdict(tn.run_point(2, 2.0, order, n, p)) for order in (1, 2) for p in [0.0] + ps for n in range(1, 61)]
+    res = exponents.exponents(analyze.analyze(rows))
+    got = {(r["metric"], r["order"]): r["s_model"] for r in res}
+    for key in [("trace_dist", 1), ("trace_dist", 2), ("infidelity", 1), ("infidelity", 2), ("local_err", 1)]:
+        assert abs(got[key] - exponents.EXPECTED[key]) < 0.04, f"{key}: {got[key]} と予想 {exponents.EXPECTED[key]:.3f}"

@@ -20,7 +20,7 @@ from pathlib import Path
 
 import numpy as np
 
-METRICS = ("infidelity", "local_err")
+METRICS = ("infidelity", "trace_dist", "local_err")
 
 
 def load(path: Path) -> list[dict]:
