@@ -99,6 +99,8 @@ def main() -> None:
     ap.add_argument("--shots", type=int, default=4000)
     ap.add_argument("--backend", default=None, help="省略すると、待ちの少ない実機を選ぶ")
     ap.add_argument("--tag", default="pilot")
+    ap.add_argument("--dd", default=None, help="動的デカップリングの系列（XY4、XpXm など）。省略で使わない")
+    ap.add_argument("--twirl", action="store_true", help="2量子ビットゲートのパウリ・ツイリングを使う")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -129,6 +131,13 @@ def main() -> None:
         return
 
     sampler = SamplerV2(mode=backend)
+    if args.dd:
+        sampler.options.dynamical_decoupling.enable = True
+        sampler.options.dynamical_decoupling.sequence_type = args.dd
+    if args.twirl:
+        sampler.options.twirling.enable_gates = True
+        sampler.options.twirling.num_randomizations = 32
+        sampler.options.twirling.shots_per_randomization = -(-args.shots // 32)   # 切り上げ（32 × これ ≥ shots が必要）
     submitted = datetime.now(timezone.utc)
     job = sampler.run(isa, shots=args.shots)
     print(f"投入：ジョブ {job.job_id()}（{submitted.astimezone(JST):%Y-%m-%d %H:%M:%S} JST）", flush=True)
@@ -161,6 +170,7 @@ def main() -> None:
         "args": vars(args), "backend": backend.name, "qubits": chain, "job_id": job.job_id(),
         "submitted_utc": submitted.isoformat(), "finished_utc": datetime.now(timezone.utc).isoformat(),
         "usage_quantum_seconds": usage, "readout_e0": e0, "readout_e1": e1, "calibration": calib,
+        "sampler_options": {"dynamical_decoupling": args.dd, "twirling_gates": args.twirl},
         "two_qubit_gates": {qc.name: qc.count_ops().get(gate, 0) for qc in isa},
         "depths": {qc.name: qc.depth() for qc in isa},
         "qiskit": qiskit.__version__, "qiskit_ibm_runtime": qiskit_ibm_runtime.__version__,
