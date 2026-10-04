@@ -22,6 +22,8 @@ $N$ スピンの横磁場イジング模型（開いた鎖）$H=\sum_iZ_iZ_{i+1}
 | `analyze.py` | CSV から実際の $n^*$ とモデルの予測を求め、`*_optimum.csv` に出力（指標：`infidelity`・`trace_dist`・`local_err`） |
 | `large_n.py` | 大きな $N$ 用の状態ベクトル計算（ZZ は位相、横磁場は1量子ビットの回転、正確な時間発展は `expm_multiply`、雑音は軌跡法）。$N=20$ で雑音なし1点が約40秒 |
 | `aer_check.py` | Qiskit Aer の密度行列シミュレータで、実際の回路（CNOT・RZ・CNOT、雑音は CNOT ごと）から最適な $n^*$ を求める（独立した検証） |
+| `summary_figures.py` | まとめの記事用の図（誤差の曲線、$n^*$ と $p$）を既存の CSV から作る |
+| `article_draft.md` | まとめの記事の下書き（技術ブログ・研究会の発表向け） |
 | `cancellation_map.py` | 局所的な量の打ち消し合いの度合いを $(n,p)$ の平面で計算し、CSV と図（`figures/`）に出力 |
 | `exponents.py` | `analyze` の結果から、$n^*\propto p^s$ の指数 $s$ を指標・次数ごとに当てはめ、`*_exponents.csv` に出力 |
 | `tests/test_trotter_noise.py` | 反例探し（下の表） |
