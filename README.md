@@ -75,6 +75,7 @@ quantum/
 | [unitary_matrix_full_decomposition](研究ノート/04_群論・代数/unitary_matrix_full_decomposition.md) | ユニタリ行列の絶対値・位相分離 |
 | [unitary_matrix_phase_separation_derivation](研究ノート/04_群論・代数/unitary_matrix_phase_separation_derivation.md) | ユニタリ行列の位相分離パラメータ化 |
 | [det_exp_trace_proof](研究ノート/04_群論・代数/det_exp_trace_proof.md) | $\det(e^A)=e^{\operatorname{tr}A}$ の証明 |
+| [matrix_exponential_commutator_bch_trotter](研究ノート/04_群論・代数/matrix_exponential_commutator_bch_trotter.md) | 行列の指数関数と交換子（ジョルダン標準形・BCH の公式・トロッター分解、具体例での机上確認） |
 | [generalized_pauli_and_sun_generators](研究ノート/04_群論・代数/generalized_pauli_and_sun_generators.md) | 一般化パウリ行列と $SU(n)$ の生成子 |
 | [classical_and_exceptional_lie_groups](研究ノート/04_群論・代数/classical_and_exceptional_lie_groups.md) | 古典群と例外型リー群（分類の全体像） |
 | [quaternions_pauli_matrices](研究ノート/04_群論・代数/quaternions_pauli_matrices.md) | 四元数とパウリ行列の対応 |

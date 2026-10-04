@@ -20,5 +20,6 @@ uv run jupyter notebook notebooks/foundations/00_taylor_series
 
 - [関数・線形写像・微分・積分のノート](../../../研究ノート/01_基礎・ベクトル解析/functions_linear_maps_derivatives_integrals.md)
 - [複素数の幾何学のノート](../../../研究ノート/04_群論・代数/complex_numbers_geometry.md)
+- [行列の指数関数と交換子のノート](../../../研究ノート/04_群論・代数/matrix_exponential_commutator_bch_trotter.md)（2冊目の §3・§6・§7 の導出。ジョルダン標準形、BCH の公式、トロッター分解とストラング分解）
 - [det(e^A) = e^{tr A} の証明](../../../研究ノート/04_群論・代数/det_exp_trace_proof.md)、Lean の証明は [DetExpTrace.lean](../../../lean4/QuantumStudy/DetExpTrace.lean)・[Schur.lean](../../../lean4/QuantumStudy/Schur.lean)
 - [多様体入門のノート](../../../研究ノート/03_多様体・微分形式・トポロジー/manifolds_introduction.md)（座標特異点）
