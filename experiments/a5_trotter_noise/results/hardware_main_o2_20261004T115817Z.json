@@ -1,0 +1,93 @@
+{
+  "args": {
+    "N": 2,
+    "order": 2,
+    "ns": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "t": 2.0,
+    "shots": 15000,
+    "backend": "ibm_fez",
+    "tag": "main_o2",
+    "dry_run": false
+  },
+  "backend": "ibm_fez",
+  "qubits": [
+    22,
+    23
+  ],
+  "job_id": "db13un9b694s73drokvg",
+  "submitted_utc": "2026-10-04T11:58:17.559505+00:00",
+  "finished_utc": "2026-10-04T12:00:24.457593+00:00",
+  "usage_quantum_seconds": 65,
+  "readout_e0": 0.0021333333333333204,
+  "readout_e1": 0.006866666666666688,
+  "calibration": {
+    "pair_errors": {
+      "22-23": 0.0015041790342229244
+    },
+    "readout_errors": {
+      "22": 0.0048828125,
+      "23": 0.0052490234375
+    },
+    "t1_us": {
+      "22": 53.085545467527595,
+      "23": 77.26873800096142
+    },
+    "t2_us": {
+      "22": 49.83184275295703,
+      "23": 67.82676166525988
+    }
+  },
+  "two_qubit_gates": {
+    "trotter_N2_o2_n1": 2,
+    "trotter_N2_o2_n2": 4,
+    "trotter_N2_o2_n3": 6,
+    "trotter_N2_o2_n4": 8,
+    "trotter_N2_o2_n5": 10,
+    "trotter_N2_o2_n6": 12,
+    "trotter_N2_o2_n7": 14,
+    "trotter_N2_o2_n8": 16,
+    "trotter_N2_o2_n9": 18,
+    "trotter_N2_o2_n10": 20,
+    "trotter_N2_o2_n11": 22,
+    "trotter_N2_o2_n12": 24,
+    "trotter_N2_o2_n13": 26,
+    "trotter_N2_o2_n14": 28,
+    "cal_0": 0,
+    "cal_1": 0
+  },
+  "depths": {
+    "trotter_N2_o2_n1": 18,
+    "trotter_N2_o2_n2": 30,
+    "trotter_N2_o2_n3": 42,
+    "trotter_N2_o2_n4": 54,
+    "trotter_N2_o2_n5": 66,
+    "trotter_N2_o2_n6": 78,
+    "trotter_N2_o2_n7": 90,
+    "trotter_N2_o2_n8": 102,
+    "trotter_N2_o2_n9": 114,
+    "trotter_N2_o2_n10": 126,
+    "trotter_N2_o2_n11": 138,
+    "trotter_N2_o2_n12": 150,
+    "trotter_N2_o2_n13": 162,
+    "trotter_N2_o2_n14": 174,
+    "cal_0": 1,
+    "cal_1": 2
+  },
+  "qiskit": "2.5.2",
+  "qiskit_ibm_runtime": "0.50.0"
+}

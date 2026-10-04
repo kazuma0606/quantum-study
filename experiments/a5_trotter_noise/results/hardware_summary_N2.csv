@@ -1,0 +1,3 @@
+N,order,backend,job_id,usage_quantum_seconds,p_calibration_cz,p_eff_fit,p_eff_over_p_cal,n_star_hw,err_min_hw,err_min_sem,n_star_sim_cal,n_star_sim_eff
+2,1,ibm_fez,db13turid5ic73eqjnng,65,0.0015041790342229244,0.016,10.64,10,0.08356657887740762,0.00806834141550254,14,9
+2,2,ibm_fez,db13un9b694s73drokvg,65,0.0015041790342229244,0.003,1.99,6,0.00038485663077075793,0.007887713065809135,6,5
