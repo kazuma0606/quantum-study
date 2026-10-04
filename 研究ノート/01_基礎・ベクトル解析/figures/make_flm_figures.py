@@ -14,6 +14,7 @@
     flm07_matrix_exponential.png     Part VIII 行列指数関数：局所と大域、det e^{tA} = e^{t tr A}
     flm08_norms.png                  Part IX ノルムの取り方と、微分が連続でないこと
     flm09_inner_product_fourier.png  Part IX 内積で変わる勾配、フーリエ級数、パーセバルの等式
+    flm10_local_distortion.png       Part III §5 ヤコビ行列は点ごとの局所的なゆがみ（小さな円 → 楕円、|det J| は面積の倍率）
 
 各図は、描く値が本文の主張と一致することを assert で確認してから保存する。
 """
@@ -508,6 +509,66 @@ def flm09():
     plt.close(fig)
 
 
+# ------------------------------------------------------------------------------------- flm10
+def flm10():
+    """極座標の写像で、点ごとのヤコビ行列が小さな円を楕円に写す様子（局所的なゆがみ）。"""
+    def F(r, th):
+        return np.array([r * np.cos(th), r * np.sin(th)])
+
+    def J(r, th):
+        return np.array([[np.cos(th), -r * np.sin(th)], [np.sin(th), r * np.cos(th)]])
+
+    rho = 0.12
+    ang = np.linspace(0, 2 * np.pi, 120)
+    points = [(0.0, 2.3), (0.3, 0.35), (0.7, 0.9), (1.2, 0.4), (1.0, 1.9), (1.5, 2.7), (1.55, 1.3)]
+    cols = plt.cm.viridis(np.linspace(0.1, 0.85, len(points)))
+
+    fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.2))
+    ax0, ax1 = axes
+    for r in np.linspace(0, 1.8, 7):
+        ths = np.linspace(0, np.pi, 100)
+        ax0.plot([r] * len(ths), ths, color="#ddd", lw=0.8)
+        P = F(r, ths)
+        ax1.plot(P[0], P[1], color="#ddd", lw=0.8)
+    for th in np.linspace(0, np.pi, 7):
+        rs = np.linspace(0, 1.8, 50)
+        ax0.plot(rs, [th] * len(rs), color="#ddd", lw=0.8)
+        P = F(rs, th)
+        ax1.plot(P[0], P[1], color="#ddd", lw=0.8)
+
+    for (r0, th0), col in zip(points, cols):
+        circ = np.stack([r0 + rho * np.cos(ang), th0 + rho * np.sin(ang)])
+        ax0.plot(circ[0], circ[1], color=col, lw=2)
+        ax0.plot(r0, th0, "o", color=col, ms=4)
+        Jp = J(r0, th0)
+        img_true = F(circ[0], circ[1])                                     # 写像そのものの像
+        img_lin = F(r0, th0)[:, None] + Jp @ (circ - np.array([[r0], [th0]]))   # 1次の近似（楕円）
+        ax1.plot(img_true[0], img_true[1], color=col, lw=2)
+        ax1.plot(img_lin[0], img_lin[1], color=col, lw=1, ls="--")
+        # 楕円の半軸は J の特異値：動径方向に 1 倍、円周方向に r 倍。面積の比は |det J| = r
+        sv = np.linalg.svd(Jp, compute_uv=False)
+        assert np.allclose(sorted(sv), sorted([1.0, r0]))
+        assert np.isclose(abs(np.linalg.det(Jp)), r0)
+        ratio = shoelace_area(img_lin.T) / shoelace_area(circ.T)
+        assert np.isclose(ratio, r0, atol=1e-3)
+        ax1.annotate(f"$|\\det J|={r0:g}$", F(r0 + 0.2 + 0.15 * r0, th0), color=col, fontsize=10, ha="center", va="center")
+    ax0.set_xlabel("$r$")
+    ax0.set_ylabel("$\\theta$")
+    ax0.set_xlim(-0.2, 1.9)
+    ax0.set_ylim(-0.2, np.pi + 0.2)
+    ax0.set_aspect("equal")
+    ax0.set_title("(a) $(r,\\theta)$ 平面：同じ大きさの小さな円", fontsize=11)
+    ax1.set_xlabel("$x$")
+    ax1.set_ylabel("$y$")
+    ax1.set_aspect("equal")
+    ax1.set_xlim(-1.9, 1.9)
+    ax1.set_ylim(-0.3, 2.15)
+    ax1.set_title("(b) $(x,y)$ 平面：点ごとに違う楕円に写る（破線は $J$ による1次の近似）", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "flm10_local_distortion.png", dpi=150)
+    plt.close(fig)
+
+
 def arrow(ax, p, v, color, lw=2.5):
     ax.add_patch(FancyArrowPatch(p, p + v, arrowstyle="-|>", mutation_scale=16, color=color, lw=lw))
 
@@ -518,7 +579,7 @@ def shoelace_area(Pts):
 
 
 FIGS = dict(flm01=flm01, flm02=flm02, flm03=flm03, flm04=flm04, flm05=flm05, flm06=flm06, flm07=flm07,
-            flm08=flm08, flm09=flm09)
+            flm08=flm08, flm09=flm09, flm10=flm10)
 
 if __name__ == "__main__":
     names = [a for a in sys.argv[1:] if a in FIGS] or list(FIGS)
