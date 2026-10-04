@@ -2,3 +2,4 @@
 import QuantumStudy.Pauli
 import QuantumStudy.DetExpTrace
 import QuantumStudy.Schur
+import QuantumStudy.Telescoping
