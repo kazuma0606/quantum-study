@@ -93,6 +93,12 @@ quantum/
 | [hydrogen_textbook_notation](研究ノート/05_量子力学/hydrogen_textbook_notation.md) | 水素原子（教科書の記法に沿った導出） |
 | [水素原子_変数分離とルジャンドルラゲール陪関数](研究ノート/05_量子力学/水素原子_変数分離とルジャンドルラゲール陪関数.md) | 水素原子（`hydrogen_atom_legendre_laguerre` の日本語版） |
 
+### 06_確率・統計
+
+| ノート | 内容 |
+|---|---|
+| [normalizing_flows_introduction](研究ノート/06_確率・統計/normalizing_flows_introduction.md) | 正規化フロー入門（確率密度の変数変換、基底分布の選び方、MCMC・拡散モデル・最適輸送との関係） |
+
 学習の候補と今後の計画は、[docs/learning_roadmap.md](docs/learning_roadmap.md) と [docs/roadmap.md](docs/roadmap.md) にあります。
 
 ### 図・動画・目次の入った長編ノート
