@@ -42,6 +42,7 @@ quantum/
 | [grad_div_rot_identities_full_derivation](研究ノート/01_基礎・ベクトル解析/grad_div_rot_identities_full_derivation.md) | grad・div・rot の恒等式の、途中式を省略しない証明 |
 | [lagrange_multipliers](研究ノート/01_基礎・ベクトル解析/lagrange_multipliers.md) | ラグランジュの未定乗数法（なぜ勾配が平行になるのか） |
 | [nonlinear_laplacian_p_laplacian](研究ノート/01_基礎・ベクトル解析/nonlinear_laplacian_p_laplacian.md) | $p$-ラプラシアンの導出と具体例 |
+| [power_series_radius_of_convergence](研究ノート/01_基礎・ベクトル解析/power_series_radius_of_convergence.md) | べき級数と収束半径（複素平面の特異点、解析接続と $\zeta(-1)=-\frac1{12}$、$e^{-1/x^2}$） |
 
 ### 02_微分幾何
 
