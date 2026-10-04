@@ -1045,7 +1045,7 @@ Qiskit の `PauliEvolutionGate` は、$e^{-iHt}$ を表すゲートで、分解�
 [ブラケット・経路積分のノート](../05_量子力学/bra_ket_notation_path_integral.md)の Part IV §4 では、$\hat H=\hat p^2/2m+V(\hat x)$ について
 
 $$
-e^{-i\hat H\varepsilon/\hbar}\approx e^{-iV(\hat x)\varepsilon/\hbar}e^{-i\hat p^2\varepsilon/2m\hbar}
+e^{-i\hat H\varepsilon/\hbar}\approx e^{-i\hat p^2\varepsilon/2m\hbar}e^{-iV(\hat x)\varepsilon/\hbar}
 $$
 
 と分けました。$[\hat x,\hat p]\ne0$ なので運動エネルギーと位置エネルギーは交換せず、これは**トロッター分解そのもの**です。時間を $N$ 等分して $N\to\infty$ とする経路積分の極限は、式 (VI-2) の極限にあたります（$\hat p$ のような有界でない演算子では、トロッター・加藤の定理がこれを保証します）。量子コンピュータでの時間発展のシミュレーションと、ファインマンの経路積分は、同じ分解の上に立っています。

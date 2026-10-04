@@ -535,3 +535,88 @@ $$
 $$
 
 3つの公式すべてで、**$\mathbf u\times(\mathbf v$または$\operatorname{rot}\mathbf v)$のような「外積を含む式」を計算すると、$\varepsilon_{ijk}\varepsilon_{klm}$という2つの$\varepsilon$の積が必然的に現れ、それが恒等式によって「内積の差」に自動分解される**、というのが3つの公式に共通する、本当の仕組みでした。「なぜ外積っぽい項が生えてくるのか」という最初の疑問の答えは、まさにこの恒等式そのものにあった、ということになります。
+
+---
+
+# 補足2：これらの公式は、どこで使うのか
+
+3つの公式は、途中式が長いわりに「いつ使うのか」が見えにくいものです。代表的な使い道を、1つずつ見ます。記号 $(\mathbf a\cdot\nabla)\mathbf b$ は、成分が $(\mathbf a\cdot\nabla)b_i=a_j\partial_jb_i=(\operatorname{grad}b_i)\cdot\mathbf a$ のベクトルです。これを使うと、上で証明した公式は
+
+$$
+\operatorname{grad}(\mathbf u\cdot\mathbf v)=(\mathbf v\cdot\nabla)\mathbf u+(\mathbf u\cdot\nabla)\mathbf v+\mathbf u\times\operatorname{rot}\mathbf v+\mathbf v\times\operatorname{rot}\mathbf u
+$$
+
+$$
+\operatorname{div}(\mathbf u\times\mathbf v)=(\operatorname{rot}\mathbf u)\cdot\mathbf v-\mathbf u\cdot(\operatorname{rot}\mathbf v)
+$$
+
+$$
+\operatorname{rot}(\mathbf u\times\mathbf v)=(\mathbf v\cdot\nabla)\mathbf u-(\mathbf u\cdot\nabla)\mathbf v+\mathbf u\,(\operatorname{div}\mathbf v)-\mathbf v\,(\operatorname{div}\mathbf u)
+$$
+
+と書けます（SymPy で3つとも確認済み）。
+
+## 1. $\operatorname{grad}(\mathbf u\cdot\mathbf v)$：流体の移流項とベルヌーイの定理
+
+$\mathbf v=\mathbf u$（流体の速度場）とすると、$\operatorname{grad}|\mathbf u|^2=2(\mathbf u\cdot\nabla)\mathbf u+2\,\mathbf u\times\operatorname{rot}\mathbf u$ なので、
+
+$$
+(\mathbf u\cdot\nabla)\mathbf u=\operatorname{grad}\frac{|\mathbf u|^2}2-\mathbf u\times\boldsymbol\omega,\qquad\boldsymbol\omega=\operatorname{rot}\mathbf u\ (\text{渦度})
+$$
+
+です。左辺は、流体の運動方程式に出てくる**移流項**（流れに乗って運ばれることによる速度の変化）です。
+
+密度 $\rho$ が一定で粘性のない流体の運動方程式（オイラー方程式）$\frac{\partial\mathbf u}{\partial t}+(\mathbf u\cdot\nabla)\mathbf u=-\frac1\rho\operatorname{grad}p$ に入れると
+
+$$
+\frac{\partial\mathbf u}{\partial t}+\operatorname{grad}\Big(\frac{|\mathbf u|^2}2+\frac p\rho\Big)=\mathbf u\times\boldsymbol\omega
+$$
+
+です。
+
+- **流れが時間によらず（$\partial_t\mathbf u=0$）、渦がない（$\boldsymbol\omega=0$）**なら、$\operatorname{grad}\big(\frac{|\mathbf u|^2}2+\frac p\rho\big)=0$ で、$\frac{|\mathbf u|^2}2+\frac p\rho$ はどこでも一定です。これが**ベルヌーイの定理**（速いところは圧力が低い）です。
+- 渦があっても、流線（$\mathbf u$ の方向）に沿って内積を取ると、$(\mathbf u\times\boldsymbol\omega)\cdot\mathbf u=0$ なので、流線に沿っては一定です。
+
+## 2. $\operatorname{div}(\mathbf u\times\mathbf v)$：電磁場のエネルギー保存（ポインティングの定理）
+
+電場 $\mathbf E$ と磁場 $\mathbf H$ の外積 $\mathbf S=\mathbf E\times\mathbf H$（**ポインティング・ベクトル**、電磁場のエネルギーの流れ）の発散は、公式から
+
+$$
+\operatorname{div}(\mathbf E\times\mathbf H)=\mathbf H\cdot\operatorname{rot}\mathbf E-\mathbf E\cdot\operatorname{rot}\mathbf H
+$$
+
+です。マクスウェル方程式 $\operatorname{rot}\mathbf E=-\frac{\partial\mathbf B}{\partial t}$、$\operatorname{rot}\mathbf H=\mathbf J+\frac{\partial\mathbf D}{\partial t}$ を入れ、真空や線形な物質（$\mathbf D=\varepsilon\mathbf E$、$\mathbf B=\mu\mathbf H$）では $\mathbf E\cdot\frac{\partial\mathbf D}{\partial t}=\frac\partial{\partial t}\big(\frac12\mathbf E\cdot\mathbf D\big)$ などとまとめられるので
+
+$$
+\frac{\partial w}{\partial t}+\operatorname{div}\mathbf S=-\mathbf E\cdot\mathbf J,\qquad w=\frac12\big(\mathbf E\cdot\mathbf D+\mathbf H\cdot\mathbf B\big)
+$$
+
+となります。「電磁場のエネルギー密度 $w$ の増え方＋流れ出る量＝電流がする仕事の分だけ減る」という**エネルギー保存の式**で、[正規化フローのノート](../06_確率・統計/normalizing_flows_introduction.md)の Part VI の連続の式に、湧き出し（右辺）が付いた形です。
+
+## 3. $\operatorname{rot}(\mathbf u\times\mathbf v)$：磁力線と渦線は流体に「凍りつく」
+
+**磁気流体の誘導方程式**：電気抵抗のない導電性の流体（プラズマなど）では、磁場が $\frac{\partial\mathbf B}{\partial t}=\operatorname{rot}(\mathbf u\times\mathbf B)$ に従います。公式と $\operatorname{div}\mathbf B=0$ を使うと
+
+$$
+\frac{\partial\mathbf B}{\partial t}+(\mathbf u\cdot\nabla)\mathbf B=(\mathbf B\cdot\nabla)\mathbf u-\mathbf B\,(\operatorname{div}\mathbf u)
+$$
+
+です。左辺は「流れに乗って見たときの磁場の変化」、右辺の $(\mathbf B\cdot\nabla)\mathbf u$ は「流れが磁力線を引き伸ばす効果」です。磁力線は流体と一緒に動き、引き伸ばされると強くなります（**アルヴェーンの定理**。太陽の黒点や、地球の磁場を作るダイナモの基本）。
+
+**渦度方程式**：§1 のオイラー方程式の rot を取ると、勾配の rot は $0$ なので
+
+$$
+\frac{\partial\boldsymbol\omega}{\partial t}=\operatorname{rot}(\mathbf u\times\boldsymbol\omega)
+$$
+
+で、誘導方程式とまったく同じ形です。したがって、粘性のない流体では、**渦線も流体と一緒に動く**（ケルビン・ヘルムホルツの渦定理）ことが、同じ公式から分かります。
+
+## 4. まとめ
+
+| 公式 | 使われる場所 | 物理的な意味 |
+|---|---|---|
+| $\operatorname{grad}(\mathbf u\cdot\mathbf v)$ | 流体の移流項 | ベルヌーイの定理（速いところは圧力が低い） |
+| $\operatorname{div}(\mathbf u\times\mathbf v)$ | ポインティングの定理 | 電磁場のエネルギー保存 |
+| $\operatorname{rot}(\mathbf u\times\mathbf v)$ | 誘導方程式、渦度方程式 | 磁力線・渦線が流体に凍りつく |
+
+量子力学にも、ブラケットや演算子の積に微分が作用する場面（ノルムの保存、エーレンフェストの定理、ヘルマン・ファインマンの定理など）があり、[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)の Part V にまとめました。
