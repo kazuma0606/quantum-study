@@ -11,3 +11,6 @@ wheels/
 
 # Lean (Lake の作業フォルダ。Mathlib を含み数 GB になる)
 .lake/
+
+# Claude Code の個人設定（Skill・サブエージェントの .claude/skills・.claude/agents はコミットする）
+.claude/settings.local.json

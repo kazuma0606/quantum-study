@@ -64,6 +64,21 @@ Pkg.add("Yao")  # 量子回路フレームワーク
 - 1ファイルの検査: `cd lean4 && lake env lean QuantumStudy/Pauli.lean`
 - `lean4/.lake/`（Mathlib を含み約 6.5GB）はコミットしない。新しい環境では `lake exe cache get` で取得する
 
+## 作業の手順（Skill・サブエージェント・tools）
+
+くり返す作業の約束事は `.claude/skills/` の Skill にまとめてある。該当する作業では必ず使う。
+
+| Skill | 使う場面 |
+|---|---|
+| `research-note` | 研究ノートを書く・追記する・直す |
+| `note-figures` | ノート用の図（matplotlib）を作る |
+| `notebook-gen` | ノートブックを生成スクリプトから作る・直す |
+| `quantum-experiment` | シミュレータ・実機（IBM、AWS Braket）で実験する |
+
+サブエージェント（`.claude/agents/`）：`note-reviewer`（ノートの点検、編集しない）、`literature-scout`（先行研究の調査）、`lean-prover`（Lean の証明の試行錯誤）。
+
+補助スクリプトは `tools/`（リンク検査、縦棒の検査、スライダーのチェック、図の書き出しとスクリーンショット、ノートブックの生成スクリプト）。詳細は `tools/README.md`。
+
 ## 関連プロジェクト
 
 ### Favnir (`C:\Users\yoshi\favnir`)
