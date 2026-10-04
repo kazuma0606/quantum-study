@@ -117,6 +117,10 @@ class Result:
     local_err: float           # |<Z_0>_ρ - <Z_0>_exact|（局所的な量）
     trotter_err: float         # 雑音なしの ‖U^n - e^{-iHt}‖
     bound: float               # trotter_bound
+    z_exact: float = 0.0       # <Z_0>（正確な時間発展）
+    z_trotter_part: float = 0.0  # <Z_0>（雑音なしのトロッター積）- z_exact（符号つき）
+    z_noise_part: float = 0.0    # <Z_0>（雑音あり）- <Z_0>（雑音なし）（符号つき）
+    # local_err = |z_trotter_part + z_noise_part|。2つの符号が逆だと打ち消し合う
 
 
 def run_point(n_qubits: int, t: float, order: int, n_steps: int, p: float,
@@ -136,6 +140,10 @@ def run_point(n_qubits: int, t: float, order: int, n_steps: int, p: float,
         rho = noisy_step(rho, U, p, n_qubits)
     fid = float(np.real(psi_exact.conj() @ rho @ psi_exact))
     z = float(np.real(np.trace(Z0 @ rho)))
-    trotter_err = opnorm(np.linalg.matrix_power(U, n_steps) - U_exact)
+    U_n = np.linalg.matrix_power(U, n_steps)
+    psi_clean = U_n @ psi0
+    z_clean = float(np.real(psi_clean.conj() @ Z0 @ psi_clean))
+    trotter_err = opnorm(U_n - U_exact)
     return Result(n_qubits, t, J, g, order, n_steps, p, 2 * (n_qubits - 1) * n_steps,
-                  1 - fid, abs(z - z_exact), trotter_err, trotter_bound(A, B, t, n_steps, order))
+                  1 - fid, abs(z - z_exact), trotter_err, trotter_bound(A, B, t, n_steps, order),
+                  z_exact, z_clean - z_exact, z - z_clean)

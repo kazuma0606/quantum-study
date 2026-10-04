@@ -212,3 +212,34 @@ def test_known_counterexamples_local_observable() -> None:
         for p in (0.01, 0.02):
             r = get[(N, 2, p)]
             assert r["n_star"] == 2 and r["n_star_pred"] > 5, r
+
+
+# ------------------------------------------------------------------ 局所的な量の、符号つきの分解
+def test_local_error_decomposition_identity() -> None:
+    """local_err = |トロッター部分 + 雑音部分|（どちらも符号つき）が、すべての条件で成り立つ。"""
+    for N in (2, 3, 4):
+        for order in (1, 2):
+            for p in (0.0, 0.005, 0.02):
+                for n in (1, 3, 7, 15):
+                    r = tn.run_point(N, 2.0, order, n, p)
+                    assert np.isclose(abs(r.z_trotter_part + r.z_noise_part), r.local_err, atol=1e-12), r
+
+
+def test_noise_does_not_always_shrink_toward_zero() -> None:
+    """反例の固定：「雑音は <Z_0> を必ず 0 に近づける（雑音部分の符号は、雑音なしの値と逆）」は成り立たない。
+    雑音なしの値が 0 に近いと、雑音が同じ向きに押すことがある（例：N=5、2次、p=0.02、n=3）。"""
+    r = tn.run_point(5, 2.0, 2, 3, 0.02)
+    z_clean = r.z_exact + r.z_trotter_part
+    assert z_clean < 0 and r.z_noise_part < 0, r
+
+
+def test_lie_local_optimum_is_a_cancellation_point() -> None:
+    """1次の分解で局所的な量を測ったときの最適な n* は、トロッター部分と雑音部分の符号が逆で、
+    互いの大きさの3割未満まで打ち消し合う点になっている（N=3、p = 0.001, 0.005, 0.02）。
+    つまり、この量の「最小誤差」は綱引きの釣り合いではなく、偶然の打ち消し合いで決まっている。"""
+    for p in (0.001, 0.005, 0.02):
+        rs = [tn.run_point(3, 2.0, 1, n, p) for n in range(1, 31)]
+        best = min(rs, key=lambda r: r.local_err)
+        tp, npart = best.z_trotter_part, best.z_noise_part
+        assert tp * npart < 0, best
+        assert best.local_err < 0.3 * min(abs(tp), abs(npart)), best
