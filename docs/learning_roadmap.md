@@ -201,7 +201,7 @@ $$
 
 - **概要**：微分方程式の解の概念を、微分可能でない関数まで拡張する。
 - **弱解の考え方**：方程式にテスト関数 $h$ を掛けて積分し、部分積分で微分を $h$ の側へ移す。例えば $-u''=f$ は $\int u'h'\,dx=\int fh\,dx$（すべての $h$ について）となり、$u$ は1回微分できれば足りる。折れ線のような関数も「解」として扱える。
-- **接点**：`nonlinear_laplacian_p_laplacian`の$p$-ラプラシアンの解は、一般に弱解として扱われる。有限要素法の理論的な土台でもある。`laplace_beltrami_from_jacobian_matrix` Part IV の式(18)（$\int\langle\operatorname{grad}f,\operatorname{grad}h\rangle\,dV=-\int h\,\Delta f\,dV$ で $\Delta$ を特徴づけたもの）は、この弱い形そのものである。$|x|''=2\delta$（`integration_algebraic_structure_stokes` Part VII の超関数）も同じ考え方。
+- **接点**：`nonlinear_laplacian_p_laplacian`の$p$-ラプラシアンの解は、一般に弱解として扱われる。有限要素法の理論的な土台でもある。`laplace_beltrami_from_jacobian_matrix` Part IV の式 (IV-1)（$\int\langle\operatorname{grad}f,\operatorname{grad}h\rangle\,dV=-\int h\,\Delta f\,dV$ で $\Delta$ を特徴づけたもの）は、この弱い形そのものである。$|x|''=2\delta$（`integration_algebraic_structure_stokes` Part VII の超関数）も同じ考え方。
 
 ### 19. 圏論
 
