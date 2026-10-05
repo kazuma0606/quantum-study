@@ -2,6 +2,7 @@
 
 数なら $e^{a+b}=e^ae^b$ ですが、行列では一般に $e^{A+B}\ne e^Ae^B$ です。このノートでは、そのずれを測る量である**交換子** $[A,B]=AB-BA$ を中心に、行列の指数関数の計算と積の扱いを整理します。
 
+- **Part 0**：行列に代入してよい理由。収束、$\cos A,\sin A$ とオイラーの公式、エルミート行列 $H$ の $e^{-iHt}$ がユニタリになる理由
 - **Part I**：$[A,B]=0$ なら $e^{A+B}=e^Ae^B$（十分条件）と、その逆が「すべての $t$ で」なら成り立つこと、1点だけなら偶然成り立つ反例
 - **Part II**：対角化できない行列の $e^A$（ジョルダン標準形）。Part I の結果を使う
 - **Part III**：交換子と量子力学。パウリ行列の交換子・反交換子と、交換子の図形的な意味（行って戻ると閉じない）
@@ -11,10 +12,11 @@
 - **付録A**：ジョルダン標準形の証明（三角化 → 固有値ごとに分ける → べき零部分を「鎖」で並べる）
 - **付録B**：BCH の公式が交換子だけで書ける理由（$\log(e^Xe^{tY})$ が満たす微分方程式）
 
-**関連ファイル**：数値で確かめるノートブック [02_matrix_exponential.ipynb](../../notebooks/foundations/00_taylor_series/02_matrix_exponential.ipynb)（§3・§6・§7 がこのノートの Part II・I・VI に対応）。図は [figures/make_matrix_exp_commutator_figures.py](figures/make_matrix_exp_commutator_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。行列の指数関数の定義と、写像としての性質は[関数・線形写像・微分・積分のノート](../01_基礎・ベクトル解析/functions_linear_maps_derivatives_integrals.md)の Part VIII、$\det e^A=e^{\operatorname{tr}A}$ は[別のノート](det_exp_trace_proof.md)、パウリ行列の交換関係の導出は[パウリ行列のノート](pauli_matrices_derivation_and_group.md)の Part IV・V にあります。
+**関連ファイル**：数値で確かめるノートブック [02_matrix_exponential.ipynb](../../notebooks/foundations/00_taylor_series/02_matrix_exponential.ipynb)（§3・§6・§7 がこのノートの Part II・I・VI に対応）。図は [figures/make_matrix_exp_commutator_figures.py](figures/make_matrix_exp_commutator_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。行列の指数関数の定義と、写像としての性質は[関数・線形写像・微分・積分のノート](../01_基礎・ベクトル解析/functions_linear_maps_derivatives_integrals.md)の Part VIII、$\det e^A=e^{\operatorname{tr}A}$ は[別のノート](det_exp_trace_proof.md)、パウリ行列の交換関係の導出は[パウリ行列のノート](pauli_matrices_derivation_and_group.md)の Part IV・V、$e^{-i\frac\theta2\sigma}$ から回転ゲート $R_z,R_y$ を作る計算は[ユニタリ行列のノート](unitary_matrix_full_decomposition.md)の Part VIII にあります。
 
 ```mermaid
 graph LR
+    P0["Part 0<br/>収束・cos A<br/>エルミート行列"] --> I
     I["Part I<br/>[A,B]=0 なら<br/>e^(A+B)=e^A e^B"] --> II["Part II<br/>ジョルダン標準形<br/>e^(λI+N)=e^λ e^N"]
     I --> III["Part III<br/>交換子と量子力学<br/>パウリ行列"]
     III --> IV["Part IV<br/>BCH の公式<br/>e^X e^Y = e^Z"]
@@ -29,6 +31,12 @@ graph LR
 
 <!-- toc:start -->
 
+- [Part 0：行列に代入してよい理由 ―収束・cos A・エルミート行列―](#p0)
+  - [1. 収束：成分ごとに確かめる](#p0-1)
+  - [2. なぜこの定義なのか：時間発展の方程式が決める](#p0-2)
+  - [3. 行列の cos A, sin A とオイラーの公式](#p0-3)
+  - [4. エルミート行列 H の e^-iHt は、なぜユニタリか](#p0-4)
+  - [5. べき級数の代入が使える関数](#p0-5)
 - [Part I：\[A,B\]=0 なら e^A+B=e^Ae^B](#p1)
   - [1. 十分条件：交換すれば、数と同じ](#p1-1)
   - [2. 「すべての t で」成り立つなら、\[A,B\]=0](#p1-2)
@@ -83,6 +91,144 @@ graph LR
   - [B-5. どこで壊れるか：2πi との関係](#B-5)
 
 <!-- toc:end -->
+
+---
+
+<a id="p0"></a>
+
+# Part 0：行列に代入してよい理由 ―収束・$\cos A$・エルミート行列―
+
+<!-- part-toc:start -->
+
+**この Part の内容**
+
+- [1. 収束：成分ごとに確かめる](#p0-1)
+- [2. なぜこの定義なのか：時間発展の方程式が決める](#p0-2)
+- [3. 行列の cos A, sin A とオイラーの公式](#p0-3)
+- [4. エルミート行列 H の e^-iHt は、なぜユニタリか](#p0-4)
+- [5. べき級数の代入が使える関数](#p0-5)
+
+<!-- part-toc:end -->
+
+このノートは、行列の指数関数を $e^A=\sum_{k\ge0}A^k/k!$ と定義して始めます。Part 0 では、この定義について最初に出てきそうな疑問を整理します。
+
+- 数のテイラー展開に、行列をそのまま代入してよいのか（収束。§1）
+- なぜこの定義を選ぶのか（§2）
+- $\cos A,\sin A$ も同じように定義でき、オイラーの公式は行列でも成り立つのか（§3）
+- エルミート行列 $H$ から作った $e^{-iHt}$ がユニタリになることを、成分ごとに確かめられるのか（§4）
+- 代入が使えるのは、どんな関数か（§5）
+
+<a id="p0-1"></a>
+
+## 1. 収束：成分ごとに確かめる
+
+$A$ の $(i,j)$ 成分を $a_{ij}$、$A^n$ の $(i,j)$ 成分を $(A^n)_{ij}$ と書きます。フロベニウスノルム $\|A\|_F=\sqrt{\sum_{i,j}|a_{ij}|^2}$ について $\|AB\|_F\le\|A\|_F\|B\|_F$ が成り立つことは、[関数・線形写像のノート](../01_基礎・ベクトル解析/functions_linear_maps_derivatives_integrals.md)の Part VIII §1 で示されています。これを繰り返すと $\|A^n\|_F\le\|A\|_F^n$ です。1つの成分の絶対値は全体のノルム以下なので、
+
+$$
+|(A^n)_{ij}|\le\|A^n\|_F\le\|A\|_F^{\,n}
+\qquad\Longrightarrow\qquad
+\sum_{n=0}^\infty\frac{|(A^n)_{ij}|}{n!}\le\sum_{n=0}^\infty\frac{\|A\|_F^{\,n}}{n!}=e^{\|A\|_F}<\infty
+$$
+
+です（右辺は**数の**指数関数の級数）。つまり $(e^A)_{ij}=\sum_n\frac{(A^n)_{ij}}{n!}$ は、どんな正方行列 $A$ でも絶対収束し、$e^A$ が定まります。絶対収束なので、Part I で使う項の並べ替えも許されます。
+
+**成分ごとの具体例**：$J=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$ では $J^2=-I$ なので、$J^{2k}=(-1)^kI$、$J^{2k+1}=(-1)^kJ$ です。したがって
+
+$$
+(e^{tJ})_{11}=\sum_{k=0}^\infty\frac{(-1)^kt^{2k}}{(2k)!}=\cos t,\qquad
+(e^{tJ})_{21}=\sum_{k=0}^\infty\frac{(-1)^kt^{2k+1}}{(2k+1)!}=\sin t
+$$
+
+で、$(1,2)$ 成分は $-\sin t$、$(2,2)$ 成分は $\cos t$ です。各成分が、そのまま $\cos,\sin$ の（数の）テイラー級数になっています。
+
+$$
+e^{tJ}=\begin{pmatrix}\cos t&-\sin t\\\sin t&\cos t\end{pmatrix}
+$$
+
+これは[ユニタリ行列のノート](unitary_matrix_full_decomposition.md)の Part VIII §5 の $R_y(\theta)$ で $t=\theta/2$ とおいた行列で、$-i\sigma_y=J$ だからです（$-i\sigma_y=-i\begin{pmatrix}0&-i\\i&0\end{pmatrix}=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$）。
+
+<a id="p0-2"></a>
+
+## 2. なぜこの定義なのか：時間発展の方程式が決める
+
+数の $e^{tx}$ は、$\dfrac{d}{dt}f=xf,\ f(0)=1$ の解です。行列でも、$G(t)=e^{tA}$ を成分ごとに項別微分すると $\dfrac{d}{dt}G=AG$、$G(0)=I$ を満たします（[関数・線形写像のノート](../01_基礎・ベクトル解析/functions_linear_maps_derivatives_integrals.md)の Part VIII §2）。
+
+**この方程式の解は他にありません。** $G$ がこの方程式の解なら、$e^{-tA}$ との積を微分して
+
+$$
+\frac{d}{dt}\big(e^{-tA}G\big)=-Ae^{-tA}G+e^{-tA}AG=0
+$$
+
+です（$e^{-tA}$ は $A$ のべき級数なので $A$ と交換し、$-Ae^{-tA}+e^{-tA}A=0$ になります）。よって $e^{-tA}G$ は定数で、$t=0$ の値が $I$ なので $G=e^{tA}$ です。
+
+**物理への接続**：時間に依存しない $H$ のシュレーディンガー方程式 $i\hbar\dfrac{d}{dt}U=HU,\ U(0)=I$ は、$A=-iH/\hbar$ とおいた $\dfrac{d}{dt}U=AU$ です。したがって解は $U(t)=e^{-iHt/\hbar}$ ただ1つです。$e^{-iHt}$ の定義は、時間発展の方程式から強制されます。
+
+<a id="p0-3"></a>
+
+## 3. 行列の $\cos A,\ \sin A$ とオイラーの公式
+
+数のテイラー展開 $\cos x=\sum_k\frac{(-1)^kx^{2k}}{(2k)!}$、$\sin x=\sum_k\frac{(-1)^kx^{2k+1}}{(2k+1)!}$ の $x$ に行列 $A$ を代入して、
+
+$$
+\cos A:=\sum_{k=0}^\infty\frac{(-1)^kA^{2k}}{(2k)!},\qquad
+\sin A:=\sum_{k=0}^\infty\frac{(-1)^kA^{2k+1}}{(2k+1)!}
+$$
+
+と定義します。§1 と同じ評価（$\|A\|_F^{\,n}$ で抑える）で、どんな $A$ でも各成分が絶対収束します。
+
+**オイラーの公式は、任意の正方行列 $A$ で成り立ちます。** $(iA)^{2k}=i^{2k}A^{2k}=(-1)^kA^{2k}$、$(iA)^{2k+1}=i\,(-1)^kA^{2k+1}$ なので、$e^{iA}$ の級数を偶数項と奇数項に分けると（絶対収束なので並べ替えてよい）、
+
+$$
+e^{iA}=\sum_k\frac{(iA)^{2k}}{(2k)!}+\sum_k\frac{(iA)^{2k+1}}{(2k+1)!}=\cos A+i\sin A\tag{0-1}
+$$
+
+使う行列は $A$ ただ1つなので、非可換性は問題になりません。$A$ がエルミートでなくても成り立ちます。[ユニタリ行列のノート](unitary_matrix_full_decomposition.md)の Part VIII §3〜4 の計算は、$A=\frac\theta2\sigma$ のときの (0-1) です。$\sigma^2=I$ より $\cos(\frac\theta2\sigma)=\cos\frac\theta2\,I$（偶数乗がすべて $I$）、$\sin(\frac\theta2\sigma)=\sin\frac\theta2\,\sigma$（奇数乗がすべて $\sigma$）になります。
+
+$\cos(-A)=\cos A$、$\sin(-A)=-\sin A$ なので、$e^{-iA}=\cos A-i\sin A$ です。
+
+<a id="p0-4"></a>
+
+## 4. エルミート行列 $H$ の $e^{-iHt}$ は、なぜユニタリか
+
+**事実（知られている）**：エルミート行列 $H$ は、ユニタリ行列 $U$ と、実数を対角に持つ対角行列 $D=\mathrm{diag}(\lambda_1,\dots,\lambda_N)$ で $H=UDU^\dagger$ と書けます（スペクトル定理）。たとえばシューア分解 $H=UTU^\dagger$（[Schur.lean](../../lean4/QuantumStudy/Schur.lean) で証明済み）から、$T=U^\dagger HU$ もエルミートで、しかも上三角なので、対角行列になり、その対角成分は実数です。
+
+$U^\dagger U=I$ より $H^n=UD^nU^\dagger$ です。級数の部分和も $U\big(\sum_{n\le N}\frac{(-it)^nD^n}{n!}\big)U^\dagger$ なので、$N\to\infty$ として、
+
+$$
+e^{-iHt}=U\Big(\sum_n\frac{(-itD)^n}{n!}\Big)U^\dagger=U\,\mathrm{diag}\big(e^{-i\lambda_1t},\dots,e^{-i\lambda_Nt}\big)\,U^\dagger\tag{0-2}
+$$
+
+です。中央の対角行列の $(j,j)$ 成分は、数 $-i\lambda_jt$ についての**数の**指数関数の級数なので、そのまま $e^{-i\lambda_jt}$ です。$\lambda_j$ が実数なので $|e^{-i\lambda_jt}|=1$ で、中央は位相だけの対角行列（ユニタリ）です。ユニタリ行列の積はユニタリなので、$e^{-iHt}$ もユニタリです。
+
+**具体例（$\sigma_x$）**：$\sigma_x=U\,\mathrm{diag}(1,-1)\,U^\dagger$、$U=\frac1{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatrix}$ です（固有値 $+1,-1$、固有ベクトルは $(1,1)^T/\sqrt2$ と $(1,-1)^T/\sqrt2$。$(\cdot)^T$ は縦に直して読む印）。$\varphi=\theta/2$ とおくと、(0-2) から
+
+$$
+e^{-i\varphi\sigma_x}=\frac12\begin{pmatrix}1&1\\1&-1\end{pmatrix}\begin{pmatrix}e^{-i\varphi}&0\\0&e^{i\varphi}\end{pmatrix}\begin{pmatrix}1&1\\1&-1\end{pmatrix}
+=\begin{pmatrix}\cos\varphi&-i\sin\varphi\\-i\sin\varphi&\cos\varphi\end{pmatrix}
+$$
+
+です（$(1,1)$ 成分は $\frac{e^{-i\varphi}+e^{i\varphi}}2=\cos\varphi$、$(1,2)$ 成分は $\frac{e^{-i\varphi}-e^{i\varphi}}2=-i\sin\varphi$）。これは (0-1) と $\sigma_x^2=I$ から出る $\cos\varphi\,I-i\sin\varphi\,\sigma_x$ と一致します。固有値が $\pm1$ なので $e^{\mp i\varphi}$ が出る、というのが $\sigma_z$ の $R_z$ と同じ仕組みです。
+
+**$\cos,\sin$ で見ると**：$H$ がエルミートなら、$(H^n)^\dagger=H^n$ で係数が実数なので、$\cos(Ht)$ と $\sin(Ht)$ はエルミートです。$e^{-iHt}=\cos(Ht)-i\sin(Ht)$ は、複素数 $e^{-i\lambda t}=\cos\lambda t-i\sin\lambda t$ の「実部と虚部」にあたる2つのエルミート行列（互いに交換する）への分解です。
+
+**対角化を使わない証明**は、Part VI §1 にあります。$(e^{-iHt})^\dagger=e^{iHt}$ と、Part I の $e^Xe^Y=e^{X+Y}$（$X,Y$ が交換するとき）から $e^{iHt}e^{-iHt}=I$ を出します。一般には $(e^A)^\dagger=e^{A^\dagger}$ なので、$A^\dagger=-A$（反エルミート）なら $e^A$ はユニタリです。
+
+**エルミート性が要る例**：$N=\begin{pmatrix}0&1\\0&0\end{pmatrix}$（固有値はどちらも $0$ で実数ですが、エルミートではありません）では $N^2=0$ なので、
+
+$$
+e^{-iN}=I-iN=\begin{pmatrix}1&-i\\0&1\end{pmatrix},\qquad
+(e^{-iN})^\dagger e^{-iN}=\begin{pmatrix}1&0\\i&1\end{pmatrix}\begin{pmatrix}1&-i\\0&1\end{pmatrix}=\begin{pmatrix}1&-i\\i&2\end{pmatrix}\ne I
+$$
+
+です。固有値が実数というだけでは足りず、固有ベクトルが直交する（ユニタリ行列で対角化できる）、つまりエルミート性が効いています。
+
+<a id="p0-5"></a>
+
+## 5. べき級数の代入が使える関数
+
+テイラー展開に行列を代入する方法は、$\exp,\cos,\sin$ のように**どんな $x$ でも収束する関数**で、そのまま使えます。収束半径が有限の関数では、条件が要ります。たとえば $\ln(1+x)=\sum_{k\ge1}\frac{(-1)^{k+1}x^k}{k}$ は $|x|<1$ でしか収束しません。$A=\mathrm{diag}(3,1)$ のとき $A-I=\mathrm{diag}(2,0)$ の $(1,1)$ 成分の級数は $x=2$ の級数で、部分和（$n=5,10,20$）は $5.07,\ -64.8,\ -34359.7$ と発散します。
+
+一般の関数 $f$ には、エルミート行列 $H=UDU^\dagger$ について $f(H):=U\,\mathrm{diag}(f(\lambda_1),\dots,f(\lambda_N))\,U^\dagger$ と定義する方法があります（関数計算）。$f=\exp,\cos,\sin$ では、(0-2) の通り、べき級数による定義と一致します。$\ln$ は、固有値がすべて正の $H$ について、この定義で定まります。
 
 ---
 
