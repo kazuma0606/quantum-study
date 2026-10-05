@@ -28,6 +28,8 @@ PAIRS = [  # (量子ビットの組, [(ラベル, ファイル名の接頭辞, �
         ("1次：動的デカップリング（XY4）", "hardware_dd_xy4_o1_", "#9467bd", "s"),
         ("1次：ゲートのツイリング", "hardware_twirl_o1_", "#2ca02c", "^"),
         ("2次：設定なし", "hardware_main_o2_", "#e67e00", "D"),
+        ("1次：設定なし（10/5）", "hardware_day2_o1_", "#0b2e6b", "x"),
+        ("2次：設定なし（10/5）", "hardware_day2_o2_", "#8c4a00", "+"),
     ]),
     ("142–143", [
         ("1次：設定なし", "hardware_q142_o1_", "#1f77b4", "o"),
@@ -67,7 +69,7 @@ def main() -> None:
         for ax in axes[row]:
             ax.set_xlabel("分割数 $n$")
             ax.legend(fontsize=8.5)
-    fig.suptitle("実機（ibm_fez、N=2、t=2）：ツイリングで、どちらの組でもコヒーレントな誤差の大部分が消える", fontsize=12)
+    fig.suptitle("実機（ibm_fez、N=2、t=2、10/4。「10/5」は翌日の測り直し）：ツイリングで、どちらの組でもコヒーレントな誤差の大部分が消える", fontsize=12)
     fig.tight_layout()
     fig.savefig(HERE / "figures" / "hardware_compare_N2.png", dpi=150)
     out = HERE / "results" / "hardware_compare_N2.csv"

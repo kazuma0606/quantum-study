@@ -59,6 +59,8 @@ MODELS = {  # 名前 → (CX の直後の誤差のパウリ, RX の層の直後�
 SHOWN = "CZ 型"   # 図に描くモデル（両方の組に共通の、いちばん単純で 142–143 を説明できるもの）
 PAIRS = {  # 量子ビットの組 → [(ファイル名の接頭辞, 次数, ツイリング)]
     "22–23": [("hardware_main_o1_", 1, False), ("hardware_main_o2_", 2, False), ("hardware_twirl_o1_", 1, True)],
+    # 1日目の2次の実行は、1次と続けて測り直した2日目の値と大きく違った（1回だけの揺らぎ）。それを2日目の1次・2次に置き換えたもの
+    "22–23（2日目）": [("hardware_day2_o1_", 1, False), ("hardware_day2_o2_", 2, False), ("hardware_twirl_o1_", 1, True)],
     "142–143": [("hardware_q142_o1_", 1, False), ("hardware_q142_o2_", 2, False),
                 ("hardware_q142_twirl_o1_", 1, True), ("hardware_q142_twirl_o2_", 2, True)],
 }
@@ -190,7 +192,7 @@ def main() -> None:
             row = {"qubits": pair, "model": name, "n_points": npts, "n_params": len(x), "chi2": float(chi2), "p": float(p)}
             row.update({f"theta_cx_{lab}": float(th) for lab, th in zip(model[0], theta)})
             row.update({f"theta_rx_{lab}": float(th) for lab, th in zip(model[1], theta_x)})
-            if pair == "22–23":
+            if pair.startswith("22–23"):
                 s = zprobe_slopes(model[0], theta, p)
                 row["zprobe_slope_q22_pred"], row["zprobe_slope_q23_pred"] = s[0], s[1]
             table.append(row)
@@ -200,7 +202,7 @@ def main() -> None:
     meas = json.loads(sorted((HERE / "results").glob("hardware_zprobe_2*.json"))[-1].read_text(encoding="utf-8"))
     print(f"Z の直接測定（実測）の傾き：{meas['phase_slope_rad_per_pair']}")
 
-    fig, axes = plt.subplots(1, 2, figsize=(13, 4.8))
+    fig, axes = plt.subplots(1, len(PAIRS), figsize=(6.5 * len(PAIRS), 4.8))
     colors = {(1, False): "#1f77b4", (2, False): "#e67e00", (1, True): "#2ca02c", (2, True): "#d62728"}
     for ax, (pair, (x, chi2, data)) in zip(axes, shown.items()):
         for d in data:
