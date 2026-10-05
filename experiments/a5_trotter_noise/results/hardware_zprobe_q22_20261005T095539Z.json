@@ -1,0 +1,30 @@
+{
+  "args": {
+    "ks": [
+      0,
+      2,
+      4,
+      8,
+      12
+    ],
+    "shots": 3000,
+    "backend": "ibm_fez",
+    "qubits": [
+      22,
+      23
+    ],
+    "x_axis": true,
+    "dry_run": false
+  },
+  "backend": "ibm_fez",
+  "job_id": "db1n87jid5ic73erd450",
+  "submitted_utc": "2026-10-05T09:55:39.870199+00:00",
+  "usage_quantum_seconds": 26,
+  "phase_slope_rad_per_pair": {
+    "22_Z": -0.028316253140121022,
+    "23_Z": 0.010434545344434006,
+    "23_X": -0.02415393935066485
+  },
+  "qiskit": "2.5.2",
+  "qiskit_ibm_runtime": "0.50.0"
+}

@@ -6,6 +6,9 @@
   位相 φ(k) = atan2(<Y>, <X>) の k に対する傾きが、CX の組1回あたりの余分な Z 回転（rad）。
   トロッター分解の1ステップ（N=2）は CX の組1回なので、noise_model_fits.py の ζ（rad/ステップ）と直接比べられる。
   （ZZ の回転 RZ は仮想ゲートで時間がかからないので、ここでは省いている。）
+--x-axis をつけると、標的の X 軸まわりの回転も測る：標的を |0> のまま（制御も |0>）同じ CX の組をくり返し、
+  Z 基底（そのまま測定）と Y 基底で測って、位相 atan2(<Y>, <Z>) の傾きを求める。
+  |+> は X の固有状態なので、上の Z 回転の測り方では、標的の X 軸まわりの回転（coherent_fits.py の X_t の項）が見えないため。
 
 実行（リポジトリのルートから）:
     uv run python experiments/a5_trotter_noise/hardware_zprobe.py --ks 0 2 4 8 12 --shots 4000 --dry-run
@@ -31,9 +34,11 @@ HERE = Path(__file__).resolve().parent
 JST = timezone(timedelta(hours=9))
 
 
-def probe_circuit(target: int, k: int, basis: str) -> QuantumCircuit:
-    qc = QuantumCircuit(2, 1, name=f"zprobe_t{target}_k{k}_{basis}")
-    qc.h(target)
+def probe_circuit(target: int, k: int, basis: str, axis: str = "Z") -> QuantumCircuit:
+    """axis="Z"：target を |+> にして X・Y で測る。axis="X"：target を |0> のまま Z・Y で測る。"""
+    qc = QuantumCircuit(2, 1, name=f"{axis.lower()}probe_t{target}_k{k}_{basis}")
+    if axis == "Z":
+        qc.h(target)
     for _ in range(k):
         qc.cx(0, 1)
         qc.barrier()
@@ -41,7 +46,9 @@ def probe_circuit(target: int, k: int, basis: str) -> QuantumCircuit:
         qc.barrier()
     if basis == "Y":
         qc.sdg(target)
-    qc.h(target)
+        qc.h(target)
+    elif basis == "X":
+        qc.h(target)
     qc.measure(target, 0)
     return qc
 
@@ -52,15 +59,18 @@ def main() -> None:
     ap.add_argument("--shots", type=int, default=4000)
     ap.add_argument("--backend", default="ibm_fez")
     ap.add_argument("--qubits", type=int, nargs=2, default=[22, 23])
+    ap.add_argument("--x-axis", action="store_true", help="標的の X 軸まわりの回転も測る")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
     service = QiskitRuntimeService(instance="open-instance")
     backend = service.backend(args.backend)
     pm = generate_preset_pass_manager(optimization_level=1, backend=backend, initial_layout=args.qubits)
-    specs = [(t, k, b) for t in (0, 1) for k in args.ks for b in ("X", "Y")]
-    isa = pm.run([probe_circuit(t, k, b) for t, k, b in specs])
-    for (t, k, b), qc in zip(specs, isa):
+    probes = [("Z", 0), ("Z", 1)] + ([("X", 1)] if args.x_axis else [])     # (回転の軸, 調べる量子ビット)
+    ref = {"Z": "X", "X": "Z"}                                               # 位相の基準になる測定の基底
+    specs = [(a, t, k, b) for a, t in probes for k in args.ks for b in (ref[a], "Y")]
+    isa = pm.run([probe_circuit(t, k, b, a) for a, t, k, b in specs])
+    for (a, t, k, b), qc in zip(specs, isa):
         cz = qc.count_ops().get("cz", 0)
         assert cz == 2 * k, f"{qc.name}：CZ が {cz} 個（想定 {2 * k}）"
     print(f"回路 {len(isa)} 本、各 {args.shots} ショット、合計 {len(isa) * args.shots} ショット。CZ の数はすべて想定どおり")
@@ -74,22 +84,23 @@ def main() -> None:
     res = job.result()
     usage = job.usage()
     expv = {}
-    for (t, k, b), r in zip(specs, res):
+    for spec, r in zip(specs, res):
         c = r.data.c.get_counts()
-        expv[(t, k, b)] = (c.get("0", 0) - c.get("1", 0)) / args.shots
+        expv[spec] = (c.get("0", 0) - c.get("1", 0)) / args.shots
     rows = []
-    for t in (0, 1):
+    for a, t in probes:
         for k in args.ks:
-            x, y = expv[(t, k, "X")], expv[(t, k, "Y")]
-            rows.append({"target_logical": t, "target_physical": args.qubits[t], "k_pairs": k,
-                         "exp_X": x, "exp_Y": y, "phase_rad": float(np.arctan2(y, x)), "coherence": float(np.hypot(x, y))})
+            e_ref, e_y = expv[(a, t, k, ref[a])], expv[(a, t, k, "Y")]
+            rows.append({"axis": a, "target_logical": t, "target_physical": args.qubits[t], "k_pairs": k,
+                         "ref_basis": ref[a], "exp_ref": e_ref, "exp_Y": e_y,
+                         "phase_rad": float(np.arctan2(e_y, e_ref)), "coherence": float(np.hypot(e_ref, e_y))})
     slopes = {}
-    for t in (0, 1):
-        ks = np.array([r["k_pairs"] for r in rows if r["target_logical"] == t])
-        ph = np.unwrap([r["phase_rad"] for r in rows if r["target_logical"] == t])
-        slopes[args.qubits[t]] = float(np.polyfit(ks, ph, 1)[0])
+    for a, t in probes:
+        sel = [r for r in rows if r["axis"] == a and r["target_logical"] == t]
+        ph = np.unwrap([r["phase_rad"] for r in sel])
+        slopes[f"{args.qubits[t]}_{a}"] = float(np.polyfit([r["k_pairs"] for r in sel], ph, 1)[0])
     stamp = submitted.strftime("%Y%m%dT%H%M%SZ")
-    out = HERE / "results" / f"hardware_zprobe_{stamp}.csv"
+    out = HERE / "results" / f"hardware_zprobe_q{args.qubits[0]}_{stamp}.csv"
     with out.open("w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0]))
         w.writeheader()
@@ -101,9 +112,9 @@ def main() -> None:
         ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"利用時間：{usage} 秒")
     for r in rows:
-        print(f"量子ビット {r['target_physical']}、k={r['k_pairs']:2d}：<X>={r['exp_X']:+.3f}、<Y>={r['exp_Y']:+.3f}、"
-              f"位相 {r['phase_rad']:+.3f} rad、コヒーレンス {r['coherence']:.3f}")
-    print(f"位相の傾き（rad / CX の組1回）：{slopes}")
+        print(f"{r['axis']} 軸、量子ビット {r['target_physical']}、k={r['k_pairs']:2d}：<{r['ref_basis']}>={r['exp_ref']:+.3f}、"
+              f"<Y>={r['exp_Y']:+.3f}、位相 {r['phase_rad']:+.3f} rad、コヒーレンス {r['coherence']:.3f}")
+    print(f"位相の傾き（rad / CX の組1回、キーは 量子ビット_軸）：{slopes}")
     print(f"書き出し: {out}")
 
 

@@ -181,6 +181,21 @@ def zprobe_slopes(labels: list[str], theta: np.ndarray, p: float, ks=(0, 2, 4, 8
     return slopes
 
 
+def xprobe_slope(labels: list[str], theta: np.ndarray, p: float, ks=(0, 2, 4, 8, 12)) -> float:
+    """hardware_zprobe.py --x-axis の回路（両方 |0>、CX・CX を k 回、標的を Z と Y で測る）の、atan2(<Y>, <Z>) の傾きの予測。"""
+    cx_e = error_sup(labels, theta, p, False) @ sup(CX)
+    pair_map = cx_e @ cx_e
+    phases = []
+    for k in ks:
+        r = np.zeros(16, dtype=complex)
+        r[0] = 1.0
+        for _ in range(k):
+            r = pair_map @ r
+        R = r.reshape(4, 4)
+        phases.append(np.arctan2(np.real(np.trace(tn.op_on(Y, 1, N) @ R)), np.real(np.trace(tn.op_on(tn.Z, 1, N) @ R))))
+    return float(np.polyfit(ks, np.unwrap(phases), 1)[0])
+
+
 def main() -> None:
     table, shown = [], {}
     for pair in PAIRS:
