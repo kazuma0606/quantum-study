@@ -21,3 +21,5 @@ experiments/a5_trotter_noise/results/s2/*_D[0-9].log
 experiments/a5_trotter_noise/results/s2/*_run*.log
 experiments/a5_trotter_noise/results/s2/*_test.log
 experiments/a5_trotter_noise/results/s2/s2_report.log
+experiments/a5_trotter_noise/results/s2/*_pos.log
+experiments/a5_trotter_noise/results/s2/*_neg.log

@@ -136,6 +136,55 @@ def compare(group: dict) -> list[dict]:
     return rows, skipped
 
 
+def stacking_weights(elpd_i: np.ndarray) -> np.ndarray:
+    """スタッキングの重み（Yao ら 2018）：点ごとの LOO 予測密度 exp(elpd_i) を重み w で混ぜたときの、対数の和を最大にする。
+    elpd_i の形は (モデル数, 点の数)。重みは単体（0 以上、和が 1）の上で、ソフトマックスで表して最適化する。"""
+    from scipy.optimize import minimize
+    from scipy.special import logsumexp, softmax
+
+    def neg(z):
+        w = softmax(np.r_[0.0, z])
+        return -np.sum(logsumexp(elpd_i + np.log(w)[:, None], axis=0))
+
+    res = minimize(neg, np.zeros(elpd_i.shape[0] - 1), method="BFGS")
+    return softmax(np.r_[0.0, res.x])
+
+
+def stacking_section(groups: dict) -> list[str]:
+    """F3s の、22–23 の差の符号が正の回と負の回を、スタッキングで合わせる。"""
+    import arviz as az
+    out = []
+    for data, group in groups.items():
+        pos, neg = f"{data}_F3s_D1_pos", f"{data}_F3s_D1_neg"
+        if pos not in group or neg not in group:
+            continue
+        elpd_i, theta = [], []
+        for tag in (pos, neg):
+            ll, good, n_chain = group[tag]
+            lls = ll.reshape(n_chain, -1, ll.shape[-1])[good]
+            loo = az.loo(az.from_dict({"posterior": {"dummy": np.zeros(lls.shape[:2])}, "log_likelihood": {"y": lls}}), pointwise=True)
+            elpd_i.append(np.asarray(loo.elpd_i).ravel())
+            theta.append(np.load(OUT / f"{tag}_draws.npz")["theta"][good].reshape(-1, 2, 15))
+        w = stacking_weights(np.array(elpd_i))
+        out += ["", f"**{data}：F3s の差の符号（22–23）の、スタッキングによる合わせ方**", "",
+                f"重み：正 {w[0]:.3f}、負 {w[1]:.3f}（elpd：正 {elpd_i[0].sum():.1f}、負 {elpd_i[1].sum():.1f}）", "",
+                "| 成分 | 正の回の中央値 | 負の回の中央値 | 合わせた分布の中央値（90% 区間） |", "|---|---|---|---|"]
+        rng = np.random.default_rng(0)
+        n = min(len(theta[0]), len(theta[1]))
+        pick = rng.random(n) < w[0]
+        mixed = np.where(pick[:, None, None], theta[0][:n], theta[1][:n])
+        for g, pair in enumerate(PAIRS):
+            for lab in ("ZI", "IX", "ZX", "IZ", "ZZ"):
+                k = nm.LABELS15.index(lab)
+                lo, md_, hi = np.percentile(mixed[:, g, k], [5, 50, 95])
+                out.append(f"| {pair} {lab} | {np.median(theta[0][:, g, k]):+.4f} | {np.median(theta[1][:, g, k]):+.4f} | "
+                           f"{md_:+.4f}（{lo:+.4f}〜{hi:+.4f}） |")
+            k1, k2 = nm.LABELS15.index("IZ"), nm.LABELS15.index("ZZ")
+            ssum = mixed[:, g, k1] + mixed[:, g, k2]
+            out.append(f"| {pair} IZ＋ZZ（和） | | | {np.median(ssum):+.4f}（{np.percentile(ssum, 5):+.4f}〜{np.percentile(ssum, 95):+.4f}） |")
+    return out
+
+
 def main() -> None:
     rows, groups = [], {}
     for meta_path in sorted(OUT.glob("*_meta.json")):
@@ -195,6 +244,7 @@ def main() -> None:
             md.append(f"| {c['run']} | {c['rank']} | {c['elpd']} | {c['elpd_diff']} | {c['dse']} | {c['points_k_gt_0.7']}/{c['points']} |")
         for tag, why, lp in skipped:
             md.append(f"| {tag} | 比較から除外 | （対数尤度の合計の中央値 {lp:.1f}） | PSIS-LOO が計算できない：{why[:60]} | | |")
+    md += stacking_section(groups)
     (OUT / "s2_report.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("\n".join(md))
 

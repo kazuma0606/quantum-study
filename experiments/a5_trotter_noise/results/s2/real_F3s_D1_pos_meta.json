@@ -1,7 +1,7 @@
 {
   "args": {
     "data": "real",
-    "form": "F2",
+    "form": "F3s",
     "drift": "D1",
     "warmup": 300,
     "samples": 300,
@@ -11,12 +11,12 @@
     "d_sign": 1.0,
     "init": "map"
   },
-  "elapsed_s": 1591.3478360176086,
+  "elapsed_s": 1842.2843141555786,
   "divergences": 0,
   "n_obs": 194,
-  "num_steps_mean": 205.98666666666668,
+  "num_steps_mean": 224.26666666666668,
   "num_steps_max": 255,
-  "tree_cap_fraction": 0.6491666666666667,
+  "tree_cap_fraction": 0.7683333333333333,
   "jobs": [
     [
       "142-143",
