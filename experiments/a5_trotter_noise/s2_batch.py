@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import time
@@ -35,7 +36,9 @@ def log(msg: str) -> None:
 
 def run(cmd: list[str], logfile: Path) -> int:
     with logfile.open("w", encoding="utf-8") as fh:
-        return subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT, cwd=HERE.parents[1]).returncode
+        # 子のプロセスの出力を UTF-8 にする（Windows の既定の CP932 だと、日本語のログを検索で読み落とした。10/8）
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+        return subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT, cwd=HERE.parents[1], env=env).returncode
 
 
 def main() -> None:

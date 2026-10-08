@@ -14,3 +14,10 @@ wheels/
 
 # Claude Code の個人設定（Skill・サブエージェントの .claude/skills・.claude/agents はコミットする）
 .claude/settings.local.json
+
+# A-5 の雑音のモデリング：事後分布のサンプルと進捗ログ（大きい・スクリプトで作り直せる）
+experiments/a5_trotter_noise/results/s2/*_draws.npz
+experiments/a5_trotter_noise/results/s2/*_D[0-9].log
+experiments/a5_trotter_noise/results/s2/*_run*.log
+experiments/a5_trotter_noise/results/s2/*_test.log
+experiments/a5_trotter_noise/results/s2/s2_report.log
