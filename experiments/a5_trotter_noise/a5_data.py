@@ -142,6 +142,28 @@ def synthetic_like(trotter: list[dict], probes: list[dict], truths: dict, rng: n
     return syn_t, syn_p
 
 
+def synthetic_c1_probes(truths: dict, rng: np.random.Generator, shots: int = 3000, ks=(2, 4, 8, 12)) -> list[dict]:
+    """来月の測定の設計の下調べ用：制御を |1> にした直接の測定（まだ実機では測っていない）の合成データ。
+    組ごとに2種類（10/5 の直接の測定と同じ k・ショット数）：
+      X 回転：制御 |1>、標的 |0>、CX の組をくり返す → 傾き ≈ −4 (IX − ZX)
+      Z 回転：制御 |1>、標的 |+>、各 CX のあとに標的へ X をかけて反転を戻す → 傾き ≈ −4 (IZ − ZZ) に近い量
+    （反転を戻さないと、制御 |1> の Z 回転は CX の反転のたびにエコーのように打ち消されて見えない）"""
+    import jax.numpy as jnp
+    obs = []
+    for pair, tr in truths.items():
+        err = nm.error_sup(jnp.array(tr.theta15), tr.p, False)
+        job = f"synthetic_c1_{pair}"
+        for axis, unflip in (("X", False), ("Z", True)):
+            e_ref, e_y = nm.probe_expectations(err, axis, 1, tuple(ks), control_one=True, unflip=unflip)
+            for k, er, ey in zip(ks, np.asarray(e_ref), np.asarray(e_y)):
+                m_ref = 2 * rng.binomial(shots, (1 + er) / 2) / shots - 1
+                m_y = 2 * rng.binomial(shots, (1 + ey) / 2) / shots - 1
+                obs.append({"pair": pair, "job": job, "time": None, "axis": axis, "target": 1, "k": int(k),
+                            "control_one": True, "unflip": unflip, "phase": float(np.arctan2(m_y, m_ref)),
+                            "sigma": _phase_sigma(m_ref, m_y, shots), "phase_true": float(np.arctan2(ey, er))})
+    return obs
+
+
 if __name__ == "__main__":
     t, p = load_all()
     print(f"トロッター回路のジョブ {len(t)} 本、点の合計 {sum(len(j['n']) for j in t)}")

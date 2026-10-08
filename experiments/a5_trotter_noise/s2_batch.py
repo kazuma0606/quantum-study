@@ -5,7 +5,7 @@
 進み具合は results/s2/batch.log（回ごとの開始・終了の時刻）と、回ごとのログ（*_map.log、*.log）に出る。
 
 実行（リポジトリのルートから）:
-    uv run python experiments/a5_trotter_noise/s2_batch.py --plan converge
+    uv run python experiments/a5_trotter_noise/s2_batch.py --plan sensitivity
 """
 
 from __future__ import annotations
@@ -26,6 +26,16 @@ PLANS = {  # 計画名 → [(データ, 形, 揺らぎ, MAP の出発点の数, 
     "converge": [("real", "F2", "D1", 60, []),
                  ("real", "F3s", "D1", 40, ["--d-sign", "1"]),
                  ("real", "F3s", "D1", 40, ["--d-sign", "-1"])],
+    # 10/9 の留守中：A 事前分布の感度分析（F3s 正、幅 0.01・0.02・0.1、較正の値つき）、B 制御の状態ごとの形 F5、
+    # C 制御 |1> の直接の測定を加えた合成データ（来月の測定の設計の下調べ）
+    "sensitivity": [("real", "F3s", "D1", 30, ["--d-sign", "1", "--prior-width", "0.01"]),
+                    ("real", "F3s", "D1", 30, ["--d-sign", "1", "--prior-width", "0.02"]),
+                    ("real", "F3s", "D1", 30, ["--d-sign", "1", "--prior-width", "0.1"]),
+                    ("real", "F3s", "D1", 30, ["--d-sign", "1", "--calib"]),
+                    ("real", "F5", "D1", 40, []),
+                    ("synthetic", "F5", "D1", 30, []),
+                    ("synthetic", "F5", "D1", 30, ["--extra-c1"]),
+                    ("real", "F5", "D1", 40, ["--calib"])],
 }
 NUTS_ARGS = ["--warmup", "300", "--samples", "300", "--chains", "4", "--init", "map"]
 
@@ -47,12 +57,16 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--plan", choices=list(PLANS), default="converge")
     RUNS = PLANS[ap.parse_args().plan]
+    sys.path.insert(0, str(HERE))
+    import s2_fit
+    tag_parser = argparse.ArgumentParser()
+    s2_fit.add_common_args(tag_parser)
     OUT.mkdir(parents=True, exist_ok=True)
     py = [sys.executable]
     log(f"開始：{len(RUNS)} 回")
     for i, (data, form, drift, starts, extra) in enumerate(RUNS, 1):
-        tag = f"{data}_{form}_{drift}" + ("" if form != "F3s" else ("_pos" if extra[-1] == "1" else "_neg"))
         base = ["--data", data, "--form", form, "--drift", drift, *extra]
+        tag = s2_fit.make_tag(tag_parser.parse_args(base))
         log(f"{i}/{len(RUNS)} {tag}：MAP 探索（出発点 {starts}）")
         rc = run(py + [str(HERE / "s2_map.py"), *base, "--starts", str(starts)], OUT / f"{tag}_map.log")
         if rc != 0:

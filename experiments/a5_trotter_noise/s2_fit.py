@@ -47,9 +47,59 @@ FORMS = {
     "F3": ["ZI", "IZ", "IX", "ZX", "ZZ"],
     "F4": None,                      # 15成分すべて（ホースシュー）
     "F3s": "sumdiff",                # F3 を、IZ と ZZ の「和」と「差」で置き直したもの（下の model を参照）
+    "F5": "branch",                  # 制御の状態ごとの、標的の回転（制御 |0> で3成分、|1> で3成分）＋ ZI
 }
 I_ZI = nm.LABELS15.index("ZI")
 KMAX = 12
+CALIB_R = np.array([0.00182, 0.00213])     # 較正の CZ 誤差の中央値（113 日分、22-23 と 142-143。calibration_history_ibm_fez.csv）
+
+
+def add_common_args(ap) -> None:
+    """s2_fit.py と s2_map.py で共通の引数（同じモデル・同じデータ・同じ名前にするため）。"""
+    ap.add_argument("--data", choices=["real", "synthetic"], default="synthetic")
+    ap.add_argument("--form", choices=list(FORMS), default="F2")
+    ap.add_argument("--drift", choices=["D0", "D1"], default="D1")
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--d-sign", type=float, choices=[1.0, -1.0], default=1.0, help="F3s で、22–23 の IZ−ZZ の符号")
+    ap.add_argument("--prior-width", type=float, default=0.05, help="コヒーレントな回転の事前分布の幅（rad）")
+    ap.add_argument("--calib", action="store_true",
+                    help="較正の値を事前分布に入れる：0.8Σθ² + 0.75p が較正の CZ 誤差のまわり（対数正規、幅 0.5）")
+    ap.add_argument("--extra-c1", action="store_true",
+                    help="合成データに、制御を |1> にした直接の測定を加える（来月の測定の設計の下調べ）")
+
+
+def make_tag(args) -> str:
+    tag = f"{args.data}_{args.form}_{args.drift}"
+    if args.form == "F3s":
+        tag += "_pos" if args.d_sign > 0 else "_neg"
+    if args.prior_width != 0.05:
+        tag += f"_w{args.prior_width:g}"
+    if args.calib:
+        tag += "_calib"
+    if args.extra_c1:
+        tag += "_c1"
+    return tag
+
+
+def model_opts(args) -> dict:
+    return {"width": args.prior_width, "calib": args.calib}
+
+
+def build_data(args):
+    """実データ、または正解の分かる合成データ（必要なら制御 |1> の直接の測定を加える）を作り、prepare する。"""
+    trotter, probes = a5_data.load_all()
+    prep = prepare(trotter, probes)
+    truth_meta = None
+    if args.data == "synthetic":
+        truths = synthetic_truth(prep)
+        rng = np.random.default_rng(args.seed + 100)
+        trotter, probes = a5_data.synthetic_like(trotter, probes, truths, rng)
+        if args.extra_c1:
+            probes = probes + a5_data.synthetic_c1_probes(truths, np.random.default_rng(args.seed + 200))
+        prep = prepare(trotter, probes)
+        truth_meta = {pair: {"theta": dict(zip(nm.LABELS15, tr.theta15.tolist())), "p": tr.p,
+                             "job_offsets": tr.job_offsets} for pair, tr in truths.items()}
+    return prep, truth_meta
 
 
 def prepare(trotter: list[dict], probes: list[dict]) -> dict:
@@ -73,7 +123,7 @@ def prepare(trotter: list[dict], probes: list[dict]) -> dict:
     tgroups = {k: {kk: np.array(vv) for kk, vv in g.items()} for k, g in tgroups.items()}
     pgroups = {}
     for o in probes:
-        key = (o["axis"], o["target"])
+        key = (o["axis"], o["target"], o.get("control_one", False), o.get("unflip", False))
         g = pgroups.setdefault(key, {"job": [], "k": [], "phase": [], "sigma": []})
         g["job"].append(job_index[(o["pair"], o["job"])])
         g["k"].append(o["k"])
@@ -96,9 +146,10 @@ def predictions(theta_job, p_job, prep):
         mus.append(z[g["mask"]])
         ys.append(g["z"][g["mask"]])
         sds.append(g["sem"][g["mask"]])
-    for (axis, target), g in sorted(prep["pgroups"].items()):
+    for (axis, target, c1, unflip), g in sorted(prep["pgroups"].items()):
         err = jax.vmap(lambda th, p: nm.error_sup(th, p, False))(theta_job[g["job"]], p_job[g["job"]])
-        e_ref, e_y = jax.vmap(lambda e: nm.probe_expectations(e, axis, target, tuple(range(KMAX + 1))))(err)
+        e_ref, e_y = jax.vmap(lambda e: nm.probe_expectations(e, axis, target, tuple(range(KMAX + 1)),
+                                                              control_one=c1, unflip=unflip))(err)
         ph = jnp.arctan2(e_y, e_ref)[jnp.arange(len(g["k"])), jnp.asarray(g["k"])]
         mus.append(g["phase"] - _wrap(g["phase"] - ph))          # 観測との差を ±π で折り返した予測
         ys.append(g["phase"])
@@ -106,18 +157,32 @@ def predictions(theta_job, p_job, prep):
     return jnp.concatenate(mus), np.concatenate(ys), np.concatenate(sds)
 
 
-def model(prep, form: str, drift: str, d_sign: float = 1.0):
+def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = None):
+    opts = opts or {"width": 0.05, "calib": False}
+    w = opts["width"]
     active = FORMS[form]
-    if active == "sumdiff":
+    if active == "branch":
+        # 制御の状態ごとの、標的の回転：制御が |0> のとき (x0, y0, z0)、|1> のとき (x1, y1, z1)。
+        # exp(-i(a IX + b ZX)) = |0><0|⊗exp(-i(a+b)X) + |1><1|⊗exp(-i(a−b)X) なので、IX = (x0+x1)/2、ZX = (x0−x1)/2（Y・Z も同じ）。
+        # データがよく決める側（制御 |0>）と、ほとんど決まらない側（制御 |1>）が、最初から別のパラメータになる
+        zi = numpyro.sample("zi", dist.Normal(jnp.zeros(2), w))
+        r0 = numpyro.sample("rot_c0", dist.Normal(jnp.zeros((2, 3)), w * np.sqrt(2)))
+        r1 = numpyro.sample("rot_c1", dist.Normal(jnp.zeros((2, 3)), w * np.sqrt(2)))
+        theta = jnp.zeros((2, 15)).at[:, I_ZI].set(zi)
+        for ax, (li, lz) in enumerate((("IX", "ZX"), ("IY", "ZY"), ("IZ", "ZZ"))):
+            theta = theta.at[:, nm.LABELS15.index(li)].set((r0[:, ax] + r1[:, ax]) / 2)
+            theta = theta.at[:, nm.LABELS15.index(lz)].set((r0[:, ax] - r1[:, ax]) / 2)
+        theta = numpyro.deterministic("theta", theta)
+    elif active == "sumdiff":
         # F3 の IZ と ZZ を、和 u = IZ + ZZ（データがよく決める）と差 v = IZ − ZZ（ほとんど決まらない）に置き直す。
         # 22–23 では差の大きさは決まるが符号がほぼ決まらず、山が2つに分かれる（10/8 の MAP 探索）。
         # そこで 22–23 の差の符号は d_sign で固定し、正と負の2回の当てはめを予測の良さで重みづけして合わせる。
         main = ["ZI", "IX", "ZX"]
         idx = jnp.array([nm.LABELS15.index(l) for l in main])
-        th_main = numpyro.sample("theta_active", dist.Normal(jnp.zeros((2, 3)), 0.05))
-        u = numpyro.sample("iz_zz_sum", dist.Normal(jnp.zeros(2), 0.05 * np.sqrt(2)))
-        v_mag = numpyro.sample("iz_zz_diff_22", dist.HalfNormal(0.05 * np.sqrt(2)))
-        v_142 = numpyro.sample("iz_zz_diff_142", dist.Normal(0.0, 0.05 * np.sqrt(2)))
+        th_main = numpyro.sample("theta_active", dist.Normal(jnp.zeros((2, 3)), w))
+        u = numpyro.sample("iz_zz_sum", dist.Normal(jnp.zeros(2), w * np.sqrt(2)))
+        v_mag = numpyro.sample("iz_zz_diff_22", dist.HalfNormal(w * np.sqrt(2)))
+        v_142 = numpyro.sample("iz_zz_diff_142", dist.Normal(0.0, w * np.sqrt(2)))
         v = jnp.stack([d_sign * v_mag, v_142])                  # PAIRS の順（22-23, 142-143）
         theta = jnp.zeros((2, 15)).at[:, idx].set(th_main)
         theta = theta.at[:, nm.LABELS15.index("IZ")].set((u + v) / 2).at[:, nm.LABELS15.index("ZZ")].set((u - v) / 2)
@@ -135,9 +200,14 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0):
         # 組が2つしかないので、組どうしで共有する大きさ s はデータからほとんど決まらない（10/7 の2回目の実行で R-hat 2.5）。
         # 組が増えるまでは、固定の事前分布 N(0, 0.05 rad) を置く
         idx = jnp.array([nm.LABELS15.index(l) for l in active])
-        th_act = numpyro.sample("theta_active", dist.Normal(jnp.zeros((2, len(active))), 0.05))
+        th_act = numpyro.sample("theta_active", dist.Normal(jnp.zeros((2, len(active))), w))
         theta = numpyro.deterministic("theta", jnp.zeros((2, 15)).at[:, idx].set(th_act))
     p = numpyro.sample("p", dist.LogNormal(jnp.full(2, np.log(0.002)), 0.8))
+    if opts["calib"]:
+        # 較正の値を事前分布に入れる：平均ゲート不忠実度 r ≈ 0.8Σθ² + 0.75p（ノートの式 (III-4)）が、
+        # 較正の CZ 誤差のまわり（対数で幅 0.5、およそ 0.6〜1.6 倍）にある、という知識
+        r = 0.8 * jnp.sum(theta**2, axis=1) + 0.75 * p
+        numpyro.factor("calib", jnp.sum(dist.LogNormal(jnp.log(jnp.asarray(CALIB_R)), 0.5).log_prob(r)))
     jp = jnp.asarray(prep["job_pair"])
     theta_job = theta[jp]
     if drift == "D1":
@@ -168,30 +238,17 @@ def synthetic_truth(prep) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--data", choices=["real", "synthetic"], default="synthetic")
-    ap.add_argument("--form", choices=list(FORMS), default="F2")
-    ap.add_argument("--drift", choices=["D0", "D1"], default="D1")
+    add_common_args(ap)
     ap.add_argument("--warmup", type=int, default=500)
     ap.add_argument("--samples", type=int, default=500)
     ap.add_argument("--chains", type=int, default=4)
-    ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--max-tree-depth", type=int, default=8, help="1回の更新で使う勾配の数の上限は 2^深さ - 1")
-    ap.add_argument("--d-sign", type=float, choices=[1.0, -1.0], default=1.0, help="F3s で、22–23 の IZ−ZZ の符号")
     ap.add_argument("--init", choices=["median", "map"], default="median",
                     help="map：s2_map.py で見つけた一番高い山（_map_init.npz）の近くから、チェーンごとに少しずらして始める")
     args = ap.parse_args()
-
-    trotter, probes = a5_data.load_all()
-    prep = prepare(trotter, probes)
-    truth_meta = None
-    if args.data == "synthetic":
-        truths = synthetic_truth(prep)
-        trotter, probes = a5_data.synthetic_like(trotter, probes, truths, np.random.default_rng(args.seed + 100))
-        prep = prepare(trotter, probes)
-        truth_meta = {pair: {"theta": dict(zip(nm.LABELS15, tr.theta15.tolist())), "p": tr.p,
-                             "job_offsets": tr.job_offsets} for pair, tr in truths.items()}
-
-    tag = f"{args.data}_{args.form}_{args.drift}" + ("" if args.form != "F3s" else ("_pos" if args.d_sign > 0 else "_neg"))
+    prep, truth_meta = build_data(args)
+    tag = make_tag(args)
+    margs = (prep, args.form, args.drift, args.d_sign, model_opts(args))
 
     def log(msg: str) -> None:
         print(f"[{time.strftime('%H:%M:%S')}] {tag}：{msg}", flush=True)
@@ -204,7 +261,7 @@ def main() -> None:
     if args.init == "map":
         from jax.flatten_util import ravel_pytree
         from numpyro.infer.util import initialize_model
-        info = initialize_model(jax.random.PRNGKey(args.seed), model, model_args=(prep, args.form, args.drift, args.d_sign))
+        info = initialize_model(jax.random.PRNGKey(args.seed), model, model_args=margs)
         _, unravel = ravel_pytree(info.param_info.z)
         x_map = np.load(OUT / f"{tag}_map_init.npz")["x"]
         rng = np.random.default_rng(args.seed)
@@ -222,12 +279,12 @@ def main() -> None:
                   inverse_mass_matrix=None if args.init != "map" else jnp.asarray(inv_mass))
     mcmc = MCMC(kernel, num_warmup=args.warmup, num_samples=args.samples, num_chains=args.chains,
                 chain_method="parallel", progress_bar=True)
-    mcmc.run(jax.random.PRNGKey(args.seed), prep, args.form, args.drift, args.d_sign, extra_fields=("diverging", "num_steps"),
+    mcmc.run(jax.random.PRNGKey(args.seed), *margs, extra_fields=("diverging", "num_steps"),
              init_params=init_params)
     samples = jax.block_until_ready(mcmc.get_samples(group_by_chain=True))   # JAX は非同期に計算するので、終わるのを待ってから時刻を記録する
     elapsed = time.time() - t0
     log(f"サンプリング終了（{elapsed:.0f} 秒）。後処理中")
-    ll = log_likelihood(model, mcmc.get_samples(), prep, args.form, args.drift, args.d_sign)["y"]
+    ll = log_likelihood(model, mcmc.get_samples(), *margs)["y"]
     extra = mcmc.get_extra_fields(group_by_chain=True)
     divergences = int(np.sum(np.asarray(extra["diverging"])))
     steps = np.asarray(extra["num_steps"])

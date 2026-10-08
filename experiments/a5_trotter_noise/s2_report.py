@@ -80,6 +80,13 @@ def summarize_run(tag: str) -> dict:
             row[f"{pair}_{lab}"] = round(float(np.median(flat_th[:, g, k])), 4)
             row[f"{pair}_{lab}_sd"] = round(float(np.std(flat_th[:, g, k])), 4)
         row[f"{pair}_p"] = round(float(np.median(flat_p[:, g])), 4)
+    # 制御の状態ごとの、標的の回転（ノートの式 (III-1)(III-2)）：制御 |0> は IX+ZX など、|1> は IX−ZX など
+    for g, pair in enumerate(PAIRS):
+        for ax, (li, lz) in (("X", ("IX", "ZX")), ("Y", ("IY", "ZY")), ("Z", ("IZ", "ZZ"))):
+            a, b = flat_th[:, g, nm.LABELS15.index(li)], flat_th[:, g, nm.LABELS15.index(lz)]
+            for name, v in (("c0", a + b), ("c1", a - b)):
+                row[f"{pair}_{ax}_{name}"] = round(float(np.median(v)), 4)
+                row[f"{pair}_{ax}_{name}_sd"] = round(float(np.std(v)), 4)
     if "sigma_drift" in d:
         row["sigma_drift"] = round(float(np.median(d["sigma_drift"][good])), 4)
     if meta.get("truth"):
@@ -199,7 +206,10 @@ def main() -> None:
             continue
         rows.append(row)
         if len(good) >= 1:
-            groups.setdefault(row["data"], {})[tag] = (ll, good, n_chain)
+            # 同じデータどうしだけを比べる（制御 |1> の直接の測定を加えた合成データは別のデータ）
+            meta_args = json.loads((OUT / f"{tag}_meta.json").read_text(encoding="utf-8"))["args"]
+            key = row["data"] + ("_c1" if meta_args.get("extra_c1") else "")
+            groups.setdefault(key, {})[tag] = (ll, good, n_chain)
 
     keys = []
     for r in rows:
@@ -223,6 +233,12 @@ def main() -> None:
         md.append(f"| {r['run']} | {v('22-23_ZI')} | {v('22-23_IX')} | {v('22-23_ZX')} | {v('142-143_ZI')} | {v('142-143_IX')} | "
                   f"{v('142-143_ZX')} | {r['22-23_p']:.4f}／{r['142-143_p']:.4f} | {r.get('sigma_drift', '—')} | "
                   f"{r.get('truth_in_90pct', '—')} {('跳びの検出 ' + str(r['jump_job_rank']) + ' 位') if 'jump_job_rank' in r else ''} |")
+    md += ["", "**制御の状態ごとの、標的の回転（中央値±標準偏差、rad）：c0 は制御 |0>、c1 は制御 |1>**", "",
+           "| 回 | 22–23 X c0 | 22–23 X c1 | 22–23 Z c0 | 22–23 Z c1 | 142–143 X c0 | 142–143 X c1 | 142–143 Z c0 | 142–143 Z c1 |",
+           "|---|---|---|---|---|---|---|---|---|"]
+    for r in rows:
+        cells = [f"{r[k]:+.4f}±{r[k + '_sd']:.4f}" for k in (f"{p}_{a}_{c}" for p in PAIRS for a in ("X", "Z") for c in ("c0", "c1"))]
+        md.append(f"| {r['run']} | " + " | ".join(cells) + " |")
     for data, group in groups.items():
         if len(group) < 2:
             continue
