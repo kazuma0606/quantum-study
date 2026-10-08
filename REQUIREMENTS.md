@@ -131,6 +131,7 @@ SymPy の主な用途：
 | 水素原子_変数分離とルジャンドルラゲール陪関数.md | 同上（日本語版） |
 | hydrogen_textbook_notation.md | 教科書記法の整理 |
 | density_matrix_bracket_notation.md | 密度行列・Tr(ρÂ)・混合状態・外積の扱い |
+| noise_modeling_through_mri.md | A-5 の雑音のモデリングの解説（MRI と量子ビットの対応、量子ゲート、制御ごとの回転、ベイズ推定） |
 | trotter_experiment_translation.md | A-5 の実験の用語の翻訳（イジング模型・CNOT による ZZ・コヒーレントな誤差・ツイリング） |
 
 ---

@@ -91,6 +91,7 @@ quantum/
 | [density_matrix_bracket_notation](研究ノート/05_量子力学/density_matrix_bracket_notation.md) | 密度行列とブラケット記法 |
 | [hydrogen_atom_legendre_laguerre](研究ノート/05_量子力学/hydrogen_atom_legendre_laguerre.md) | 水素原子（変数分離から、ルジャンドル・ラゲール陪関数まで） |
 | [hydrogen_textbook_notation](研究ノート/05_量子力学/hydrogen_textbook_notation.md) | 水素原子（教科書の記法に沿った導出） |
+| [noise_modeling_through_mri](研究ノート/05_量子力学/noise_modeling_through_mri.md) | 雑音をモデルにする（MRI の T1・T2・エコーから量子ビットの誤差へ、制御の状態ごとの回転、ベイズ推定と AI の対応、A-5 の S2 の読み方） |
 | [trotter_experiment_translation](研究ノート/05_量子力学/trotter_experiment_translation.md) | トロッター実験（A-5）を読むための翻訳（イジング模型、量子回路、確率的な誤差とコヒーレントな誤差、ツイリング） |
 | [水素原子_変数分離とルジャンドルラゲール陪関数](研究ノート/05_量子力学/水素原子_変数分離とルジャンドルラゲール陪関数.md) | 水素原子（`hydrogen_atom_legendre_laguerre` の日本語版） |
 

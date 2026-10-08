@@ -1,6 +1,6 @@
 # A-5 実験計画：雑音のモデリング（2026年10月〜）
 
-テーマ A-5 の次の段階の計画です。実機で見つかった雑音（CNOT ごとのコヒーレントな回転、組ごとの違い、ジョブごとの揺らぎ）を、**ベイズの階層モデル**として表し、推定のしかた（サンプリング、変分推論、ニューラルネットによる推論）と機械学習の基準手法を、同じ物差しで比べます。議論の経緯は [a5_discussion_noise_modeling.md](a5_discussion_noise_modeling.md)、これまでの結果は [experiments/a5_trotter_noise/README.md](../experiments/a5_trotter_noise/README.md) にあります。
+テーマ A-5 の次の段階の計画です。実機で見つかった雑音（CNOT ごとのコヒーレントな回転、組ごとの違い、ジョブごとの揺らぎ）を、**ベイズの階層モデル**として表し、推定のしかた（サンプリング、変分推論、ニューラルネットによる推論）と機械学習の基準手法を、同じ物差しで比べます。議論の経緯は [a5_discussion_noise_modeling.md](a5_discussion_noise_modeling.md)、用語と考え方の解説は [雑音をモデルにする（ノート）](../研究ノート/05_量子力学/noise_modeling_through_mri.md)、これまでの結果は [experiments/a5_trotter_noise/README.md](../experiments/a5_trotter_noise/README.md) にあります。
 
 ## 1. 目的と問い
 
