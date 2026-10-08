@@ -5,7 +5,7 @@
 進み具合は results/s2/batch.log（回ごとの開始・終了の時刻）と、回ごとのログ（*_map.log、*.log）に出る。
 
 実行（リポジトリのルートから）:
-    uv run python experiments/a5_trotter_noise/s2_batch.py
+    uv run python experiments/a5_trotter_noise/s2_batch.py --plan converge
 """
 
 from __future__ import annotations
@@ -18,14 +18,15 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "results" / "s2"
-RUNS = [  # (データ, 形, 揺らぎ, MAP の出発点の数)
-    ("synthetic", "F2", "D1", 30),
-    ("real", "F2", "D1", 30),
-    ("real", "F2", "D0", 20),
-    ("real", "F1", "D1", 30),
-    ("real", "F3", "D1", 30),
-    ("real", "F4", "D1", 30),
-]
+PLANS = {  # 計画名 → [(データ, 形, 揺らぎ, MAP の出発点の数, 追加の引数)]
+    # 10/8 朝：最初の一通り
+    "first": [("synthetic", "F2", "D1", 30, []), ("real", "F2", "D1", 30, []), ("real", "F2", "D0", 20, []),
+              ("real", "F1", "D1", 30, []), ("real", "F3", "D1", 30, []), ("real", "F4", "D1", 30, [])],
+    # 10/8 夜：実データの収束の改善。F2 は出発点を増やし、F3 は和と差に置き直した F3s を、22–23 の差の符号ごとに
+    "converge": [("real", "F2", "D1", 60, []),
+                 ("real", "F3s", "D1", 40, ["--d-sign", "1"]),
+                 ("real", "F3s", "D1", 40, ["--d-sign", "-1"])],
+}
 NUTS_ARGS = ["--warmup", "300", "--samples", "300", "--chains", "4", "--init", "map"]
 
 
@@ -42,12 +43,16 @@ def run(cmd: list[str], logfile: Path) -> int:
 
 
 def main() -> None:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--plan", choices=list(PLANS), default="converge")
+    RUNS = PLANS[ap.parse_args().plan]
     OUT.mkdir(parents=True, exist_ok=True)
     py = [sys.executable]
     log(f"開始：{len(RUNS)} 回")
-    for i, (data, form, drift, starts) in enumerate(RUNS, 1):
-        tag = f"{data}_{form}_{drift}"
-        base = ["--data", data, "--form", form, "--drift", drift]
+    for i, (data, form, drift, starts, extra) in enumerate(RUNS, 1):
+        tag = f"{data}_{form}_{drift}" + ("" if form != "F3s" else ("_pos" if extra[-1] == "1" else "_neg"))
+        base = ["--data", data, "--form", form, "--drift", drift, *extra]
         log(f"{i}/{len(RUNS)} {tag}：MAP 探索（出発点 {starts}）")
         rc = run(py + [str(HERE / "s2_map.py"), *base, "--starts", str(starts)], OUT / f"{tag}_map.log")
         if rc != 0:

@@ -46,6 +46,7 @@ FORMS = {
     "F2": ["ZI", "IX", "ZX"],
     "F3": ["ZI", "IZ", "IX", "ZX", "ZZ"],
     "F4": None,                      # 15成分すべて（ホースシュー）
+    "F3s": "sumdiff",                # F3 を、IZ と ZZ の「和」と「差」で置き直したもの（下の model を参照）
 }
 I_ZI = nm.LABELS15.index("ZI")
 KMAX = 12
@@ -105,9 +106,23 @@ def predictions(theta_job, p_job, prep):
     return jnp.concatenate(mus), np.concatenate(ys), np.concatenate(sds)
 
 
-def model(prep, form: str, drift: str):
+def model(prep, form: str, drift: str, d_sign: float = 1.0):
     active = FORMS[form]
-    if active is None:
+    if active == "sumdiff":
+        # F3 の IZ と ZZ を、和 u = IZ + ZZ（データがよく決める）と差 v = IZ − ZZ（ほとんど決まらない）に置き直す。
+        # 22–23 では差の大きさは決まるが符号がほぼ決まらず、山が2つに分かれる（10/8 の MAP 探索）。
+        # そこで 22–23 の差の符号は d_sign で固定し、正と負の2回の当てはめを予測の良さで重みづけして合わせる。
+        main = ["ZI", "IX", "ZX"]
+        idx = jnp.array([nm.LABELS15.index(l) for l in main])
+        th_main = numpyro.sample("theta_active", dist.Normal(jnp.zeros((2, 3)), 0.05))
+        u = numpyro.sample("iz_zz_sum", dist.Normal(jnp.zeros(2), 0.05 * np.sqrt(2)))
+        v_mag = numpyro.sample("iz_zz_diff_22", dist.HalfNormal(0.05 * np.sqrt(2)))
+        v_142 = numpyro.sample("iz_zz_diff_142", dist.Normal(0.0, 0.05 * np.sqrt(2)))
+        v = jnp.stack([d_sign * v_mag, v_142])                  # PAIRS の順（22-23, 142-143）
+        theta = jnp.zeros((2, 15)).at[:, idx].set(th_main)
+        theta = theta.at[:, nm.LABELS15.index("IZ")].set((u + v) / 2).at[:, nm.LABELS15.index("ZZ")].set((u - v) / 2)
+        theta = numpyro.deterministic("theta", theta)
+    elif active is None:
         tau = numpyro.sample("tau", dist.HalfCauchy(0.01))
         lam = numpyro.sample("lam", dist.HalfCauchy(jnp.ones((2, 15))))
         c2 = numpyro.sample("c2", dist.InverseGamma(2.0, 2.0 * 0.05**2))          # 大きな成分の上限の目安 約 0.05 rad
@@ -161,6 +176,7 @@ def main() -> None:
     ap.add_argument("--chains", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--max-tree-depth", type=int, default=8, help="1回の更新で使う勾配の数の上限は 2^深さ - 1")
+    ap.add_argument("--d-sign", type=float, choices=[1.0, -1.0], default=1.0, help="F3s で、22–23 の IZ−ZZ の符号")
     ap.add_argument("--init", choices=["median", "map"], default="median",
                     help="map：s2_map.py で見つけた一番高い山（_map_init.npz）の近くから、チェーンごとに少しずらして始める")
     args = ap.parse_args()
@@ -175,7 +191,7 @@ def main() -> None:
         truth_meta = {pair: {"theta": dict(zip(nm.LABELS15, tr.theta15.tolist())), "p": tr.p,
                              "job_offsets": tr.job_offsets} for pair, tr in truths.items()}
 
-    tag = f"{args.data}_{args.form}_{args.drift}"
+    tag = f"{args.data}_{args.form}_{args.drift}" + ("" if args.form != "F3s" else ("_pos" if args.d_sign > 0 else "_neg"))
 
     def log(msg: str) -> None:
         print(f"[{time.strftime('%H:%M:%S')}] {tag}：{msg}", flush=True)
@@ -188,7 +204,7 @@ def main() -> None:
     if args.init == "map":
         from jax.flatten_util import ravel_pytree
         from numpyro.infer.util import initialize_model
-        info = initialize_model(jax.random.PRNGKey(args.seed), model, model_args=(prep, args.form, args.drift))
+        info = initialize_model(jax.random.PRNGKey(args.seed), model, model_args=(prep, args.form, args.drift, args.d_sign))
         _, unravel = ravel_pytree(info.param_info.z)
         x_map = np.load(OUT / f"{tag}_map_init.npz")["x"]
         rng = np.random.default_rng(args.seed)
@@ -206,12 +222,12 @@ def main() -> None:
                   inverse_mass_matrix=None if args.init != "map" else jnp.asarray(inv_mass))
     mcmc = MCMC(kernel, num_warmup=args.warmup, num_samples=args.samples, num_chains=args.chains,
                 chain_method="parallel", progress_bar=True)
-    mcmc.run(jax.random.PRNGKey(args.seed), prep, args.form, args.drift, extra_fields=("diverging", "num_steps"),
+    mcmc.run(jax.random.PRNGKey(args.seed), prep, args.form, args.drift, args.d_sign, extra_fields=("diverging", "num_steps"),
              init_params=init_params)
     samples = jax.block_until_ready(mcmc.get_samples(group_by_chain=True))   # JAX は非同期に計算するので、終わるのを待ってから時刻を記録する
     elapsed = time.time() - t0
     log(f"サンプリング終了（{elapsed:.0f} 秒）。後処理中")
-    ll = log_likelihood(model, mcmc.get_samples(), prep, args.form, args.drift)["y"]
+    ll = log_likelihood(model, mcmc.get_samples(), prep, args.form, args.drift, args.d_sign)["y"]
     extra = mcmc.get_extra_fields(group_by_chain=True)
     divergences = int(np.sum(np.asarray(extra["diverging"])))
     steps = np.asarray(extra["num_steps"])

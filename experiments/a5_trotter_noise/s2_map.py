@@ -50,11 +50,12 @@ def main() -> None:
     ap.add_argument("--form", choices=list(s2_fit.FORMS), default="F2")
     ap.add_argument("--drift", choices=["D0", "D1"], default="D1")
     ap.add_argument("--starts", type=int, default=40)
+    ap.add_argument("--d-sign", type=float, choices=[1.0, -1.0], default=1.0, help="F3s で、22–23 の IZ−ZZ の符号")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
-    tag = f"{args.data}_{args.form}_{args.drift}"
+    tag = f"{args.data}_{args.form}_{args.drift}" + ("" if args.form != "F3s" else ("_pos" if args.d_sign > 0 else "_neg"))
     prep = load_prep(args.data, args.seed)
-    model_args = (prep, args.form, args.drift)
+    model_args = (prep, args.form, args.drift, args.d_sign)
 
     info = initialize_model(jax.random.PRNGKey(args.seed), s2_fit.model, model_args=model_args, init_strategy=init_to_sample)
     flat0, unravel = ravel_pytree(info.param_info.z)
@@ -84,6 +85,12 @@ def main() -> None:
                 values[name] = jnp.asarray(rng.normal(0, 0.02, shape))
             elif name == "zraw":
                 values[name] = jnp.asarray(rng.normal(0, 0.3, shape))
+            elif name == "iz_zz_sum":
+                values[name] = jnp.asarray(rng.normal(0, 0.005, shape))
+            elif name in ("iz_zz_diff_22",):
+                values[name] = jnp.asarray(abs(rng.normal(0, 0.05)))
+            elif name == "iz_zz_diff_142":
+                values[name] = jnp.asarray(rng.normal(0, 0.02))
             elif name in ("t_job", "delta_raw"):
                 values[name] = jnp.zeros(shape)
             elif name == "sigma_drift":
