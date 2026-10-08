@@ -1,0 +1,181 @@
+{
+  "args": {
+    "data": "synthetic",
+    "form": "F2",
+    "drift": "D1",
+    "warmup": 300,
+    "samples": 300,
+    "chains": 4,
+    "seed": 0,
+    "max_tree_depth": 8,
+    "init": "map"
+  },
+  "elapsed_s": 1311.5357580184937,
+  "divergences": 0,
+  "n_obs": 194,
+  "num_steps_mean": 188.02666666666667,
+  "num_steps_max": 255,
+  "tree_cap_fraction": 0.5308333333333334,
+  "jobs": [
+    [
+      "142-143",
+      "db14d8hb694s73drp710"
+    ],
+    [
+      "142-143",
+      "db14dn6egvvc73bh4b80"
+    ],
+    [
+      "142-143",
+      "db14e5megvvc73bh4br0"
+    ],
+    [
+      "142-143",
+      "db14ek9b694s73drp8m0"
+    ],
+    [
+      "142-143",
+      "db1n8l2vog1s73fid2kg"
+    ],
+    [
+      "22-23",
+      "db13qorid5ic73eqjkgg"
+    ],
+    [
+      "22-23",
+      "db13turid5ic73eqjnng"
+    ],
+    [
+      "22-23",
+      "db13un9b694s73drokvg"
+    ],
+    [
+      "22-23",
+      "db1458rid5ic73eqjvi0"
+    ],
+    [
+      "22-23",
+      "db14683id5ic73eqk0lg"
+    ],
+    [
+      "22-23",
+      "db147amegvvc73bh41hg"
+    ],
+    [
+      "22-23",
+      "db1mt1eegvvc73bhsfkg"
+    ],
+    [
+      "22-23",
+      "db1mtijid5ic73ercjl0"
+    ],
+    [
+      "22-23",
+      "db1n87jid5ic73erd450"
+    ],
+    [
+      "22-23",
+      "db1o1g6egvvc73bhtrog"
+    ],
+    [
+      "22-23",
+      "db1o2h3id5ic73ere1fg"
+    ],
+    [
+      "22-23",
+      "db1oc7bid5ic73erehe0"
+    ],
+    [
+      "22-23",
+      "db1od8hb694s73dsjbr0"
+    ],
+    [
+      "22-23",
+      "db1oe9eegvvc73bhugeg"
+    ]
+  ],
+  "labels15": [
+    "IX",
+    "IY",
+    "IZ",
+    "XI",
+    "XX",
+    "XY",
+    "XZ",
+    "YI",
+    "YX",
+    "YY",
+    "YZ",
+    "ZI",
+    "ZX",
+    "ZY",
+    "ZZ"
+  ],
+  "truth": {
+    "22-23": {
+      "theta": {
+        "IX": 0.018,
+        "IY": 0.0,
+        "IZ": 0.0,
+        "XI": 0.0,
+        "XX": 0.0,
+        "XY": 0.0,
+        "XZ": 0.0,
+        "YI": 0.0,
+        "YX": 0.0,
+        "YY": 0.0,
+        "YZ": 0.0,
+        "ZI": -0.017,
+        "ZX": -0.011,
+        "ZY": 0.0,
+        "ZZ": 0.0
+      },
+      "p": 0.0046,
+      "job_offsets": {
+        "db13qorid5ic73eqjkgg": -0.0009916465549964623,
+        "db13turid5ic73eqjnng": 6.0143602597438484e-05,
+        "db13un9b694s73drokvg": 0.0013402152455545336,
+        "db1458rid5ic73eqjvi0": -0.0004922065185513296,
+        "db14683id5ic73eqk0lg": -0.0006204748998199404,
+        "db147amegvvc73bh41hg": 0.0004898420501851982,
+        "db1mt1eegvvc73bhsfkg": 0.00035688700816006075,
+        "db1mtijid5ic73ercjl0": 0.00010541424899789856,
+        "db1n87jid5ic73erd450": -0.0009304680447082046,
+        "db1o1g6egvvc73bhtrog": 0.006,
+        "db1o2h3id5ic73ere1fg": 0.0006953031944582878,
+        "db1oc7bid5ic73erehe0": -0.0013442145472850819,
+        "db1od8hb694s73dsjbr0": -0.0004576157610402182,
+        "db1oe9eegvvc73bhugeg": -0.0019012227398008442
+      }
+    },
+    "142-143": {
+      "theta": {
+        "IX": 0.033,
+        "IY": 0.0,
+        "IZ": 0.0,
+        "XI": 0.0,
+        "XX": 0.0,
+        "XY": 0.0,
+        "XZ": 0.0,
+        "YI": 0.0,
+        "YX": 0.0,
+        "YY": 0.0,
+        "YZ": 0.0,
+        "ZI": -0.01,
+        "ZX": -0.003,
+        "ZY": 0.0,
+        "ZZ": 0.0
+      },
+      "p": 0.0035,
+      "job_offsets": {
+        "db14d8hb694s73drp710": 1.2301533574825744e-06,
+        "db14dn6egvvc73bh4b80": 0.00029874553750846986,
+        "db14e5megvvc73bh4br0": -0.00027413785536221756,
+        "db14ek9b694s73drp8m0": -0.0008905918387572742,
+        "db1n8l2vog1s73fid2kg": -0.00045467078517172257
+      }
+    }
+  },
+  "numpyro": "0.22.0",
+  "jax": "0.11.2"
+}
