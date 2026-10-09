@@ -35,7 +35,11 @@ PLANS = {  # 計画名 → [(データ, 形, 揺らぎ, MAP の出発点の数, 
                     ("real", "F5", "D1", 40, []),
                     ("synthetic", "F5", "D1", 30, []),
                     ("synthetic", "F5", "D1", 30, ["--extra-c1"]),
-                    ("real", "F5", "D1", 40, ["--calib"])],
+                    ("real", "F5", "D1", 40, ["--calib"]),
+                    # 10/9 朝に追加：較正の値つきの負の符号（4 と合わせて符号のスタッキング）、F5 のサンプルを2倍、7 を別の種で
+                    ("real", "F3s", "D1", 30, ["--d-sign", "-1", "--calib"]),
+                    ("real", "F5", "D1", 40, ["--label", "long"], ["--warmup", "600", "--samples", "600"]),
+                    ("synthetic", "F5", "D1", 30, ["--extra-c1", "--seed", "1", "--label", "seed1"])],
 }
 NUTS_ARGS = ["--warmup", "300", "--samples", "300", "--chains", "4", "--init", "map"]
 
@@ -64,7 +68,9 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     py = [sys.executable]
     log(f"開始：{len(RUNS)} 回")
-    for i, (data, form, drift, starts, extra) in enumerate(RUNS, 1):
+    for i, run_spec in enumerate(RUNS, 1):
+        data, form, drift, starts, extra = run_spec[:5]
+        nuts_extra = run_spec[5] if len(run_spec) > 5 else []          # NUTS だけに渡す追加の引数（サンプル数など）
         base = ["--data", data, "--form", form, "--drift", drift, *extra]
         tag = s2_fit.make_tag(tag_parser.parse_args(base))
         log(f"{i}/{len(RUNS)} {tag}：MAP 探索（出発点 {starts}）")
@@ -73,7 +79,13 @@ def main() -> None:
             log(f"{i}/{len(RUNS)} {tag}：MAP 探索が失敗（終了コード {rc}）。この回を飛ばす")
             continue
         log(f"{i}/{len(RUNS)} {tag}：NUTS")
-        rc = run(py + [str(HERE / "s2_fit.py"), *base, *NUTS_ARGS], OUT / f"{tag}.log")
+        nuts = list(NUTS_ARGS)
+        for j in range(0, len(nuts_extra), 2):                           # 同じ引数は後から渡したもので置き換える
+            if nuts_extra[j] in nuts:
+                nuts[nuts.index(nuts_extra[j]) + 1] = nuts_extra[j + 1]
+            else:
+                nuts += nuts_extra[j:j + 2]
+        rc = run(py + [str(HERE / "s2_fit.py"), *base, *nuts], OUT / f"{tag}.log")
         log(f"{i}/{len(RUNS)} {tag}：終了（終了コード {rc}）")
     rc = run(py + [str(HERE / "s2_report.py")], OUT / "s2_report.log")
     log(f"まとめ（s2_report.py）終了（終了コード {rc}）。すべて完了")

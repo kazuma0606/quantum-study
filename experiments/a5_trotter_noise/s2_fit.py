@@ -64,6 +64,7 @@ def add_common_args(ap) -> None:
     ap.add_argument("--prior-width", type=float, default=0.05, help="コヒーレントな回転の事前分布の幅（rad）")
     ap.add_argument("--calib", action="store_true",
                     help="較正の値を事前分布に入れる：0.8Σθ² + 0.75p が較正の CZ 誤差のまわり（対数正規、幅 0.5）")
+    ap.add_argument("--label", default="", help="結果のファイル名の末尾に付ける名前（同じ設定を、サンプル数や種を変えて回すとき）")
     ap.add_argument("--extra-c1", action="store_true",
                     help="合成データに、制御を |1> にした直接の測定を加える（来月の測定の設計の下調べ）")
 
@@ -78,6 +79,8 @@ def make_tag(args) -> str:
         tag += "_calib"
     if args.extra_c1:
         tag += "_c1"
+    if args.label:
+        tag += f"_{args.label}"
     return tag
 
 

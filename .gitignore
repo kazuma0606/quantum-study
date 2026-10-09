@@ -23,3 +23,7 @@ experiments/a5_trotter_noise/results/s2/*_test.log
 experiments/a5_trotter_noise/results/s2/s2_report.log
 experiments/a5_trotter_noise/results/s2/*_pos.log
 experiments/a5_trotter_noise/results/s2/*_neg.log
+# NUTS の進捗ログはまとめて対象外（MAP 探索のログとバッチのログは残す）
+experiments/a5_trotter_noise/results/s2/*.log
+!experiments/a5_trotter_noise/results/s2/*_map.log
+!experiments/a5_trotter_noise/results/s2/batch.log
