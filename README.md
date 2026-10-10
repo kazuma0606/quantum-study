@@ -1,5 +1,9 @@
 # quantum
 
+> **作成** 2026-09-17　**更新** 2026-10-10
+> リポジトリ全体の入口。目的（量子ソフトウェアエンジニアへの転職を見据えた、理論の整理 → 実装 → テスト → 可視化）、
+> フォルダの構成、研究ノートの一覧（ジャンル別）、ノートブック・実験・Lean への案内。
+
 個人の量子コンピューティング学習・実装リポジトリです。量子ソフトウェアエンジニアへの転職を見据えて、**理論の整理 → 実装 → テスト → 可視化**を一続きで積み上げています。
 
 - 微分幾何から量子力学・群論までを、「ベクトル・行列で考える」視点で一貫して整理する
@@ -42,6 +46,7 @@ quantum/
 | [grad_div_rot_identities_full_derivation](研究ノート/01_基礎・ベクトル解析/grad_div_rot_identities_full_derivation.md) | grad・div・rot の恒等式の、途中式を省略しない証明 |
 | [lagrange_multipliers](研究ノート/01_基礎・ベクトル解析/lagrange_multipliers.md) | ラグランジュの未定乗数法（なぜ勾配が平行になるのか） |
 | [nonlinear_laplacian_p_laplacian](研究ノート/01_基礎・ベクトル解析/nonlinear_laplacian_p_laplacian.md) | $p$-ラプラシアンの導出と具体例 |
+| [derivative_map](研究ノート/01_基礎・ベクトル解析/derivative_map.md) | 微分の地図（定義の強さ・対象と構造・計算法の3層で、ガトー／フレシェ／弱微分／ラドン・ニコディム／リー微分と共変微分／伊藤など、区別すべき微分を整理。反例を検算） |
 | [autodiff_and_coordinates](研究ノート/01_基礎・ベクトル解析/autodiff_and_coordinates.md) | 自動微分は何を微分しているのか（余接ベクトル・計量・座標、勾配降下法と再パラメータ化。JAX・PyTorch・TensorFlow で検算） |
 | [power_series_radius_of_convergence](研究ノート/01_基礎・ベクトル解析/power_series_radius_of_convergence.md) | べき級数と収束半径（複素平面の特異点、解析接続と $\zeta(-1)=-\frac1{12}$、$e^{-1/x^2}$） |
 

@@ -27,3 +27,6 @@ experiments/a5_trotter_noise/results/s2/*_neg.log
 experiments/a5_trotter_noise/results/s2/*.log
 !experiments/a5_trotter_noise/results/s2/*_map.log
 !experiments/a5_trotter_noise/results/s2/batch.log
+
+# sbi（SBI のライブラリ）が学習のたびに作る TensorBoard のログ
+sbi-logs/

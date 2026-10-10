@@ -1,5 +1,8 @@
 # 図表の貼り付け用スニペット（christoffel_riemann_intro.md 用）
 
+> **作成** 2026-09-30　**更新** 2026-10-02
+> クリストッフェル記号のノート用の、表と Mermaid 図の元の下書き。すべて本文に挿入済みで、本文を直してもこのファイルには反映されない。
+
 このファイルは、表と Mermaid 図の元の下書きです。**以下の図・表・Mermaid はすべて本文（christoffel_riemann_intro.md）に挿入済みです。** 本文を直した場合、このファイルには反映されません。
 Mermaid は GitHub と VS Code（Markdown Preview Mermaid Support 拡張）で描画できます。ラベルに数式（`$...$`）は使わず、プレーンテキストにしています。
 

@@ -1,5 +1,9 @@
 # $\operatorname{grad}(\mathbf u\cdot\mathbf v)$、$\operatorname{div}(\mathbf u\times\mathbf v)$、$\operatorname{rot}(\mathbf u\times\mathbf v)$ ―途中式を省略しない完全証明―
 
+> **作成** 2026-10-01　**更新** 2026-10-04
+> grad(u·v)、div(u×v)、rot(u×v) の恒等式の、途中式を省略しない証明。
+> 教科書で省かれている「ゼロを足して引く」箇所も含めて、すべての項を書き出す。
+
 3つの公式に共通して使われている「省かれた途中式」の正体は、**存在しない項を、同じ値をゼロになるように足して引く（ゼロを足す）というテクニック**です。この操作が明示されずに使われているため、天下り的に見えてしまいます。ここでは、その「ゼロを足す」箇所も含めて、すべての項を書き出します。
 
 記法：$\mathbf u=(u_1,u_2,u_3)$、$\mathbf v=(v_1,v_2,v_3)$（すべて$x,y,z$の関数）、$\partial_x,\partial_y,\partial_z$は各座標での偏微分。
