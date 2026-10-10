@@ -1,5 +1,9 @@
 # 自動微分は何を微分しているのか ―余接ベクトル・計量・座標―
 
+> **作成** 2026-10-10　**更新** 2026-10-10
+> 自動微分（PyTorch・JAX・TensorFlow）が返す量が、数学的には何か（$dL$ の成分、計量なし）を、極座標と再パラメータ化の例で確かめる。
+> 2階微分・勾配降下法・複素数の規約と、計量を扱える幾何ライブラリ（geomstats・diffjeom）への位置づけ。検算は experiments/autodiff_geometry。
+
 自動微分（PyTorch の `autograd`、JAX の `grad`、TensorFlow の `GradientTape`）と勾配降下法は、「微分」を機械的に計算します。ところが、微分には、共変微分・外微分・リー微分のように、何を何と比べるかで定義が変わるものがあります。このノートでは、自動微分が返す量が数学的には何なのかを、極座標の具体例とライブラリの実装で確かめます。
 
 - **Part I**：自動微分が計算するもの。微分は線形写像、`grad` は余接ベクトル $dL$ の成分
@@ -8,8 +12,9 @@
 - **Part IV**：勾配降下法と再パラメータ化。座標の取り方で軌跡が変わり、計量で補正すると変わらない
 - **Part V**：複素数の勾配。ライブラリで共役の向きが違う
 - **Part VI**：ライブラリの実装で確かめたことと、確かめていないこと
+- **Part VII**：計量まで扱える既存の幾何ライブラリ（geomstats・diffjeom で極座標と球面を確認）
 
-**関連ファイル**：検算は [experiments/autodiff_geometry/](../../experiments/autodiff_geometry/README.md)（スクリプトと22件のテスト。JAX・PyTorch・TensorFlow の3つで実行）。極座標の計量とクリストッフェル記号は [球座標の計量テンソル計算例](../02_微分幾何/球座標の計量テンソル計算例.md) と[クリストッフェル記号のノート](../02_微分幾何/christoffel_riemann_intro.md)、$df$ と $\mathrm{grad}$ の違いは[計量テンソルと共変反変_まとめ](../02_微分幾何/計量テンソルと共変反変_まとめ.md)の5節、ラプラス・ベルトラミ作用素の補正項は[ヤコビ行列から見るラプラス・ベルトラミ作用素](../02_微分幾何/laplace_beltrami_from_jacobian_matrix.md)にあります。
+**関連ファイル**：検算は [experiments/autodiff_geometry/](../../experiments/autodiff_geometry/README.md)（スクリプトと22件のテスト。JAX・PyTorch・TensorFlow の3つで実行。Part VII の幾何ライブラリの確認スクリプトも同じ場所）。極座標の計量とクリストッフェル記号は [球座標の計量テンソル計算例](../02_微分幾何/球座標の計量テンソル計算例.md) と[クリストッフェル記号のノート](../02_微分幾何/christoffel_riemann_intro.md)、$df$ と $\mathrm{grad}$ の違いは[計量テンソルと共変反変_まとめ](../02_微分幾何/計量テンソルと共変反変_まとめ.md)の5節、ラプラス・ベルトラミ作用素の補正項は[ヤコビ行列から見るラプラス・ベルトラミ作用素](../02_微分幾何/laplace_beltrami_from_jacobian_matrix.md)にあります。
 
 **記号の約束**
 
@@ -43,6 +48,9 @@
   - [3. 計量で補正する（自然勾配）](#p4-3)
 - [Part V：複素数の勾配](#p5)
 - [Part VI：ライブラリの実装で確かめたこと](#p6)
+- [Part VII：計量まで扱える既存の幾何ライブラリ](#p7)
+  - [1. 極座標と単位球面で確かめたこと](#p7-1)
+  - [2. 使うときの注意](#p7-2)
 - [まとめ](#summary)
 
 <!-- toc:end -->
@@ -351,6 +359,53 @@ $z=1+2i$ での `grad` の出力は、次の通りです。
 | 複素数の規約 | $2\,\partial f/\partial\bar z$ | 同左 | $2\,\partial f/\partial z$ |
 
 **確かめていないもの**：PyTorch の C++ 側の微分公式、TensorFlow の C++ カーネル、JAX の `ad.py` の内部、`jax.hessian` の実装は、読んでいません。値の確認は、スクリプトの実行結果によります。
+
+---
+
+<a id="p7"></a>
+
+# Part VII：計量まで扱える既存の幾何ライブラリ
+
+<!-- part-toc:start -->
+
+**この Part の内容**
+
+- [1. 極座標と単位球面で確かめたこと](#p7-1)
+- [2. 使うときの注意](#p7-2)
+
+<!-- part-toc:end -->
+
+PyTorch・JAX・TensorFlow の自動微分は、計量を中核の概念として持っていません。計量・接続・曲率までを扱うのは、その上に載った幾何ライブラリです。目的ごとに整理します。**確かめた**と書いたものは、極座標と単位球面の例を実際に実行しました（[確認スクリプト](../../experiments/autodiff_geometry/README.md)）。それ以外は、各ライブラリの説明（検索結果の要約）による整理で、動かしてはいません。
+
+| 目的 | ライブラリ | 計量・接続の扱い |
+|---|---|---|
+| 計量を与えて接続・曲率を作る | **diffjeom**（JAX）：確かめた | 計量の関数 `g(x)` から `jacfwd` で $\Gamma$、リーマン曲率、リッチ曲率を作ります。極座標の $\Gamma$ は、Part III の自作の関数と完全に一致しました（最大差 0.0）。 |
+| | **geomstats**：確かめた | `ImmersedSet` に、はめ込み写像（極座標なら $(r,\theta)\mapsto(r\cos\theta,\,r\sin\theta)$）を与えると、既定で `PullbackMetric` を持ち、$g=J^TJ$ を自動微分で作ります。そこから $\Gamma$ と曲率が出ます。 |
+| | autograv、Riemax（JAX） | 計量の関数から $\Gamma$ と曲率を作ります。Riemax は誘導計量と測地線も扱います。 |
+| 多様体上の最適化 | geoopt（PyTorch）、Pymanopt（autograd・JAX・TensorFlow・PyTorch）、tensorflow-riemopt、Manifolds.jl と ManifoldDiff.jl（Julia） | ユークリッド勾配をリーマン勾配に変換します（`egrad2rgrad`、`change_representer`）。Part I の (I-2) $g^{jk}\partial_kL$ に相当する処理です。 |
+| 自然勾配（フィッシャー計量） | KFAC-JAX、NNGeometry（PyTorch）、curvlinops | フィッシャー行列とその近似で、勾配を前処理します（Part IV の自然勾配）。 |
+| 記号計算 | SymPy の `diffgeom`、SageMath、OGRePy など | 記号で共変微分・曲率を扱います。数値の自動微分ではありません。 |
+
+<a id="p7-1"></a>
+
+## 1. 極座標と単位球面で確かめたこと
+
+| | 値 |
+|---|---|
+| 極座標の $\Gamma^r{}_{\theta\theta}$、$\Gamma^\theta{}_{r\theta}$（$r=2$） | $-2=-r$、$0.5=1/r$（diffjeom・geomstats の両方） |
+| 極座標のリーマン曲率、スカラー曲率 | どちらも $0$ |
+| 単位球面の $\Gamma^\theta{}_{\varphi\varphi}$、$\Gamma^\varphi{}_{\theta\varphi}$（$\theta=0.9$） | $-\sin\theta\cos\theta=-0.487$、$\cot\theta=0.794$ |
+| 単位球面のスカラー曲率、$R^\theta{}_{\varphi\theta\varphi}$ | $2$、$\sin^2\theta$（リッチテンソルは $g$ に等しい） |
+
+極座標では $\Gamma$ は $0$ ではないのに、曲率が $0$ です。$\Gamma$ は座標の取り方（座標基底の回転や伸び縮み）にも反応し、曲率は座標では消せない曲がりだけを測るからです（[クリストッフェル記号のノート](../02_微分幾何/christoffel_riemann_intro.md)）。
+
+<a id="p7-2"></a>
+
+## 2. 使うときの注意
+
+- diffjeom 0.0.1 は2ファイル・約6KB の小さなパッケージで、機能は $\Gamma$・リーマン・リッチ・スカラー曲率と整合性の検査（対称性、ビアンキ恒等式）です。本格的な道具というより、計量から曲率を出す手順が短いコードで見える教材として読めます。
+- geomstats 2.8.0 は、NumPy 2 では import できません（`numpy.trapz` が NumPy 2.0 で削除されたため）。NumPy 1.x の別環境が要ります。メタデータ上、バックエンドの extras は autograd と pytorch だけで、TensorFlow は `test-scripts` に出てくるだけです。
+- 添字の上下（共変・反変）を型として持ち、自動微分と組み合わせた汎用のライブラリは、今回の調査の範囲では見つかっていません。どのライブラリでも、添字の位置は人間が管理します（たとえば diffjeom の `Gamma[i,j,k]` は、上付きが先頭という約束）。
 
 ---
 

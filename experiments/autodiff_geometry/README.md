@@ -15,6 +15,8 @@ uv run pytest experiments/autodiff_geometry -q                    # 検算（22 
 |---|---|
 | `autodiff_geometry.py` | 実験の本体。JAX・PyTorch・TensorFlow で同じ量を計算する関数（`LIBS = jax, torch, tf`） |
 | `tests/test_autodiff_geometry.py` | 下の表の各行に対応する検算（手計算の値、3つのライブラリの一致、反例） |
+| `check_diffjeom.py` | 幾何ライブラリ diffjeom（JAX）が、自作の `christoffel_from_metric` と同じ $\Gamma$ を返すことの確認（下の「幾何ライブラリで確かめたこと」） |
+| `check_geomstats.py` | 幾何ライブラリ geomstats の `PullbackMetric` で、$g=J^TJ$・$\Gamma$・曲率を確認（NumPy 1.x の一時環境で実行） |
 
 ## 確かめたこと
 
@@ -43,6 +45,23 @@ uv run pytest experiments/autodiff_geometry -q                    # 検算（22 
 つまり、どのライブラリでも、勾配は「$df$ の成分を、引数と同じ形の配列として返したもの」で、更新式は成分ごとの引き算です。暗黙のうちに、パラメータ空間にユークリッド計量が入っています。
 
 **読んでいないもの**：PyTorch の C++ 側の微分公式（`derivatives.yaml` は wheel に入っていない）、TensorFlow の C++ カーネル、JAX の `ad.py` の内部（定義の所在は確認）、`jax.hessian` の実装。
+
+## 幾何ライブラリで確かめたこと
+
+計量を与えると接続・曲率を作ってくれる既存のライブラリを、同じ極座標・単位球面の例で試しました。どちらもプロジェクトの依存には入れず、一時的な環境で実行します。
+
+```bash
+uv run --with diffjeom python experiments/autodiff_geometry/check_diffjeom.py
+uv run --no-project --python 3.12 --with geomstats --with autograd --with "numpy<2" \
+    python experiments/autodiff_geometry/check_geomstats.py
+```
+
+| ライブラリ | 確かめたこと | 注意 |
+|---|---|---|
+| diffjeom 0.0.1（JAX） | 極座標の $\Gamma$ が自作と**完全に一致**（最大差 0.0）。極座標のリーマン曲率とスカラー曲率は 0（$\Gamma\ne0$ でも平坦）。単位球面で $R^\theta{}_{\varphi\theta\varphi}=\sin^2\theta$、スカラー曲率 2 | 小さなパッケージ（2ファイル、合計約 6KB。`get_christoffel2`・`get_riemann`・`get_ricci_tensor`・`get_ricci_scalar`・`check_*`）。計量の関数 `g(x)` を渡す。添字は `Gamma[i,j,k]`＝$\Gamma^i{}_{jk}$ |
+| geomstats 2.8.0 | `ImmersedSet`（はめ込み写像 `immersion` を与える）が既定で `PullbackMetric` を持ち、$g=J^TJ$ を自動微分で作る。極座標の $\Gamma^r{}_{\theta\theta}=-r$、$\Gamma^\theta{}_{r\theta}=1/r$、単位球面の $\Gamma$ とスカラー曲率 2、リッチテンソル $=g$ を確認 | NumPy 2 では import できない（`numpy.trapz` が NumPy 2.0 で削除されたため）。メタデータ上、バックエンドの extras は autograd と pytorch で、TensorFlow は `test-scripts` だけ。ここでは autograd バックエンドを使った |
+
+autograv 0.1.1（JAX、`numpy<2` を要求）は、NumPy の制約がこの環境と合わないので試していません。
 
 ## 関連
 
