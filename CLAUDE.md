@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-個人の量子コンピューティング学習・実装リポジトリ。量子ソフトウェアエンジニアへの転職を見据えた実績作りが目的。
+個人の量子コンピューティング学習・実装リポジトリ。式を天下りに受け取らず、導出し、コードで検算し、実機やシミュレータで確かめることが目的。
 
 ロードマップ詳細: `docs/roadmap.md`
 
