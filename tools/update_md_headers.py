@@ -11,7 +11,7 @@
 - 要約は人が書く。このスクリプトは日付の行だけを書き直す（見出しが無いファイルは --check で知らせる）。
   初めて見出しを入れるときは、--init <要約の JSON>（ファイルのパス → 要約の文字列のリスト）で入れる。
 
-対象：git が追跡している .md のうち、Claude Code の設定（.claude/、CLAUDE.md）と、自動で作られる表（results/ の下）を除くもの。
+対象：git が追跡している .md のうち、Claude Code・Codex の設定（.claude/、CLAUDE.md、.agents/、AGENTS.md）と、自動で作られる表（results/ の下）を除くもの。
 
 実行（リポジトリのルートから）:
     uv run python tools/update_md_headers.py           # 日付を書き直す（コミットの前に実行する）
@@ -30,7 +30,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATE_RE = re.compile(r"^> \*\*作成\*\* (\d{4}-\d{2}-\d{2})　\*\*更新\*\* (\d{4}-\d{2}-\d{2})\s*$")
-EXCLUDE = (".claude/", "CLAUDE.md")
+EXCLUDE = (".claude/", "CLAUDE.md", ".agents/", "AGENTS.md")     # Claude Code・Codex の設定（先頭の形が決まっている）
 
 
 def git(*args: str) -> str:
