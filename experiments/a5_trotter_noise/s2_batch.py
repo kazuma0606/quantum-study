@@ -40,6 +40,14 @@ PLANS = {  # 計画名 → [(データ, 形, 揺らぎ, MAP の出発点の数, 
                     ("real", "F3s", "D1", 30, ["--d-sign", "-1", "--calib"]),
                     ("real", "F5", "D1", 40, ["--label", "long"], ["--warmup", "600", "--samples", "600"]),
                     ("synthetic", "F5", "D1", 30, ["--extra-c1", "--seed", "1", "--label", "seed1"])],
+    # 10/10：S4 のあとに自動で回す。F5 の「制御 |1> の Z 回転 −0.11」が事前分布の幅によらないか（データ由来か）、
+    # F5 でも揺らぎが要るか、制御 |1> の測定つき合成データでの失敗（seed1）が種によるものか
+    "followup": [("real", "F5", "D1", 40, ["--prior-width", "0.02", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+                 ("real", "F5", "D1", 40, ["--prior-width", "0.1", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+                 ("real", "F5", "D0", 30, ["--label", "long"], ["--warmup", "600", "--samples", "600"]),
+                 ("synthetic", "F5", "D1", 30, ["--extra-c1", "--seed", "2", "--label", "seed2"]),
+                 ("synthetic", "F5", "D1", 30, ["--extra-c1", "--seed", "1", "--label", "seed1long"],
+                  ["--warmup", "600", "--samples", "600"])],
 }
 NUTS_ARGS = ["--warmup", "300", "--samples", "300", "--chains", "4", "--init", "map"]
 

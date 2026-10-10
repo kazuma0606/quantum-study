@@ -16,11 +16,25 @@ dependencies = [
     "qiskit>=2.5.2",
     "qiskit-aer>=0.17.2",
     "qiskit-ibm-runtime>=0.50.0",
+    "sbi>=0.27.0",
     "scipy>=1.18.1",
     "sympy>=1.14.0",
+    "torch>=2.11.0",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
 ]
+tf = [
+    "tensorflow>=2.21.0",
+]
+
+# PyTorch は CUDA 版（RTX 50 系＝Blackwell には CUDA 12.8 以降の版が要る）を PyTorch の公式の置き場所から入れる
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
