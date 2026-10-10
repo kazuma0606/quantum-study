@@ -102,3 +102,84 @@ def test_parameter_shift_rule_is_exact():
     for th in [0.0, 0.7, 2.1, -1.3]:
         shift, exact, val, val_exact = dm.parameter_shift_example(th)
         assert np.isclose(shift, exact, atol=1e-12) and np.isclose(val, val_exact, atol=1e-12)
+
+
+# ------------------------------------------------------------- 交換子・反交換子（関数の側）
+def test_composition_difference_example():
+    x = sp.symbols("x")
+    f, g = sp.Lambda(x, x + 1), sp.Lambda(x, x**2)
+    assert sp.simplify(dm.composition_commutator(f, g) - (-2 * x)) == 0  # x²+1 − (x+1)² = −2x
+
+
+def test_near_ring_distributivity():
+    right, left, zero_then_h, h_then_zero = dm.near_ring_examples()
+    x = sp.symbols("x")
+    assert right == 0  # (f+g)∘h = f∘h + g∘h
+    assert sp.simplify(left - (2 * x + 2) * sp.cos(x)) == 0  # f∘(g+h) − (f∘g+f∘h) = 2gh ≠ 0（f=x², g=x+1, h=cos x）
+    assert zero_then_h == 0 and h_then_zero == 1  # 0∘h = 0 だが h∘0 = h(0) = 1
+
+
+def test_composition_difference_is_not_bilinear_and_fails_jacobi():
+    x = sp.symbols("x")
+    example, additivity_gap, jacobi = dm.composition_commutator_examples()
+    assert sp.simplify(example + 2 * x) == 0
+    assert sp.simplify(additivity_gap + 2 * x) == 0  # [x+1, x²] = −2x だが [x,x²]+[1,x²] = 0
+    assert sp.simplify(jacobi - (-12 * x**4 - 24 * x**3 - 12 * x**2 - 1)) == 0  # ヤコビ恒等式が成り立たない
+
+
+def test_hand_computation_of_the_jacobi_counterexample():
+    x = sp.symbols("x")
+    p = dm.composition_jacobi_pieces()
+    expect = {
+        "[a,b]": 2 * x, "[b,c]": -3 * x**2 - 3 * x, "[c,a]": sp.Integer(0),
+        "[[a,b],c]": -6 * x**3, "[[b,c],a]": -12 * x**4 - 18 * x**3 - 12 * x**2, "[[c,a],b]": sp.Integer(-1),
+    }
+    for k, v in expect.items():
+        assert sp.simplify(p[k] - v) == 0, k
+
+
+def test_matrix_commutator_is_a_lie_bracket():
+    jac, bil = dm.matrix_commutator_is_a_lie_bracket()
+    assert jac < 1e-12 and bil < 1e-12
+
+
+def test_group_commutator_of_maps():
+    x = sp.symbols("x")
+    nontrivial, trivial = dm.group_commutator_of_affine_maps()
+    assert sp.simplify(nontrivial - (x - 1)) == 0  # f=x+1, g=2x：f∘g∘f⁻¹∘g⁻¹ = x−1
+    assert sp.simplify(trivial - x) == 0  # 平行移動どうしは可換
+
+
+def test_group_commutator_expansion_gives_matrix_commutator():
+    c = dm.group_commutator_coefficients()
+    zero = sp.zeros(2)
+    for key in ("const", "t", "s", "t2", "s2", "ts"):
+        assert c[key] == zero, key  # 定数項は I、t, s, t², s² の係数は 0、ts の係数は [A,B]
+
+
+def test_derivative_is_commutator_with_D():
+    assert dm.derivative_as_commutator() == (0, 0)  # [D, f·]h = f'h、[D, x] = 1
+
+
+def test_lie_bracket_is_a_first_order_operator():
+    assert dm.lie_bracket_is_first_order() == 0
+
+
+def test_cartan_formula_on_one_forms():
+    assert dm.cartan_formula_on_one_forms() == [0, 0]  # L_X ω = d ι_X ω + ι_X dω
+
+
+def test_dirac_operator_squares_to_laplacian():
+    assert all(e == 0 for e in dm.dirac_operator_squared())  # (σ·∇)² = ∇²
+
+
+def test_pauli_anticommutation_and_commutation():
+    anti, comm_xy = dm.anticommutator_check()
+    assert all(m == sp.zeros(2) for row in anti for m in row)  # {σ_i,σ_j} = 2δ_ij I
+    assert comm_xy == sp.zeros(2)  # [σ_x,σ_y] = 2iσ_z
+
+
+def test_poisson_bracket_properties():
+    qp, jacobi, leibniz, lie = dm.poisson_checks()
+    assert qp == 1 and jacobi == 0 and leibniz == 0
+    assert lie == 0  # [X_f, X_g] = −X_{{f,g}}（X_f = {·, f}）

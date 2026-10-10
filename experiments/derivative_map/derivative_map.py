@@ -198,6 +198,197 @@ def parameter_shift_example(theta):
     return shift, -math.sin(theta), expval(theta), math.cos(theta)
 
 
+# ===================================================================== 交換子・反交換子（関数の側）
+_X = sp.symbols("x")
+
+
+def composition_commutator(f, g):
+    """合成の差 [f,g] := f∘g − g∘f（f, g は sympy.Lambda）。"""
+    return sp.simplify(f(g(_X)) - g(f(_X)))
+
+
+def near_ring_examples():
+    """関数の全体 (写像, 点ごとの和, 合成) の分配法則。右分配 (f+g)∘h = f∘h + g∘h は成り立ち、左分配 f∘(g+h) は成り立たない。
+    また 0∘x = 0 だが x∘0 は 0 と限らない。"""
+    f = sp.Lambda(_X, _X**2)
+    g = sp.Lambda(_X, _X + 1)
+    h = sp.Lambda(_X, sp.cos(_X))
+    right = sp.simplify((f(_X) + g(_X)).subs(_X, h(_X)) - (f(h(_X)) + g(h(_X))))  # (f+g)∘h − (f∘h+g∘h)
+    left = sp.simplify(f(g(_X) + h(_X)) - (f(g(_X)) + f(h(_X))))  # f∘(g+h) − (f∘g+f∘h)
+    zero = sp.Lambda(_X, sp.Integer(0))
+    zero_then_h = sp.simplify(zero(h(_X)))  # 0∘h = 0
+    h_then_zero = sp.simplify(h(zero(_X)))  # h∘0 = h(0) = 1
+    return right, left, zero_then_h, h_then_zero
+
+
+def composition_commutator_examples():
+    """合成の差の例と、双線形でないこと、ヤコビ恒等式が成り立たないこと。"""
+    f = sp.Lambda(_X, _X + 1)
+    g = sp.Lambda(_X, _X**2)
+    example = composition_commutator(f, g)  # −2x
+
+    # 第1引数について加法的でない：[f1+f2, g] ≠ [f1,g] + [f2,g]
+    f1 = sp.Lambda(_X, _X)
+    f2 = sp.Lambda(_X, sp.Integer(1))
+    f12 = sp.Lambda(_X, f1(_X) + f2(_X))
+    additivity_gap = sp.simplify(composition_commutator(f12, g) - (composition_commutator(f1, g) + composition_commutator(f2, g)))
+
+    # ヤコビ恒等式
+    def br(a, b):
+        return sp.Lambda(_X, a(b(_X)) - b(a(_X)))
+
+    a, b, c = sp.Lambda(_X, _X**2), sp.Lambda(_X, _X + 1), sp.Lambda(_X, _X**3)
+    jacobi = sp.simplify(br(br(a, b), c)(_X) + br(br(b, c), a)(_X) + br(br(c, a), b)(_X))
+    return example, additivity_gap, jacobi
+
+
+def composition_jacobi_pieces():
+    """ノートの手計算の途中結果：a=x², b=x+1, c=x³ の合成の差 [a,b]、[b,c]、[c,a] と、二重の括弧 3 つ。"""
+
+    def br(u, v):
+        return sp.Lambda(_X, sp.expand(u(v(_X)) - v(u(_X))))
+
+    a, b, c = sp.Lambda(_X, _X**2), sp.Lambda(_X, _X + 1), sp.Lambda(_X, _X**3)
+    ab, bc, ca = br(a, b), br(b, c), br(c, a)
+    return {
+        "[a,b]": ab(_X), "[b,c]": bc(_X), "[c,a]": ca(_X),
+        "[[a,b],c]": br(ab, c)(_X), "[[b,c],a]": br(bc, a)(_X), "[[c,a],b]": br(ca, b)(_X),
+    }
+
+
+def group_commutator_of_affine_maps():
+    """f(x)=x+1、g(x)=2x の群の交換子 f∘g∘f⁻¹∘g⁻¹。x−1（平行移動）になる。可換な平行移動どうしでは恒等写像。"""
+    f = sp.Lambda(_X, _X + 1)
+    g = sp.Lambda(_X, 2 * _X)
+    f_inv = sp.Lambda(_X, _X - 1)
+    g_inv = sp.Lambda(_X, _X / 2)
+    nontrivial = sp.simplify(f(g(f_inv(g_inv(_X)))))
+    t1 = sp.Lambda(_X, _X + 3)
+    t2 = sp.Lambda(_X, _X + 5)
+    t1_inv = sp.Lambda(_X, _X - 3)
+    t2_inv = sp.Lambda(_X, _X - 5)
+    trivial = sp.simplify(t1(t2(t1_inv(t2_inv(_X)))))
+    return nontrivial, trivial
+
+
+def matrix_commutator_is_a_lie_bracket(seed=0):
+    """線形写像（行列）では、積 AB が双線形なので [A,B]=AB−BA は双線形でヤコビ恒等式を満たす。"""
+    rng = np.random.default_rng(seed)
+    A, B, C = (rng.normal(size=(3, 3)) for _ in range(3))
+    br = lambda P, Q: P @ Q - Q @ P
+    jacobi = br(br(A, B), C) + br(br(B, C), A) + br(br(C, A), B)
+    bilinear = br(2 * A + 3 * B, C) - (2 * br(A, C) + 3 * br(B, C))
+    return np.abs(jacobi).max(), np.abs(bilinear).max()
+
+
+def group_commutator_coefficients():
+    """e^{tA} e^{sB} e^{-tA} e^{-sB} を t, s の3次まで展開し、各係数を調べる（一般の 2×2 行列 A, B）。"""
+    t, s = sp.symbols("t s")
+    A = sp.Matrix(2, 2, sp.symbols("a0:4"))
+    B = sp.Matrix(2, 2, sp.symbols("b0:4"))
+
+    def E(M, order=3):
+        out = sp.zeros(2)
+        for k in range(order + 1):
+            out += M**k / sp.factorial(k)
+        return out
+
+    P = (E(t * A) * E(s * B) * E(-t * A) * E(-s * B)).applyfunc(sp.expand)
+
+    def coeff(mono):
+        return P.applyfunc(lambda e: sp.Poly(e, t, s).coeff_monomial(mono))
+
+    comm = A * B - B * A
+    return {
+        "const": sp.simplify(coeff(1) - sp.eye(2)),
+        "t": coeff(t),
+        "s": coeff(s),
+        "t2": coeff(t**2),
+        "s2": coeff(s**2),
+        "ts": sp.simplify(coeff(t * s) - comm),
+    }
+
+
+def derivative_as_commutator():
+    """[D, f·] h = f' h、[D, x] = 1（h は一般の関数）。"""
+    f = sp.Function("f")(_X)
+    h = sp.Function("h")(_X)
+    D = lambda u: sp.diff(u, _X)
+    gap_f = sp.simplify(D(f * h) - f * D(h) - sp.diff(f, _X) * h)
+    gap_x = sp.simplify(D(_X * h) - _X * D(h) - h)
+    return gap_f, gap_x
+
+
+def lie_bracket_is_first_order():
+    """X(Yf) − Y(Xf) = Σ (X(Y^i) − Y(X^i)) ∂_i f（2階微分の項が消える）。X, Y, f は一般の関数（2次元）。"""
+    x, y = sp.symbols("x y")
+    co = [x, y]
+    f = sp.Function("f")(x, y)
+    X = [sp.Function("X1")(x, y), sp.Function("X2")(x, y)]
+    Y = [sp.Function("Y1")(x, y), sp.Function("Y2")(x, y)]
+    apply = lambda V, u: sum(V[i] * sp.diff(u, co[i]) for i in range(2))
+    lhs = apply(X, apply(Y, f)) - apply(Y, apply(X, f))
+    comps = [apply(X, Y[i]) - apply(Y, X[i]) for i in range(2)]
+    rhs = sum(comps[i] * sp.diff(f, co[i]) for i in range(2))
+    return sp.simplify(sp.expand(lhs - rhs))
+
+
+def cartan_formula_on_one_forms():
+    """カルタンの公式 L_X ω = d(ι_X ω) + ι_X(dω) を、2次元の1-形式で成分ごとに確かめる。
+    リー微分の成分は (L_X ω)_j = X^i ∂_i ω_j + ω_i ∂_j X^i。"""
+    x, y = sp.symbols("x y")
+    co = [x, y]
+    X = [sp.Function("X1")(x, y), sp.Function("X2")(x, y)]
+    w = [sp.Function("w1")(x, y), sp.Function("w2")(x, y)]
+    lie = [sum(X[i] * sp.diff(w[j], co[i]) + w[i] * sp.diff(X[i], co[j]) for i in range(2)) for j in range(2)]
+    i_X_w = sum(X[i] * w[i] for i in range(2))
+    d_iXw = [sp.diff(i_X_w, co[j]) for j in range(2)]
+    F = sp.diff(w[1], x) - sp.diff(w[0], y)  # dω = F dx∧dy
+    iX_dw = [-F * X[1], F * X[0]]  # ι_X(dx∧dy) = X^x dy − X^y dx
+    return [sp.simplify(sp.expand(lie[j] - d_iXw[j] - iX_dw[j])) for j in range(2)]
+
+
+def dirac_operator_squared():
+    """(σ·∇)² ψ − ∇² ψ = 0（ψ は一般の2成分スピノル、3次元）。{σ_i,σ_j}=2δ_ij と ∂ の可換性による。"""
+    x, y, z = sp.symbols("x y z")
+    co = [x, y, z]
+    sx = sp.Matrix([[0, 1], [1, 0]])
+    sy = sp.Matrix([[0, -sp.I], [sp.I, 0]])
+    sz = sp.Matrix([[1, 0], [0, -1]])
+    sig = [sx, sy, sz]
+    psi = sp.Matrix([sp.Function("p1")(x, y, z), sp.Function("p2")(x, y, z)])
+    op = lambda v: sum((sig[i] * v.diff(co[i]) for i in range(3)), sp.zeros(2, 1))
+    lap = lambda v: sum((v.diff(c, 2) for c in co), sp.zeros(2, 1))
+    return (op(op(psi)) - lap(psi)).applyfunc(sp.simplify)
+
+
+def anticommutator_check():
+    """{σ_i,σ_j} = 2δ_ij I と [σ_i,σ_j] = 2i ε_ijk σ_k。"""
+    sx = sp.Matrix([[0, 1], [1, 0]])
+    sy = sp.Matrix([[0, -sp.I], [sp.I, 0]])
+    sz = sp.Matrix([[1, 0], [0, -1]])
+    sig = [sx, sy, sz]
+    anti = [[(sig[i] * sig[j] + sig[j] * sig[i]) - 2 * (1 if i == j else 0) * sp.eye(2) for j in range(3)] for i in range(3)]
+    comm_xy = sig[0] * sig[1] - sig[1] * sig[0] - 2 * sp.I * sz
+    return anti, comm_xy
+
+
+def poisson_checks():
+    """ポアソン括弧 {f,g} = f_q g_p − f_p g_q（1自由度）。{q,p}=1、ヤコビ、ライプニッツ、
+    X_f := {·, f} とすると [X_f, X_g] = −X_{{f,g}}（符号は流儀による）。"""
+    q, p = sp.symbols("q p")
+    PB = lambda f, g: sp.diff(f, q) * sp.diff(g, p) - sp.diff(f, p) * sp.diff(g, q)
+    f, g, h = q**2 * p, p**2 + q**3, q * p + sp.sin(q)
+    jacobi = sp.simplify(PB(PB(f, g), h) + PB(PB(g, h), f) + PB(PB(h, f), g))
+    leibniz = sp.simplify(PB(f * g, h) - (f * PB(g, h) + PB(f, h) * g))
+    H = sp.Function("H")(q, p)
+    Xf = lambda u: PB(u, f)
+    Xg = lambda u: PB(u, g)
+    XPB = lambda u: PB(u, PB(f, g))
+    lie = sp.simplify(sp.expand(Xf(Xg(H)) - Xg(Xf(H)) + XPB(H)))  # [X_f,X_g]H + X_{{f,g}}H = 0 なら符号は −
+    return sp.simplify(PB(q, p)), jacobi, leibniz, lie
+
+
 def main():
     print("(層1) f=x³/(x²+y²): 方向 (1,0),(0,1),(1,1) の方向微分",
           [round(directional_quotient(f_nonadditive, v, 1e-8), 6) for v in [(1, 0), (0, 1), (1, 1)]])

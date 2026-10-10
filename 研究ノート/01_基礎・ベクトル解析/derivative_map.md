@@ -1,6 +1,6 @@
 # 微分の地図 ―定義の強さ・対象と構造・計算法で整理する―
 
-> **作成** 2026-10-10　**更新** 2026-10-10
+> **作成** 2026-10-10　**更新** 2026-10-11
 > 「微分」という一語の下にある、定義上区別すべき微分（ガトー・フレシェ・汎関数微分・弱微分・外微分・リー微分・共変微分・複素微分・確率微分・導分・差分・自動微分など）を、3つの層で整理した地図。
 > 各項目の定義、前提にする構造、リポジトリ内の該当ノート、反例の検算（experiments/derivative_map）。
 
@@ -8,11 +8,11 @@
 
 - **Part I**：地図の見方。3つの層と、区別するための4つの問い
 - **Part II**：層1「定義の強さ」。方向微分・ガトー微分・ハダマール微分・フレシェ微分と、3つの反例
-- **Part III**：層2「対象と構造」。汎関数微分、弱微分とラドン・ニコディム微分、外微分・リー微分・共変微分、複素微分、確率微分、導分、分数階微分
+- **Part III**：層2「対象と構造」。汎関数微分、弱微分とラドン・ニコディム微分、外微分・リー微分・共変微分、複素微分、確率微分、導分、分数階微分、関数の側の交換子と反交換子
 - **Part IV**：層3「計算法」。差分、スペクトル法、自動微分、パラメータシフト則
 - **Part V**：どの微分を使うかの確認表と、リポジトリでまだ書いていないもの
 
-**関連ファイル**：反例と数値の検算は [experiments/derivative_map/](../../experiments/derivative_map/README.md)（12件のテスト）。有限次元の微分（全微分・方向微分・連鎖律）は [関数・線形写像・微分・積分のノート](functions_linear_maps_derivatives_integrals.md) の Part III、自動微分と座標は [autodiff_and_coordinates.md](autodiff_and_coordinates.md)、共変微分は [christoffel_riemann_intro.md](../02_微分幾何/christoffel_riemann_intro.md)、リー微分は [lie_derivative.md](../02_微分幾何/lie_derivative.md)、外微分は [differential_forms_hodge_star.md](../03_多様体・微分形式・トポロジー/differential_forms_hodge_star.md)、超関数は [integration_algebraic_structure_stokes.md](../03_多様体・微分形式・トポロジー/integration_algebraic_structure_stokes.md) の Part VII、第一変分は [nonlinear_laplacian_p_laplacian.md](nonlinear_laplacian_p_laplacian.md)、差分とスペクトル法は [vandermonde_finite_difference_spectral.md](../07_数値計算/vandermonde_finite_difference_spectral.md) にあります。
+**関連ファイル**：反例と数値の検算は [experiments/derivative_map/](../../experiments/derivative_map/README.md)（25件のテスト）。有限次元の微分（全微分・方向微分・連鎖律）は [関数・線形写像・微分・積分のノート](functions_linear_maps_derivatives_integrals.md) の Part III、自動微分と座標は [autodiff_and_coordinates.md](autodiff_and_coordinates.md)、共変微分は [christoffel_riemann_intro.md](../02_微分幾何/christoffel_riemann_intro.md)、リー微分は [lie_derivative.md](../02_微分幾何/lie_derivative.md)、外微分は [differential_forms_hodge_star.md](../03_多様体・微分形式・トポロジー/differential_forms_hodge_star.md)、超関数は [integration_algebraic_structure_stokes.md](../03_多様体・微分形式・トポロジー/integration_algebraic_structure_stokes.md) の Part VII、第一変分は [nonlinear_laplacian_p_laplacian.md](nonlinear_laplacian_p_laplacian.md)、差分とスペクトル法は [vandermonde_finite_difference_spectral.md](../07_数値計算/vandermonde_finite_difference_spectral.md) にあります。
 
 **このノートの確かさ**：定義と定理の述べ方は、Web で調べた出典（末尾）の要約で確認しました。本文を精読したのは、Wikipedia のガトー微分のページだけです。反例と数値は、すべて手元で実行して確かめています。出典を確認していない記述は、本文に「記憶による」と書きました。
 
@@ -46,6 +46,7 @@
   - [6. 確率微分](#p3-6)
   - [7. 導分](#p3-7)
   - [8. 分数階微分](#p3-8)
+  - [9. 交換子と反交換子：関数の側では](#p3-9)
 - [Part IV：層3「計算法」](#p4)
   - [1. 差分](#p4-1)
   - [2. スペクトル法](#p4-2)
@@ -260,6 +261,15 @@ $$
 - [6. 確率微分](#p3-6)
 - [7. 導分](#p3-7)
 - [8. 分数階微分](#p3-8)
+- [9. 交換子と反交換子：関数の側では](#p3-9)
+  - [9-a. 関数そのものは可換](#p3-9a)
+  - [9-b. 微分と掛け算：\[D,f\]=f'](#p3-9b)
+  - [9-c. ベクトル場のリー括弧](#p3-9c)
+  - [9-d. ポアソン括弧](#p3-9d)
+  - [9-e. 反交換子：微分形式、外微分と内部積](#p3-9e)
+  - [9-f. ディラック作用素：ラプラシアンの平方根](#p3-9f)
+  - [9-g. 合成については](#p3-9g)
+  - [9-h. まとめ](#p3-9h)
 
 <!-- part-toc:end -->
 
@@ -390,6 +400,8 @@ $$
 
 次数付き導分は、次数 $d$ の $D$ について $D(ab)=D(a)b+(-1)^{\deg(a)\deg(D)}aD(b)$ で、奇数次（$d$、内部積）が反導分です。リー微分・内部積・外微分は、無限次元の次数付きリー代数をなします（nLab の導分のページ、Wikipedia の Generalizations of the derivative の要約）。
 
+導分と交換子の関係（$[D,f]=f'$、リー括弧、カルタンの公式）は §9 で、関数の合成の交換子は[関数・線形写像のノート](functions_linear_maps_derivatives_integrals.md)の Part II §12 で扱います。
+
 <a id="p3-8"></a>
 
 ## 8. 分数階微分
@@ -397,6 +409,143 @@ $$
 整数階の微分を $\alpha$ 階に拡張しますが、定義が複数あります。**リーマン・リウヴィル**は、$\alpha$ 階の積分 $I^\alpha f=\frac1{\Gamma(\alpha)}\int_0^x(x-s)^{\alpha-1}f(s)\,ds$ を作り、それを整数階微分したものです。**カプート**は、先に整数階微分してから $I^\alpha$ を作ります。
 
 SymPy で $\alpha=\tfrac12$ を計算すると、定数 $f=1$ のリーマン・リウヴィル微分は $\dfrac1{\sqrt{\pi x}}$ で**0ではありません**（カプートは $0$）。$f=x$ は $\dfrac{2\sqrt x}{\sqrt\pi}=\dfrac{\Gamma(2)}{\Gamma(3/2)}x^{1/2}$ です。このため、リーマン・リウヴィルでは、初期条件に分数階微分の値が要り、カプートでは、通常の整数階の初期値で済みます（Springer・arXiv の比較論文の要約）。
+
+
+<a id="p3-9"></a>
+
+## 9. 交換子と反交換子：関数の側では
+
+行列では $[A,B]=AB-BA$ と $\{A,B\}=AB+BA$（パウリ行列なら $\{\sigma_i,\sigma_j\}=2\delta_{ij}I$）を使います。関数でも同じ記号が使えるのかを整理します。**関数どうしの合成**については、差 $f\circ g-g\circ f$ が双線形でもヤコビ恒等式を満たすものでもなく（近環）、群の交換子 $f\circ g\circ f^{-1}\circ g^{-1}$ を使うことを、[関数・線形写像のノート](functions_linear_maps_derivatives_integrals.md)の Part II §12 で扱いました。ここでは、関数に**作用する演算子**の側を見ます。
+
+<a id="p3-9a"></a>
+
+### 9-a. 関数そのものは可換
+
+関数の点ごとの積は可換です（$fg=gf$）。したがって、関数の掛け算どうしの交換子は $0$ で、非可換性は、掛け算と微分のような**演算子の組**に現れます。
+
+<a id="p3-9b"></a>
+
+### 9-b. 微分と掛け算：$[D,f]=f'$
+
+$D=d/dx$ と、関数 $f$ を掛ける演算子 $f\cdot$ を、関数 $h$ に作用させます。ライプニッツ則 $D(fh)=f'h+fDh$ から、
+
+$$
+[D,\,f\cdot]\,h=D(fh)-f\,Dh=f'h+fDh-fDh=f'h\qquad\Longrightarrow\qquad[D,\,f\cdot]=f'\cdot\tag{III-10}
+$$
+
+です。**関数の導関数は、$D$ との交換子**です。(III-8) のライプニッツ則 $D(ab)=D(a)b+aD(b)$ は、「$D$ と掛け算の交換子が、また掛け算になる」という言い換えです。$f=x$ なら $[D,x]=1$ で、量子力学の $\hat p=-i\hbar D$ では
+
+$$
+[\hat p,\hat x]\,h=-i\hbar\big(D(xh)-xDh\big)=-i\hbar\,h\qquad\Longrightarrow\qquad[\hat x,\hat p]=i\hbar
+$$
+
+です（[bra_ket_notation_path_integral.md](../05_量子力学/bra_ket_notation_path_integral.md)）。
+
+<a id="p3-9c"></a>
+
+### 9-c. ベクトル場のリー括弧
+
+ベクトル場 $X=X^i\partial_i$、$Y=Y^j\partial_j$ を、関数 $f$ に続けて作用させます。積の微分で展開すると、
+
+$$
+X(Yf)=X^i\partial_i\big(Y^j\partial_jf\big)=X^i(\partial_iY^j)\,\partial_jf+X^iY^j\,\partial_i\partial_jf
+$$
+
+$$
+Y(Xf)=Y^j(\partial_jX^i)\,\partial_if+Y^jX^i\,\partial_j\partial_if
+$$
+
+です。差を取ると、2階微分の項 $X^iY^j\partial_i\partial_jf$ と $Y^jX^i\partial_j\partial_if$ は、混合偏微分の対称性（$\partial_i\partial_j=\partial_j\partial_i$）で打ち消し合い、1階微分の項だけが残ります。
+
+$$
+[X,Y]f=X(Yf)-Y(Xf)=\big(X^i\partial_iY^j-Y^i\partial_iX^j\big)\,\partial_jf\tag{III-11}
+$$
+
+（2つ目の項は、添字 $i,j$ を付け替えました。）$[X,Y]$ は、2階の演算子どうしの差なのに、**1階の演算子（ベクトル場）**になります。これが**リー括弧**です。例えば $X=\partial_x$、$Y=x\,\partial_y$（成分 $X=(1,0)$、$Y=(0,x)$）なら、$j=y$ の成分が $1\cdot\partial_x(x)-0=1$、$j=x$ の成分が $0$ なので $[\partial_x,\,x\partial_y]=\partial_y$ です。(III-11) を、一般の関数 $f,X^i,Y^i$（2次元）で SymPy でも確かめました。
+
+<a id="p3-9d"></a>
+
+### 9-d. ポアソン括弧
+
+位相空間（座標 $q^i$、運動量 $p_i$）の関数 $f,g$ に対し、**ポアソン括弧**は
+
+$$
+\{f,g\}=\frac{\partial f}{\partial q^i}\frac{\partial g}{\partial p_i}-\frac{\partial f}{\partial p_i}\frac{\partial g}{\partial q^i}\tag{III-12}
+$$
+
+です（[lie_derivative.md](../02_微分幾何/lie_derivative.md) の付録 C-3 と同じ定義）。$\{q,p\}=1$ で、量子力学の $[\hat x,\hat p]=i\hbar$ に対応します。ポアソン括弧は、双線形、反対称、ヤコビ恒等式に加えて、積についてライプニッツ則 $\{fg,h\}=f\{g,h\}+\{f,h\}g$ を満たします（具体的な関数で SymPy で確認）。**関数の空間そのものに、リー括弧と積が整合した構造を入れる**もので、関数の合成の差（Part II §12）が持てなかった構造です。ハミルトンベクトル場 $X_f$（$X_H(f)=\{f,H\}$）との関係は
+
+$$
+[X_f,X_g]=-X_{\{f,g\}}\tag{III-13}
+$$
+
+です（同付録の C-4 に証明があり、一般の関数 $H$ に作用させる形で SymPy でも確認しました）。符号は、ハミルトンベクトル場の定義の流儀で変わることがあります（検索した出典の1つは、$\iota_{X_f}\omega=df$ で定義して $X_{\{f,g\}}=-[X_f,X_g]$ と、(III-13) と同じ符号の式を書いていました。本を読むときは、$X_f$ の定義を確かめてください）。ディラックの対応規則は、$\{\ ,\ \}\to\frac1{i\hbar}[\ ,\ ]$ です。記号 $\{\ ,\ \}$ は反交換子にも使うので、混同に注意してください。
+
+<a id="p3-9e"></a>
+
+### 9-e. 反交換子：微分形式、外微分と内部積
+
+**外積代数**：微分形式の楔積は $\alpha\wedge\beta=(-1)^{pq}\beta\wedge\alpha$（$\alpha$ が $p$-形式、$\beta$ が $q$-形式）で、1-形式どうしは自動的に反可換です（$dx\wedge dy=-dy\wedge dx$）。0-形式（関数）は可換です。これは、二次形式が $0$ のクリフォード代数です。計量 $g$ があると、基底の関係が $e_ie_j+e_je_i=2g_{ij}$ になります。パウリ行列は $\{\sigma_i,\sigma_j\}=2\delta_{ij}I$ を満たし（SymPy で確認）、この関係の $3$ 次元での表現です（[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)の Part V）。
+
+**次数付き交換子**：奇数次の演算子（$d$ と内部積 $i_X$）どうしでは、交換子の符号が反転して、反交換子になります。
+
+$$
+[D_1,D_2]=D_1D_2-(-1)^{|D_1||D_2|}D_2D_1\qquad\Longrightarrow\qquad[d,i_X]=d\,i_X+i_X\,d\tag{III-14}
+$$
+
+**カルタンの公式** $\mathcal L_X=d\,i_X+i_X\,d$ は、「リー微分は、$d$ と $i_X$ の反交換子」という意味です（[lie_derivative.md](../02_微分幾何/lie_derivative.md) の §24 に証明）。1-形式 $\omega=\omega_idx^i$ について、成分で確かめます。内部積と外微分の成分は $i_X\omega=\omega_iX^i$、$(d\omega)_{ij}=\partial_i\omega_j-\partial_j\omega_i$、$(i_X\alpha)_j=X^i\alpha_{ij}$ です（同ノートの §22）。
+
+$$
+\begin{aligned}
+\big(d(i_X\omega)\big)_j&=\partial_j\big(X^i\omega_i\big)=(\partial_jX^i)\,\omega_i+X^i\partial_j\omega_i\\
+\big(i_X(d\omega)\big)_j&=X^i(d\omega)_{ij}=X^i\partial_i\omega_j-X^i\partial_j\omega_i
+\end{aligned}
+$$
+
+足すと、$X^i\partial_j\omega_i$ が打ち消し合い、
+
+$$
+\big(d\,i_X\omega+i_X\,d\omega\big)_j=\omega_i\,\partial_jX^i+X^i\,\partial_i\omega_j=\big(\mathcal L_X\omega\big)_j\tag{III-15}
+$$
+
+で、1-形式のリー微分の成分の式（同ノートの §18）と一致します。2次元の一般の1-形式でも、SymPy で確かめました。$d^2=\tfrac12\{d,d\}=0$ も、同じ形の式です。
+
+**導分との関係**：$d$ と $i_X$ は反導分で、2つの反導分の反交換子は導分になり、それがリー微分 $\mathcal L_X$（導分）です（出典：nLab の Cartan's homotopy formula の要約）。
+
+<a id="p3-9f"></a>
+
+### 9-f. ディラック作用素：ラプラシアンの平方根
+
+パウリ行列を使って、1階の演算子 $D=\sigma_i\partial_i$（3次元）を作ります。2乗すると、
+
+$$
+D^2=\sigma_i\sigma_j\,\partial_i\partial_j,\qquad\sigma_i\sigma_j=\tfrac12\{\sigma_i,\sigma_j\}+\tfrac12[\sigma_i,\sigma_j]=\delta_{ij}I+i\varepsilon_{ijk}\sigma_k
+$$
+
+です。第2項は、$\varepsilon_{ijk}$ が $i,j$ について反対称、$\partial_i\partial_j$ が $i,j$ について対称（混合偏微分の対称性）なので、$i,j$ で和を取ると打ち消し合って $0$ になります（対称 × 反対称の和）。残るのは $\delta_{ij}\partial_i\partial_j=\nabla^2$ です。
+
+$$
+(\vec\sigma\cdot\nabla)^2=\nabla^2\tag{III-16}
+$$
+
+一般の2成分の関数 $(\psi_1,\psi_2)$ について SymPy で確かめました。一般に、$\{\gamma^\mu,\gamma^\nu\}=2g^{\mu\nu}$ を満たす行列 $\gamma^\mu$ で $D=\gamma^\mu\partial_\mu$ を作ると、平らな座標で $D^2=g^{\mu\nu}\partial_\mu\partial_\nu$ になります（計量の符号の流儀で、$\{\gamma^\mu,\gamma^\nu\}=\pm2g^{\mu\nu}$ と書く本もあります）。ディラックが「ラプラシアンの平方根」として考えた構造で、**クリフォード代数の反交換関係が、1階の微分作用素を、2階のラプラシアンの平方根にしています**。
+
+<a id="p3-9g"></a>
+
+### 9-g. 合成については
+
+関数の合成 $f\circ g+g\circ f$ には、自然な構造がありません。$f(x)=-x$、$g(x)=x^2$ では $f\circ g+g\circ f=-x^2+x^2=0$ になりますが、$f$ が線形（加法的）だったための偶然です。反交換関係が現れる関数の側の舞台は、上の 9-e と 9-f（微分形式と、微分作用素に行列を掛けたもの）です。
+
+<a id="p3-9h"></a>
+
+### 9-h. まとめ
+
+| 対象 | 交換子 | 反交換子 |
+|---|---|---|
+| 線形写像（行列） | $AB-BA$ | $AB+BA$（パウリ行列は $2\delta_{ij}I$） |
+| 一般の関数（合成） | 群の交換子（無限小でリー括弧）。差は双線形でない | 自然な構造は無い |
+| 関数に作用する演算子 | $[D,f]=f'$（III-10）、リー括弧（III-11） | $\{d,i_X\}=\mathcal L_X$（III-15）、ディラック作用素（III-16） |
+| 位相空間の関数 | ポアソン括弧（III-12、III-13） | — |
 
 ---
 
@@ -509,7 +658,7 @@ $R_Y(\theta)\lvert0\rangle$ の $\langle Z\rangle=\cos\theta$ で、$\theta=0.7$
 | 外微分・リー微分・共変微分・共変外微分 | あり |
 | 複素微分（コーシー・リーマン、$\partial,\bar\partial$） | $\bar\partial$ は断片的。コーシー・リーマン方程式は未整備 |
 | 確率微分（伊藤の補題） | 名前のみ。定義は未整備 |
-| 導分 | このノートの Part III §7 のみ |
+| 導分 | このノートの Part III §7（交換子・反交換子との関係は §9） |
 | 分数階微分 | このノートの Part III §8 のみ |
 | 差分・スペクトル法 | あり |
 | 自動微分 | [autodiff_and_coordinates.md](autodiff_and_coordinates.md) |
@@ -523,7 +672,7 @@ $R_Y(\theta)\lvert0\rangle$ の $\langle Z\rangle=\cos\theta$ で、$\theta=0.7$
 | 層 | 要点 |
 |---|---|
 | 1 定義の強さ | フレシェ ⇒ ハダマール ⇒ ガトー ⇒ 全方向の方向微分 ⇒ 偏微分。どれも逆は不成立。3つの反例（非加法的な方向微分、偏微分だけ、線形なガトー微分で不連続）を、検算つきで示した。ガトー微分の定義は著者で違う |
-| 2 対象と構造 | 汎関数微分は内積で決まる（離散化した自動微分の成分は $\Delta x$ 倍）。弱微分は部分積分で定義。ラドン・ニコディム微分は、ヤコビアンの一般化。外微分は接続不要、リー微分は $X$ の近傍が要る（(III-5)）、共変微分は $X$ の1点だけ（(III-4)）。ウィルティンガー微分、伊藤とストラトノビッチ（(III-7)）、導分と反導分、リーマン・リウヴィルとカプート |
+| 2 対象と構造 | 汎関数微分は内積で決まる（離散化した自動微分の成分は $\Delta x$ 倍）。弱微分は部分積分で定義。ラドン・ニコディム微分は、ヤコビアンの一般化。外微分は接続不要、リー微分は $X$ の近傍が要る（(III-5)）、共変微分は $X$ の1点だけ（(III-4)）。ウィルティンガー微分、伊藤とストラトノビッチ（(III-7)）、導分と反導分、リーマン・リウヴィルとカプート、関数の側の交換子（$[D,f]=f'$、リー括弧、ポアソン括弧）と反交換子（カルタンの公式、ディラック作用素） |
 | 3 計算法 | 差分は近似（$O(h)$、$O(h^2)$、丸め誤差で頭打ち）、自動微分は連鎖律で値を計算、パラメータシフト則（(IV-1)）は厳密 |
 
 「微分」という一語は、**何を前提にして、何に対して、何を返す**のかを言わないと、数学としては定まりません。この地図は、その3点を、各微分について1行で言えるようにするためのものです。
