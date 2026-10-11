@@ -143,7 +143,8 @@ def audit(base: str | None, head: str, dry_run: bool) -> None:
         try:
             result = subprocess.run(
                 [executable, "exec", "--skip-git-repo-check", "--sandbox", "read-only", "--output-last-message", str(answer), "-"],
-                cwd=snapshot, input=prompt, text=True, capture_output=True, timeout=900, check=False,
+                cwd=snapshot, input=prompt, text=True, encoding="utf-8", errors="replace",
+                capture_output=True, timeout=900, check=False,
             )
         except (OSError, subprocess.TimeoutExpired) as error:
             print(f"Codex audit pending ({label}): {error}", file=sys.stderr)
@@ -152,6 +153,7 @@ def audit(base: str | None, head: str, dry_run: bool) -> None:
             print(f"Codex audit pending ({label}): Codex exited {result.returncode}; retry on a later push", file=sys.stderr)
             return
         body = answer.read_text(encoding="utf-8")
+        body = body.replace(snapshot.as_posix(), ROOT.as_posix()).replace(str(snapshot), str(ROOT))
         report.write_text(
             f"# Codex audit: {label}\n\nHead: `{head}`  \nBase: `{base or 'root'}`\n\n"
             "Scope: committed changes listed below; CSV and generated results excluded.\n\n"
