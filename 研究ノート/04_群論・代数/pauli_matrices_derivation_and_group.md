@@ -1,6 +1,6 @@
 # パウリ行列 ―導出・交換関係・ブロッホ球・群構造―
 
-> **作成** 2026-09-17　**更新** 2026-10-03
+> **作成** 2026-09-17　**更新** 2026-10-11
 > パウリ行列の導出（なぜこの3つの行列なのか）、積と交換関係、固有ベクトルとブロッホ球、指数関数と二重被覆、群構造。
 > 図のスクリプトと Lean の形式証明あり。
 
@@ -665,6 +665,50 @@ $$
 **補足（極は座標特異点）**：$\theta=0$（北極、$|0\rangle$）と $\theta=\pi$（南極、$|1\rangle$）では $\phi$ が決まりません（$\sin\frac\theta2$ や $\cos\frac\theta2$ が $0$ になり、$e^{i\phi}$ が効かなくなる）。これは、球座標の極が座標特異点であるのと同じ現象で、状態そのものに特別なことは起きていません（[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md)の Part I §5、Part IX §1）。
 
 **補足（リーマン球面）**：比 $\beta/\alpha=e^{i\phi}\tan\frac\theta2$ は、$\hat n$ を使うと $\dfrac{n_x+in_y}{1+n_z}$ で、[多様体のノート](../03_多様体・微分形式・トポロジー/manifolds_introduction.md#p5-3)の南極からの立体射影 $\sigma_S$ を複素数で書いたものです。大域位相を除いた量子ビットの状態の空間は、多様体のノートの Part V §3 の**リーマン球面 $\mathbb{CP}^1$** と同じものです。
+
+**補足（範囲、1対1、ホップ写像、教科書との対応）**
+
+ブロッホ球の定義を、文献（Wikipedia の Bloch sphere など）の標準的な形と照らして、正確に整理します。
+
+**範囲**：角度の範囲は
+
+$$
+0\leq\theta\leq\pi,\qquad0\leq\phi<2\pi
+$$
+
+とします（文献でも同じ範囲です）。$\theta$ は北極（$|0\rangle$）から測った角度で、$\phi$ は $x$ 軸から測った経度です。
+
+**1対1であることの確認**：大域位相を除いた状態と、球面上の点 $\hat n$ が1対1に対応することを、2つに分けて確かめます。
+
+- **全射（どの状態も表せる）**：上で見た通り、$\alpha\geq0$ にそろえると、$\alpha=\cos\frac\theta2\in[0,1]$ から $\theta=2\arccos\alpha\in[0,\pi]$ が決まります。$\beta\neq0$ なら、$\beta=|\beta|e^{i\phi}$ の偏角から $\phi$ が決まります。
+- **単射（違う点は違う状態）**：$|{+}\hat n\rangle$ と $|{+}\hat m\rangle$ が同じ状態（大域位相の違いだけ）なら、$\big|\langle{+}\hat m|{+}\hat n\rangle\big|=1$ です。§5 の式 $\big|\langle{+}\hat m|{+}\hat n\rangle\big|^2=\frac12(1+\hat m\cdot\hat n)$ より $\hat m\cdot\hat n=1$ で、単位ベクトルどうしなので $\hat m=\hat n$ です。つまり、$\hat n$ が違えば、別の状態です。
+
+（極 $\theta=0,\pi$ では $\phi$ が定まりませんが、点としては1つです。上の「極は座標特異点」の補足の通りです。）
+
+**$\theta$ を負にも許す書き方について**：$-\pi<\theta<0$ を許すと、同じ状態を2回数えます。$\sin\frac\theta2<0$ なので、$\theta'=|\theta|$、$\phi'=\phi+\pi$ とおくと
+
+$$
+\cos\frac\theta2\,|0\rangle+e^{i\phi}\sin\frac\theta2\,|1\rangle
+=\cos\frac{\theta'}2\,|0\rangle+\underbrace{(-e^{i\phi})}_{=\,e^{i(\phi+\pi)}=\,e^{i\phi'}}\sin\frac{\theta'}2\,|1\rangle
+$$
+
+で、$(\theta,\phi)$（$\theta<0$）と $(|\theta|,\ \phi+\pi)$ は、位相まで含めて同じベクトルです（ランダムな角度で数値でも確認しています）。球面全体を1回ずつ覆うには、$0\leq\theta\leq\pi$ で十分です。
+
+**ホップ写像との関係**：§4 の期待値の式を、$|\psi\rangle=\alpha|0\rangle+\beta|1\rangle$（$|\alpha|^2+|\beta|^2=1$）に対して書くと、$\hat n=\langle\vec\sigma\rangle$ は
+
+$$
+\hat n=\big(2\operatorname{Re}(\bar\alpha\beta),\ 2\operatorname{Im}(\bar\alpha\beta),\ |\alpha|^2-|\beta|^2\big)
+$$
+
+です。大域位相 $e^{i\gamma}$ を掛けても、$\bar\alpha\beta\to e^{-i\gamma}\bar\alpha\,e^{i\gamma}\beta=\bar\alpha\beta$、$|\alpha|^2$、$|\beta|^2$ は変わらないので、$\hat n$ は変わりません。この写像は、単位3次元球面 $S^3=\{(\alpha,\beta):|\alpha|^2+|\beta|^2=1\}\subset\mathbb C^2$ から $S^2$（ブロッホ球）への写像で、**ホップ写像**と呼ばれます。1つの点 $\hat n$ に写る $S^3$ の点の集まり（ファイバー）は、大域位相 $e^{i\gamma}$ を掛けてできる円周です。「状態ベクトルの空間 $S^3$ から、大域位相の円周を同一視して、ブロッホ球 $S^2$ ができる」というのが、ホップ写像の見方です（上のリーマン球面 $\mathbb{CP}^1$ の補足と同じ内容です）。式の数値確認は、図のスクリプトの `check_bloch_formulas` にあります。
+
+**教科書との対応**：『量子コンピューティング 基本アルゴリズムから量子機械学習まで』（オーム社）p.11 は、
+
+$$
+|\psi\rangle=e^{i\Phi}\Big(\cos\frac\theta2\,|0\rangle+\sin\frac\theta2\,e^{i\phi}\,|1\rangle\Big)
+$$
+
+と書き、全体の位相 $e^{i\Phi}$（グローバル位相）を無視して、状態を球面上の1点として表します。$e^{i\Phi}$ を落とすと、上の $|{+}\hat n\rangle$ と同じ式です。教科書の $|\pm\rangle$、$|{\pm i}\rangle$ は、上の表の $|{\pm}\hat x\rangle$、$|{\pm}\hat y\rangle$（$\hat n\cdot\vec\sigma$ の固有値 $+1$ の固有ベクトル $|{+}\hat n\rangle$ の $\hat n=\pm\hat x,\pm\hat y$）にあたります。教科書は、緯度 $\theta$ の範囲を「$-\pi\sim\pi$」と書いていますが（図 2.1 では $\theta$ を $Z$ 軸から測っています）、上の通り、$0\leq\theta\leq\pi$ で十分です。出版社の正誤表（第1刷〜第6刷用）に、この箇所の項目はありません。
 
 <a id="p6-4"></a>
 

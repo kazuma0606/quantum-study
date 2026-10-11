@@ -318,6 +318,27 @@ def check_bloch_formulas():
         psi0 = psi * np.exp(-1j * np.angle(psi[0]))
         t0, p0 = 2 * np.arccos(psi0[0].real), np.angle(psi0[1])
         assert np.allclose(psi0, ket_n(t0, p0))
+        assert 0 <= t0 <= np.pi                                                             # α ≥ 0 とそろえると θ ∈ [0, π]
+        # 大域位相を変えても (θ, φ) は同じ（そろえ方が1通り）
+        gamma = rng.uniform(-np.pi, np.pi)
+        psi_g = psi * np.exp(1j * gamma)
+        psi_g0 = psi_g * np.exp(-1j * np.angle(psi_g[0]))
+        assert np.allclose(psi_g0, psi0)
+        # ホップ写像 (α, β) → (2Re ᾱβ, 2Im ᾱβ, |α|²−|β|²) は、大域位相によらず、⟨σ⟩ = n に等しい単位ベクトル
+        a, b = psi[0], psi[1]
+        hopf = np.array([2 * (np.conj(a) * b).real, 2 * (np.conj(a) * b).imag, abs(a) ** 2 - abs(b) ** 2])
+        assert np.allclose(hopf, [np.vdot(psi, S @ psi).real for S in (SX, SY, SZ)])
+        assert np.isclose(np.linalg.norm(hopf), 1.0)
+        ag_, bg_ = psi_g[0], psi_g[1]
+        assert np.allclose(hopf, [2 * (np.conj(ag_) * bg_).real, 2 * (np.conj(ag_) * bg_).imag, abs(ag_) ** 2 - abs(bg_) ** 2])
+        # 単射：|⟨+m|+n⟩| = 1 となるのは m = n のときだけ（(1 + n·m)/2 = 1 ⇔ n·m = 1）
+        assert np.isclose(abs(np.vdot(ket_n(th, ph), ket_n(th, ph))), 1.0)
+        th3, ph3 = rng.uniform(0, np.pi), rng.uniform(0, 2 * np.pi)
+        if np.linalg.norm(nvec(th3, ph3) - n) > 1e-3:
+            assert abs(np.vdot(ket_n(th3, ph3), vp)) < 1 - 1e-9
+        # θ < 0 を許すと同じ状態を2回数える：(θ, φ) と (|θ|, φ + π) は位相まで含めて同じベクトル
+        tneg = -rng.uniform(0.05, np.pi - 0.05)
+        assert np.allclose(ket_n(tneg, ph), ket_n(-tneg, ph + np.pi))
 
 
 def pauli05():
