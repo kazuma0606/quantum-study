@@ -50,19 +50,32 @@ def base_for_new_ref(head: str) -> str | None:
     return result.stdout.decode().strip() if result.returncode == 0 else None
 
 
+def empty_tree() -> str:
+    result = subprocess.run(
+        ["git", "hash-object", "-t", "tree", "-w", "--stdin"],
+        cwd=ROOT, input=b"", capture_output=True, check=True,
+    )
+    return result.stdout.decode().strip()
+
+
 def changes(base: str | None, head: str) -> tuple[list[str], str]:
     if base is None:
         raw = git("ls-tree", "-r", "--name-only", "-z", head).stdout
         names = [p for p in raw.decode("utf-8").split("\0") if p]
-        diff_args = ("show", "--format=", "--no-ext-diff", "--find-renames", "-w", "--ignore-blank-lines", head)
+        base = empty_tree()
     else:
         raw = git("diff", "--name-only", "-z", "--find-renames", base, head).stdout
         names = [p for p in raw.decode("utf-8").split("\0") if p]
-        diff_args = ("diff", "--no-ext-diff", "--find-renames", "-w", "--ignore-blank-lines", base, head)
     selected = sorted({p for p in names if reviewable(p)})
     if not selected:
         return [], ""
-    patch = git(*diff_args, "--", *selected).stdout.decode("utf-8", errors="replace")
+    markdown = [p for p in selected if Path(p).suffix.lower() == ".md"]
+    other = [p for p in selected if p not in markdown]
+    patches = []
+    for files, options in ((markdown, ("-w", "--ignore-blank-lines")), (other, ())):
+        if files:
+            patches.append(git("diff", "--no-ext-diff", "--find-renames", *options, base, head, "--", *files).stdout)
+    patch = b"".join(patches).decode("utf-8", errors="replace")
     return selected, patch
 
 

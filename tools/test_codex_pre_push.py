@@ -95,6 +95,15 @@ class PendingAuditTest(unittest.TestCase):
             git("commit", "-qam", "content change")
             content_head = git("rev-parse", "HEAD")
 
+            code = repo / "sample.py"
+            code.write_text('VALUE = """alpha\nbeta"""\n', encoding="utf-8")
+            git("add", "sample.py")
+            git("commit", "-qm", "add code")
+            code_base = git("rev-parse", "HEAD")
+            code.write_text('VALUE = """alpha\n\nbeta"""\n', encoding="utf-8")
+            git("commit", "-qam", "blank line in string")
+            code_head = git("rev-parse", "HEAD")
+
             with patch.object(hook, "ROOT", repo):
                 files, blank_patch = hook.changes(base, blank_head)
                 self.assertEqual(files, ["note.md"])
@@ -102,6 +111,34 @@ class PendingAuditTest(unittest.TestCase):
                 files, content_patch = hook.changes(blank_head, content_head)
                 self.assertEqual(files, ["note.md"])
                 self.assertIn("gamma", content_patch)
+                files, code_patch = hook.changes(code_base, code_head)
+                self.assertEqual(files, ["sample.py"])
+                self.assertIn("+\n", code_patch)
+
+    def test_root_retry_diff_includes_older_and_newer_commits(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+
+            def git(*args: str) -> str:
+                result = subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)
+                return result.stdout.decode().strip()
+
+            git("init", "-q")
+            git("config", "user.name", "Audit Test")
+            git("config", "user.email", "audit@example.invalid")
+            (repo / "first.md").write_text("first commit\n", encoding="utf-8")
+            git("add", "first.md")
+            git("commit", "-qm", "root")
+            (repo / "second.py").write_text("SECOND = True\n", encoding="utf-8")
+            git("add", "second.py")
+            git("commit", "-qm", "later")
+            head = git("rev-parse", "HEAD")
+
+            with patch.object(hook, "ROOT", repo):
+                files, patch_text = hook.changes(None, head)
+                self.assertEqual(files, ["first.md", "second.py"])
+                self.assertIn("first commit", patch_text)
+                self.assertIn("SECOND = True", patch_text)
 
 
 if __name__ == "__main__":
