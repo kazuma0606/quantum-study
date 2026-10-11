@@ -51,6 +51,7 @@ FORMS = {
 }
 I_ZI = nm.LABELS15.index("ZI")
 KMAX = 12
+GAMMA_T1 = 6e-4                            # CX ごとの振幅減衰の目安（0.1 μs / 160 μs）
 CALIB_R = np.array([0.00182, 0.00213])     # 較正の CZ 誤差の中央値（113 日分、22-23 と 142-143。calibration_history_ibm_fez.csv）
 
 
@@ -65,6 +66,8 @@ def add_common_args(ap) -> None:
     ap.add_argument("--calib", action="store_true",
                     help="較正の値を事前分布に入れる：0.8Σθ² + 0.75p が較正の CZ 誤差のまわり（対数正規、幅 0.5）")
     ap.add_argument("--label", default="", help="結果のファイル名の末尾に付ける名前（同じ設定を、サンプル数や種を変えて回すとき）")
+    ap.add_argument("--t1", action="store_true", help="CX ごとの振幅減衰（T1 緩和）を入れる")
+    ap.add_argument("--obs-scale", action="store_true", help="誤差棒を広げる係数（トロッター回路・直接の測定で別々）を入れる")
     ap.add_argument("--extra-c1", action="store_true",
                     help="合成データに、制御を |1> にした直接の測定を加える（来月の測定の設計の下調べ）")
 
@@ -77,6 +80,10 @@ def make_tag(args) -> str:
         tag += f"_w{args.prior_width:g}"
     if args.calib:
         tag += "_calib"
+    if getattr(args, "t1", False):
+        tag += "_t1"
+    if getattr(args, "obs_scale", False):
+        tag += "_os"
     if args.extra_c1:
         tag += "_c1"
     if args.label:
@@ -85,7 +92,8 @@ def make_tag(args) -> str:
 
 
 def model_opts(args) -> dict:
-    return {"width": args.prior_width, "calib": args.calib}
+    return {"width": args.prior_width, "calib": args.calib, "t1": getattr(args, "t1", False),
+            "obs_scale": getattr(args, "obs_scale", False)}
 
 
 def build_data(args):
@@ -140,17 +148,26 @@ def _wrap(x):
     return jnp.arctan2(jnp.sin(x), jnp.cos(x))
 
 
-def predictions(theta_job, p_job, prep):
-    """ジョブごとのパラメータから、すべての観測の予測を、観測の順に並べて返す（y と sd も同じ順）。"""
+def predictions(theta_job, p_job, prep, gamma_job=None):
+    """ジョブごとのパラメータから、すべての観測の予測を、観測の順に並べて返す（y と sd も同じ順）。
+    gamma_job があれば、CX ごとの振幅減衰（T1）も入れる。"""
     mus, ys, sds = [], [], []
     for (order, twirled), g in sorted(prep["tgroups"].items()):
-        err = jax.vmap(lambda th, p: nm.error_sup(th, p, twirled))(theta_job[g["job"]], p_job[g["job"]])
+        if gamma_job is None:
+            err = jax.vmap(lambda th, p: nm.error_sup(th, p, twirled))(theta_job[g["job"]], p_job[g["job"]])
+        else:
+            err = jax.vmap(lambda th, p, ga: nm.error_sup(th, p, twirled, ga))(theta_job[g["job"]], p_job[g["job"]],
+                                                                               gamma_job[g["job"]])
         z = jax.vmap(lambda e, n: nm.trotter_z0(order, n, e))(err, jnp.asarray(g["n"]))
         mus.append(z[g["mask"]])
         ys.append(g["z"][g["mask"]])
         sds.append(g["sem"][g["mask"]])
     for (axis, target, c1, unflip), g in sorted(prep["pgroups"].items()):
-        err = jax.vmap(lambda th, p: nm.error_sup(th, p, False))(theta_job[g["job"]], p_job[g["job"]])
+        if gamma_job is None:
+            err = jax.vmap(lambda th, p: nm.error_sup(th, p, False))(theta_job[g["job"]], p_job[g["job"]])
+        else:
+            err = jax.vmap(lambda th, p, ga: nm.error_sup(th, p, False, ga))(theta_job[g["job"]], p_job[g["job"]],
+                                                                             gamma_job[g["job"]])
         e_ref, e_y = jax.vmap(lambda e: nm.probe_expectations(e, axis, target, tuple(range(KMAX + 1)),
                                                               control_one=c1, unflip=unflip))(err)
         ph = jnp.arctan2(e_y, e_ref)[jnp.arange(len(g["k"])), jnp.asarray(g["k"])]
@@ -161,7 +178,7 @@ def predictions(theta_job, p_job, prep):
 
 
 def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = None):
-    opts = opts or {"width": 0.05, "calib": False}
+    opts = {"width": 0.05, "calib": False, "t1": False, "obs_scale": False, **(opts or {})}
     w = opts["width"]
     active = FORMS[form]
     if active == "branch":
@@ -224,7 +241,19 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         pair_mean = jax.ops.segment_sum(raw, jp, num_segments=2) / jnp.bincount(jp, length=2)
         delta = numpyro.deterministic("delta_job", raw - pair_mean[jp])
         theta_job = theta_job.at[:, I_ZI].add(delta)
-    mu, y, sd_obs = predictions(theta_job, p[jp], prep)
+    gamma_job = None
+    if opts["t1"]:
+        # CX ごとの振幅減衰 γ = 1 − exp(−t/T1)。較正の T1（中央値 約 160 μs、calibration_history_ibm_fez.csv）と、
+        # CX 1回と前後の1量子ビットゲートの時間 約 0.1 μs から、γ ≈ 6×10⁻⁴ を中心に置く（対数で幅 0.7、およそ 0.5〜2 倍）
+        gamma = numpyro.sample("gamma", dist.LogNormal(jnp.full(2, np.log(GAMMA_T1)), 0.7))
+        gamma_job = gamma[jp]
+    mu, y, sd_obs = predictions(theta_job, p[jp], prep, gamma_job)
+    if opts["obs_scale"]:
+        # 誤差棒の広げ方：統計誤差に入っていないばらつき（読み出し補正の不確かさなど。10/11 の事後予測チェックで約 1.3 倍）。
+        # トロッター回路と、直接の測定（位相）で別々に置く
+        scale = numpyro.sample("obs_scale", dist.LogNormal(jnp.zeros(2), 0.5))
+        n_trot = sum(int(g["mask"].sum()) for g in prep["tgroups"].values())
+        sd_obs = sd_obs * jnp.where(jnp.arange(len(y)) < n_trot, scale[0], scale[1])
     numpyro.sample("y", dist.Normal(mu, sd_obs), obs=y)
 
 
@@ -248,6 +277,9 @@ def main() -> None:
     ap.add_argument("--max-tree-depth", type=int, default=8, help="1回の更新で使う勾配の数の上限は 2^深さ - 1")
     ap.add_argument("--init", choices=["median", "map"], default="median",
                     help="map：s2_map.py で見つけた一番高い山（_map_init.npz）の近くから、チェーンごとに少しずらして始める")
+    ap.add_argument("--sigma-floor", type=float, default=1e-4, help="--init map で、MAP の σ_drift がこれより小さければ置き直す")
+    ap.add_argument("--sigma-reset", type=float, default=1e-3, help="置き直すときの σ_drift の値")
+    ap.add_argument("--map-from", help="MAP の出発点を、別のタグの _map_init.npz から読む（MAP 探索をやり直さずに NUTS だけ回すとき）")
     args = ap.parse_args()
     prep, truth_meta = build_data(args)
     tag = make_tag(args)
@@ -264,9 +296,19 @@ def main() -> None:
     if args.init == "map":
         from jax.flatten_util import ravel_pytree
         from numpyro.infer.util import initialize_model
-        info = initialize_model(jax.random.PRNGKey(args.seed), model, model_args=margs)
+        info = initialize_model(jax.random.PRNGKey(args.seed), model, model_args=margs, init_strategy=init_to_median)
         _, unravel = ravel_pytree(info.param_info.z)
-        x_map = np.load(OUT / f"{tag}_map_init.npz")["x"]
+        x_map = np.load(OUT / f"{args.map_from or tag}_map_init.npz")["x"]
+        if "sigma_drift" in info.param_info.z:
+            # 階層の広がり σ_drift は、MAP 探索で 0 へ落ちることがある（δ も 0 に寄せると事後密度がいくらでも高くなる、
+            # ニールの漏斗の首）。そこから始めると NUTS が抜け出せない（10/11、制御 |1> つき合成データの seed1 で確認）。
+            # 小さすぎるときは、妥当な値に置き直してから始める（制約のない空間では log σ）
+            flag = {k: jnp.full(jnp.shape(v), k == "sigma_drift", float) for k, v in info.param_info.z.items()}
+            i_sd = int(np.argmax(np.asarray(ravel_pytree(flag)[0])))
+            if np.exp(x_map[i_sd]) < args.sigma_floor:
+                log(f"MAP の σ_drift = {np.exp(x_map[i_sd]):.1e} は小さすぎる（漏斗の首）ので、{args.sigma_reset:.0e} に置き直す")
+                x_map = x_map.copy()
+                x_map[i_sd] = np.log(args.sigma_reset)
         rng = np.random.default_rng(args.seed)
         starts = [unravel(jnp.asarray(x_map + rng.normal(0, 1e-3, x_map.shape))) for _ in range(args.chains)]
         init_params = starts[0] if args.chains == 1 else jax.tree_util.tree_map(lambda *xs: jnp.stack(xs), *starts)
@@ -298,7 +340,7 @@ def main() -> None:
     np.savez_compressed(OUT / f"{tag}_draws.npz", log_lik=np.asarray(ll),
                         **{k: np.asarray(v) for k, v in samples.items()})
     import arviz as az
-    idata = az.from_dict({"posterior": {k: np.asarray(v) for k, v in samples.items() if k in ("theta", "p", "sigma_drift", "delta_job", "s", "tau")}})
+    idata = az.from_dict({"posterior": {k: np.asarray(v) for k, v in samples.items() if k in ("theta", "p", "sigma_drift", "delta_job", "s", "tau", "gamma", "obs_scale")}})
     summ = az.summary(idata)
     summ.to_csv(OUT / f"{tag}_summary.csv")
     meta = {"args": vars(args), "elapsed_s": elapsed, "divergences": divergences, "n_obs": int(ll.shape[1]),

@@ -153,12 +153,12 @@ def compare_to_nuts(samp: np.ndarray, label: str) -> list[dict]:
     return rows
 
 
-def train(inference, thetas, xs, max_epochs, proposal=None):
+def train(inference, thetas, xs, max_epochs, proposal=None, batch_size=512):
     import torch
     t1 = time.time()
     inference.append_simulations(torch.tensor(thetas, dtype=torch.float32), torch.tensor(xs, dtype=torch.float32),
                                  proposal=proposal)
-    est = inference.train(training_batch_size=512, max_num_epochs=max_epochs, show_train_summary=False)
+    est = inference.train(training_batch_size=batch_size, max_num_epochs=max_epochs, show_train_summary=False)
     log(f"学習完了：{time.time() - t1:.0f} 秒、検証の損失 {inference._summary['best_validation_loss'][-1]:.2f}")
     return est
 
@@ -187,12 +187,12 @@ def synthetic_check(prep, trotter, probes, posterior, dev) -> tuple[list[dict], 
     return rows, f"{hits}/{len(NAMES) - 1}"
 
 
-def sbc(sim, posterior, n_sets: int, n_draws: int, batch: int, seed: int, dev) -> dict:
+def sbc(sim, posterior, n_sets: int, n_draws: int, batch: int, seed: int, dev, draw_prior=None) -> dict:
     """シミュレーションに基づく較正（Talts ら 2018）：事前分布から正解を引いて合成データを作り、事後分布の中での正解の順位を数える。
     推定が正直なら、順位は一様に分布し、68%・90% 区間に正解が入る割合はそれぞれ 0.68・0.90 になる。"""
     import torch
     rng = np.random.default_rng(seed + 777)
-    th_true = PRIOR_MEAN + PRIOR_SD * rng.standard_normal((n_sets, len(NAMES)))
+    th_true = draw_prior(rng, n_sets) if draw_prior else PRIOR_MEAN + PRIOR_SD * rng.standard_normal((n_sets, len(NAMES)))
     th_true, xs = simulate(sim, th_true, batch, seed + 777, "SBC")
     ranks, in68, in90 = [], [], []
     t0 = time.time()
@@ -228,6 +228,9 @@ def main() -> None:
     ap.add_argument("--sbc-draws", type=int, default=500)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--tag", default="")
+    ap.add_argument("--box-k", type=float, default=0.0,
+                    help="0 より大きいとき：事前分布を、NUTS の事後分布の中央値 ± k×標準偏差の箱の中の一様分布に絞る（局所版）")
+    ap.add_argument("--train-batch", type=int, default=512, help="学習の1回あたりのデータ数（大きいほど GPU を使い切りやすい）")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     tag = args.tag or (args.mode if args.mode == "trial" else f"{args.mode}_{args.sims}")
@@ -239,20 +242,35 @@ def main() -> None:
     prep = s2_fit.prepare(trotter, probes)
     sim, x_real = make_simulator(prep)
     log(f"{tag}：開始（観測 {len(x_real)} 点、パラメータ {len(NAMES)} 個、学習は {dev}）")
-    prior = torch_prior(dev)
-    x_o = torch.tensor(x_real, dtype=torch.float32, device=dev)
     summary = {"args": vars(args), "device": dev, "started": time.strftime("%Y-%m-%d %H:%M:%S")}
+    prior = torch_prior(dev)
+    draw_prior = None
+    if args.box_k > 0:
+        # 局所版：事前分布（幅 0.05 rad など）はデータが決める幅（0.0003 rad など）より数百倍広く、事前分布全体からの
+        # シミュレーションでは本物のデータの近くが学べない（10/10 の 100 万回の版）。そこで、NUTS の事後分布の
+        # 中央値 ± k×標準偏差の箱に絞る。箱の中では元の事前分布はほぼ平らなので、一様分布で置き換えてよい
+        # （箱の外に事後分布がはみ出していないかは、結果の事後分布が箱の端に張りついていないかで確かめる）
+        from sbi.utils import BoxUniform
+        ref = nuts_reference()
+        med, sd = np.median(ref, axis=0), ref.std(axis=0)
+        low, high = med - args.box_k * sd, med + args.box_k * sd
+        prior = BoxUniform(torch.tensor(low, dtype=torch.float32, device=dev), torch.tensor(high, dtype=torch.float32, device=dev), device=dev)
+        draw_prior = lambda r, n: low + (high - low) * r.random((n, len(NAMES)))
+        summary["box"] = {"k": args.box_k, "low": low.tolist(), "high": high.tolist()}
+        log(f"局所版：NUTS の中央値 ± {args.box_k}×標準偏差の箱に絞る")
+    x_o = torch.tensor(x_real, dtype=torch.float32, device=dev)
     rng = np.random.default_rng(args.seed)
 
     if args.mode in ("trial", "amortized"):
-        thetas = PRIOR_MEAN + PRIOR_SD * rng.standard_normal((args.sims, len(NAMES)))
+        thetas = draw_prior(rng, args.sims) if draw_prior else PRIOR_MEAN + PRIOR_SD * rng.standard_normal((args.sims, len(NAMES)))
         thetas, xs = simulate(sim, thetas, args.batch, args.seed, tag)
         inference = NPE(prior=prior, density_estimator="nsf", device=dev)
-        est = train(inference, thetas, xs, 200 if args.mode == "trial" else args.max_epochs)
+        est = train(inference, thetas, xs, 200 if args.mode == "trial" else args.max_epochs, batch_size=args.train_batch)
         posterior = inference.build_posterior(est)
-        summary["synthetic_rows"], summary["synthetic_hits"] = synthetic_check(prep, trotter, probes, posterior, dev)
+        if not draw_prior:          # 局所版では、合成データの正解が箱の外にあるので行わない（SBC で確かめる）
+            summary["synthetic_rows"], summary["synthetic_hits"] = synthetic_check(prep, trotter, probes, posterior, dev)
         if args.sbc > 0:
-            summary["sbc"] = sbc(sim, posterior, args.sbc, args.sbc_draws, args.batch, args.seed, dev)
+            summary["sbc"] = sbc(sim, posterior, args.sbc, args.sbc_draws, args.batch, args.seed, dev, draw_prior)
     else:
         inference = NPE(prior=prior, density_estimator="nsf", device=dev)
         proposal = prior

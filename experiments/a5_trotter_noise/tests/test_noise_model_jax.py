@@ -108,3 +108,22 @@ def test_real_data_loader_and_synthetic_copy():
     assert len(syn_t) == len(trotter) and len(syn_p) == len(probes)
     resid = np.concatenate([(j["z"] - j["z_true"]) / j["sem"] for j in syn_t])
     assert 0.5 < np.std(resid) < 1.5                                      # 合成データのばらつきが実データの統計誤差に合う
+
+
+def test_amplitude_damping():
+    """振幅減衰（T1）の超演算子：クラウス演算子からの直接の計算と一致し、トレースを保ち、|11> を |00> の側へ移す。
+    ツイリングすると |0> への偏りが消える。gamma=0 は減衰なしと同じ。"""
+    g = 0.1
+    k0, k1 = np.diag([1, np.sqrt(1 - g)]), np.array([[0, np.sqrt(g)], [0, 0]])
+    ref = sum(np.kron(np.kron(a, b), np.conj(np.kron(a, b))) for a in (k0, k1) for b in (k0, k1))
+    D = np.asarray(nm.damp_sup(g))
+    assert np.allclose(D, ref)
+    assert np.allclose(np.asarray(nm.VEC_I) @ D, np.asarray(nm.VEC_I))
+    rho11 = np.zeros((4, 4)); rho11[3, 3] = 1
+    assert np.allclose(np.diag((D @ rho11.reshape(-1)).reshape(4, 4)).real, [0.01, 0.09, 0.09, 0.81])
+    rho00 = np.zeros((4, 4)); rho00[0, 0] = 1
+    T = np.asarray(nm.pauli_twirl(jnp.asarray(D)))
+    assert not np.allclose(T @ rho00.reshape(-1), rho00.reshape(-1))          # ツイリング後は |00> も動く（偏りのない通路）
+    th = jnp.full(15, 0.01)
+    for tw in (False, True):
+        assert np.allclose(np.asarray(nm.error_sup(th, 0.002, tw)), np.asarray(nm.error_sup(th, 0.002, tw, 0.0)))

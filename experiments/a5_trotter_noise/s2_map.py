@@ -97,6 +97,10 @@ def main() -> None:
                 values[name] = jnp.zeros(shape)
             elif name == "sigma_drift":
                 values[name] = jnp.asarray(0.002)
+            elif name == "gamma":
+                values[name] = jnp.asarray(s2_fit.GAMMA_T1 * np.exp(rng.normal(0, 0.3, shape)))
+            elif name == "obs_scale":
+                values[name] = jnp.asarray(np.exp(rng.normal(0.2, 0.1, shape)))
         start = initialize_model(jax.random.PRNGKey(1000 + i), s2_fit.model, model_args=model_args,
                                  init_strategy=init_to_value(values=values))
         x0, _ = ravel_pytree(start.param_info.z)
@@ -111,7 +115,8 @@ def main() -> None:
             print(f"[{time.strftime('%H:%M:%S')}] 出発点 {i + 1}/{args.starts}：着いた点が不正な値なので飛ばす", flush=True)
             continue
         results.append({"start": i, "neg_log_post": val, "x": np.asarray(res.x),
-                        "theta": np.asarray(cons["theta"]), "p": np.asarray(cons["p"])})
+                        "theta": np.asarray(cons["theta"]), "p": np.asarray(cons["p"]),
+                        "extra": {k: np.asarray(cons[k]).tolist() for k in ("gamma", "obs_scale", "sigma_drift") if k in cons}})
         print(f"[{time.strftime('%H:%M:%S')}] 出発点 {i + 1}/{args.starts}：負の対数事後確率 {val:.2f}（経過 {time.time() - t0:.0f} 秒）", flush=True)
 
     # 着いた点を、回転の角度（2組 × 15成分）が 0.002 rad 以内なら同じ山とみなしてまとめる
@@ -128,7 +133,7 @@ def main() -> None:
     out = []
     for m in modes:
         entry = {"neg_log_post": m["neg_log_post"], "delta_from_best": m["neg_log_post"] - best["neg_log_post"],
-                 "count": m["count"], "p": m["p"].tolist()}
+                 "count": m["count"], "p": m["p"].tolist(), **m["extra"]}
         for g, pair in enumerate(s2_fit.PAIRS):
             entry[pair] = {lab: float(m["theta"][g, k]) for k, lab in enumerate(nm.LABELS15) if abs(m["theta"][g, k]) > 1e-4}
         out.append(entry)

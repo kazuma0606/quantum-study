@@ -48,6 +48,11 @@ PLANS = {  # 計画名 → [(データ, 形, 揺らぎ, MAP の出発点の数, 
                  ("synthetic", "F5", "D1", 30, ["--extra-c1", "--seed", "2", "--label", "seed2"]),
                  ("synthetic", "F5", "D1", 30, ["--extra-c1", "--seed", "1", "--label", "seed1long"],
                   ["--warmup", "600", "--samples", "600"])],
+    # 10/11：事後予測チェックで、ずれが統計誤差の約 1.3 倍（T1 の形のずれは 1σ）。F5+D1 に T1（CX ごとの振幅減衰）と、
+    # 誤差棒を広げる係数を、それぞれ・両方入れて、予測の良さ（LOO）と、制御 |1> の Z 回転などが動くかを見る
+    "t1": [("real", "F5", "D1", 12, ["--t1", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+           ("real", "F5", "D1", 12, ["--obs-scale", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+           ("real", "F5", "D1", 12, ["--t1", "--obs-scale", "--label", "long"], ["--warmup", "600", "--samples", "600"])],
 }
 NUTS_ARGS = ["--warmup", "300", "--samples", "300", "--chains", "4", "--init", "map"]
 

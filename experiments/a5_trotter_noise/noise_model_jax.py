@@ -52,15 +52,37 @@ def coherent_unitary(theta15):
     return expm(-1j * H)
 
 
-def error_sup(theta15, p, twirled: bool):
-    """CX の直後に入れる誤差の超演算子（コヒーレントな誤差のあとに脱分極）。"""
+def damp_sup(gamma):
+    """両方の量子ビットに、同じ振幅減衰（T1 緩和、|1> → |0> の確率 gamma）をかける超演算子。
+    1量子ビットのクラウス演算子 K0 = diag(1, √(1−γ))、K1 = √γ |0><1|。"""
+    gamma = jnp.clip(gamma, 0.0, 1.0)          # 事前分布（対数正規）の裾や、初期化の乱数で 1 を超えても NaN にしない
+    k0 = jnp.array([[1.0, 0.0], [0.0, 0.0]], dtype=complex) + jnp.sqrt(1 - gamma) * jnp.array([[0, 0], [0, 1]], dtype=complex)
+    k1 = jnp.sqrt(gamma) * jnp.array([[0, 1], [0, 0]], dtype=complex)
+    return sum(sup(jnp.kron(a, b)) for a in (k0, k1) for b in (k0, k1))
+
+
+SUP16 = jax.vmap(sup)(PAULI16)
+
+
+def pauli_twirl(S):
+    """超演算子をパウリでツイリングする：(1/16) Σ_P P∘S∘P。"""
+    return jnp.einsum("kab,bc,kcd->ad", SUP16, S, SUP16) / 16
+
+
+def error_sup(theta15, p, twirled: bool, gamma=None):
+    """CX の直後に入れる誤差の超演算子（コヒーレントな誤差のあとに脱分極。gamma があれば、さらに振幅減衰）。
+    ツイリングありでは、振幅減衰もツイリングされる（|0> への偏りが消え、パウリ通路になる）。"""
     E = coherent_unitary(theta15)
     if twirled:
         c = jnp.einsum("kij,ji->k", PAULI16, E) / 4                 # c_P = tr(P E) / 4
-        S = jnp.einsum("k,kab->ab", jnp.abs(c) ** 2, jax.vmap(sup)(PAULI16))
+        S = jnp.einsum("k,kab->ab", jnp.abs(c) ** 2, SUP16)
     else:
         S = sup(E)
-    return depol_sup(p) @ S
+    S = depol_sup(p) @ S
+    if gamma is not None:
+        D = damp_sup(gamma)
+        S = (pauli_twirl(D) if twirled else D) @ S
+    return S
 
 
 def _rx(theta):
