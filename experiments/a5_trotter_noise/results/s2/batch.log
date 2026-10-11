@@ -105,3 +105,29 @@
 [2026-10-11 09:57:58] real_F5_D1_t1_os_long：NUTS（初期化を直して回し直し）
 [2026-10-11 10:50:11] real_F5_D1_t1_os_long：終了（終了コード 0）
 [2026-10-11 10:50:18] まとめ 終了。回し直しすべて完了
+[2026-10-11 11:15:43] 開始：6 回
+[2026-10-11 11:15:43] 1/6 synthetic_F5_D1_os_c1rec_rehm011：MAP 探索（出発点 20）
+[2026-10-11 11:26:18] 1/6 synthetic_F5_D1_os_c1rec_rehm011：NUTS
+[2026-10-11 12:14:09] 1/6 synthetic_F5_D1_os_c1rec_rehm011：終了（終了コード 0）
+[2026-10-11 12:14:09] 2/6 synthetic_F5_D1_os_c1rec_rehp0105：MAP 探索（出発点 20）
+[2026-10-11 12:25:03] 2/6 synthetic_F5_D1_os_c1rec_rehp0105：NUTS
+[2026-10-11 13:09:57] 2/6 synthetic_F5_D1_os_c1rec_rehp0105：終了（終了コード 0）
+[2026-10-11 13:09:57] 3/6 synthetic_F5_D1_t1_os_c1rec_rehm011：MAP 探索（出発点 20）
+[2026-10-11 13:22:00] 3/6 synthetic_F5_D1_t1_os_c1rec_rehm011：NUTS
+[2026-10-11 14:09:56] 3/6 synthetic_F5_D1_t1_os_c1rec_rehm011：終了（終了コード 0）
+[2026-10-11 14:09:56] 4/6 synthetic_F5_D1_t1_os_c1rec_rehp0105：MAP 探索（出発点 20）
+[2026-10-11 14:22:57] 4/6 synthetic_F5_D1_t1_os_c1rec_rehp0105：NUTS
+[2026-10-11 15:16:44] 4/6 synthetic_F5_D1_t1_os_c1rec_rehp0105：終了（終了コード 0）
+[2026-10-11 15:16:44] 5/6 real_F5_D1_t1_os_long30：MAP 探索（出発点 30）
+[2026-10-11 15:38:39] 5/6 real_F5_D1_t1_os_long30：NUTS
+[2026-10-11 16:43:49] 5/6 real_F5_D1_t1_os_long30：終了（終了コード 0）
+[2026-10-11 16:43:49] 6/6 real_F5_D1_os_drop1：MAP 探索（出発点 20）
+[2026-10-11 16:58:22] 6/6 real_F5_D1_os_drop1：NUTS
+[2026-10-11 17:43:29] 6/6 real_F5_D1_os_drop1：終了（終了コード 0）
+[2026-10-11 17:43:37] まとめ（s2_report.py）終了（終了コード 0）。すべて完了
+[2026-10-11 20:20:45] real_F5_D1_os_drop_p142x12：MAP 探索（出発点 20）
+[2026-10-11 20:20:47] real_F5_D1_os_drop_mon22z：MAP 探索（出発点 20）
+[2026-10-11 20:35:16] real_F5_D1_os_drop_p142x12：NUTS
+[2026-10-11 20:35:39] real_F5_D1_os_drop_mon22z：NUTS
+[2026-10-11 21:34:41] real_F5_D1_os_drop_mon22z：終了（終了コード 0）
+[2026-10-11 21:36:48] real_F5_D1_os_drop_p142x12：終了（終了コード 0）
