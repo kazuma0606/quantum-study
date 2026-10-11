@@ -9,9 +9,15 @@
 --x-axis をつけると、標的の X 軸まわりの回転も測る：標的を |0> のまま（制御も |0>）同じ CX の組をくり返し、
   Z 基底（そのまま測定）と Y 基底で測って、位相 atan2(<Y>, <Z>) の傾きを求める。
   |+> は X の固有状態なので、上の Z 回転の測り方では、標的の X 軸まわりの回転（coherent_fits.py の X_t の項）が見えないため。
+--control-one をつけると、制御を最初に X で |1> にし、標的の Z 回転だけを測る（S6 で選んだ測定、10/11）。
+  CX のたびに標的が反転するので、各 CX のあとに標的へ X をかけて反転を戻す（戻さないと、制御 |1> のときの標的の
+  Z 回転は反転のたびにエコーのように打ち消されて見えない）。noise_model_jax.probe_expectations(control_one=True, unflip=True)
+  と同じ回路。F5 の実データの当てはめ（揺らぎあり）が正しければ、22–23 では位相が CX の組1回あたり約 +0.44 rad 進むので、
+  k は 0〜4 と小さく取る（k=8 で ±π を超えて折り返す）。
 
 実行（リポジトリのルートから）:
     uv run python experiments/a5_trotter_noise/hardware_zprobe.py --ks 0 2 4 8 12 --shots 4000 --dry-run
+    uv run python experiments/a5_trotter_noise/hardware_zprobe.py --control-one --ks 0 1 2 3 4 --shots 3000 --dry-run
 出力: results/hardware_zprobe_<日時>.csv と .json
 """
 
@@ -34,16 +40,20 @@ HERE = Path(__file__).resolve().parent
 JST = timezone(timedelta(hours=9))
 
 
-def probe_circuit(target: int, k: int, basis: str, axis: str = "Z") -> QuantumCircuit:
-    """axis="Z"：target を |+> にして X・Y で測る。axis="X"：target を |0> のまま Z・Y で測る。"""
-    qc = QuantumCircuit(2, 1, name=f"{axis.lower()}probe_t{target}_k{k}_{basis}")
+def probe_circuit(target: int, k: int, basis: str, axis: str = "Z", control_one: bool = False) -> QuantumCircuit:
+    """axis="Z"：target を |+> にして X・Y で測る。axis="X"：target を |0> のまま Z・Y で測る。
+    control_one=True：最初に制御を |1> にし、各 CX のあとに標的へ X をかけて反転を戻す。"""
+    qc = QuantumCircuit(2, 1, name=f"{axis.lower()}probe{'_c1' if control_one else ''}_t{target}_k{k}_{basis}")
+    if control_one:
+        qc.x(0)
     if axis == "Z":
         qc.h(target)
     for _ in range(k):
-        qc.cx(0, 1)
-        qc.barrier()
-        qc.cx(0, 1)
-        qc.barrier()
+        for _ in range(2):
+            qc.cx(0, 1)
+            if control_one:
+                qc.x(1)
+            qc.barrier()
     if basis == "Y":
         qc.sdg(target)
         qc.h(target)
@@ -60,20 +70,28 @@ def main() -> None:
     ap.add_argument("--backend", default="ibm_fez")
     ap.add_argument("--qubits", type=int, nargs=2, default=[22, 23])
     ap.add_argument("--x-axis", action="store_true", help="標的の X 軸まわりの回転も測る")
+    ap.add_argument("--control-one", action="store_true",
+                    help="制御を |1> にして、標的の Z 回転だけを測る（各 CX のあとに標的の反転を戻す）")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
     service = QiskitRuntimeService(instance="open-instance")
     backend = service.backend(args.backend)
     pm = generate_preset_pass_manager(optimization_level=1, backend=backend, initial_layout=args.qubits)
-    probes = [("Z", 0), ("Z", 1)] + ([("X", 1)] if args.x_axis else [])     # (回転の軸, 調べる量子ビット)
+    if args.control_one:
+        probes = [("Z", 1)]
+    else:
+        probes = [("Z", 0), ("Z", 1)] + ([("X", 1)] if args.x_axis else [])     # (回転の軸, 調べる量子ビット)
     ref = {"Z": "X", "X": "Z"}                                               # 位相の基準になる測定の基底
     specs = [(a, t, k, b) for a, t in probes for k in args.ks for b in (ref[a], "Y")]
-    isa = pm.run([probe_circuit(t, k, b, a) for a, t, k, b in specs])
+    isa = pm.run([probe_circuit(t, k, b, a, args.control_one) for a, t, k, b in specs])
     for (a, t, k, b), qc in zip(specs, isa):
         cz = qc.count_ops().get("cz", 0)
         assert cz == 2 * k, f"{qc.name}：CZ が {cz} 個（想定 {2 * k}）"
     print(f"回路 {len(isa)} 本、各 {args.shots} ショット、合計 {len(isa) * args.shots} ショット。CZ の数はすべて想定どおり")
+    depth = max(qc.depth() for qc in isa)
+    est = 2.0 + 3e-4 * len(isa) * args.shots
+    print(f"一番深い回路の深さ {depth}。QPU 時間の見積もり 約 {est:.0f} 秒（これまでのジョブから：2 秒 ＋ 0.3 ms × 回路×ショット）")
     if args.dry_run:
         print("--dry-run：実機には投げずに終了")
         return
@@ -100,7 +118,7 @@ def main() -> None:
         ph = np.unwrap([r["phase_rad"] for r in sel])
         slopes[f"{args.qubits[t]}_{a}"] = float(np.polyfit([r["k_pairs"] for r in sel], ph, 1)[0])
     stamp = submitted.strftime("%Y%m%dT%H%M%SZ")
-    out = HERE / "results" / f"hardware_zprobe_q{args.qubits[0]}_{stamp}.csv"
+    out = HERE / "results" / f"hardware_zprobe_{'c1_' if args.control_one else ''}q{args.qubits[0]}_{stamp}.csv"
     with out.open("w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0]))
         w.writeheader()

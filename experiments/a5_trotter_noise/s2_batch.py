@@ -53,6 +53,19 @@ PLANS = {  # 計画名 → [(データ, 形, 揺らぎ, MAP の出発点の数, 
     "t1": [("real", "F5", "D1", 12, ["--t1", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
            ("real", "F5", "D1", 12, ["--obs-scale", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
            ("real", "F5", "D1", 12, ["--t1", "--obs-scale", "--label", "long"], ["--warmup", "600", "--samples", "600"])],
+    # 10/11 午後：① 本番の予行演習。正解を実データの当てはめ（誤差棒つき）から作り、22–23 の制御 |1> の Z 回転だけを
+    # −0.11 と +0.105 にした2つの世界で、S6 の推奨の測定（c1 Z、22–23 は k=1〜4）を加え、実データの約 1.4 倍のばらつきを入れて、
+    # 誤差棒つき・T1＋誤差棒つきのモデルで当てはめる。② T1＋誤差棒の MAP 探索を出発点 30 個でやり直す。③ 外れの1点を抜く
+    "rehearsal": [
+        *[("synthetic", "F5", "D1", 20,
+           [*t1, "--obs-scale", "--extra-c1", "--c1-design", "rec", "--truth-from", "real_F5_D1_os_long",
+            "--truth-c1z", v, "--syn-noise", "1.42", "1.35", "--label", lab],
+           ["--warmup", "600", "--samples", "600"])
+          for t1 in ([], ["--t1"]) for v, lab in (("-0.11", "rehm011"), ("0.105", "rehp0105"))],
+        ("real", "F5", "D1", 30, ["--t1", "--obs-scale", "--label", "long30"], ["--warmup", "600", "--samples", "600"]),
+        ("real", "F5", "D1", 20, ["--obs-scale", "--drop-trotter", "db13un9b694s73drokvg:2:2", "--label", "drop1"],
+         ["--warmup", "600", "--samples", "600"]),
+    ],
 }
 NUTS_ARGS = ["--warmup", "300", "--samples", "300", "--chains", "4", "--init", "map"]
 

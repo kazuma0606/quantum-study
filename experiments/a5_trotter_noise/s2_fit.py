@@ -68,6 +68,14 @@ def add_common_args(ap) -> None:
     ap.add_argument("--label", default="", help="結果のファイル名の末尾に付ける名前（同じ設定を、サンプル数や種を変えて回すとき）")
     ap.add_argument("--t1", action="store_true", help="CX ごとの振幅減衰（T1 緩和）を入れる")
     ap.add_argument("--obs-scale", action="store_true", help="誤差棒を広げる係数（トロッター回路・直接の測定で別々）を入れる")
+    ap.add_argument("--drop-trotter", nargs="*", help="トロッター回路の点を抜く（ジョブ ID:次数:n。外れ値の影響を見るとき。--label で名前を変える）")
+    ap.add_argument("--drop-probe", nargs="*", help="直接の測定の点を抜く（ジョブ ID:軸:対象:k）")
+    ap.add_argument("--truth-from",help="合成データの正解を、このタグの NUTS の事後平均（回転・p・ジョブごとのずれ）から作る")
+    ap.add_argument("--truth-c1z", type=float, help="合成データの正解の、22–23 の制御 |1> の Z 回転（rot_c1 の z）を置き換える")
+    ap.add_argument("--c1-design", choices=["all", "rec"], default="all",
+                    help="--extra-c1 の測定：all＝両方の組で X と Z（k=2,4,8,12）、rec＝S6 の推奨（Z だけ、22–23 は k=1〜4、142–143 は k=2〜12）")
+    ap.add_argument("--syn-noise", type=float, nargs=2, default=[1.0, 1.0],
+                    help="合成データのばらつきの倍率（トロッター回路、直接の測定）。実データの事後予測チェックでは約 1.4、1.35")
     ap.add_argument("--extra-c1", action="store_true",
                     help="合成データに、制御を |1> にした直接の測定を加える（来月の測定の設計の下調べ）")
 
@@ -85,7 +93,7 @@ def make_tag(args) -> str:
     if getattr(args, "obs_scale", False):
         tag += "_os"
     if args.extra_c1:
-        tag += "_c1"
+        tag += "_c1" if getattr(args, "c1_design", "all") == "all" else "_c1rec"
     if args.label:
         tag += f"_{args.label}"
     return tag
@@ -99,14 +107,34 @@ def model_opts(args) -> dict:
 def build_data(args):
     """実データ、または正解の分かる合成データ（必要なら制御 |1> の直接の測定を加える）を作り、prepare する。"""
     trotter, probes = a5_data.load_all()
+    for spec in getattr(args, "drop_trotter", None) or []:
+        # 外れ値の影響を見るため、トロッター回路の1点を抜く（ジョブ ID:次数:n）
+        job, order, n = spec.split(":")
+        hits = [j for j in trotter if j["job"] == job and j["order"] == int(order) and int(n) in j["n"]]
+        assert len(hits) == 1, f"抜く点が見つからない：{spec}"
+        j = hits[0]
+        keep = j["n"] != int(n)
+        for key in ("n", "z", "sem", "z_trot"):
+            j[key] = j[key][keep]
+    for spec in getattr(args, "drop_probe", None) or []:
+        # 直接の測定・監視用の回路の1点を抜く（ジョブ ID:軸:対象:k）
+        job, axis, target, k = spec.split(":")
+        hits = [i for i, o in enumerate(probes) if o["job"] == job and o["axis"] == axis
+                and o["target"] == int(target) and o["k"] == int(k)]
+        assert len(hits) == 1, f"抜く点が見つからない：{spec}（{len(hits)} 件）"
+        probes = [o for i, o in enumerate(probes) if i != hits[0]]
     prep = prepare(trotter, probes)
     truth_meta = None
     if args.data == "synthetic":
-        truths = synthetic_truth(prep)
+        truths = truth_from_fit(prep, args.truth_from, args.truth_c1z) if getattr(args, "truth_from", None) \
+            else synthetic_truth(prep)
         rng = np.random.default_rng(args.seed + 100)
-        trotter, probes = a5_data.synthetic_like(trotter, probes, truths, rng)
+        noise = tuple(getattr(args, "syn_noise", [1.0, 1.0]))
+        trotter, probes = a5_data.synthetic_like(trotter, probes, truths, rng, noise_scale=noise)
         if args.extra_c1:
-            probes = probes + a5_data.synthetic_c1_probes(truths, np.random.default_rng(args.seed + 200))
+            design = REC_C1_DESIGN if getattr(args, "c1_design", "all") == "rec" else None
+            probes = probes + a5_data.synthetic_c1_probes(truths, np.random.default_rng(args.seed + 200),
+                                                          design=design, noise_scale=noise[1])
         prep = prepare(trotter, probes)
         truth_meta = {pair: {"theta": dict(zip(nm.LABELS15, tr.theta15.tolist())), "p": tr.p,
                              "job_offsets": tr.job_offsets} for pair, tr in truths.items()}
@@ -255,6 +283,33 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         n_trot = sum(int(g["mask"].sum()) for g in prep["tgroups"].values())
         sd_obs = sd_obs * jnp.where(jnp.arange(len(y)) < n_trot, scale[0], scale[1])
     numpyro.sample("y", dist.Normal(mu, sd_obs), obs=y)
+
+
+# S6 で選んだ制御 |1> の測定（反転を戻す Z だけ。22–23 は位相の折り返しを避けて k を小さく）
+REC_C1_DESIGN = {"22-23": [("Z", True, (1, 2, 3, 4))], "142-143": [("Z", True, (2, 4, 8, 12))]}
+
+
+def truth_from_fit(prep, tag: str, c1z: float | None) -> dict:
+    """合成データの正解を、実データの当てはめ（NUTS）の事後平均から作る。c1z を与えれば、22–23 の制御 |1> の Z 回転だけ置き換える
+    （本番の予行演習：正解が −0.11 の世界と +0.105 の世界で、推奨の測定が正しい側を選べるか）。"""
+    d = np.load(OUT / f"{tag}_draws.npz")
+    meta = json.loads((OUT / f"{tag}_meta.json").read_text(encoding="utf-8"))
+    r0, r1 = d["rot_c0"].reshape(-1, 2, 3).mean(0), d["rot_c1"].reshape(-1, 2, 3).mean(0).copy()
+    if c1z is not None:
+        r1[0, 2] = c1z
+    zi, p = d["zi"].reshape(-1, 2).mean(0), d["p"].reshape(-1, 2).mean(0)
+    delta = d["delta_job"].reshape(-1, d["delta_job"].shape[-1]).mean(0)
+    jobs = [tuple(j) for j in meta["jobs"]]
+    truths = {}
+    for g, pair in enumerate(PAIRS):
+        vals = {"ZI": zi[g]}
+        for ax, (li, lz) in enumerate((("IX", "ZX"), ("IY", "ZY"), ("IZ", "ZZ"))):
+            vals[li], vals[lz] = (r0[g, ax] + r1[g, ax]) / 2, (r0[g, ax] - r1[g, ax]) / 2
+        truths[pair] = nm.PairTruth(theta15=nm.theta_from(vals), p=float(p[g]))
+    for (pair, job), de in zip(jobs, delta):
+        truths[pair].job_offsets[job] = float(de)
+    assert [tuple(j) for j in prep["jobs"]] == jobs
+    return truths
 
 
 def synthetic_truth(prep) -> dict:

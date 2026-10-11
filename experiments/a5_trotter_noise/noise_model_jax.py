@@ -93,10 +93,11 @@ def _rz_target(theta):
     return jnp.kron(_I2, jnp.diag(jnp.array([jnp.exp(-0.5j * theta), jnp.exp(0.5j * theta)])))
 
 
-def trotter_z0(order: int, ns, err, x_err=None):
-    """各 n の <Z_0>。err は CX の直後、x_err は RX の層の直後の誤差の超演算子（None なら誤差なし）。"""
+def trotter_z0(order: int, ns, err, x_err=None, fold: int = 1):
+    """各 n の <Z_0>。err は CX の直後、x_err は RX の層の直後の誤差の超演算子（None なら誤差なし）。
+    fold：CX を CX・CX・CX のように奇数回重ねて、雑音だけを fold 倍にする（ゲートの折り重ね。理想では CX³ = CX）。"""
     ns = jnp.asarray(ns)
-    cx_e = err @ sup(CX)
+    cx_e = jnp.linalg.matrix_power(err @ sup(CX), fold)
     xe = jnp.eye(16, dtype=complex) if x_err is None else x_err
 
     def one(n):

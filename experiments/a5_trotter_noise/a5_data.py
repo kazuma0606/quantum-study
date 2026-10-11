@@ -119,9 +119,12 @@ def load_all() -> tuple[list[dict], list[dict]]:
     return load_trotter(), load_probes()
 
 
-def synthetic_like(trotter: list[dict], probes: list[dict], truths: dict, rng: np.random.Generator):
+def synthetic_like(trotter: list[dict], probes: list[dict], truths: dict, rng: np.random.Generator,
+                   noise_scale: tuple[float, float] = (1.0, 1.0)):
     """実データと同じ構造（同じジョブ・同じ n・同じショット数）の合成データを、正解のパラメータ truths から作る。
-    truths：組 → noise_model_jax.PairTruth。ジョブごとの揺らぎは PairTruth.job_offsets（ジョブ ID → ずれ）で与える。"""
+    truths：組 → noise_model_jax.PairTruth。ジョブごとの揺らぎは PairTruth.job_offsets（ジョブ ID → ずれ）で与える。
+    noise_scale：(トロッター回路, 直接の測定) の、統計誤差に対するばらつきの倍率。1 より大きければ、統計誤差に入っていない
+    ばらつき（実データの事後予測チェックで約 1.4 倍）を、正規分布の雑音として足す（誤差棒の値そのものは変えない）。"""
     import jax.numpy as jnp
     syn_t, syn_p = [], []
     for j in trotter:
@@ -131,6 +134,8 @@ def synthetic_like(trotter: list[dict], probes: list[dict], truths: dict, rng: n
         z_true = np.asarray(nm.trotter_z0(j["order"], j["n"], nm.error_sup(jnp.array(th), tr.p, j["twirled"])))
         shots = np.round((1 - z_true**2) / np.maximum(j["sem"], 1e-6) ** 2).astype(int)     # 実データの統計誤差に合うショット数
         z = 2 * rng.binomial(np.maximum(shots, 100), np.clip((1 + z_true) / 2, 0, 1)) / np.maximum(shots, 100) - 1
+        if noise_scale[0] > 1:
+            z = z + rng.normal(0, 1, len(z)) * j["sem"] * np.sqrt(noise_scale[0] ** 2 - 1)
         syn_t.append({**j, "z": z, "z_true": z_true})
     for o in probes:
         tr = truths[o["pair"]]
@@ -138,29 +143,38 @@ def synthetic_like(trotter: list[dict], probes: list[dict], truths: dict, rng: n
         th[nm.LABELS15.index(tr.drift_label)] += tr.job_offsets.get(o["job"], 0.0)
         e_ref, e_y = nm.probe_expectations(nm.error_sup(jnp.array(th), tr.p, False), o["axis"], o["target"], (o["k"],))
         ph_true = float(np.arctan2(float(e_y[0]), float(e_ref[0])))
-        syn_p.append({**o, "phase": ph_true + rng.normal(0, o["sigma"]), "phase_true": ph_true})
+        syn_p.append({**o, "phase": ph_true + rng.normal(0, o["sigma"] * noise_scale[1]), "phase_true": ph_true})
     return syn_t, syn_p
 
 
-def synthetic_c1_probes(truths: dict, rng: np.random.Generator, shots: int = 3000, ks=(2, 4, 8, 12)) -> list[dict]:
+def synthetic_c1_probes(truths: dict, rng: np.random.Generator, shots: int = 3000, ks=(2, 4, 8, 12),
+                        design: dict | None = None, noise_scale: float = 1.0) -> list[dict]:
     """来月の測定の設計の下調べ用：制御を |1> にした直接の測定（まだ実機では測っていない）の合成データ。
     組ごとに2種類（10/5 の直接の測定と同じ k・ショット数）：
       X 回転：制御 |1>、標的 |0>、CX の組をくり返す → 傾き ≈ −4 (IX − ZX)
       Z 回転：制御 |1>、標的 |+>、各 CX のあとに標的へ X をかけて反転を戻す → 傾き ≈ −4 (IZ − ZZ) に近い量
-    （反転を戻さないと、制御 |1> の Z 回転は CX の反転のたびにエコーのように打ち消されて見えない）"""
+    （反転を戻さないと、制御 |1> の Z 回転は CNOT の反転のたびにエコーのように打ち消されて見えない）
+    design：組 → [(軸, 反転を戻すか, k の並び), ...]。与えれば、その組み合わせだけを作る（S6 で選んだ回路の予行演習用）。
+    noise_scale：位相に足すばらつきの倍率（統計誤差の何倍か。誤差棒の値そのものは変えない）。"""
     import jax.numpy as jnp
     obs = []
     for pair, tr in truths.items():
         err = nm.error_sup(jnp.array(tr.theta15), tr.p, False)
         job = f"synthetic_c1_{pair}"
-        for axis, unflip in (("X", False), ("Z", True)):
-            e_ref, e_y = nm.probe_expectations(err, axis, 1, tuple(ks), control_one=True, unflip=unflip)
-            for k, er, ey in zip(ks, np.asarray(e_ref), np.asarray(e_y)):
+        th = np.array(tr.theta15)
+        th[nm.LABELS15.index(tr.drift_label)] += tr.job_offsets.get(job, 0.0)
+        err = nm.error_sup(jnp.array(th), tr.p, False)
+        plan = design[pair] if design is not None else [("X", False, tuple(ks)), ("Z", True, tuple(ks))]
+        for axis, unflip, kk in plan:
+            e_ref, e_y = nm.probe_expectations(err, axis, 1, tuple(kk), control_one=True, unflip=unflip)
+            for k, er, ey in zip(kk, np.asarray(e_ref), np.asarray(e_y)):
                 m_ref = 2 * rng.binomial(shots, (1 + er) / 2) / shots - 1
                 m_y = 2 * rng.binomial(shots, (1 + ey) / 2) / shots - 1
+                sig = _phase_sigma(m_ref, m_y, shots)
+                ph = float(np.arctan2(m_y, m_ref)) + (rng.normal(0, sig * np.sqrt(noise_scale**2 - 1)) if noise_scale > 1 else 0.0)
                 obs.append({"pair": pair, "job": job, "time": None, "axis": axis, "target": 1, "k": int(k),
-                            "control_one": True, "unflip": unflip, "phase": float(np.arctan2(m_y, m_ref)),
-                            "sigma": _phase_sigma(m_ref, m_y, shots), "phase_true": float(np.arctan2(ey, er))})
+                            "control_one": True, "unflip": unflip, "phase": ph,
+                            "sigma": sig, "phase_true": float(np.arctan2(ey, er))})
     return obs
 
 

@@ -57,8 +57,9 @@ def circuit_outputs(phi, g, delta, spec):
     p = jnp.exp(phi[14 + g])
     gamma = jnp.exp(phi[16 + g]) if phi.shape[0] == len(NAMES_T1) else None
     if spec[0] == "trotter":
-        _, order, tw, ns = spec
-        z = nm.trotter_z0(order, jnp.asarray(ns), nm.error_sup(theta15(phi, g, delta), p, tw, gamma)).real
+        _, order, tw, ns = spec[:4]
+        fold = spec[4] if len(spec) > 4 else 1
+        z = nm.trotter_z0(order, jnp.asarray(ns), nm.error_sup(theta15(phi, g, delta), p, tw, gamma), fold=fold).real
         return z, (z,)
     _, axis, target, c1, unflip, ks = spec
     e_ref, e_y = nm.probe_expectations(nm.error_sup(theta15(phi, g, delta), p, False, gamma), axis, target, tuple(ks),
@@ -102,6 +103,9 @@ DESIGNS = {
     "トロッター 1次 生（n=1〜14）": [((0, 1), [("trotter", 1, False, NS)], 8000)],
     "トロッター 1次 ツイリング": [((0, 1), [("trotter", 1, True, NS)], 8000)],
     "トロッター 2次 生": [((0, 1), [("trotter", 2, False, NS)], 8000)],
+    "トロッター 1次 生、雑音 3 倍（CX を3回重ねる）": [((0, 1), [("trotter", 1, False, NS, 3)], 8000)],
+    "トロッター 1次 生、雑音 1 倍＋3 倍": [((0, 1), [("trotter", 1, False, NS), ("trotter", 1, False, NS, 3)], 8000)],
+    "トロッター 1次 ツイリング、雑音 1 倍＋3 倍": [((0, 1), [("trotter", 1, True, NS), ("trotter", 1, True, NS, 3)], 8000)],
     "c1 Z＋X を2回（別の時刻）": [((0, 1), [C1_Z, C1_X], 3000), ((0, 1), [C1_Z, C1_X], 3000)],
 }
 TARGETS = ["c1_z[22-23]", "c1_x[22-23]", "c1_z[142-143]", "zi[22-23]", "c0_x[22-23]", "log_p[22-23]"]
