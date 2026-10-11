@@ -37,6 +37,7 @@ NAMES = ([f"zi[{p}]" for p in PAIRS] + [f"c0_{a}[{p}]" for p in PAIRS for a in "
          + [f"c1_{a}[{p}]" for p in PAIRS for a in "xyz"] + [f"log_p[{p}]" for p in PAIRS])
 NAMES_T1 = NAMES + [f"log_gamma[{p}]" for p in PAIRS]       # T1 を入れたモデルでは、振幅減衰 γ も φ に入れる
 SEC_PER_SHOT, SEC_PER_JOB = 3e-4, 2.0
+DRIFT_VAR_FACTOR = 3.0          # 自由度 ν=3 の t 分布の分散は ν/(ν−2)・σ² = 3σ²
 
 
 def theta15(phi, g, delta):
@@ -152,7 +153,9 @@ def main() -> None:
         # (φ, δ) のブロックの精度行列を足して逆行列を取り、φ のブロックだけを読む（δ について周辺化）。ノートの式 (V-8)(V-9)
         prior = np.zeros((P + n_jobs, P + n_jobs))
         prior[:P, :P] = prec0
-        prior[P:, P:] = np.eye(n_jobs) / sd_drift**2
+        # 新しいジョブのずれ δ の事前分布：s2_fit.py は StudentT(3, 0, σ_drift)。その分散 3σ_drift² を持つ正規分布で近似する
+        # （裾の重さは表せない。δ に強く反応する測定では、正規近似の限界に注意）
+        prior[P:, P:] = np.eye(n_jobs) / (DRIFT_VAR_FACTOR * sd_drift**2)
         cov = np.linalg.inv(prior + A.T @ A)[:P, :P]
         sd = np.sqrt(np.diag(cov))
         rows.append({"design": name, "qpu_s": secs, **{t: sd[names.index(t)] for t in TARGETS},
