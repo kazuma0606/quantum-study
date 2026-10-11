@@ -126,6 +126,8 @@ def build_data(args):
     prep = prepare(trotter, probes)
     truth_meta = None
     if args.data == "synthetic":
+        if getattr(args, "truth_c1z", None) is not None and not getattr(args, "truth_from", None):
+            raise ValueError("--truth-c1z は --truth-from と一緒に使う（既定の正解には適用しない）")
         truths = truth_from_fit(prep, args.truth_from, args.truth_c1z) if getattr(args, "truth_from", None) \
             else synthetic_truth(prep)
         rng = np.random.default_rng(args.seed + 100)
@@ -293,6 +295,9 @@ def truth_from_fit(prep, tag: str, c1z: float | None) -> dict:
     """合成データの正解を、実データの当てはめ（NUTS）の事後平均から作る。c1z を与えれば、22–23 の制御 |1> の Z 回転だけ置き換える
     （本番の予行演習：正解が −0.11 の世界と +0.105 の世界で、推奨の測定が正しい側を選べるか）。"""
     d = np.load(OUT / f"{tag}_draws.npz")
+    if "gamma" in d.files:
+        # 合成データの生成器（a5_data.synthetic_like）は振幅減衰を入れないので、T1 つきの当てはめは正解にできない
+        raise ValueError(f"--truth-from {tag}：T1 つきの当てはめは正解に使えない（生成器が γ を扱わない）")
     meta = json.loads((OUT / f"{tag}_meta.json").read_text(encoding="utf-8"))
     r0, r1 = d["rot_c0"].reshape(-1, 2, 3).mean(0), d["rot_c1"].reshape(-1, 2, 3).mean(0).copy()
     if c1z is not None:
