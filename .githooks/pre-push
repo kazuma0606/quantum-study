@@ -1,0 +1,12 @@
+#!/bin/sh
+# Git runs this hook locally before transferring commits.
+root=$(git rev-parse --show-toplevel) || exit 0
+cd "$root" || exit 0
+
+if ! command -v uv >/dev/null 2>&1; then
+  echo "Codex audit pending: uv is unavailable" >&2
+  exit 0
+fi
+
+uv run --no-sync python tools/codex_pre_push.py || echo "Codex audit pending: see the local audit report" >&2
+exit 0

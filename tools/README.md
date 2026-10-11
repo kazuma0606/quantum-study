@@ -18,6 +18,18 @@
 
 目次の生成と整合性の検査は、`研究ノート/tools/build_toc.py` にあります（`--check` で書き込まずに検査）。
 
+## push 前の Codex 監査
+
+`.githooks/pre-push` は `tools/codex_pre_push.py` を呼び、push 対象のコミット差分を読み取り専用で確認します。CSV、ログ、バイナリ、`results/` 以下の生成物は監査対象から外します。未コミットの作業ファイルを誤って読むことを防ぐため、対象コミットから一時的なスナップショットを作って Codex に渡します。
+
+結果は `.codex/audit-reports/` に Markdown で保存され、Git には追加されません。Claude Code に修正を頼むときは、このレポートを指定して、各指摘を先に検討してもらってください。指摘があっても push は止めません。Codex が使えない場合は監査を保留し、次回の push で再試行します。同じコミット差分の成功済みレポートは再利用します。hook は監査の完了まで待つので、初回は push に時間がかかります。空白だけの差分は自動でスキップします。文体だけの変更など、内容を確認して監査不要と判断した Markdown コミットには `Audit-Skip: style` というコミット本文の行を付けられます。push 範囲のすべてのコミットにこの行がある場合だけスキップします。
+
+ローカルで hook を有効にするには `git config core.hooksPath .githooks` を実行します。コミットを指定したドライランは次のとおりです。
+
+```bash
+uv run --no-sync python tools/codex_pre_push.py --dry-run --range HEAD~1 HEAD
+```
+
 ## ノートブックの生成スクリプト（`notebook_generators/`）
 
 ノートブックは手で編集せず、これらのスクリプトで生成します（セル ID を固定しているので、作り直しても差分は変更した箇所だけになる）。ノートブックを直すときは、スクリプトを直して作り直します。
