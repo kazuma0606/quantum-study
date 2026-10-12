@@ -131,3 +131,38 @@
 [2026-10-11 20:35:39] real_F5_D1_os_drop_mon22z：NUTS
 [2026-10-11 21:34:41] real_F5_D1_os_drop_mon22z：終了（終了コード 0）
 [2026-10-11 21:36:48] real_F5_D1_os_drop_p142x12：終了（終了コード 0）
+[2026-10-12 07:43:03] 開始：8 回
+[2026-10-12 07:43:03] 1/8 real_F5_D1_os_hw1_long：MAP 探索（出発点 30）
+[2026-10-12 08:03:17] 1/8 real_F5_D1_os_hw1_long：NUTS
+[2026-10-12 08:54:32] 1/8 real_F5_D1_os_hw1_long：終了（終了コード 0）
+[2026-10-12 08:54:32] 2/8 real_F5_D1_t1_os_hw1_long：MAP 探索（出発点 30）
+[2026-10-12 09:15:31] 2/8 real_F5_D1_t1_os_hw1_long：NUTS
+[2026-10-12 10:12:59] 2/8 real_F5_D1_t1_os_hw1_long：終了（終了コード 0）
+[2026-10-12 10:12:59] 3/8 real_F5_D1_os_rob_long：MAP 探索（出発点 30）
+[2026-10-12 10:32:47] 3/8 real_F5_D1_os_rob_long：NUTS
+[2026-10-12 11:34:54] 3/8 real_F5_D1_os_rob_long：終了（終了コード 0）
+[2026-10-12 11:34:54] 4/8 real_F5_D1_osp_long：MAP 探索（出発点 30）
+[2026-10-12 11:55:44] 4/8 real_F5_D1_osp_long：NUTS
+[2026-10-12 12:52:19] 4/8 real_F5_D1_osp_long：終了（終了コード 0）
+[2026-10-12 12:52:19] 5/8 synthetic_F5_D1_os_c1rec_rehm011s1：MAP 探索（出発点 20）
+[2026-10-12 13:06:28] 5/8 synthetic_F5_D1_os_c1rec_rehm011s1：NUTS
+[2026-10-12 13:52:01] 5/8 synthetic_F5_D1_os_c1rec_rehm011s1：終了（終了コード 0）
+[2026-10-12 13:52:01] 6/8 synthetic_F5_D1_os_c1rec_rehp0105s1：MAP 探索（出発点 20）
+[2026-10-12 14:07:24] 6/8 synthetic_F5_D1_os_c1rec_rehp0105s1：NUTS
+[2026-10-12 15:00:13] 6/8 synthetic_F5_D1_os_c1rec_rehp0105s1：終了（終了コード 0）
+[2026-10-12 15:00:13] 7/8 synthetic_F5_D1_os_c1rec_rehm011s2：MAP 探索（出発点 20）
+[2026-10-12 15:13:52] 7/8 synthetic_F5_D1_os_c1rec_rehm011s2：NUTS
+[2026-10-12 15:53:15] 7/8 synthetic_F5_D1_os_c1rec_rehm011s2：終了（終了コード 0）
+[2026-10-12 15:53:15] 8/8 synthetic_F5_D1_os_c1rec_rehp0105s2：MAP 探索（出発点 20）
+[2026-10-12 16:06:03] 8/8 synthetic_F5_D1_os_c1rec_rehp0105s2：NUTS
+[2026-10-12 16:55:34] 8/8 synthetic_F5_D1_os_c1rec_rehp0105s2：終了（終了コード 0）
+[2026-10-12 16:55:45] まとめ（s2_report.py）終了（終了コード 0）。すべて完了
+[2026-10-12 17:26:52] real_F5_D1_os_hw1_split_long：MAP 探索（出発点 30）
+[2026-10-12 17:26:53] real_F5_D1_t1_os_rob_long：MAP 探索（出発点 30）
+[2026-10-12 17:26:54] real_F5_D1_t1_os_rob_hw1_long：MAP 探索（出発点 30）
+[2026-10-12 17:48:02] real_F5_D1_os_hw1_split_long：NUTS
+[2026-10-12 17:55:40] real_F5_D1_t1_os_rob_hw1_long：NUTS
+[2026-10-12 17:56:28] real_F5_D1_t1_os_rob_long：NUTS
+[2026-10-12 19:16:56] real_F5_D1_os_hw1_split_long：終了（終了コード 0）
+[2026-10-12 19:37:19] real_F5_D1_t1_os_rob_hw1_long：終了（終了コード 0）
+[2026-10-12 19:40:31] real_F5_D1_t1_os_rob_long：終了（終了コード 0）

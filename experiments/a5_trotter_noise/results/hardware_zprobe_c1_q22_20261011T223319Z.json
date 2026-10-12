@@ -1,0 +1,29 @@
+{
+  "args": {
+    "ks": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "shots": 2000,
+    "backend": "ibm_fez",
+    "qubits": [
+      22,
+      23
+    ],
+    "x_axis": false,
+    "control_one": true,
+    "dry_run": false
+  },
+  "backend": "ibm_fez",
+  "job_id": "db60tc2mb58s738b46rg",
+  "submitted_utc": "2026-10-11T22:33:19.194733+00:00",
+  "usage_quantum_seconds": 7,
+  "phase_slope_rad_per_pair": {
+    "23_Z": 0.002194708544532861
+  },
+  "qiskit": "2.5.2",
+  "qiskit_ibm_runtime": "0.50.0"
+}

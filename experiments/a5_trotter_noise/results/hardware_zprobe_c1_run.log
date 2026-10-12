@@ -1,0 +1,13 @@
+C:\Users\yoshi\quantum\experiments\a5_trotter_noise\hardware_zprobe.py:100: DeprecationWarning: The SamplerV2 class is deprecated as of qiskit-ibm-runtime 0.50.0 and will be removed no sooner than 3 months after the release date. `qiskit_ibm_runtime.executor_sampler.Sampler` provides a new Sampler implementation that runs all the pre- and post-processing in the client side. The top-level `qiskit_ibm_runtime.Sampler` import will be updated to point to the client-side sampler in an upcoming release, with the legacy Sampler being available until the deprecation is completed.
+  job = SamplerV2(mode=backend).run(isa, shots=args.shots)
+回路 10 本、各 2000 ショット、合計 20000 ショット。CZ の数はすべて想定どおり
+一番深い回路の深さ 58。QPU 時間の見積もり 約 8 秒（これまでのジョブから：2 秒 ＋ 0.3 ms × 回路×ショット）
+投入：ジョブ db60tc2mb58s738b46rg（2026-10-12 07:33:19 JST）
+利用時間：7 秒
+Z 軸、量子ビット 23、k= 0：<X>=+0.999、<Y>=+0.033、位相 +0.033 rad、コヒーレンス 1.000
+Z 軸、量子ビット 23、k= 1：<X>=+0.997、<Y>=+0.051、位相 +0.051 rad、コヒーレンス 0.998
+Z 軸、量子ビット 23、k= 2：<X>=+0.999、<Y>=+0.054、位相 +0.054 rad、コヒーレンス 1.000
+Z 軸、量子ビット 23、k= 3：<X>=+0.992、<Y>=+0.052、位相 +0.052 rad、コヒーレンス 0.993
+Z 軸、量子ビット 23、k= 4：<X>=+0.991、<Y>=+0.043、位相 +0.043 rad、コヒーレンス 0.992
+位相の傾き（rad / CX の組1回、キーは 量子ビット_軸）：{'23_Z': 0.002194708544532861}
+書き出し: C:\Users\yoshi\quantum\experiments\a5_trotter_noise\results\hardware_zprobe_c1_q22_20261011T223319Z.csv
