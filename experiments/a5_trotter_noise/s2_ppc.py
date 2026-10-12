@@ -63,8 +63,19 @@ def main() -> None:
     idx = rng.choice(len(theta), size=min(args.draws, len(theta)), replace=False)
     jp = jnp.asarray(prep["job_pair"])
 
-    def mu_of(th, pp, de, ga):
+    # 時期で分けるモデル（--split-hw）：10/12 のジョブだけ、22–23 の制御 |1> の Z 回転を rot_c1z_hw に置き換える（s2_fit.model と同じ）
+    split = "rot_c1z_hw" in d.files
+    if split:
+        hw_jobs = set(s2_fit.model_opts(a)["hw_jobs"])
+        hw = jnp.array([i for i, (_, job) in enumerate(prep["jobs"]) if job in hw_jobs])
+        r1z_hw = d["rot_c1z_hw"].reshape(-1)
+        r0z = d["rot_c0"].reshape(-1, 2, 3)[:, 0, 2]
+    iz, zz = s2_fit.nm.LABELS15.index("IZ"), s2_fit.nm.LABELS15.index("ZZ")
+
+    def mu_of(th, pp, de, ga, hz):
         tj = th[jp]
+        if hz is not None:
+            tj = tj.at[hw, iz].set((hz[0] + hz[1]) / 2).at[hw, zz].set((hz[0] - hz[1]) / 2)
         if de is not None:
             tj = tj.at[:, I_ZI].add(de)
         return s2_fit.predictions(tj, pp[jp], prep, None if ga is None else ga[jp])[0]
@@ -72,7 +83,8 @@ def main() -> None:
     f = jax.jit(mu_of)
     mus = np.stack([np.asarray(f(jnp.asarray(theta[i]), jnp.asarray(p[i]),
                                  None if delta is None else jnp.asarray(delta[i]),
-                                 None if gamma is None else jnp.asarray(gamma[i]))) for i in idx])
+                                 None if gamma is None else jnp.asarray(gamma[i]),
+                                 jnp.asarray([r0z[i], r1z_hw[i]]) if split else None)) for i in idx])
     _, y, sd = s2_fit.predictions(jnp.asarray(theta[0])[jp], jnp.asarray(p[0])[jp], prep)
     y, sd = np.asarray(y), np.asarray(sd)
     rows = point_meta(prep)
@@ -87,11 +99,11 @@ def main() -> None:
         sc = np.median(d["obs_scale"].reshape(-1, 2), axis=0)
         sd = sd * np.where(np.array([row["kind"] == "trotter" for row in rows]), sc[0], sc[1])
         print(f"誤差棒の倍率（中央値）：トロッター回路 {sc[0]:.2f}、直接の測定 {sc[1]:.2f}")
-    if meta["args"].get("robust"):
-        print("注意：t 分布の尤度のモデル。p_ppc の複製は正規分布で作っているので、外れ値の多さは過大に見える")
     assert len(rows) == len(y) == mus.shape[1]
 
-    yrep = mus + sd * rng.standard_normal(mus.shape)
+    # 複製データは、当てはめと同じ尤度から作る（--robust なら自由度 4 の t 分布）
+    noise = rng.standard_t(4.0, mus.shape) if meta["args"].get("robust") else rng.standard_normal(mus.shape)
+    yrep = mus + sd * noise
     r = (y - mus.mean(0)) / sd
     # PSIS-LOO の k̂
     try:
