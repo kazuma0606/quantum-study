@@ -69,6 +69,12 @@ def add_common_args(ap) -> None:
     ap.add_argument("--t1", action="store_true", help="CX ごとの振幅減衰（T1 緩和）を入れる")
     ap.add_argument("--obs-scale", action="store_true", help="誤差棒を広げる係数（トロッター回路・直接の測定で別々）を入れる")
     ap.add_argument("--drop-trotter", nargs="*", help="トロッター回路の点を抜く（ジョブ ID:次数:n。外れ値の影響を見るとき。--label で名前を変える）")
+    ap.add_argument("--with-c1-hw", action="store_true", help="10/12 の実機の、制御 |1> の Z 回転の直接の測定を加える")
+    ap.add_argument("--split-hw", action="store_true",
+                    help="--with-c1-hw のジョブだけ、22–23 の制御 |1> の Z 回転を別のパラメータにする（時期で分けるモデル）")
+    ap.add_argument("--robust", action="store_true", help="観測の誤差を t 分布（自由度 4）にする（外れ値に強い尤度）")
+    ap.add_argument("--obs-scale-pair", action="store_true",
+                    help="誤差棒の倍率を、組ごと・種類ごと（トロッター回路／直接の測定）に別々に置く（--obs-scale の代わり）")
     ap.add_argument("--drop-probe", nargs="*", help="直接の測定の点を抜く（ジョブ ID:軸:対象:k）")
     ap.add_argument("--truth-from",help="合成データの正解を、このタグの NUTS の事後平均（回転・p・ジョブごとのずれ）から作る")
     ap.add_argument("--truth-c1z", type=float, help="合成データの正解の、22–23 の制御 |1> の Z 回転（rot_c1 の z）を置き換える")
@@ -92,6 +98,14 @@ def make_tag(args) -> str:
         tag += "_t1"
     if getattr(args, "obs_scale", False):
         tag += "_os"
+    if getattr(args, "obs_scale_pair", False):
+        tag += "_osp"
+    if getattr(args, "robust", False):
+        tag += "_rob"
+    if getattr(args, "with_c1_hw", False):
+        tag += "_hw1"
+    if getattr(args, "split_hw", False):
+        tag += "_split"
     if args.extra_c1:
         tag += "_c1" if getattr(args, "c1_design", "all") == "all" else "_c1rec"
     if args.label:
@@ -101,12 +115,14 @@ def make_tag(args) -> str:
 
 def model_opts(args) -> dict:
     return {"width": args.prior_width, "calib": args.calib, "t1": getattr(args, "t1", False),
-            "obs_scale": getattr(args, "obs_scale", False)}
+            "obs_scale": getattr(args, "obs_scale", False), "obs_scale_pair": getattr(args, "obs_scale_pair", False),
+            "robust": getattr(args, "robust", False), "split_hw": getattr(args, "split_hw", False),
+            "hw_jobs": sorted({o["job"] for o in a5_data.load_c1_probes()}) if getattr(args, "split_hw", False) else []}
 
 
 def build_data(args):
     """実データ、または正解の分かる合成データ（必要なら制御 |1> の直接の測定を加える）を作り、prepare する。"""
-    trotter, probes = a5_data.load_all()
+    trotter, probes = a5_data.load_all(with_c1=getattr(args, "with_c1_hw", False))
     for spec in getattr(args, "drop_trotter", None) or []:
         # 外れ値の影響を見るため、トロッター回路の1点を抜く（ジョブ ID:次数:n）
         job, order, n = spec.split(":")
@@ -174,6 +190,19 @@ def prepare(trotter: list[dict], probes: list[dict]) -> dict:
     return {"jobs": jobs, "job_pair": job_pair, "tgroups": tgroups, "pgroups": pgroups}
 
 
+def point_kind_pair(prep):
+    """predictions() と同じ順に、観測ごとの (種類：0 トロッター回路／1 直接の測定, 組の番号) を返す。"""
+    kind, pair = [], []
+    for _, g in sorted(prep["tgroups"].items()):
+        for jb, mask in zip(g["job"], g["mask"]):
+            kind += [0] * int(mask.sum())
+            pair += [int(prep["job_pair"][jb])] * int(mask.sum())
+    for _, g in sorted(prep["pgroups"].items()):
+        kind += [1] * len(g["job"])
+        pair += [int(prep["job_pair"][jb]) for jb in g["job"]]
+    return np.array(kind), np.array(pair)
+
+
 def _wrap(x):
     return jnp.arctan2(jnp.sin(x), jnp.cos(x))
 
@@ -208,7 +237,8 @@ def predictions(theta_job, p_job, prep, gamma_job=None):
 
 
 def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = None):
-    opts = {"width": 0.05, "calib": False, "t1": False, "obs_scale": False, **(opts or {})}
+    opts = {"width": 0.05, "calib": False, "t1": False, "obs_scale": False, "obs_scale_pair": False, "robust": False,
+            **(opts or {})}
     w = opts["width"]
     active = FORMS[form]
     if active == "branch":
@@ -260,6 +290,14 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         numpyro.factor("calib", jnp.sum(dist.LogNormal(jnp.log(jnp.asarray(CALIB_R)), 0.5).log_prob(r)))
     jp = jnp.asarray(prep["job_pair"])
     theta_job = theta[jp]
+    if opts.get("split_hw") and active == "branch":
+        # 時期で分けるモデル：10/12 の実機のジョブ（制御 |1> の Z の測定）だけ、22–23 の制御 |1> の Z 回転を別のパラメータにする
+        # （「1週間で回転が変わった」という仮説。そのジョブが測るのはこの方向だけなので、ほかの成分は共通のまま）
+        hw = [i for i, (pair, job) in enumerate(prep["jobs"]) if job in opts["hw_jobs"]]
+        r1z_hw = numpyro.sample("rot_c1z_hw", dist.Normal(0.0, w * np.sqrt(2)))
+        iz, zz = nm.LABELS15.index("IZ"), nm.LABELS15.index("ZZ")
+        for i in hw:
+            theta_job = theta_job.at[i, iz].set((r0[0, 2] + r1z_hw) / 2).at[i, zz].set((r0[0, 2] - r1z_hw) / 2)
     if drift == "D1":
         sd = numpyro.sample("sigma_drift", dist.HalfNormal(0.01))
         # δ を σ・t と分けず、直接置く（中心化）。監視用の回路などでずれがよく決まるジョブでは、分けると
@@ -284,7 +322,17 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         scale = numpyro.sample("obs_scale", dist.LogNormal(jnp.zeros(2), 0.5))
         n_trot = sum(int(g["mask"].sum()) for g in prep["tgroups"].values())
         sd_obs = sd_obs * jnp.where(jnp.arange(len(y)) < n_trot, scale[0], scale[1])
-    numpyro.sample("y", dist.Normal(mu, sd_obs), obs=y)
+    if opts["obs_scale_pair"]:
+        # 誤差棒の倍率を、(種類, 組) の 2×2 で別々に置く。10/11 に、142–143 の1点を抜くと 22–23 の値まで入れ替わった
+        # （倍率を2つの組で共有していたことが原因の候補）ため
+        scale = numpyro.sample("obs_scale", dist.LogNormal(jnp.zeros((2, 2)), 0.5))
+        kind, pair = point_kind_pair(prep)
+        sd_obs = sd_obs * scale[kind, pair]
+    if opts["robust"]:
+        # 外れ値に強い尤度：自由度 4 の t 分布（正規分布より裾が重く、外れた点の重みが自動で下がる。深層学習の Huber 損失に近い）
+        numpyro.sample("y", dist.StudentT(4.0, mu, sd_obs), obs=y)
+    else:
+        numpyro.sample("y", dist.Normal(mu, sd_obs), obs=y)
 
 
 # S6 で選んだ制御 |1> の測定（反転を戻す Z だけ。22–23 は位相の折り返しを避けて k を小さく）

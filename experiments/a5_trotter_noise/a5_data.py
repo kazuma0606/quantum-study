@@ -115,8 +115,26 @@ def load_probes() -> list[dict]:
     return obs
 
 
-def load_all() -> tuple[list[dict], list[dict]]:
-    return load_trotter(), load_probes()
+def load_c1_probes() -> list[dict]:
+    """10/12 の実機の、制御 |1> の Z 回転の直接の測定（量子ビット 22–23、各 CX のあとに標的の反転を戻す。hardware_zprobe.py
+    --control-one、k=0〜4、2000 ショット）。k=0 は、ほかの直接の測定と同じく使わない（準備と測定の位相のずれを含むため）。"""
+    obs = []
+    for path in sorted(RES.glob("hardware_zprobe_c1_q22_2*.csv")):
+        meta = json.loads(path.with_suffix(".json").read_text(encoding="utf-8"))
+        shots = meta["args"]["shots"]
+        for r in csv.DictReader(path.open(encoding="utf-8")):
+            if int(r["k_pairs"]) == 0:
+                continue
+            e_ref, e_y = float(r["exp_ref"]), float(r["exp_Y"])
+            obs.append({"pair": "22-23", "job": meta["job_id"], "time": _utc(meta["submitted_utc"]), "axis": "Z",
+                        "target": 1, "k": int(r["k_pairs"]), "control_one": True, "unflip": True,
+                        "phase": float(np.arctan2(e_y, e_ref)), "sigma": _phase_sigma(e_ref, e_y, shots)})
+    return obs
+
+
+def load_all(with_c1: bool = False) -> tuple[list[dict], list[dict]]:
+    """with_c1=True なら、10/12 の制御 |1> の直接の測定も加える（それまでの当てはめを再現できるよう、既定では加えない）。"""
+    return load_trotter(), load_probes() + (load_c1_probes() if with_c1 else [])
 
 
 def synthetic_like(trotter: list[dict], probes: list[dict], truths: dict, rng: np.random.Generator,

@@ -56,6 +56,25 @@ PLANS = {  # 計画名 → [(データ, 形, 揺らぎ, MAP の出発点の数, 
     # 10/11 午後：① 本番の予行演習。正解を実データの当てはめ（誤差棒つき）から作り、22–23 の制御 |1> の Z 回転だけを
     # −0.11 と +0.105 にした2つの世界で、S6 の推奨の測定（c1 Z、22–23 は k=1〜4）を加え、実データの約 1.4 倍のばらつきを入れて、
     # 誤差棒つき・T1＋誤差棒つきのモデルで当てはめる。② T1＋誤差棒の MAP 探索を出発点 30 個でやり直す。③ 外れの1点を抜く
+    # 10/12：実機の制御 |1> の Z の測定（傾き約 0、−0.11 と +0.105 のどちらでもない）を加えた当てはめ（D）、
+    # 外れ値に強い尤度（A）、誤差棒の倍率を組ごとに分ける（B）、予行演習の乱数の種を変える（C）
+    "today": [
+        ("real", "F5", "D1", 30, ["--obs-scale", "--with-c1-hw", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+        ("real", "F5", "D1", 30, ["--t1", "--obs-scale", "--with-c1-hw", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+        ("real", "F5", "D1", 30, ["--obs-scale", "--robust", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+        ("real", "F5", "D1", 30, ["--obs-scale-pair", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+        *[("synthetic", "F5", "D1", 20,
+           ["--obs-scale", "--extra-c1", "--c1-design", "rec", "--truth-from", "real_F5_D1_os_long",
+            "--truth-c1z", v, "--syn-noise", "1.42", "1.35", "--seed", sd, "--label", f"{lab}s{sd}"],
+           ["--warmup", "600", "--samples", "600"])
+          for sd in ("1", "2") for v, lab in (("-0.11", "rehm011"), ("0.105", "rehp0105"))],
+    ],
+    # 10/12 夕方：1 時期で分けるモデル（10/12 のジョブだけ制御 |1> の Z 回転が別）、2 T1＋誤差棒＋t 分布の尤度、3 それに実機を加える
+    "evening": [
+        ("real", "F5", "D1", 30, ["--obs-scale", "--with-c1-hw", "--split-hw", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+        ("real", "F5", "D1", 30, ["--t1", "--obs-scale", "--robust", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+        ("real", "F5", "D1", 30, ["--t1", "--obs-scale", "--robust", "--with-c1-hw", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
+    ],
     "rehearsal": [
         *[("synthetic", "F5", "D1", 20,
            [*t1, "--obs-scale", "--extra-c1", "--c1-design", "rec", "--truth-from", "real_F5_D1_os_long",

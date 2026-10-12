@@ -76,11 +76,19 @@ def main() -> None:
     _, y, sd = s2_fit.predictions(jnp.asarray(theta[0])[jp], jnp.asarray(p[0])[jp], prep)
     y, sd = np.asarray(y), np.asarray(sd)
     rows = point_meta(prep)
-    if "obs_scale" in d.files:
+    if "obs_scale" in d.files and d["obs_scale"].shape[-2:] == (2, 2):
+        # 組ごとの倍率（--obs-scale-pair）：(種類, 組) の 2×2
+        sc = np.median(d["obs_scale"].reshape(-1, 2, 2), axis=0)
+        kind, pair = s2_fit.point_kind_pair(prep)
+        sd = sd * sc[kind, pair]
+        print(f"誤差棒の倍率（中央値、行が トロッター回路／直接の測定、列が組）：{sc.round(2).tolist()}")
+    elif "obs_scale" in d.files:
         # 誤差棒を広げたモデルでは、広げた誤差棒で比べる（事後分布の中央値の倍率）
         sc = np.median(d["obs_scale"].reshape(-1, 2), axis=0)
         sd = sd * np.where(np.array([row["kind"] == "trotter" for row in rows]), sc[0], sc[1])
         print(f"誤差棒の倍率（中央値）：トロッター回路 {sc[0]:.2f}、直接の測定 {sc[1]:.2f}")
+    if meta["args"].get("robust"):
+        print("注意：t 分布の尤度のモデル。p_ppc の複製は正規分布で作っているので、外れ値の多さは過大に見える")
     assert len(rows) == len(y) == mus.shape[1]
 
     yrep = mus + sd * rng.standard_normal(mus.shape)
