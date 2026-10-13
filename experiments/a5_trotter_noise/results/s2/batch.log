@@ -166,3 +166,25 @@
 [2026-10-12 19:16:56] real_F5_D1_os_hw1_split_long：終了（終了コード 0）
 [2026-10-12 19:37:19] real_F5_D1_t1_os_rob_hw1_long：終了（終了コード 0）
 [2026-10-12 19:40:31] real_F5_D1_t1_os_rob_long：終了（終了コード 0）
+[2026-10-13 07:25:35] real_F5_D1_os_hw1_split_long8：NUTS（8 チェーン、1000＋1000、出発点は real_F5_D1_os_hw1_split_long の MAP）
+[2026-10-13 07:25:36] real_F5_D1_t1_os_rob_hw1_long8：NUTS（8 チェーン、1000＋1000、出発点は real_F5_D1_t1_os_rob_hw1_long の MAP）
+[2026-10-13 07:42:10] synthetic_F5_D1_t1_os_mix_wA：MAP 探索（出発点 20）
+[2026-10-13 07:42:11] synthetic_F5_D1_os_split_mix_wA：MAP 探索（出発点 20）
+[2026-10-13 07:42:12] synthetic_F5_D1_t1_os_mix_wB：MAP 探索（出発点 20）
+[2026-10-13 07:42:13] synthetic_F5_D1_os_split_mix_wB：MAP 探索（出発点 20）
+[2026-10-13 08:25:56] synthetic_F5_D1_os_split_mix_wB：NUTS
+[2026-10-13 08:41:31] synthetic_F5_D1_os_split_mix_wA：NUTS
+[2026-10-13 08:42:20] synthetic_F5_D1_t1_os_mix_wA：NUTS
+[2026-10-13 08:44:14] synthetic_F5_D1_t1_os_mix_wB：NUTS
+[2026-10-13 11:51:15] real_F5_D1_os_hw1_split_long8：終了（終了コード 0）
+[2026-10-13 12:57:26] synthetic_F5_D1_os_split_mix_wB：終了（終了コード 0）
+[2026-10-13 13:05:07] synthetic_F5_D1_os_split_mix_wA：終了（終了コード 0）
+[2026-10-13 13:05:29] real_F5_D1_t1_os_rob_hw1_long8：終了（終了コード 0）
+[2026-10-13 13:20:13] synthetic_F5_D1_t1_os_mix_wA：終了（終了コード 0）
+[2026-10-13 13:21:52] synthetic_F5_D1_t1_os_mix_wB：終了（終了コード 0）
+[2026-10-13 18:47:12] synthetic_F5_D1_t1_os_mix_t1p_wA1：MAP 探索（出発点 20）
+[2026-10-13 18:47:13] synthetic_F5_D1_t1_os_mix_t1p_wA0：MAP 探索（出発点 20）
+[2026-10-13 18:57:08] synthetic_F5_D1_t1_os_mix_t1p_wA0：NUTS
+[2026-10-13 18:59:57] synthetic_F5_D1_t1_os_mix_t1p_wA1：NUTS
+[2026-10-13 20:38:15] synthetic_F5_D1_t1_os_mix_t1p_wA0：終了（終了コード 0）
+[2026-10-13 20:38:36] synthetic_F5_D1_t1_os_mix_t1p_wA1：終了（終了コード 0）
