@@ -178,14 +178,16 @@ def build_data(args):
             th = tr.theta15.copy()
             th[nm.LABELS15.index("IZ")], th[nm.LABELS15.index("ZZ")] = (c0z + args.truth_new_c1z) / 2, (c0z - args.truth_new_c1z) / 2
             tr.job_theta[a5_data.MIXED_JOB.format(pair="22-23")] = th
+        if getattr(args, "truth_no_t1", False):
+            # T1 なしの世界：昔のデータも来月のジョブも、T1 を入れずに作る（10/13 の監査で、昔のデータを作ったあとに
+            # 外していた不具合を直した）
+            for tr in truths.values():
+                tr.gamma = None
         trotter, probes = a5_data.synthetic_like(trotter, probes, truths, rng, noise_scale=noise)
         if getattr(args, "mixed_job", False):
             rng_mix = np.random.default_rng(args.seed + 300)
             for pair, tr in truths.items():
                 tr.job_offsets[a5_data.MIXED_JOB.format(pair=pair)] = float(rng_mix.normal(0, 0.0015))
-            if getattr(args, "truth_no_t1", False):
-                for tr in truths.values():
-                    tr.gamma = None
             t_mix, p_mix = a5_data.synthetic_mixed_job(truths, rng_mix, noise_scale=noise,
                                                        t1_probe=getattr(args, "t1_probe", False))
             trotter, probes = trotter + t_mix, probes + p_mix
