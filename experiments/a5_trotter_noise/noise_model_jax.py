@@ -152,6 +152,25 @@ def probe_expectations(err, axis: str, target: int, ks, control_one: bool = Fals
     return e_ref, e_y
 
 
+def t1_probe_z(err, control_one: bool, ks):
+    """T1 だけに敏感な回路：制御を |0>（control_one=False）または |1> に準備し、標的は |0> のまま、CX の組を k 回くり返して、
+    両方の量子ビットの <Z> を測る（各 k について (<Z_制御>, <Z_標的>) を返す）。
+    脱分極は |0> も |1> も 0 へ縮めるが、振幅減衰（T1）は |1> だけを |0> の側（+1）へ戻す。そのため、|0> と |1> から始めた
+    <Z_制御> の和は、脱分極では 0 のまま、T1 があると k とともに正へ育つ（MRI の反転回復に当たる）。"""
+    pair = (err @ sup(CX)) @ (err @ sup(CX))
+    rho0 = sup(jnp.array(np.kron(_X, _I2))) @ RHO00 if control_one else RHO00
+    kmax = int(max(ks))
+
+    def body(rho, _):
+        return pair @ rho, rho
+
+    _, rhos = jax.lax.scan(body, rho0, jnp.arange(kmax + 1))
+    R = rhos[jnp.asarray(ks)].reshape(-1, 4, 4)
+    z0 = jnp.real(jnp.einsum("ij,kji->k", jnp.array(np.kron(_Z, _I2)), R))
+    z1 = jnp.real(jnp.einsum("ij,kji->k", jnp.array(np.kron(_I2, _Z)), R))
+    return z0, z1
+
+
 # ---------------------------------------------------------------- 合成データ
 
 @dataclass
@@ -161,6 +180,8 @@ class PairTruth:
     p: float                                # CNOT ごとの脱分極
     drift_label: str = "ZI"                 # ジョブごとの揺らぎを足す項
     job_offsets: dict = field(default_factory=dict)   # ジョブ名 → その項へのずれ（rad）
+    gamma: float | None = None              # CNOT ごとの振幅減衰（T1）。None なら入れない
+    job_theta: dict = field(default_factory=dict)     # ジョブ名 → そのジョブだけの回転（15 成分）。時期で回転が変わる世界用
 
 
 def theta_from(labels_values: dict) -> np.ndarray:

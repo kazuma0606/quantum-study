@@ -42,6 +42,10 @@ def point_meta(prep) -> list[dict]:
         for jb, k in zip(g["job"], g["k"]):
             rows.append({"kind": "probe", "group": f"probe {axis} t{target}{' c1' if c1 else ''} {PAIRS[prep['job_pair'][jb]]}",
                          "pair": PAIRS[prep["job_pair"][jb]], "job": prep["jobs"][jb][1], "x": int(k)})
+    for (c1, q), g in sorted(prep.get("zgroups", {}).items()):
+        for jb, k in zip(g["job"], g["k"]):
+            rows.append({"kind": "probe", "group": f"t1probe {'c1' if c1 else 'c0'} q{q} {PAIRS[prep['job_pair'][jb]]}",
+                         "pair": PAIRS[prep["job_pair"][jb]], "job": prep["jobs"][jb][1], "x": int(k)})
     return rows
 
 

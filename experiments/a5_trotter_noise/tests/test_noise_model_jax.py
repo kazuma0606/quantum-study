@@ -127,3 +127,16 @@ def test_amplitude_damping():
     th = jnp.full(15, 0.01)
     for tw in (False, True):
         assert np.allclose(np.asarray(nm.error_sup(th, 0.002, tw)), np.asarray(nm.error_sup(th, 0.002, tw, 0.0)))
+
+
+def test_t1_probe_separates_damping_from_depolarizing():
+    """T1 専用の回路：|0> と |1> から始めた制御の <Z> の和は、脱分極だけなら 0、T1 だけなら 2[1-(1-γ)^(2k)]（ノートの式 (V-11)）。"""
+    ks = (2, 4, 8, 16, 24)
+    th = jnp.zeros(15)
+    dep = nm.error_sup(th, 0.004, False)
+    s_dep = np.asarray(nm.t1_probe_z(dep, False, ks)[0] + nm.t1_probe_z(dep, True, ks)[0])
+    assert np.allclose(s_dep, 0.0, atol=1e-12)
+    g = 0.0018
+    t1 = nm.error_sup(th, 0.0, False, g)
+    s_t1 = np.asarray(nm.t1_probe_z(t1, False, ks)[0] + nm.t1_probe_z(t1, True, ks)[0])
+    assert np.allclose(s_t1, 2 * (1 - (1 - g) ** (2 * np.array(ks))), atol=1e-10)

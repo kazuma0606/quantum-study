@@ -51,6 +51,7 @@ FORMS = {
 }
 I_ZI = nm.LABELS15.index("ZI")
 KMAX = 12
+KMAX_T1 = 24                                # T1 専用の回路の、CX の組の回数の上限
 GAMMA_T1 = 6e-4                            # CX ごとの振幅減衰の目安（0.1 μs / 160 μs）
 CALIB_R = np.array([0.00182, 0.00213])     # 較正の CZ 誤差の中央値（113 日分、22-23 と 142-143。calibration_history_ibm_fez.csv）
 
@@ -70,6 +71,12 @@ def add_common_args(ap) -> None:
     ap.add_argument("--obs-scale", action="store_true", help="誤差棒を広げる係数（トロッター回路・直接の測定で別々）を入れる")
     ap.add_argument("--drop-trotter", nargs="*", help="トロッター回路の点を抜く（ジョブ ID:次数:n。外れ値の影響を見るとき。--label で名前を変える）")
     ap.add_argument("--with-c1-hw", action="store_true", help="10/12 の実機の、制御 |1> の Z 回転の直接の測定を加える")
+    ap.add_argument("--mixed-job", action="store_true",
+                    help="合成データに、来月の測り方（1本のジョブにトロッター回路・監視用の回路・制御 |1> の Z の測定を混ぜる）を組ごとに加える")
+    ap.add_argument("--t1-probe", action="store_true", help="--mixed-job に、T1 専用の回路（制御 |0>・|1>、k=2〜24）を加える")
+    ap.add_argument("--truth-no-t1", action="store_true", help="--truth-from の当てはめに T1 があっても、正解の T1 を 0 にする")
+    ap.add_argument("--truth-new-c1z", type=float,
+                    help="--mixed-job のジョブだけ、22–23 の制御 |1> の Z 回転をこの値にする（「時期で回転が変わった」世界）")
     ap.add_argument("--split-hw", action="store_true",
                     help="--with-c1-hw のジョブだけ、22–23 の制御 |1> の Z 回転を別のパラメータにする（時期で分けるモデル）")
     ap.add_argument("--robust", action="store_true", help="観測の誤差を t 分布（自由度 4）にする（外れ値に強い尤度）")
@@ -106,6 +113,10 @@ def make_tag(args) -> str:
         tag += "_hw1"
     if getattr(args, "split_hw", False):
         tag += "_split"
+    if getattr(args, "mixed_job", False):
+        tag += "_mix"
+    if getattr(args, "t1_probe", False):
+        tag += "_t1p"
     if args.extra_c1:
         tag += "_c1" if getattr(args, "c1_design", "all") == "all" else "_c1rec"
     if args.label:
@@ -117,7 +128,17 @@ def model_opts(args) -> dict:
     return {"width": args.prior_width, "calib": args.calib, "t1": getattr(args, "t1", False),
             "obs_scale": getattr(args, "obs_scale", False), "obs_scale_pair": getattr(args, "obs_scale_pair", False),
             "robust": getattr(args, "robust", False), "split_hw": getattr(args, "split_hw", False),
-            "hw_jobs": sorted({o["job"] for o in a5_data.load_c1_probes()}) if getattr(args, "split_hw", False) else []}
+            "hw_jobs": split_jobs(args)}
+
+
+def split_jobs(args) -> list[str]:
+    """時期で分けるモデル（--split-hw）で、22–23 の制御 |1> の Z 回転を別にするジョブ：
+    合成データの来月のジョブ（--mixed-job）、または 10/12 の実機のジョブ（--with-c1-hw）。"""
+    if not getattr(args, "split_hw", False):
+        return []
+    if getattr(args, "mixed_job", False):
+        return [a5_data.MIXED_JOB.format(pair="22-23")]
+    return sorted({o["job"] for o in a5_data.load_c1_probes()})
 
 
 def build_data(args):
@@ -148,14 +169,33 @@ def build_data(args):
             else synthetic_truth(prep)
         rng = np.random.default_rng(args.seed + 100)
         noise = tuple(getattr(args, "syn_noise", [1.0, 1.0]))
+        if getattr(args, "truth_new_c1z", None) is not None:
+            if not getattr(args, "mixed_job", False):
+                raise ValueError("--truth-new-c1z は --mixed-job と一緒に使う")
+            tr = truths["22-23"]
+            vals = dict(zip(nm.LABELS15, tr.theta15))
+            c0z = vals["IZ"] + vals["ZZ"]
+            th = tr.theta15.copy()
+            th[nm.LABELS15.index("IZ")], th[nm.LABELS15.index("ZZ")] = (c0z + args.truth_new_c1z) / 2, (c0z - args.truth_new_c1z) / 2
+            tr.job_theta[a5_data.MIXED_JOB.format(pair="22-23")] = th
         trotter, probes = a5_data.synthetic_like(trotter, probes, truths, rng, noise_scale=noise)
+        if getattr(args, "mixed_job", False):
+            rng_mix = np.random.default_rng(args.seed + 300)
+            for pair, tr in truths.items():
+                tr.job_offsets[a5_data.MIXED_JOB.format(pair=pair)] = float(rng_mix.normal(0, 0.0015))
+            if getattr(args, "truth_no_t1", False):
+                for tr in truths.values():
+                    tr.gamma = None
+            t_mix, p_mix = a5_data.synthetic_mixed_job(truths, rng_mix, noise_scale=noise,
+                                                       t1_probe=getattr(args, "t1_probe", False))
+            trotter, probes = trotter + t_mix, probes + p_mix
         if args.extra_c1:
             design = REC_C1_DESIGN if getattr(args, "c1_design", "all") == "rec" else None
             probes = probes + a5_data.synthetic_c1_probes(truths, np.random.default_rng(args.seed + 200),
                                                           design=design, noise_scale=noise[1])
         prep = prepare(trotter, probes)
         truth_meta = {pair: {"theta": dict(zip(nm.LABELS15, tr.theta15.tolist())), "p": tr.p,
-                             "job_offsets": tr.job_offsets} for pair, tr in truths.items()}
+                             "job_offsets": tr.job_offsets, "gamma": tr.gamma} for pair, tr in truths.items()}
     return prep, truth_meta
 
 
@@ -178,8 +218,16 @@ def prepare(trotter: list[dict], probes: list[dict]) -> dict:
         for k, v in (("n", n), ("mask", mask), ("z", z), ("sem", sem)):
             g[k].append(v)
     tgroups = {k: {kk: np.array(vv) for kk, vv in g.items()} for k, g in tgroups.items()}
-    pgroups = {}
+    pgroups, zgroups = {}, {}
     for o in probes:
+        if o.get("kind") == "zpop":
+            # T1 専用の回路（制御を |0>／|1> に準備し CX の組を k 回、量子ビット q の <Z>）
+            g = zgroups.setdefault((o["control_one"], o["qubit"]), {"job": [], "k": [], "z": [], "sigma": []})
+            g["job"].append(job_index[(o["pair"], o["job"])])
+            g["k"].append(o["k"])
+            g["z"].append(o["z"])
+            g["sigma"].append(o["sigma"])
+            continue
         key = (o["axis"], o["target"], o.get("control_one", False), o.get("unflip", False))
         g = pgroups.setdefault(key, {"job": [], "k": [], "phase": [], "sigma": []})
         g["job"].append(job_index[(o["pair"], o["job"])])
@@ -187,7 +235,8 @@ def prepare(trotter: list[dict], probes: list[dict]) -> dict:
         g["phase"].append(o["phase"])
         g["sigma"].append(o["sigma"])
     pgroups = {k: {kk: np.array(vv) for kk, vv in g.items()} for k, g in pgroups.items()}
-    return {"jobs": jobs, "job_pair": job_pair, "tgroups": tgroups, "pgroups": pgroups}
+    zgroups = {k: {kk: np.array(vv) for kk, vv in g.items()} for k, g in zgroups.items()}
+    return {"jobs": jobs, "job_pair": job_pair, "tgroups": tgroups, "pgroups": pgroups, "zgroups": zgroups}
 
 
 def point_kind_pair(prep):
@@ -198,6 +247,9 @@ def point_kind_pair(prep):
             kind += [0] * int(mask.sum())
             pair += [int(prep["job_pair"][jb])] * int(mask.sum())
     for _, g in sorted(prep["pgroups"].items()):
+        kind += [1] * len(g["job"])
+        pair += [int(prep["job_pair"][jb]) for jb in g["job"]]
+    for _, g in sorted(prep.get("zgroups", {}).items()):
         kind += [1] * len(g["job"])
         pair += [int(prep["job_pair"][jb]) for jb in g["job"]]
     return np.array(kind), np.array(pair)
@@ -232,6 +284,16 @@ def predictions(theta_job, p_job, prep, gamma_job=None):
         ph = jnp.arctan2(e_y, e_ref)[jnp.arange(len(g["k"])), jnp.asarray(g["k"])]
         mus.append(g["phase"] - _wrap(g["phase"] - ph))          # 観測との差を ±π で折り返した予測
         ys.append(g["phase"])
+        sds.append(g["sigma"])
+    for (c1, q), g in sorted(prep.get("zgroups", {}).items()):
+        if gamma_job is None:
+            err = jax.vmap(lambda th, p: nm.error_sup(th, p, False))(theta_job[g["job"]], p_job[g["job"]])
+        else:
+            err = jax.vmap(lambda th, p, ga: nm.error_sup(th, p, False, ga))(theta_job[g["job"]], p_job[g["job"]],
+                                                                             gamma_job[g["job"]])
+        z = jax.vmap(lambda e: nm.t1_probe_z(e, c1, tuple(range(KMAX_T1 + 1)))[q])(err)
+        mus.append(z[jnp.arange(len(g["k"])), jnp.asarray(g["k"])])
+        ys.append(g["z"])
         sds.append(g["sigma"])
     return jnp.concatenate(mus), np.concatenate(ys), np.concatenate(sds)
 
@@ -343,9 +405,7 @@ def truth_from_fit(prep, tag: str, c1z: float | None) -> dict:
     """合成データの正解を、実データの当てはめ（NUTS）の事後平均から作る。c1z を与えれば、22–23 の制御 |1> の Z 回転だけ置き換える
     （本番の予行演習：正解が −0.11 の世界と +0.105 の世界で、推奨の測定が正しい側を選べるか）。"""
     d = np.load(OUT / f"{tag}_draws.npz")
-    if "gamma" in d.files:
-        # 合成データの生成器（a5_data.synthetic_like）は振幅減衰を入れないので、T1 つきの当てはめは正解にできない
-        raise ValueError(f"--truth-from {tag}：T1 つきの当てはめは正解に使えない（生成器が γ を扱わない）")
+    gamma = d["gamma"].reshape(-1, 2).mean(0) if "gamma" in d.files else None       # T1 つきの当てはめなら、正解にも T1 を入れる
     meta = json.loads((OUT / f"{tag}_meta.json").read_text(encoding="utf-8"))
     r0, r1 = d["rot_c0"].reshape(-1, 2, 3).mean(0), d["rot_c1"].reshape(-1, 2, 3).mean(0).copy()
     if c1z is not None:
@@ -358,10 +418,13 @@ def truth_from_fit(prep, tag: str, c1z: float | None) -> dict:
         vals = {"ZI": zi[g]}
         for ax, (li, lz) in enumerate((("IX", "ZX"), ("IY", "ZY"), ("IZ", "ZZ"))):
             vals[li], vals[lz] = (r0[g, ax] + r1[g, ax]) / 2, (r0[g, ax] - r1[g, ax]) / 2
-        truths[pair] = nm.PairTruth(theta15=nm.theta_from(vals), p=float(p[g]))
+        truths[pair] = nm.PairTruth(theta15=nm.theta_from(vals), p=float(p[g]),
+                                    gamma=None if gamma is None else float(gamma[g]))
     for (pair, job), de in zip(jobs, delta):
         truths[pair].job_offsets[job] = float(de)
-    assert [tuple(j) for j in prep["jobs"]] == jobs
+    # 当てはめに、今回のデータにないジョブ（10/12 の実機など）が含まれていてもよい。今回のジョブはすべて当てはめに含まれていること
+    missing = set(map(tuple, prep["jobs"])) - set(jobs)
+    assert not missing, f"正解の当てはめに含まれないジョブ：{missing}"
     return truths
 
 

@@ -147,9 +147,9 @@ def synthetic_like(trotter: list[dict], probes: list[dict], truths: dict, rng: n
     syn_t, syn_p = [], []
     for j in trotter:
         tr = truths[j["pair"]]
-        th = tr.theta15.copy()
+        th = np.array(tr.job_theta.get(j["job"], tr.theta15), dtype=float).copy()
         th[nm.LABELS15.index(tr.drift_label)] += tr.job_offsets.get(j["job"], 0.0)
-        z_true = np.asarray(nm.trotter_z0(j["order"], j["n"], nm.error_sup(jnp.array(th), tr.p, j["twirled"])))
+        z_true = np.asarray(nm.trotter_z0(j["order"], j["n"], nm.error_sup(jnp.array(th), tr.p, j["twirled"], tr.gamma)))
         shots = np.round((1 - z_true**2) / np.maximum(j["sem"], 1e-6) ** 2).astype(int)     # 実データの統計誤差に合うショット数
         z = 2 * rng.binomial(np.maximum(shots, 100), np.clip((1 + z_true) / 2, 0, 1)) / np.maximum(shots, 100) - 1
         if noise_scale[0] > 1:
@@ -157,12 +157,70 @@ def synthetic_like(trotter: list[dict], probes: list[dict], truths: dict, rng: n
         syn_t.append({**j, "z": z, "z_true": z_true})
     for o in probes:
         tr = truths[o["pair"]]
-        th = tr.theta15.copy()
+        th = np.array(tr.job_theta.get(o["job"], tr.theta15), dtype=float).copy()
         th[nm.LABELS15.index(tr.drift_label)] += tr.job_offsets.get(o["job"], 0.0)
-        e_ref, e_y = nm.probe_expectations(nm.error_sup(jnp.array(th), tr.p, False), o["axis"], o["target"], (o["k"],))
+        e_ref, e_y = nm.probe_expectations(nm.error_sup(jnp.array(th), tr.p, False, tr.gamma), o["axis"], o["target"], (o["k"],),
+                                           control_one=o.get("control_one", False), unflip=o.get("unflip", False))
         ph_true = float(np.arctan2(float(e_y[0]), float(e_ref[0])))
         syn_p.append({**o, "phase": ph_true + rng.normal(0, o["sigma"] * noise_scale[1]), "phase_true": ph_true})
     return syn_t, syn_p
+
+
+MIXED_JOB = "synthetic_mixed_{pair}"
+
+
+def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tuple[float, float] = (1.0, 1.0),
+                        shots_trotter: int = 8000, shots_probe: int = 3000,
+                        t1_probe: bool = False) -> tuple[list[dict], list[dict]]:
+    """来月の測り方の予行演習用：1本のジョブ（組ごと）に、次を混ぜた合成データ。
+      トロッター回路（1次・2次、ツイリングなし、n=1〜14、8000 ショット）、監視用の回路（制御の Z 位相・標的の X 回転、k=12）、
+      制御 |1> の Z の測定（反転を戻す。22–23 は k=1〜4、142–143 は k=2〜12）
+    同じジョブなので、回転・ずれ・T1 はすべて同じ値（truths の job_theta・job_offsets・gamma）で作る。"""
+    import jax.numpy as jnp
+    trot, probes = [], []
+    for pair, tr in truths.items():
+        job = MIXED_JOB.format(pair=pair)
+        th = np.array(tr.job_theta.get(job, tr.theta15), dtype=float).copy()
+        th[nm.LABELS15.index(tr.drift_label)] += tr.job_offsets.get(job, 0.0)
+        ns = np.arange(1, 15)
+        for order in (1, 2):
+            z_true = np.asarray(nm.trotter_z0(order, ns, nm.error_sup(jnp.array(th), tr.p, False, tr.gamma)))
+            z = 2 * rng.binomial(shots_trotter, np.clip((1 + z_true) / 2, 0, 1)) / shots_trotter - 1
+            sem = np.sqrt(np.maximum(1 - z**2, 1e-6) / shots_trotter)
+            if noise_scale[0] > 1:
+                z = z + rng.normal(0, 1, len(z)) * sem * np.sqrt(noise_scale[0] ** 2 - 1)
+            trot.append({"pair": pair, "job": job, "time": None, "order": order, "twirled": False, "dd": False,
+                         "source": "synthetic", "n": ns, "z": z, "sem": sem, "z_trot": np.zeros(14), "z_exact": 0.0,
+                         "z_true": z_true})
+        err = nm.error_sup(jnp.array(th), tr.p, False, tr.gamma)
+        kc1 = (1, 2, 3, 4) if pair == "22-23" else (2, 4, 8, 12)
+        plan = [("Z", 0, False, False, (12,)), ("X", 1, False, False, (12,)), ("Z", 1, True, True, kc1)]
+        for axis, target, c1, unflip, ks in plan:
+            e_ref, e_y = nm.probe_expectations(err, axis, target, ks, control_one=c1, unflip=unflip)
+            for k, er, ey in zip(ks, np.asarray(e_ref), np.asarray(e_y)):
+                m_ref = 2 * rng.binomial(shots_probe, (1 + er) / 2) / shots_probe - 1
+                m_y = 2 * rng.binomial(shots_probe, (1 + ey) / 2) / shots_probe - 1
+                sig = _phase_sigma(m_ref, m_y, shots_probe)
+                ph = float(np.arctan2(m_y, m_ref))
+                if noise_scale[1] > 1:
+                    ph += rng.normal(0, sig * np.sqrt(noise_scale[1] ** 2 - 1))
+                probes.append({"pair": pair, "job": job, "time": None, "axis": axis, "target": target, "k": int(k),
+                               "control_one": c1, "unflip": unflip, "phase": ph, "sigma": sig,
+                               "phase_true": float(np.arctan2(ey, er))})
+        if t1_probe:
+            # T1 専用の回路（制御 |0>・|1>、k=2〜24）。両方の量子ビットの <Z>。読み出しの偏りは入れていない
+            ks = (2, 4, 8, 16, 24)
+            for c1 in (False, True):
+                zs = nm.t1_probe_z(err, c1, ks)
+                for q in (0, 1):
+                    for k, zt in zip(ks, np.asarray(zs[q])):
+                        m = 2 * rng.binomial(shots_probe, np.clip((1 + zt) / 2, 0, 1)) / shots_probe - 1
+                        sig = float(np.sqrt(max(1 - m**2, 1e-6) / shots_probe))
+                        if noise_scale[1] > 1:
+                            m += rng.normal(0, sig * np.sqrt(noise_scale[1] ** 2 - 1))
+                        probes.append({"pair": pair, "job": job, "time": None, "kind": "zpop", "control_one": c1,
+                                       "qubit": q, "k": int(k), "z": float(m), "sigma": sig, "z_true": float(zt)})
+    return trot, probes
 
 
 def synthetic_c1_probes(truths: dict, rng: np.random.Generator, shots: int = 3000, ks=(2, 4, 8, 12),
@@ -181,7 +239,7 @@ def synthetic_c1_probes(truths: dict, rng: np.random.Generator, shots: int = 300
         job = f"synthetic_c1_{pair}"
         th = np.array(tr.theta15)
         th[nm.LABELS15.index(tr.drift_label)] += tr.job_offsets.get(job, 0.0)
-        err = nm.error_sup(jnp.array(th), tr.p, False)
+        err = nm.error_sup(jnp.array(th), tr.p, False, tr.gamma)
         plan = design[pair] if design is not None else [("X", False, tuple(ks)), ("Z", True, tuple(ks))]
         for axis, unflip, kk in plan:
             e_ref, e_y = nm.probe_expectations(err, axis, 1, tuple(kk), control_one=True, unflip=unflip)

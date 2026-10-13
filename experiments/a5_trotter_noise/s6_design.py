@@ -56,6 +56,14 @@ def circuit_outputs(phi, g, delta, spec):
     φ が 18 個（T1 を入れたモデル）なら、最後の2個の log γ で振幅減衰も入れる。"""
     p = jnp.exp(phi[14 + g])
     gamma = jnp.exp(phi[16 + g]) if phi.shape[0] == len(NAMES_T1) else None
+    if spec[0] == "t1probe":
+        # T1 専用の回路：制御を |0> と |1> に準備して CX の組を k 回。両方の量子ビットの <Z>（読み出しの偏りは入れていない）
+        _, ks = spec
+        err = nm.error_sup(theta15(phi, g, delta), p, False, gamma)
+        za0, zb0 = nm.t1_probe_z(err, False, tuple(ks))
+        za1, zb1 = nm.t1_probe_z(err, True, tuple(ks))
+        z = jnp.concatenate([za0, zb0, za1, zb1])
+        return z, (z,)
     if spec[0] == "trotter":
         _, order, tw, ns = spec[:4]
         fold = spec[4] if len(spec) > 4 else 1
@@ -68,7 +76,7 @@ def circuit_outputs(phi, g, delta, spec):
 
 
 def sigmas(spec, aux, shots):
-    if spec[0] == "trotter":
+    if spec[0] in ("trotter", "t1probe"):
         (z,) = aux
         return np.sqrt(np.maximum(1 - np.asarray(z) ** 2, 1e-6) / shots)
     e_ref, e_y = (np.asarray(a) for a in aux)
@@ -78,6 +86,8 @@ def sigmas(spec, aux, shots):
 
 
 def n_circuits(spec):
+    if spec[0] == "t1probe":
+        return 2 * len(spec[1])                     # |0> と |1> の準備ごとに1本（2つの量子ビットを同時に測る）
     return len(spec[3]) if spec[0] == "trotter" else 2 * len(spec[5])        # 直接の測定は基準の基底と Y の2本ずつ
 
 
@@ -108,6 +118,10 @@ DESIGNS = {
     "トロッター 1次 ツイリング、雑音 1 倍＋3 倍": [((0, 1), [("trotter", 1, True, NS), ("trotter", 1, True, NS, 3)], 8000)],
     "c1 Z＋X を2回（別の時刻）": [((0, 1), [C1_Z, C1_X], 3000), ((0, 1), [C1_Z, C1_X], 3000)],
 }
+T1P = ("t1probe", (2, 4, 8, 16, 24))
+DESIGNS["T1 専用（|0>・|1>、k=2〜24）"] = [((0, 1), [T1P], 3000)]
+DESIGNS["T1 専用、22-23 だけ"] = [((0,), [T1P], 3000)]
+DESIGNS["c1 Z（推奨）＋T1 専用"] = [((0,), [C1_Z[:5] + (KS_SMALL,), T1P], 3000), ((1,), [C1_Z, T1P], 3000)]
 TARGETS = ["c1_z[22-23]", "c1_x[22-23]", "c1_z[142-143]", "zi[22-23]", "c0_x[22-23]", "log_p[22-23]"]
 
 
@@ -167,6 +181,7 @@ def main() -> None:
         cov = np.linalg.inv(prior + A.T @ A)[:P, :P]
         sd = np.sqrt(np.diag(cov))
         rows.append({"design": name, "qpu_s": secs, **{t: sd[names.index(t)] for t in TARGETS},
+                     **({f"log_gamma[{pr}]": sd[names.index(f"log_gamma[{pr}]")] for pr in PAIRS} if P == len(NAMES_T1) else {}),
                      "info_gain_nats": 0.5 * (np.linalg.slogdet(cov0)[1] - np.linalg.slogdet(cov)[1])})
 
     # 制御 |1> の Z 回転の2つの候補で、c1 Z の予測がどれだけ違うか（山を見分けられるか）

@@ -75,6 +75,17 @@ PLANS = {  # 計画名 → [(データ, 形, 揺らぎ, MAP の出発点の数, 
         ("real", "F5", "D1", 30, ["--t1", "--obs-scale", "--robust", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
         ("real", "F5", "D1", 30, ["--t1", "--obs-scale", "--robust", "--with-c1-hw", "--label", "long"], ["--warmup", "600", "--samples", "600"]),
     ],
+    # 10/13：来月の測り方で「T1 が欠けていた」と「時期で回転が変わった」を区別できるかの予行演習。
+    # 世界 A：T1 あり・回転は変わらない（T1＋誤差棒＋実機の当てはめが正解）。世界 B：T1 なし・来月のジョブだけ制御 |1> の Z 回転が
+    # −0.11 → −0.006（誤差棒の当てはめが正解）。どちらにも来月の混ぜたジョブ（--mixed-job）を加え、2つのモデルで当てはめる
+    "distinguish": [
+        *[("synthetic", "F5", "D1", 20,
+           [*model, "--mixed-job", "--syn-noise", "1.42", "1.35", *world, "--label", f"w{wname}"],
+           ["--warmup", "600", "--samples", "600"])
+          for wname, world in (("A", ["--truth-from", "real_F5_D1_t1_os_hw1_long"]),
+                               ("B", ["--truth-from", "real_F5_D1_os_long", "--truth-c1z", "-0.11", "--truth-new-c1z", "-0.006"]))
+          for model in (["--t1", "--obs-scale"], ["--obs-scale", "--split-hw"])],
+    ],
     "rehearsal": [
         *[("synthetic", "F5", "D1", 20,
            [*t1, "--obs-scale", "--extra-c1", "--c1-design", "rec", "--truth-from", "real_F5_D1_os_long",
