@@ -124,6 +124,12 @@ def make_tag(args) -> str:
         tag += "_t1p"
     if getattr(args, "ro_model", False):
         tag += "_ro"
+    # 合成データの条件も名前に入れる（同じ --label で条件だけ変えると結果が上書きされるため。10/14 の監査）。
+    # 10/14 の結果のファイル名は、これを入れる前の名前のまま
+    if getattr(args, "syn_ro", None):
+        tag += f"_sro{args.syn_ro[0]:g}-{args.syn_ro[1]:g}"
+    if getattr(args, "t1_shots", None):
+        tag += f"_t1s{args.t1_shots}"
     if args.extra_c1:
         tag += "_c1" if getattr(args, "c1_design", "all") == "all" else "_c1rec"
     if args.label:
@@ -393,8 +399,12 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
     if opts["ro_model"] and prep.get("zgroups"):
         # 読み出しの偏り：測った <Z> = 倍率 × 本当の <Z> ＋ ずれ。倍率 = 1 − e01 − e10、ずれ = e10 − e01（組・量子ビットごと）。
         # 偏りは k によらず一定、T1 は k とともに育つので、k への依存で分けられる
-        ro_s = numpyro.sample("ro_scale", dist.Normal(jnp.full((2, 2), 0.97), 0.03))
-        ro_b = numpyro.sample("ro_bias", dist.Normal(jnp.zeros((2, 2)), 0.03))
+        # 誤読の確率そのもの（0〜1）を置き、そこから倍率とずれを作る（10/14 の監査：倍率とずれを独立な正規分布に置くと、
+        # 誤読の確率が負になる領域を許してしまう）。Beta(1.5, 40) は平均約 3.6%、95% 点で約 10%
+        e01 = numpyro.sample("ro_e01", dist.Beta(jnp.full((2, 2), 1.5), 40.0))
+        e10 = numpyro.sample("ro_e10", dist.Beta(jnp.full((2, 2), 1.5), 40.0))
+        ro_s = numpyro.deterministic("ro_scale", 1 - e01 - e10)
+        ro_b = numpyro.deterministic("ro_bias", e10 - e01)
         n_z = sum(len(g["k"]) for g in prep["zgroups"].values())
         zq = np.concatenate([np.full(len(g["k"]), q) for (c1, q), g in sorted(prep["zgroups"].items())])
         zp = np.concatenate([prep["job_pair"][g["job"]] for _, g in sorted(prep["zgroups"].items())])
