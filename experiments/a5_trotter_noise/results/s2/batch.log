@@ -188,3 +188,48 @@
 [2026-10-13 18:59:57] synthetic_F5_D1_t1_os_mix_t1p_wA1：NUTS
 [2026-10-13 20:38:15] synthetic_F5_D1_t1_os_mix_t1p_wA0：終了（終了コード 0）
 [2026-10-13 20:38:36] synthetic_F5_D1_t1_os_mix_t1p_wA1：終了（終了コード 0）
+[2026-10-14 07:01:59] synthetic_F5_D1_t1_os_mix_t1p_wA0fix：MAP 探索（出発点 20）
+[2026-10-14 07:02:00] synthetic_F5_D1_t1_os_mix_t1p_ro_wA1r：MAP 探索（出発点 20）
+[2026-10-14 07:02:01] synthetic_F5_D1_t1_os_mix_t1p_ro_wA0r：MAP 探索（出発点 20）
+[2026-10-14 07:02:02] synthetic_F5_D1_t1_os_mix_t1p_ro_wA1rs1：MAP 探索（出発点 20）
+[2026-10-14 07:02:03] synthetic_F5_D1_t1_os_mix_t1p_ro_wA0rs1：MAP 探索（出発点 20）
+[2026-10-14 07:02:04] synthetic_F5_D1_t1_os_mix_t1p_wA0rnoro：MAP 探索（出発点 20）
+[2026-10-14 07:16:48] synthetic_F5_D1_t1_os_mix_t1p_wA0fix：NUTS
+[2026-10-14 07:21:27] synthetic_F5_D1_t1_os_mix_t1p_wA0rnoro：NUTS
+[2026-10-14 07:23:33] synthetic_F5_D1_t1_os_mix_t1p_ro_wA0rs1：NUTS
+[2026-10-14 07:23:37] synthetic_F5_D1_t1_os_mix_t1p_ro_wA1r：NUTS
+[2026-10-14 07:24:08] synthetic_F5_D1_t1_os_mix_t1p_ro_wA1rs1：NUTS
+[2026-10-14 07:26:06] synthetic_F5_D1_t1_os_mix_t1p_ro_wA0r：NUTS
+[2026-10-14 11:20:41] synthetic_F5_D1_t1_os_mix_t1p_ro_wA1rs1：終了（終了コード 0）
+[2026-10-14 11:20:42] synthetic_F5_D1_t1_os_mix_t1p_wA0rnoro：終了（終了コード 0）
+[2026-10-14 11:24:02] synthetic_F5_D1_t1_os_mix_t1p_ro_wA1r：終了（終了コード 0）
+[2026-10-14 11:25:22] synthetic_F5_D1_t1_os_mix_t1p_wA0fix：終了（終了コード 0）
+[2026-10-14 11:25:23] synthetic_F5_D1_t1_os_mix_t1p_ro_wA0rs1：終了（終了コード 0）
+[2026-10-14 11:26:30] synthetic_F5_D1_t1_os_mix_t1p_ro_wA0r：終了（終了コード 0）
+[2026-10-14 11:27:17] 6本の終了を確認。区別の予行演習（T1 専用の回路つき）3本を開始
+[2026-10-14 11:27:17] synthetic_F5_D1_t1_os_mix_t1p_ro_wBr：MAP 探索（出発点 20）
+[2026-10-14 11:27:18] synthetic_F5_D1_os_split_mix_t1p_ro_wBr：MAP 探索（出発点 20）
+[2026-10-14 11:27:19] synthetic_F5_D1_os_split_mix_t1p_ro_wA1r：MAP 探索（出発点 20）
+[2026-10-14 11:42:42] synthetic_F5_D1_os_split_mix_t1p_ro_wBr：NUTS
+[2026-10-14 11:44:50] synthetic_F5_D1_os_split_mix_t1p_ro_wA1r：NUTS
+[2026-10-14 11:45:43] synthetic_F5_D1_t1_os_mix_t1p_ro_wBr：NUTS
+[2026-10-14 13:34:57] synthetic_F5_D1_os_split_mix_t1p_ro_wBr：終了（終了コード 0）
+[2026-10-14 13:41:14] synthetic_F5_D1_os_split_mix_t1p_ro_wA1r：終了（終了コード 0）
+[2026-10-14 13:41:32] synthetic_F5_D1_t1_os_mix_t1p_ro_wBr：終了（終了コード 0）
+[2026-10-14 13:42:18] 区別の予行演習3本の終了を確認。種を変えた3本と、T1 専用の回路 1000 ショットの2本を開始
+[2026-10-14 13:42:18] synthetic_F5_D1_t1_os_mix_t1p_ro_wBrs1：MAP 探索（出発点 20）
+[2026-10-14 13:42:19] synthetic_F5_D1_os_split_mix_t1p_ro_wBrs1：MAP 探索（出発点 20）
+[2026-10-14 13:42:20] synthetic_F5_D1_os_split_mix_t1p_ro_wA1rs1：MAP 探索（出発点 20）
+[2026-10-14 13:42:21] synthetic_F5_D1_t1_os_mix_t1p_ro_wA1r1k：MAP 探索（出発点 20）
+[2026-10-14 13:42:22] synthetic_F5_D1_t1_os_mix_t1p_ro_wA0r1k：MAP 探索（出発点 20）
+[2026-10-14 13:59:56] synthetic_F5_D1_os_split_mix_t1p_ro_wA1rs1：NUTS
+[2026-10-14 14:00:56] synthetic_F5_D1_os_split_mix_t1p_ro_wBrs1：NUTS
+[2026-10-14 14:03:07] synthetic_F5_D1_t1_os_mix_t1p_ro_wBrs1：NUTS
+[2026-10-14 14:15:47] synthetic_F5_D1_t1_os_mix_t1p_ro_wA1r1k：NUTS
+[2026-10-14 14:16:35] synthetic_F5_D1_t1_os_mix_t1p_ro_wA0r1k：NUTS
+[2026-10-14 17:01:33] synthetic_F5_D1_os_split_mix_t1p_ro_wA1rs1：終了（終了コード 0）
+[2026-10-14 17:10:12] synthetic_F5_D1_t1_os_mix_t1p_ro_wBrs1：終了（終了コード 0）
+[2026-10-14 17:12:49] synthetic_F5_D1_os_split_mix_t1p_ro_wBrs1：終了（終了コード 0）
+[2026-10-14 17:20:45] synthetic_F5_D1_t1_os_mix_t1p_ro_wA1r1k：終了（終了コード 0）
+[2026-10-14 17:29:28] synthetic_F5_D1_t1_os_mix_t1p_ro_wA0r1k：終了（終了コード 0）
+[2026-10-14 17:29:28] 10/14 の追加の5本、すべて完了
