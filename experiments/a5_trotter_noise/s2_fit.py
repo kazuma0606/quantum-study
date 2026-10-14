@@ -74,6 +74,11 @@ def add_common_args(ap) -> None:
     ap.add_argument("--mixed-job", action="store_true",
                     help="合成データに、来月の測り方（1本のジョブにトロッター回路・監視用の回路・制御 |1> の Z の測定を混ぜる）を組ごとに加える")
     ap.add_argument("--t1-probe", action="store_true", help="--mixed-job に、T1 専用の回路（制御 |0>・|1>、k=2〜24）を加える")
+    ap.add_argument("--t1-shots", type=int, help="T1 専用の回路のショット数（既定は直接の測定と同じ 3000）")
+    ap.add_argument("--syn-ro", type=float, nargs=2,
+                    help="合成データの T1 専用の回路に、読み出しの誤り（e01 = P(1|0)、e10 = P(0|1)）を入れる")
+    ap.add_argument("--ro-model", action="store_true",
+                    help="T1 専用の回路の <Z> に、読み出しの倍率とずれ（組・量子ビットごと）を推定するパラメータを入れる")
     ap.add_argument("--truth-no-t1", action="store_true", help="--truth-from の当てはめに T1 があっても、正解の T1 を 0 にする")
     ap.add_argument("--truth-new-c1z", type=float,
                     help="--mixed-job のジョブだけ、22–23 の制御 |1> の Z 回転をこの値にする（「時期で回転が変わった」世界）")
@@ -117,6 +122,8 @@ def make_tag(args) -> str:
         tag += "_mix"
     if getattr(args, "t1_probe", False):
         tag += "_t1p"
+    if getattr(args, "ro_model", False):
+        tag += "_ro"
     if args.extra_c1:
         tag += "_c1" if getattr(args, "c1_design", "all") == "all" else "_c1rec"
     if args.label:
@@ -128,6 +135,7 @@ def model_opts(args) -> dict:
     return {"width": args.prior_width, "calib": args.calib, "t1": getattr(args, "t1", False),
             "obs_scale": getattr(args, "obs_scale", False), "obs_scale_pair": getattr(args, "obs_scale_pair", False),
             "robust": getattr(args, "robust", False), "split_hw": getattr(args, "split_hw", False),
+            "ro_model": getattr(args, "ro_model", False),
             "hw_jobs": split_jobs(args)}
 
 
@@ -189,7 +197,9 @@ def build_data(args):
             for pair, tr in truths.items():
                 tr.job_offsets[a5_data.MIXED_JOB.format(pair=pair)] = float(rng_mix.normal(0, 0.0015))
             t_mix, p_mix = a5_data.synthetic_mixed_job(truths, rng_mix, noise_scale=noise,
-                                                       t1_probe=getattr(args, "t1_probe", False))
+                                                       t1_probe=getattr(args, "t1_probe", False),
+                                                       t1_shots=getattr(args, "t1_shots", None),
+                                                       readout=tuple(args.syn_ro) if getattr(args, "syn_ro", None) else None)
             trotter, probes = trotter + t_mix, probes + p_mix
         if args.extra_c1:
             design = REC_C1_DESIGN if getattr(args, "c1_design", "all") == "rec" else None
@@ -302,7 +312,7 @@ def predictions(theta_job, p_job, prep, gamma_job=None):
 
 def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = None):
     opts = {"width": 0.05, "calib": False, "t1": False, "obs_scale": False, "obs_scale_pair": False, "robust": False,
-            **(opts or {})}
+            "ro_model": False, **(opts or {})}
     w = opts["width"]
     active = FORMS[form]
     if active == "branch":
@@ -380,6 +390,15 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         gamma = numpyro.sample("gamma", dist.LogNormal(jnp.full(2, np.log(GAMMA_T1)), 0.7))
         gamma_job = gamma[jp]
     mu, y, sd_obs = predictions(theta_job, p[jp], prep, gamma_job)
+    if opts["ro_model"] and prep.get("zgroups"):
+        # 読み出しの偏り：測った <Z> = 倍率 × 本当の <Z> ＋ ずれ。倍率 = 1 − e01 − e10、ずれ = e10 − e01（組・量子ビットごと）。
+        # 偏りは k によらず一定、T1 は k とともに育つので、k への依存で分けられる
+        ro_s = numpyro.sample("ro_scale", dist.Normal(jnp.full((2, 2), 0.97), 0.03))
+        ro_b = numpyro.sample("ro_bias", dist.Normal(jnp.zeros((2, 2)), 0.03))
+        n_z = sum(len(g["k"]) for g in prep["zgroups"].values())
+        zq = np.concatenate([np.full(len(g["k"]), q) for (c1, q), g in sorted(prep["zgroups"].items())])
+        zp = np.concatenate([prep["job_pair"][g["job"]] for _, g in sorted(prep["zgroups"].items())])
+        mu = mu.at[-n_z:].set(ro_s[zp, zq] * mu[-n_z:] + ro_b[zp, zq])
     if opts["obs_scale"]:
         # 誤差棒の広げ方：統計誤差に入っていないばらつき（読み出し補正の不確かさなど。10/11 の事後予測チェックで約 1.3 倍）。
         # トロッター回路と、直接の測定（位相）で別々に置く

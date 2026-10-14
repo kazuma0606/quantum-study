@@ -86,6 +86,20 @@ PLANS = {  # 計画名 → [(データ, 形, 揺らぎ, MAP の出発点の数, 
                                ("B", ["--truth-from", "real_F5_D1_os_long", "--truth-c1z", "-0.11", "--truth-new-c1z", "-0.006"]))
           for model in (["--t1", "--obs-scale"], ["--obs-scale", "--split-hw"])],
     ],
+    # 10/14：T1 なしの世界の回し直し（不具合を直したもの）と、読み出しの偏りを入れた T1 専用の回路の予行演習
+    "readout": [
+        *[("synthetic", "F5", "D1", 20,
+           ["--t1", "--obs-scale", "--mixed-job", "--t1-probe", "--syn-noise", "1.42", "1.35",
+            "--truth-from", "real_F5_D1_t1_os_hw1_long", *world, *ro, *model, "--label", lab],
+           ["--warmup", "600", "--samples", "600"])
+          for lab, world, ro, model in (
+              ("wA0fix", ["--truth-no-t1"], [], []),
+              ("wA1r", [], ["--syn-ro", "0.01", "0.03"], ["--ro-model"]),
+              ("wA0r", ["--truth-no-t1"], ["--syn-ro", "0.01", "0.03"], ["--ro-model"]),
+              ("wA1rs1", ["--seed", "1"], ["--syn-ro", "0.01", "0.03"], ["--ro-model"]),
+              ("wA0rs1", ["--truth-no-t1", "--seed", "1"], ["--syn-ro", "0.01", "0.03"], ["--ro-model"]),
+              ("wA0rnoro", ["--truth-no-t1"], ["--syn-ro", "0.01", "0.03"], []))],
+    ],
     "rehearsal": [
         *[("synthetic", "F5", "D1", 20,
            [*t1, "--obs-scale", "--extra-c1", "--c1-design", "rec", "--truth-from", "real_F5_D1_os_long",

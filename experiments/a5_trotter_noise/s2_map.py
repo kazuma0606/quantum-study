@@ -99,6 +99,10 @@ def main() -> None:
                 values[name] = jnp.asarray(0.002)
             elif name == "gamma":
                 values[name] = jnp.asarray(s2_fit.GAMMA_T1 * np.exp(rng.normal(0, 0.3, shape)))
+            elif name == "ro_scale":
+                values[name] = jnp.asarray(0.97 + rng.normal(0, 0.01, shape))
+            elif name == "ro_bias":
+                values[name] = jnp.asarray(rng.normal(0, 0.01, shape))
             elif name == "obs_scale":
                 values[name] = jnp.asarray(np.exp(rng.normal(0.2, 0.1, shape)))
         start = initialize_model(jax.random.PRNGKey(1000 + i), s2_fit.model, model_args=model_args,

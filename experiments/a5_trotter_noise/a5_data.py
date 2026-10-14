@@ -171,7 +171,8 @@ MIXED_JOB = "synthetic_mixed_{pair}"
 
 def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tuple[float, float] = (1.0, 1.0),
                         shots_trotter: int = 8000, shots_probe: int = 3000,
-                        t1_probe: bool = False) -> tuple[list[dict], list[dict]]:
+                        t1_probe: bool = False, readout: tuple[float, float] | None = None,
+                        t1_shots: int | None = None) -> tuple[list[dict], list[dict]]:
     """来月の測り方の予行演習用：1本のジョブ（組ごと）に、次を混ぜた合成データ。
       トロッター回路（1次・2次、ツイリングなし、n=1〜14、8000 ショット）、監視用の回路（制御の Z 位相・標的の X 回転、k=12）、
       制御 |1> の Z の測定（反転を戻す。22–23 は k=1〜4、142–143 は k=2〜12）
@@ -214,8 +215,14 @@ def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tup
                 zs = nm.t1_probe_z(err, c1, ks)
                 for q in (0, 1):
                     for k, zt in zip(ks, np.asarray(zs[q])):
-                        m = 2 * rng.binomial(shots_probe, np.clip((1 + zt) / 2, 0, 1)) / shots_probe - 1
-                        sig = float(np.sqrt(max(1 - m**2, 1e-6) / shots_probe))
+                        p0 = np.clip((1 + zt) / 2, 0, 1)
+                        if readout is not None:
+                            # 読み出しの誤り：e01 = P(1 と読む | 0)、e10 = P(0 と読む | 1)（補正していない生の <Z>）
+                            e01, e10 = readout
+                            p0 = p0 * (1 - e01) + (1 - p0) * e10
+                        n_sh = t1_shots or shots_probe
+                        m = 2 * rng.binomial(n_sh, p0) / n_sh - 1
+                        sig = float(np.sqrt(max(1 - m**2, 1e-6) / n_sh))
                         if noise_scale[1] > 1:
                             m += rng.normal(0, sig * np.sqrt(noise_scale[1] ** 2 - 1))
                         probes.append({"pair": pair, "job": job, "time": None, "kind": "zpop", "control_one": c1,
