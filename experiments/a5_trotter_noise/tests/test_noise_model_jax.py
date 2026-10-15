@@ -140,3 +140,15 @@ def test_t1_probe_separates_damping_from_depolarizing():
     t1 = nm.error_sup(th, 0.0, False, g)
     s_t1 = np.asarray(nm.t1_probe_z(t1, False, ks)[0] + nm.t1_probe_z(t1, True, ks)[0])
     assert np.allclose(s_t1, 2 * (1 - (1 - g) ** (2 * np.array(ks))), atol=1e-10)
+
+
+def test_t1_probe_joint_probabilities_match_marginals():
+    """T1 専用の回路の同時確率（4通り）は和が 1 で、そこから作った各量子ビットの <Z> は t1_probe_z と一致する。"""
+    ks = (2, 8, 24)
+    err = nm.error_sup(jnp.full(15, 0.01), 0.002, False, 0.0015)
+    for c1 in (False, True):
+        P = np.asarray(nm.t1_probe_probs(err, c1, ks))
+        assert np.allclose(P.sum(1), 1.0)
+        z0, z1 = (np.asarray(z) for z in nm.t1_probe_z(err, c1, ks))
+        assert np.allclose(P @ np.array([1, 1, -1, -1]), z0)
+        assert np.allclose(P @ np.array([1, -1, 1, -1]), z1)

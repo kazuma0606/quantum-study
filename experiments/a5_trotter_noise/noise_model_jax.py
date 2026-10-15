@@ -171,6 +171,21 @@ def t1_probe_z(err, control_one: bool, ks):
     return z0, z1
 
 
+def t1_probe_probs(err, control_one: bool, ks):
+    """t1_probe_z と同じ回路の、2つの量子ビットを同時に測ったときの4通りの確率（各 k について |00>, |01>, |10>, |11> の順。
+    左が制御）。同じショットで両方を測るので、制御と標的の結果には相関がある（10/15 の監査）。"""
+    pair = (err @ sup(CX)) @ (err @ sup(CX))
+    rho0 = sup(jnp.array(np.kron(_X, _I2))) @ RHO00 if control_one else RHO00
+    kmax = int(max(ks))
+
+    def body(rho, _):
+        return pair @ rho, rho
+
+    _, rhos = jax.lax.scan(body, rho0, jnp.arange(kmax + 1))
+    R = rhos[jnp.asarray(ks)].reshape(-1, 4, 4)
+    return jnp.real(jnp.diagonal(R, axis1=1, axis2=2))
+
+
 # ---------------------------------------------------------------- 合成データ
 
 @dataclass

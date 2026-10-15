@@ -9,6 +9,8 @@ T1 専用の回路のデータ → γ の事後分布、をニューラルネッ
   パラメータ（6個、事前分布はすべて一様）：γ ∈ [0, 0.004]（CNOT ごとの振幅減衰。0 を含む）、p ∈ [0.0005, 0.005]（脱分極）、
     読み出しの誤り e01・e10 を制御・標的の量子ビットごとに ∈ [0, 0.08]
   データ（20 個）：制御を |0>・|1> に準備し、CX の組を k = 2, 4, 8, 16, 24 回、2つの量子ビットの生の <Z>（読み出しの誤りを含む）。
+    2つの量子ビットは同じショットで同時に測るので、4通りの同時の結果を多項分布で引いてから集計する（10/15 の監査で直した。
+    それ以前の結果 t1probe_sbi_s0〜s2 は、2つを独立な二項分布で作っていた）。
     ショットの二項分布のばらつきに、実データ並みの余分なばらつき（統計誤差の 1.35 倍、s2_fit.py の --syn-noise と同じ）を足す
 限界：回転は固定、ほかの回路（トロッター回路など）は読まない。混ぜたジョブ全体を当てはめる NUTS より単純なので、
   見分けられる割合はやや楽観的に出る可能性がある。NUTS の結果（第2段、種2つ）と並べて確かめる。
@@ -63,24 +65,40 @@ def fixed_theta() -> jnp.ndarray:
 
 
 def make_expect(theta):
-    """パラメータ → 読み出しの誤りを含む、生の <Z> の期待値（20 個）。"""
+    """パラメータ → 読み出しの結果の4通り（00, 01, 10, 11。左が制御）の確率。準備（|0>・|1>）× k（5通り）× 4 の 40 個。
+    2つの量子ビットは同じショットで同時に測るので、本当の状態の同時確率に、量子ビットごとの読み出しの誤りの行列
+    M = [[1−e01, e10], [e01, 1−e10]]（行が読んだ値、列が本当の値）のテンソル積をかける（10/15 の監査：制御と標的を
+    別々の二項分布で作ると、2つの値の相関が消える）。"""
+    def conf(e01, e10):
+        return jnp.array([[1 - e01, e10], [e01, 1 - e10]])
+
     def one(par):
         g, p, e01c, e10c, e01t, e10t = par
         err = nm.error_sup(theta, p, False, g)
-        zs = []
+        M = jnp.kron(conf(e01c, e10c), conf(e01t, e10t))
+        out = []
         for c1 in (False, True):
-            zc, zt = nm.t1_probe_z(err, c1, KS)
-            zs += [(1 - e01c - e10c) * zc + (e10c - e01c), (1 - e01t - e10t) * zt + (e10t - e01t)]
-        return jnp.concatenate(zs)
+            P = nm.t1_probe_probs(err, c1, KS)              # (k, 4)
+            out.append(P @ M.T)
+        return jnp.concatenate(out).reshape(-1)
     return jax.jit(jax.vmap(one))
 
 
+ZC = np.array([1, 1, -1, -1])       # 制御の Z の値（00, 01, 10, 11 の順、左が制御）
+ZT = np.array([1, -1, 1, -1])       # 標的の Z の値
+
+
 def simulate(expect, pars: np.ndarray, shots: int, rng: np.random.Generator, batch: int = 4096) -> np.ndarray:
+    """4通りの同時の結果を多項分布で引き、制御・標的の <Z> を集計する（データは 20 個：準備 × k × 量子ビット）。
+    実データ並みの余分なばらつき（統計誤差の 1.35 倍）も足す。"""
     xs = []
     for i in range(0, len(pars), batch):
-        z = np.asarray(expect(jnp.asarray(pars[i:i + batch])))
-        p0 = np.clip((1 + z) / 2, 0, 1)
-        m = 2 * rng.binomial(shots, p0) / shots - 1
+        P = np.asarray(expect(jnp.asarray(pars[i:i + batch]))).reshape(-1, 2, len(KS), 4)
+        P = np.clip(P, 0, None)
+        P = P / P.sum(-1, keepdims=True)
+        n = rng.multinomial(shots, P.reshape(-1, 4)).reshape(P.shape) / shots
+        zc, zt = n @ ZC, n @ ZT                              # (batch, 準備, k)
+        m = np.stack([zc, zt], axis=-1).reshape(len(P), -1)   # 準備 → k → 量子ビット の順
         sig = np.sqrt(np.maximum(1 - m**2, 1e-6) / shots)
         xs.append(m + rng.standard_normal(m.shape) * sig * np.sqrt(NOISE**2 - 1))
     return np.concatenate(xs)
