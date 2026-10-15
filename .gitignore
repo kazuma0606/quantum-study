@@ -33,3 +33,6 @@ experiments/a5_trotter_noise/results/s2/*.log
 
 # sbi（SBI のライブラリ）が学習のたびに作る TensorBoard のログ
 sbi-logs/
+
+# A-5 S6：学習済みのニューラル推定器（作り直せる、約 0.4 MB × ショット数）
+experiments/a5_trotter_noise/results/s6/*_posterior.pkl
