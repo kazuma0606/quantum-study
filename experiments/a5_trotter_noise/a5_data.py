@@ -209,24 +209,28 @@ def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tup
                                "control_one": c1, "unflip": unflip, "phase": ph, "sigma": sig,
                                "phase_true": float(np.arctan2(ey, er))})
         if t1_probe:
-            # T1 専用の回路（制御 |0>・|1>、k=2〜24）。両方の量子ビットの <Z>。読み出しの偏りは入れていない
+            # T1 専用の回路（制御 |0>・|1>、k=2〜24）。両方の量子ビットの <Z>。
+            # 2つの量子ビットは同じショットで同時に測るので、4通りの同時の結果を多項分布で引き、量子ビットごとの読み出しの誤り
+            # （e01 = P(1 と読む | 0)、e10 = P(0 と読む | 1)、補正していない生の値）をかけてから集計する（10/15 の監査）
             ks = (2, 4, 8, 16, 24)
+            n_sh = t1_shots or shots_probe
+            e01, e10 = readout if readout is not None else (0.0, 0.0)
+            conf = np.array([[1 - e01, e10], [e01, 1 - e10]])           # 行が読んだ値、列が本当の値
+            M = np.kron(conf, conf)
+            zsign = (np.array([1, 1, -1, -1]), np.array([1, -1, 1, -1]))   # 00, 01, 10, 11 の順（左が制御）
             for c1 in (False, True):
+                P = np.asarray(nm.t1_probe_probs(err, c1, ks)) @ M.T
                 zs = nm.t1_probe_z(err, c1, ks)
-                for q in (0, 1):
-                    for k, zt in zip(ks, np.asarray(zs[q])):
-                        p0 = np.clip((1 + zt) / 2, 0, 1)
-                        if readout is not None:
-                            # 読み出しの誤り：e01 = P(1 と読む | 0)、e10 = P(0 と読む | 1)（補正していない生の <Z>）
-                            e01, e10 = readout
-                            p0 = p0 * (1 - e01) + (1 - p0) * e10
-                        n_sh = t1_shots or shots_probe
-                        m = 2 * rng.binomial(n_sh, p0) / n_sh - 1
+                for i, k in enumerate(ks):
+                    pk = np.clip(P[i], 0, None)
+                    freq = rng.multinomial(n_sh, pk / pk.sum()) / n_sh
+                    for q in (0, 1):
+                        m = float(freq @ zsign[q])
                         sig = float(np.sqrt(max(1 - m**2, 1e-6) / n_sh))
                         if noise_scale[1] > 1:
                             m += rng.normal(0, sig * np.sqrt(noise_scale[1] ** 2 - 1))
                         probes.append({"pair": pair, "job": job, "time": None, "kind": "zpop", "control_one": c1,
-                                       "qubit": q, "k": int(k), "z": float(m), "sigma": sig, "z_true": float(zt)})
+                                       "qubit": q, "k": int(k), "z": m, "sigma": sig, "z_true": float(np.asarray(zs[q])[i])})
     return trot, probes
 
 

@@ -58,10 +58,14 @@ def log(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-def fixed_theta() -> jnp.ndarray:
-    """22–23 の回転を、T1＋誤差棒＋実機の当てはめの事後平均に固定する。"""
+def fixed_theta(pair: int = 0) -> jnp.ndarray:
+    """組（0 = 22–23、1 = 142–143）の回転を、T1＋誤差棒＋実機の当てはめの事後平均に固定する。"""
     d = np.load(s2_fit.OUT / "real_F5_D1_t1_os_hw1_long_draws.npz")
-    return jnp.asarray(d["theta"].reshape(-1, 2, 15).mean(0)[0])
+    return jnp.asarray(d["theta"].reshape(-1, 2, 15).mean(0)[pair])
+
+
+# 世界の正解の p（脱分極）：合成データの予行演習の正解（real_F5_D1_t1_os_hw1_long の事後平均）と同じ値
+TRUE_P = {0: 0.00173, 1: 0.00207}
 
 
 def make_expect(theta):
@@ -113,13 +117,17 @@ def main() -> None:
     ap.add_argument("--sbc", type=int, default=300)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--tag", default="t1probe_sbi")
+    ap.add_argument("--pair", type=int, choices=[0, 1], default=0,
+                    help="回転と脱分極の条件をどちらの組にするか（0 = 22–23、1 = 142–143）")
     args = ap.parse_args()
     import torch
     from sbi.inference import NPE
     from sbi.utils import BoxUniform
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     OUT.mkdir(parents=True, exist_ok=True)
-    expect = make_expect(fixed_theta())
+    expect = make_expect(fixed_theta(args.pair))
+    TRUE_REST["p"] = TRUE_P[args.pair]
+    log(f"組の条件：{['22-23', '142-143'][args.pair]}（回転は当てはめの事後平均、正解の p = {TRUE_REST['p']}）")
     prior = BoxUniform(torch.tensor(LOW, dtype=torch.float32, device=dev), torch.tensor(HIGH, dtype=torch.float32, device=dev),
                        device=dev)
     rng = np.random.default_rng(args.seed)
