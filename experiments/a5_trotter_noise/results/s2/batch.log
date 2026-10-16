@@ -293,3 +293,63 @@
 [2026-10-15 07:49:16] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v2wA1s2：終了（終了コード 0）
 [2026-10-15 07:49:36] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v2wBs2：終了（終了コード 0）
 [2026-10-15 07:49:36] 10/15 第 3 段が完了
+[2026-10-16 07:05:31] 10/16 第 1 段を開始（6 本）
+[2026-10-16 07:05:31] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA1：MAP 探索（出発点 20）
+[2026-10-16 07:05:33] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA0：MAP 探索（出発点 20）
+[2026-10-16 07:05:35] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA1s1：MAP 探索（出発点 20）
+[2026-10-16 07:05:37] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wB：MAP 探索（出発点 20）
+[2026-10-16 07:05:39] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wB：MAP 探索（出発点 20）
+[2026-10-16 07:05:41] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wA1：MAP 探索（出発点 20）
+[2026-10-16 07:25:48] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA1：NUTS
+[2026-10-16 07:26:39] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wA1：NUTS
+[2026-10-16 07:27:24] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wB：NUTS
+[2026-10-16 07:28:18] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA1s1：NUTS
+[2026-10-16 07:31:26] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA0：NUTS
+[2026-10-16 07:31:34] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wB：NUTS
+[2026-10-16 12:21:41] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wA1：終了（終了コード 0、結果あり）
+[2026-10-16 12:25:30] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA1：終了（終了コード 0、結果あり）
+[2026-10-16 12:26:38] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wB：終了（終了コード 0、結果あり）
+[2026-10-16 12:37:39] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA1s1：終了（終了コード 0、結果あり）
+[2026-10-16 12:41:02] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA0：終了（終了コード 0、結果あり）
+[2026-10-16 12:43:36] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wB：終了（終了コード 0、結果あり）
+[2026-10-16 12:43:36] 10/16 第 1 段が完了
+[2026-10-16 12:43:36] 10/16 第 2 段を開始（8 本）
+[2026-10-16 12:43:36] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA1s0：MAP 探索（出発点 20）
+[2026-10-16 12:43:38] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA1s1：MAP 探索（出発点 20）
+[2026-10-16 12:43:40] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA0s0：MAP 探索（出発点 20）
+[2026-10-16 12:43:42] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA0s1：MAP 探索（出発点 20）
+[2026-10-16 12:43:44] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA1s0：MAP 探索（出発点 20）
+[2026-10-16 12:43:46] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA1s1：MAP 探索（出発点 20）
+[2026-10-16 12:43:48] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA0s0：MAP 探索（出発点 20）
+[2026-10-16 12:43:50] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA0s1：MAP 探索（出発点 20）
+[2026-10-16 13:10:54] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA1s0：NUTS
+[2026-10-16 13:12:46] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA1s1：NUTS
+[2026-10-16 13:13:51] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA0s0：NUTS
+[2026-10-16 13:14:29] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA0s1：NUTS
+[2026-10-16 13:16:12] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA1s0：NUTS
+[2026-10-16 13:19:33] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA1s1：NUTS
+[2026-10-16 13:19:46] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA0s0：NUTS
+[2026-10-16 13:21:49] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA0s1：NUTS
+[2026-10-16 19:41:03] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA1s1：終了（終了コード 0、結果あり）
+[2026-10-16 19:41:03] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA0s0：終了（終了コード 0、結果あり）
+[2026-10-16 19:44:49] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA0s1：終了（終了コード 0、結果あり）
+[2026-10-16 19:46:56] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s2000_v3wA1s0：終了（終了コード 0、結果あり）
+[2026-10-16 19:47:03] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA0s0：終了（終了コード 0、結果あり）
+[2026-10-16 19:48:49] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA1s1：終了（終了コード 0、結果あり）
+[2026-10-16 19:49:04] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA0s1：終了（終了コード 0、結果あり）
+[2026-10-16 19:51:21] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_t1s1000_v3wA1s0：終了（終了コード 0、結果あり）
+[2026-10-16 19:51:21] 10/16 第 2 段が完了
+[2026-10-16 19:51:21] 10/16 第 3 段を開始（4 本）
+[2026-10-16 19:51:21] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA1s2：MAP 探索（出発点 20）
+[2026-10-16 19:51:23] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wA1s2：MAP 探索（出発点 20）
+[2026-10-16 19:51:25] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wBs2：MAP 探索（出発点 20）
+[2026-10-16 19:51:27] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wBs2：MAP 探索（出発点 20）
+[2026-10-16 20:07:04] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wA1s2：NUTS
+[2026-10-16 20:07:35] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wBs2：NUTS
+[2026-10-16 20:08:02] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wBs2：NUTS
+[2026-10-16 20:08:16] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA1s2：NUTS
+[2026-10-17 07:11:01] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wA1s2：終了（終了コード 0、結果あり）
+[2026-10-17 07:14:49] synthetic_F5_D1_os_split_mix_t1p_ro_sro0.01-0.03_v3wBs2：終了（終了コード 0、結果あり）
+[2026-10-17 07:20:16] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wA1s2：終了（終了コード 0、結果あり）
+[2026-10-17 07:20:23] synthetic_F5_D1_t1_os_mix_t1p_ro_sro0.01-0.03_v3wBs2：終了（終了コード 0、結果あり）
+[2026-10-17 07:20:23] 10/16 第 3 段が完了
