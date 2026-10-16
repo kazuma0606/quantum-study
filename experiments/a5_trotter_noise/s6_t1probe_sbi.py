@@ -125,6 +125,9 @@ def main() -> None:
     from sbi.utils import BoxUniform
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     OUT.mkdir(parents=True, exist_ok=True)
+    # 保存名に組を入れる（同じ --tag で組だけ変えると上書きされるため。10/17 の監査）。10/16 までの結果は、入れる前の名前のまま
+    pair_name = ["22-23", "142-143"][args.pair]
+    stem = f"{args.tag}_pair{pair_name}"
     expect = make_expect(fixed_theta(args.pair))
     TRUE_REST["p"] = TRUE_P[args.pair]
     log(f"組の条件：{['22-23', '142-143'][args.pair]}（回転は当てはめの事後平均、正解の p = {TRUE_REST['p']}）")
@@ -144,7 +147,7 @@ def main() -> None:
         post = inf.build_posterior(est)
         # 学習済みの推定器を保存する（判定の決まりを変えて計算し直すとき、学習し直さずに済むように）
         import pickle
-        with (OUT / f"{args.tag}_{shots}_posterior.pkl").open("wb") as fh:
+        with (OUT / f"{stem}_{shots}_posterior.pkl").open("wb") as fh:
             pickle.dump(post, fh)
         log(f"{shots} ショット：学習完了（{time.time() - t0:.0f} 秒、エポック {inf._summary['epochs_trained'][-1]}）")
 
@@ -186,10 +189,10 @@ def main() -> None:
                 f"正解が区間に入る割合 {worlds[wname]['coverage90']:.3f}")
         results["by_shots"][str(shots)] = {"sbc": sbc, "worlds": worlds, "seconds": time.time() - t0,
                                            "qpu_s_estimate": 2.0 + 3e-4 * 2 * len(KS) * shots}
-        (OUT / f"{args.tag}.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
+        (OUT / f"{stem}.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
 
     lines = ["# T1 専用の回路：ショット数ごとの見分けられる割合（SBI）", "",
-             f"22–23 の組、回転は固定。判定：事後分布の中央値が γ = {THRESH} を超えたら「T1 あり」。世界ごとに {args.n_test} 組。"
+             f"{pair_name} の組、回転は固定。判定：事後分布の中央値が γ = {THRESH} を超えたら「T1 あり」。世界ごとに {args.n_test} 組。"
              "QPU 秒は T1 専用の回路だけの見積もり（2 秒 ＋ 0.3 ms × 回路 10 本 × ショット）。", "",
              f"判定率は「中央値 > {THRESH}」／「90% 区間の下の端 > {LO_THRESH}」の2通り。",  "",
              "| ショット | QPU 秒 | " + " | ".join(f"{w}：判定率" for w in WORLDS) + " | γ=0.00179 の 90% 区間の幅 | SBC γ（68%・90%） |",
@@ -199,7 +202,7 @@ def main() -> None:
         lines.append(f"| {sh} | {r['qpu_s_estimate']:.0f} | "
                      + " | ".join(f"{w[n]['detect_rate']:.3f}／{w[n]['detect_rate_lo']:.3f}" for n in WORLDS)
                      + f" | {w['T1 あり（γ=0.00179）']['width90_median']:.5f} | {r['sbc'][68]['gamma']:.2f}・{r['sbc'][90]['gamma']:.2f} |")
-    (OUT / f"{args.tag}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (OUT / f"{stem}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     log("\n".join(lines))
 
 
