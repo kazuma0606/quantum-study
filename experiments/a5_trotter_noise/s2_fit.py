@@ -63,6 +63,14 @@ GAMMA_T1 = 6e-4                            # CX ごとの振幅減衰の目安�
 CALIB_R = np.array([0.00182, 0.00213])     # 較正の CZ 誤差の中央値（113 日分、22-23 と 142-143。calibration_history_ibm_fez.csv）
 
 
+def _nonneg_int(v: str) -> int:
+    """引数用：0 以上の整数だけを受け付ける（負の k は配列の末尾を指し、生成と尤度で別の回路になるため。10/17 の監査）。"""
+    k = int(v)
+    if k < 0:
+        raise argparse.ArgumentTypeError(f"0 以上の整数にする：{v}")
+    return k
+
+
 def add_common_args(ap) -> None:
     """s2_fit.py と s2_map.py で共通の引数（同じモデル・同じデータ・同じ名前にするため）。"""
     ap.add_argument("--data", choices=["real", "synthetic"], default="synthetic")
@@ -82,7 +90,7 @@ def add_common_args(ap) -> None:
                     help="合成データに、来月の測り方（1本のジョブにトロッター回路・監視用の回路・制御 |1> の Z の測定を混ぜる）を組ごとに加える")
     ap.add_argument("--t1-probe", action="store_true", help="--mixed-job に、T1 専用の回路（制御 |0>・|1>、k=2〜24）を加える")
     ap.add_argument("--t1-shots", type=int, help="T1 専用の回路のショット数（既定は直接の測定と同じ 3000）")
-    ap.add_argument("--t1-ks", type=int, nargs="+", help="T1 専用の回路の CX の組の回数の並び（既定 2 4 8 16 24）")
+    ap.add_argument("--t1-ks", type=_nonneg_int, nargs="+", help="T1 専用の回路の CX の組の回数の並び（既定 2 4 8 16 24、0 以上の整数）")
     ap.add_argument("--syn-ro", type=float, nargs=2,
                     help="合成データの T1 専用の回路に、読み出しの誤り（e01 = P(1|0)、e10 = P(0|1)）を入れる")
     ap.add_argument("--zcorr", action="store_true",

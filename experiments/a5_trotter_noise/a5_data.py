@@ -178,6 +178,9 @@ def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tup
       制御 |1> の Z の測定（反転を戻す。22–23 は k=1〜4、142–143 は k=2〜12）
     同じジョブなので、回転・ずれ・T1 はすべて同じ値（truths の job_theta・job_offsets・gamma）で作る。"""
     import jax.numpy as jnp
+    # 負の k は配列の末尾を指してしまい、生成と尤度で別の回路になる（10/17 の監査）。0 以上の整数だけを受け付ける
+    if t1_ks is not None and any((not isinstance(k, (int, np.integer))) or k < 0 for k in t1_ks):
+        raise ValueError(f"T1 専用の回路の k は 0 以上の整数にする：{tuple(t1_ks)}")
     trot, probes = [], []
     for pair, tr in truths.items():
         job = MIXED_JOB.format(pair=pair)
