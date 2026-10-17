@@ -13,7 +13,7 @@
 - **Part V**：結果レジスタが入力を「覚える」と、入力の干渉が消えること
 - **Part VI**：環境を使った見方（Kraus 表現）
 
-**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py)（mp07、mp08）で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（部分トレースの11件を含む）。密度行列の基本は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
+**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py)（mp07、mp08）で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（部分トレースの12件を含む）。密度行列の基本は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
 
 **記号の約束**
 
@@ -233,7 +233,7 @@ $$
 
 で、$\rho_A$ の固有値は $s_k^2$（と、余った次元の $0$）、$\rho_B$ の固有値も同じ $s_k^2$ です（転置は固有値を変えない）。**$\rho_A$ と $\rho_B$ は、ゼロでない固有値が同じ**で、その固有値 $p_k=s_k^2$ が本編の付録B-3 の確率です。
 
-- **純度**：$\operatorname{tr}\rho_A^2=\sum_kp_k^2$。$\sum_kp_k=1$ なので、$1$ になるのは $p$ が1つだけ $1$ のとき、つまり $C$ の階数が $1$（積状態）のときだけです。それ以外では $1$ より小さくなります。純度の下限は、一般の $N$ 次元の密度行列では $1/N$（$N$ 個が等確率）ですが、2つの系にまたがる純粋状態の縮約では、$\rho_A$ の階数 $r$ が $\min(N,M)$ 以下なので、$\operatorname{tr}\rho_A^2\ge\frac1r\ge\frac1{\min(N,M)}$ です。$1/N$ に届くのは $M\ge N$ のときだけで、本編の例（$N=4$、$M=2$）の下限は $\frac12$ です（ランダムな純粋状態の最小純度でも $0.501$。数値で確認）。
+- **純度**：$\operatorname{tr}\rho_A^2=\sum_kp_k^2$。$\sum_kp_k=1$ なので、$1$ になるのは $p$ が1つだけ $1$ のとき、つまり $C$ の階数が $1$（積状態）のときだけです。それ以外では $1$ より小さくなります。純度の下限は、一般の $N$ 次元の密度行列では $1/N$（$N$ 個が等確率）ですが、2つの系にまたがる純粋状態の縮約では、$\rho_A$ の階数 $r$ が $\min(N,M)$ 以下なので、$\operatorname{tr}\rho_A^2\ge\frac1r\ge\frac1{\min(N,M)}$ です。$1/N$ に届くのは $M\ge N$ のときだけで、本編の例（$N=4$、$M=2$）の下限は $\frac12$ です（乱数種 3 のランダムな純粋状態 500 個で、最小の純度は $0.503$。`test_purity_lower_bound_depends_on_the_environment_dimension` の条件）。
 - **エントロピー**：$S=-\sum_kp_k\log_2p_k$ は、$\rho_A$ の固有値のエントロピーです（本編の付録B-3）。積状態で $0$。
 
 <a id="p3-4"></a>
@@ -414,7 +414,7 @@ $$
 
 です（$\langle m_E|U|0_E\rangle$ は、系の演算子）。**系だけを見ると、ユニタリな全体の発展が、$\sum_mK_m\rho K_m^\dagger$ という、一般の（ユニタリでない）変化に見えます**。トレースが保たれること $\operatorname{tr}\rho_S'=1$ は、$\sum_mK_m^\dagger K_m=I$（本編の付録A-4）と同じ条件です。
 
-$K_m$ の組を、**クラウス表現**と呼びます。本編の付録A-4 の、誤差のある測定演算子 $K_m$ と同じ形です。ノイズのノート（[noise_modeling_through_mri.md](../05_量子力学/noise_modeling_through_mri.md)）の脱分極、T1、脱位相の量子チャネルも、この形の $K_m$ の組で書けます。Part V §3 の模型で、入力 1 量子ビットを系、結果レジスタを環境と見ると、$\rho_A$ の非対角成分が $\langle e_1|e_0\rangle$ 倍になった (V-3) は、**環境が入力の値を区別する情報をどれだけ記録したか**を表す、脱位相です。位相の情報は環境に持ち出されるのではなく、**系と環境の相関に移ります**。実際、相対位相 $\varphi$ を付けた $\frac1{\sqrt2}(|0\rangle|e_0\rangle+e^{i\varphi}|1\rangle|e_1\rangle)$ の環境単独の状態は、$\rho_B=\frac12(|e_0\rangle\langle e_0|+|e_1\rangle\langle e_1|)$ で $\varphi$ に依存せず、環境だけから元の相対位相は読めません（数値で確認）。
+$K_m$ の組を、**クラウス表現**と呼びます。本編の付録A-4 の、誤差のある測定演算子 $K_m$ と同じ形です。ノイズのノート（[noise_modeling_through_mri.md](../05_量子力学/noise_modeling_through_mri.md)）の脱分極、T1、脱位相の量子チャネルも、この形の $K_m$ の組で書けます。Part V §3 の模型で、入力 1 量子ビットを系、結果レジスタを環境と見ると、$\rho_A$ の非対角成分が $\langle e_1|e_0\rangle$ 倍になった (V-3) は、**環境が入力の値を区別する情報をどれだけ記録したか**を表す、脱位相です。位相の情報は、環境に持ち出されるのではありません。相対位相 $\varphi$ は、全体の状態（系と環境の組）に保たれたままで、系だけを見ると、$\rho_A$ の非対角成分の位相として残ります（$(\rho_A)_{0,1}=\frac12e^{-i\varphi}\langle e_1|e_0\rangle$）。縮むのは**大きさ**（$|\langle e_1|e_0\rangle|$ 倍）で、環境が入力の値を区別できるほど小さくなります。実際、相対位相 $\varphi$ を付けた $\frac1{\sqrt2}(|0\rangle|e_0\rangle+e^{i\varphi}|1\rangle|e_1\rangle)$ の環境単独の状態は、$\rho_B=\frac12(|e_0\rangle\langle e_0|+|e_1\rangle\langle e_1|)$ で $\varphi$ に依存せず、環境だけから元の相対位相は読めません（$\rho_A$ の非対角成分の式とともに、数値で確認）。
 
 ---
 
@@ -452,6 +452,7 @@ $K_m$ の組を、**クラウス表現**と呼びます。本編の付録A-4 の
 | Part V §3 | $f(x_1x_0)=x_0$ では、結果レジスタとエンタングルしたままでも、$H^{\otimes2}$ の後の分布が $(\frac12,\frac12,0,0)$（干渉が残る） | `test_interference_survives_between_inputs_with_the_same_result` |
 | Part III §3 | 純粋状態の縮約で $\operatorname{tr}\rho_A^2\ge\frac1{\min(N,M)}$（$N=4,M=2$ は $\frac12$） | `test_purity_lower_bound_depends_on_the_environment_dimension` |
 | Part VI | 相対位相 $\varphi$ は、環境単独の状態 $\rho_B$ に現れない | `test_relative_phase_is_not_readable_from_the_environment_alone` |
+| Part VI | $(\rho_A)_{0,1}=\frac12e^{-i\varphi}\langle e_1|e_0\rangle$（位相は系の非対角成分に残り、大きさが縮む） | `test_relative_phase_stays_in_the_system_coherence` |
 | Part VI | $\operatorname{Tr}_E[U(\rho\otimes|0\rangle\langle0|)U^\dagger]=\sum K_m\rho K_m^\dagger$ | `test_environment_picture_gives_kraus_sum` |
 | 図 | mp07、mp08 の各値を本文の式と `assert` で照合 | `figures/make_measurement_projection_figures.py` |
 

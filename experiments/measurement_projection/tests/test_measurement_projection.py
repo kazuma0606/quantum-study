@@ -513,3 +513,13 @@ def test_relative_phase_is_not_readable_from_the_environment_alone():
         v = (np.kron(mp.ket(0, 2), e0) + np.exp(1j * phi) * np.kron(mp.ket(1, 2), e1)) / np.sqrt(2)
         rho_b = mp.partial_trace(mp.density(v), 2, 2, "B")
         assert np.allclose(rho_b, 0.5 * (np.outer(e0, e0.conj()) + np.outer(e1, e1.conj())))
+
+
+def test_relative_phase_stays_in_the_system_coherence():
+    """(ρ_A)_{01} = ½ e^{-iφ} ⟨e1|e0⟩：位相は系の非対角成分に残り、大きさが |⟨e1|e0⟩| 倍になる"""
+    e0 = np.array([1, 0], dtype=complex)
+    e1 = np.array([np.cos(0.9), np.sin(0.9)], dtype=complex)
+    for phi in (0.0, 0.7, 2.0):
+        v = (np.kron(mp.ket(0, 2), e0) + np.exp(1j * phi) * np.kron(mp.ket(1, 2), e1)) / np.sqrt(2)
+        ra = mp.partial_trace(mp.density(v), 2, 2)
+        assert np.isclose(ra[0, 1], 0.5 * np.exp(-1j * phi) * np.vdot(e1, e0))
