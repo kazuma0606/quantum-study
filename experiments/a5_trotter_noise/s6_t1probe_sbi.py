@@ -68,7 +68,28 @@ def fixed_theta(pair: int = 0) -> jnp.ndarray:
 TRUE_P = {0: 0.00173, 1: 0.00207}
 
 
-def make_expect(theta):
+ROT_NAMES = [f"{b}_{a}" for b in ("c0", "c1") for a in "xyz"]
+AXES = (("IX", "ZX"), ("IY", "ZY"), ("IZ", "ZZ"))
+
+
+def rotation_prior(pair: int, k_sd: float = 4.0):
+    """回転も推定する版（--free-rot）の事前分布：当てはめの事後分布の平均 ± k_sd × 標準偏差の箱（制御 |0>・|1> の X・Y・Z）。"""
+    d = np.load(s2_fit.OUT / "real_F5_D1_t1_os_hw1_long_draws.npz")
+    r = np.concatenate([d["rot_c0"].reshape(-1, 2, 3)[:, pair], d["rot_c1"].reshape(-1, 2, 3)[:, pair]], axis=1)
+    m, sd = r.mean(0), r.std(0)
+    return m, m - k_sd * sd, m + k_sd * sd
+
+
+def theta_with_rotations(theta_fixed, rot):
+    """固定の回転（ZI などはそのまま）の、制御 |0>・|1> の X・Y・Z の回転だけを rot（6 個）で置き換える（F5 の置き方）。"""
+    th = theta_fixed
+    for ax, (li, lz) in enumerate(AXES):
+        th = th.at[nm.LABELS15.index(li)].set((rot[ax] + rot[3 + ax]) / 2)
+        th = th.at[nm.LABELS15.index(lz)].set((rot[ax] - rot[3 + ax]) / 2)
+    return th
+
+
+def make_expect(theta, free_rot: bool = False):
     """パラメータ → 読み出しの結果の4通り（00, 01, 10, 11。左が制御）の確率。準備（|0>・|1>）× k（5通り）× 4 の 40 個。
     2つの量子ビットは同じショットで同時に測るので、本当の状態の同時確率に、量子ビットごとの読み出しの誤りの行列
     M = [[1−e01, e10], [e01, 1−e10]]（行が読んだ値、列が本当の値）のテンソル積をかける（10/15 の監査：制御と標的を
@@ -77,8 +98,9 @@ def make_expect(theta):
         return jnp.array([[1 - e01, e10], [e01, 1 - e10]])
 
     def one(par):
-        g, p, e01c, e10c, e01t, e10t = par
-        err = nm.error_sup(theta, p, False, g)
+        g, p, e01c, e10c, e01t, e10t = par[:6]
+        th = theta_with_rotations(theta, par[6:12]) if free_rot else theta
+        err = nm.error_sup(th, p, False, g)
         M = jnp.kron(conf(e01c, e10c), conf(e01t, e10t))
         out = []
         for c1 in (False, True):
@@ -109,6 +131,7 @@ def simulate(expect, pars: np.ndarray, shots: int, rng: np.random.Generator, bat
 
 
 def main() -> None:
+    global KS, NAMES, LOW, HIGH
     ap = argparse.ArgumentParser()
     ap.add_argument("--shots", type=int, nargs="+", default=[500, 1000, 2000, 3000])
     ap.add_argument("--sims", type=int, default=200000)
@@ -117,9 +140,18 @@ def main() -> None:
     ap.add_argument("--sbc", type=int, default=300)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--tag", default="t1probe_sbi")
+    ap.add_argument("--ks", type=int, nargs="+", default=list(KS), help="CX の組の回数の並び（既定 2 4 8 16 24）")
+    ap.add_argument("--free-rot", action="store_true",
+                    help="回転（制御 |0>・|1> の X・Y・Z の6個）も推定する。事前分布は当てはめの平均 ± 4 標準偏差の箱")
     ap.add_argument("--pair", type=int, choices=[0, 1], default=0,
                     help="回転と脱分極の条件をどちらの組にするか（0 = 22–23、1 = 142–143）")
     args = ap.parse_args()
+    KS = tuple(args.ks)
+    rot_mean = None
+    if args.free_rot:
+        rot_mean, rlo, rhi = rotation_prior(args.pair)
+        NAMES = NAMES + ROT_NAMES
+        LOW, HIGH = np.r_[LOW, rlo], np.r_[HIGH, rhi]
     import torch
     from sbi.inference import NPE
     from sbi.utils import BoxUniform
@@ -128,9 +160,10 @@ def main() -> None:
     # 保存名に組を入れる（同じ --tag で組だけ変えると上書きされるため。10/17 の監査）。10/16 までの結果は、入れる前の名前のまま
     pair_name = ["22-23", "142-143"][args.pair]
     stem = f"{args.tag}_pair{pair_name}"
-    expect = make_expect(fixed_theta(args.pair))
+    expect = make_expect(fixed_theta(args.pair), args.free_rot)
     TRUE_REST["p"] = TRUE_P[args.pair]
-    log(f"組の条件：{['22-23', '142-143'][args.pair]}（回転は当てはめの事後平均、正解の p = {TRUE_REST['p']}）")
+    log(f"組の条件：{pair_name}（回転は{'推定する（6個）' if args.free_rot else '当てはめの事後平均に固定'}、"
+        f"正解の p = {TRUE_REST['p']}）、k = {KS}")
     prior = BoxUniform(torch.tensor(LOW, dtype=torch.float32, device=dev), torch.tensor(HIGH, dtype=torch.float32, device=dev),
                        device=dev)
     rng = np.random.default_rng(args.seed)
@@ -170,7 +203,10 @@ def main() -> None:
         # 3つの世界で、見分けられる割合
         worlds = {}
         for wname, g in WORLDS.items():
-            par = np.array([[g, TRUE_REST["p"], TRUE_REST["e01"], TRUE_REST["e10"], TRUE_REST["e01"], TRUE_REST["e10"]]] * args.n_test)
+            row = [g, TRUE_REST["p"], TRUE_REST["e01"], TRUE_REST["e10"], TRUE_REST["e01"], TRUE_REST["e10"]]
+            if args.free_rot:
+                row += list(rot_mean)              # 世界の正解の回転は、固定の版と同じ当てはめの平均
+            par = np.array([row] * args.n_test)
             x_w = simulate(expect, par, shots, rng)
             med, lo, hi, inside = [], [], [], []
             for i in range(args.n_test):

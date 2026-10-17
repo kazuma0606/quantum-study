@@ -230,7 +230,8 @@ def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tup
                         if noise_scale[1] > 1:
                             m += rng.normal(0, sig * np.sqrt(noise_scale[1] ** 2 - 1))
                         probes.append({"pair": pair, "job": job, "time": None, "kind": "zpop", "control_one": c1,
-                                       "qubit": q, "k": int(k), "z": m, "sigma": sig, "z_true": float(np.asarray(zs[q])[i])})
+                                       "qubit": q, "k": int(k), "z": m, "sigma": sig, "shots": int(n_sh),
+                                       "z_true": float(np.asarray(zs[q])[i])})
     return trot, probes
 
 

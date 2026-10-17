@@ -77,6 +77,8 @@ def add_common_args(ap) -> None:
     ap.add_argument("--t1-shots", type=int, help="T1 専用の回路のショット数（既定は直接の測定と同じ 3000）")
     ap.add_argument("--syn-ro", type=float, nargs=2,
                     help="合成データの T1 専用の回路に、読み出しの誤り（e01 = P(1|0)、e10 = P(0|1)）を入れる")
+    ap.add_argument("--zcorr", action="store_true",
+                    help="T1 専用の回路の制御と標的の <Z>（同じショットの同時測定）を、相関つきの2変量正規分布で数える（10/17 の監査）")
     ap.add_argument("--ro-model", action="store_true",
                     help="T1 専用の回路の <Z> に、読み出しの倍率とずれ（組・量子ビットごと）を推定するパラメータを入れる")
     ap.add_argument("--truth-no-t1", action="store_true", help="--truth-from の当てはめに T1 があっても、正解の T1 を 0 にする")
@@ -124,6 +126,8 @@ def make_tag(args) -> str:
         tag += "_t1p"
     if getattr(args, "ro_model", False):
         tag += "_ro"
+    if getattr(args, "zcorr", False):
+        tag += "_zc"
     # 合成データの条件も名前に入れる（同じ --label で条件だけ変えると結果が上書きされるため。10/14 の監査）。
     # 10/14 の結果のファイル名は、これを入れる前の名前のまま
     if getattr(args, "syn_ro", None):
@@ -141,7 +145,7 @@ def model_opts(args) -> dict:
     return {"width": args.prior_width, "calib": args.calib, "t1": getattr(args, "t1", False),
             "obs_scale": getattr(args, "obs_scale", False), "obs_scale_pair": getattr(args, "obs_scale_pair", False),
             "robust": getattr(args, "robust", False), "split_hw": getattr(args, "split_hw", False),
-            "ro_model": getattr(args, "ro_model", False),
+            "ro_model": getattr(args, "ro_model", False), "zcorr": getattr(args, "zcorr", False),
             "hw_jobs": split_jobs(args)}
 
 
@@ -240,11 +244,12 @@ def prepare(trotter: list[dict], probes: list[dict]) -> dict:
     for o in probes:
         if o.get("kind") == "zpop":
             # T1 専用の回路（制御を |0>／|1> に準備し CX の組を k 回、量子ビット q の <Z>）
-            g = zgroups.setdefault((o["control_one"], o["qubit"]), {"job": [], "k": [], "z": [], "sigma": []})
+            g = zgroups.setdefault((o["control_one"], o["qubit"]), {"job": [], "k": [], "z": [], "sigma": [], "shots": []})
             g["job"].append(job_index[(o["pair"], o["job"])])
             g["k"].append(o["k"])
             g["z"].append(o["z"])
             g["sigma"].append(o["sigma"])
+            g["shots"].append(o.get("shots", 0))
             continue
         key = (o["axis"], o["target"], o.get("control_one", False), o.get("unflip", False))
         g = pgroups.setdefault(key, {"job": [], "k": [], "phase": [], "sigma": []})
@@ -318,7 +323,7 @@ def predictions(theta_job, p_job, prep, gamma_job=None):
 
 def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = None):
     opts = {"width": 0.05, "calib": False, "t1": False, "obs_scale": False, "obs_scale_pair": False, "robust": False,
-            "ro_model": False, **(opts or {})}
+            "ro_model": False, "zcorr": False, **(opts or {})}
     w = opts["width"]
     active = FORMS[form]
     if active == "branch":
@@ -409,6 +414,8 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         zq = np.concatenate([np.full(len(g["k"]), q) for (c1, q), g in sorted(prep["zgroups"].items())])
         zp = np.concatenate([prep["job_pair"][g["job"]] for _, g in sorted(prep["zgroups"].items())])
         mu = mu.at[-n_z:].set(ro_s[zp, zq] * mu[-n_z:] + ro_b[zp, zq])
+    else:
+        e01 = e10 = None
     if opts["obs_scale"]:
         # 誤差棒の広げ方：統計誤差に入っていないばらつき（読み出し補正の不確かさなど。10/11 の事後予測チェックで約 1.3 倍）。
         # トロッター回路と、直接の測定（位相）で別々に置く
@@ -421,11 +428,59 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         scale = numpyro.sample("obs_scale", dist.LogNormal(jnp.zeros((2, 2)), 0.5))
         kind, pair = point_kind_pair(prep)
         sd_obs = sd_obs * scale[kind, pair]
+    keep = np.ones(len(y), bool)
+    if opts["zcorr"] and prep.get("zgroups"):
+        # T1 専用の回路では、制御と標的の <Z> を同じショットで同時に測るので、2つの値には相関がある。独立に数えると同じ情報を
+        # 二重に数える（10/17 の監査）。そこで、同じ (準備, ジョブ, k) の2つの値を組にし、モデルの4通りの同時確率から
+        # 1ショットの共分散 (E[ZcZt] − E[Zc]E[Zt]) / ショット数 を計算して、2変量正規分布で数える。余分なばらつき（誤差棒の倍率）は
+        # 2つの値に独立にかかると置くので、相関は「ショットの共分散 / (広げた誤差棒の積)」になる
+        keys = sorted(prep["zgroups"])
+        n_z = sum(len(g["k"]) for g in prep["zgroups"].values())
+        off = len(y) - n_z
+        starts = {}
+        pos = off
+        for key in keys:
+            starts[key] = pos
+            pos += len(prep["zgroups"][key]["k"])
+        zc_, zt_ = jnp.array([1.0, 1.0, -1.0, -1.0]), jnp.array([1.0, -1.0, 1.0, -1.0])
+        locs, covs, obs = [], [], []
+        for c1 in (False, True):
+            g0, g1 = prep["zgroups"][(c1, 0)], prep["zgroups"][(c1, 1)]
+            assert np.array_equal(g0["job"], g1["job"]) and np.array_equal(g0["k"], g1["k"])
+            jobs = g0["job"]
+            th, pp = theta_job[jobs], p[jp][jobs]
+            if gamma_job is None:
+                errs = jax.vmap(lambda a, b: nm.error_sup(a, b, False))(th, pp)
+            else:
+                errs = jax.vmap(lambda a, b, c: nm.error_sup(a, b, False, c))(th, pp, gamma_job[jobs])
+            P = jax.vmap(lambda e: nm.t1_probe_probs(e, c1, tuple(range(KMAX_T1 + 1))))(errs)[jnp.arange(len(jobs)), jnp.asarray(g0["k"])]
+            if e01 is not None:
+                pr = prep["job_pair"][jobs]
+
+                def conf(a, b):
+                    return jnp.array([[1 - a, b], [a, 1 - b]])
+                M = jax.vmap(lambda a0, b0, a1, b1: jnp.kron(conf(a0, b0), conf(a1, b1)))(
+                    e01[pr, 0], e10[pr, 0], e01[pr, 1], e10[pr, 1])
+                P = jnp.einsum("nij,nj->ni", M, P)
+            ezc, ezt, ezct = P @ zc_, P @ zt_, P @ (zc_ * zt_)
+            n_sh = jnp.asarray(np.maximum(g0["shots"], 1), dtype=float)
+            cov = (ezct - ezc * ezt) / n_sh
+            i0 = starts[(c1, 0)] + np.arange(len(jobs))
+            i1 = starts[(c1, 1)] + np.arange(len(jobs))
+            s0, s1 = sd_obs[i0], sd_obs[i1]
+            rho = jnp.clip(cov / (s0 * s1), -0.95, 0.95)
+            locs.append(jnp.stack([mu[i0], mu[i1]], -1))
+            covs.append(jnp.stack([jnp.stack([s0**2, rho * s0 * s1], -1), jnp.stack([rho * s0 * s1, s1**2], -1)], -2))
+            obs.append(np.stack([y[i0], y[i1]], -1))
+            keep[i0] = False
+            keep[i1] = False
+        numpyro.sample("yz", dist.MultivariateNormal(jnp.concatenate(locs), covariance_matrix=jnp.concatenate(covs)),
+                       obs=np.concatenate(obs))
     if opts["robust"]:
         # 外れ値に強い尤度：自由度 4 の t 分布（正規分布より裾が重く、外れた点の重みが自動で下がる。深層学習の Huber 損失に近い）
-        numpyro.sample("y", dist.StudentT(4.0, mu, sd_obs), obs=y)
+        numpyro.sample("y", dist.StudentT(4.0, mu[keep], sd_obs[keep]), obs=y[keep])
     else:
-        numpyro.sample("y", dist.Normal(mu, sd_obs), obs=y)
+        numpyro.sample("y", dist.Normal(mu[keep], sd_obs[keep]), obs=y[keep])
 
 
 # S6 で選んだ制御 |1> の測定（反転を戻す Z だけ。22–23 は位相の折り返しを避けて k を小さく）
@@ -531,7 +586,9 @@ def main() -> None:
     samples = jax.block_until_ready(mcmc.get_samples(group_by_chain=True))   # JAX は非同期に計算するので、終わるのを待ってから時刻を記録する
     elapsed = time.time() - t0
     log(f"サンプリング終了（{elapsed:.0f} 秒）。後処理中")
-    ll = log_likelihood(model, mcmc.get_samples(), *margs)["y"]
+    ll_all = log_likelihood(model, mcmc.get_samples(), *margs)
+    # 点ごとの対数尤度：ふつうの観測は1点ずつ、--zcorr の T1 専用の回路は (制御, 標的) の組を1点として数える
+    ll = jnp.concatenate([ll_all["y"]] + ([ll_all["yz"]] if "yz" in ll_all else []), axis=1)
     extra = mcmc.get_extra_fields(group_by_chain=True)
     divergences = int(np.sum(np.asarray(extra["diverging"])))
     steps = np.asarray(extra["num_steps"])
