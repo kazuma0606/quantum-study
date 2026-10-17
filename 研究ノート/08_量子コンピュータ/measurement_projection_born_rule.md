@@ -16,7 +16,7 @@
 - **付録C**：クロネッカー積の性質と、Qiskit の並び順
 - **付録D**：検算の一覧
 
-**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと40件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
+**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと44件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
 
 <a id="toc"></a>
 
@@ -1151,7 +1151,13 @@ $$
 P(0)=(1-\epsilon)\cos^2\frac\theta2+\epsilon\sin^2\frac\theta2
 $$
 
-です。$\epsilon=0$ なら通常の $Z$ 測定（$K_0=|0\rangle\langle0|$）、$\epsilon>0$ では、$|0\rangle$（$\theta=0$）でも結果 $0$ の確率が $1-\epsilon$ にとどまり、$|1\rangle$ でも $\epsilon$ の確率で $0$ が出ます（図 A-1 の右下）。**注意（読み出し誤差との違い）**：結果の確率だけを見れば、「射影測定をして、結果ラベルを確率 $\epsilon$ で取り違える」読み出し誤差と同じです。しかし**測定後の状態は違います**。状態 $|+\rangle$、$\epsilon=0.1$ で結果 $0$ が出たとき（確率はどちらも $\frac12$）、ラベルの取り違えの模型では測定後の状態は $(1-\epsilon)|0\rangle\langle0|+\epsilon|1\rangle\langle1|$ で非対角成分が $0$ ですが、$K_0$ による測定後の状態は $\propto(\sqrt{1-\epsilon},\ \sqrt\epsilon)^T$ の純粋状態で、非対角成分が $\sqrt{\epsilon(1-\epsilon)}=0.3$ 残ります（数値で確認）。(A-5)(A-6) は、確率と測定後の状態をどちらも決めるので、この違いも区別できます。また $K_0^2=\mathrm{diag}(1-\epsilon,\ \epsilon)\ne K_0$ なので、$\epsilon>0$ の $K_0$ は射影演算子ではありません。結果 $0$ の後の状態 $\propto(\sqrt{1-\epsilon}\cos\frac\theta2,\ \sqrt\epsilon\sin\frac\theta2)^T$ は $|0\rangle$ に完全には崩れません（弱い測定）。
+です。$\epsilon=0$ なら通常の $Z$ 測定（$K_0=|0\rangle\langle0|$）、$\epsilon>0$ では、$|0\rangle$（$\theta=0$）でも結果 $0$ の確率が $1-\epsilon$ にとどまり、$|1\rangle$ でも $\epsilon$ の確率で $0$ が出ます（図 A-1 の右下）。**注意（読み出し誤差との違い）**：結果の確率だけを見れば、「射影測定をして、結果ラベルを確率 $\epsilon$ で取り違える」読み出し誤差と同じです。しかし**測定後の状態は違います**。状態 $|+\rangle$、$\epsilon=0.1$ で結果 $0$ が出たとき（確率はどちらも $\frac12$）、ラベルの取り違えの模型では測定後の状態は $(1-\epsilon)|0\rangle\langle0|+\epsilon|1\rangle\langle1|$ で非対角成分が $0$ ですが、$K_0$ による測定後の状態は $\propto(\sqrt{1-\epsilon},\ \sqrt\epsilon)^T$ の純粋状態で、非対角成分が $\sqrt{\epsilon(1-\epsilon)}=0.3$ 残ります（数値で確認）。ただし、この「ラベル取り違え」の模型は、結果 $0$ に**複数の演算子**が対応するので、(A-6) のような1結果1演算子の形では書けません（結果 $0$ の後の状態 $\mathrm{diag}(0.9,\,0.1)$ は階数 $2$ の混合状態で、単一の $K_0|+\rangle$ では表せない）。一般の測定は、結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当てて、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすものです（(A-6) は各 $m$ に $\alpha$ が1つの場合）。このとき、結果 $m$ の確率と、測定後の状態（密度行列）は
+
+$$
+P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-7}
+$$
+
+です。ラベル取り違えの模型は、$K_{0,1}=\sqrt{1-\epsilon}\,P_0$、$K_{0,2}=\sqrt\epsilon\,P_1$（結果 $0$ の2つの経路）、$K_{1,1}=\sqrt{1-\epsilon}\,P_1$、$K_{1,2}=\sqrt\epsilon\,P_0$ で、$\rho_0\propto(1-\epsilon)P_0\rho P_0+\epsilon P_1\rho P_1$、$E_0=(1-\epsilon)P_0+\epsilon P_1$ になります。以下では、1結果1演算子の場合 (A-6) を扱います。また $K_0^2=\mathrm{diag}(1-\epsilon,\ \epsilon)\ne K_0$ なので、$\epsilon>0$ の $K_0$ は射影演算子ではありません。結果 $0$ の後の状態 $\propto(\sqrt{1-\epsilon}\cos\frac\theta2,\ \sqrt\epsilon\sin\frac\theta2)^T$ は $|0\rangle$ に完全には崩れません（弱い測定）。
 
 **注意：足す順序**：(A-5) は、各 $K_m^\dagger K_m$ を作ってから足す条件で、$\big(\sum_mK_m^\dagger\big)\big(\sum_mK_m\big)=\sum_{m,m'}K_m^\dagger K_{m'}$ ではありません。後者には、$m\ne m'$ の**交差項** $K_m^\dagger K_{m'}$ が入ります。例：ビット反転の測定演算子 $K_0=\sqrt{1-p}\,I$、$K_1=\sqrt p\,X$ では、$K_0^\dagger K_0+K_1^\dagger K_1=(1-p)I+pI=I$ ですが、
 
@@ -1384,7 +1390,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 
 # 付録D：検算の一覧
 
-このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（40件）、図のスクリプトの `assert` で確かめています。
+このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（44件）、図のスクリプトの `assert` で確かめています。
 
 | ノートの箇所 | 確かめたこと | テスト |
 |---|---|---|
@@ -1405,6 +1411,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 | 付録A-4 | $\sum K^\dagger K=I$ だが $(\sum K^\dagger)(\sum K)=I+2\sqrt{p(1-p)}X$。振幅減衰の $K_1^\dagger K_1=\gamma\lvert1\rangle\langle1\rvert$ | `test_sum_of_kraus_then_product_is_not_identity` |
 | 付録A-4 | 弱い測定 $K_0$ と、ラベル取り違えの読み出し誤差は、確率が同じで測定後の状態が違う（非対角成分 $\sqrt{\epsilon(1-\epsilon)}$ と $0$） | `test_unsharp_measurement_differs_from_readout_error_after_the_measurement` |
 | 付録B-3 | 階数はエンタングルメントの量でない（偏った振幅の1対1は階数2・約 $0.469$ bit。階数3でも $p=(0.999,\ldots)$ は階数2の $p=(0.5,0.5)$ よりエントロピーが小さい） | `test_rank_is_not_a_measure_of_entanglement` |
+| 付録A-4 | ラベル取り違えの読み出し誤差は、結果 $0$ に2つの演算子が要る（条件付き状態 $\mathrm{diag}(1-\epsilon,\epsilon)$ は階数 $2$、$E_0=(1-\epsilon)P_0+\epsilon P_1$） | `test_readout_error_needs_several_operators_per_outcome` |
 | 付録B-3 | 1対1では階数 $=$ 振幅がゼロでない入力の個数（$\alpha=(\sqrt{0.4},\ldots)$ は階数 $4$ でエントロピーは $2$ bit 未満）。入力が $\lvert0\rangle$ だけなら、非定数の $f$ でも積状態 | `test_injective_function_rank_counts_nonzero_amplitudes` |
 | 付録A-4 | $K_m=\langle m_E\vert U\vert0_E\rangle$ から $\sum K^\dagger K=I$ | `test_stinespring_form_of_kraus` |
 | 付録B-2 | 結果レジスタを測ったときの確率と状態、逆像の重ね合わせ | `test_result_register_collapse_for_example`、`test_result_register_collapse_is_uniform_on_preimage` |

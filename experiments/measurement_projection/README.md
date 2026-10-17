@@ -1,13 +1,13 @@
 # 射影演算子による測定確率の検算
 
 > **作成** 2026-10-17　**更新** 2026-10-17
-> 研究ノート「射影演算子による測定確率の計算」（measurement_projection_born_rule.md）の、式と数値を確かめるスクリプトとテスト（40件）。Qiskit での確認を含む。
+> 研究ノート「射影演算子による測定確率の計算」（measurement_projection_born_rule.md）の、式と数値を確かめるスクリプトとテスト（44件）。Qiskit での確認を含む。
 
 ノート [measurement_projection_born_rule.md](../../研究ノート/08_量子コンピュータ/measurement_projection_born_rule.md) の本編（テンソル積の作用、ボルン則、$P(x^\ast)=\frac1N$、4候補の例）と、付録A〜C（完全な射影測定とPOVM、結果レジスタの測定とエンタングルメント、クロネッカー積の性質とQiskit の並び順）と、別ノート「[部分トレースと縮約密度行列](../../研究ノート/08_量子コンピュータ/partial_trace_reduced_density_matrix.md)」を、NumPy・SciPy・Qiskit で確かめます。
 
 ```bash
 uv run python experiments/measurement_projection/measurement_projection.py   # 値を表示する
-uv run pytest experiments/measurement_projection -q                          # 検算（40 件）
+uv run pytest experiments/measurement_projection -q                          # 検算（44 件）
 ```
 
 | ファイル | 内容 |

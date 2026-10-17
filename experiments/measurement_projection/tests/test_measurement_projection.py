@@ -458,3 +458,58 @@ def test_injective_function_rank_counts_nonzero_amplitudes():
     # 入力が |0⟩ だけなら、非定数の f でも積状態（階数 1）
     psi0 = mp.psi_state(F_EXAMPLE, 2, 1, np.array([1, 0, 0, 0], dtype=complex))
     assert np.linalg.matrix_rank(mp.coefficient_matrix(psi0, 4, 2)) == 1
+
+
+# ------------------------------------------------------------- Web 版 Codex のレビュー（10/17）の反映
+def test_interference_survives_between_inputs_with_the_same_result():
+    """f(x1 x0) = x0：結果レジスタとエンタングルしたままでも、上位ビットの干渉は残る"""
+    psi = mp.psi_state(lambda x: x & 1, 2, 1)
+    out = np.kron(mp.hadamard_all(2), np.eye(2)) @ psi
+    assert np.allclose([mp.prob_input(out, x, 4, 2) for x in range(4)], [0.5, 0.5, 0, 0])
+    rho_a = mp.partial_trace(mp.density(psi), 4, 2)
+    assert np.allclose(np.sort(np.linalg.eigvalsh(rho_a))[::-1][:2], [0.5, 0.5]) and np.linalg.matrix_rank(mp.coefficient_matrix(psi, 4, 2)) == 2
+    # |Ψ⟩ = |+⟩_{x1} ⊗ (|00⟩+|11⟩)/√2_{x0 B}
+    expected = np.kron(np.array([1, 1]) / np.sqrt(2), np.array([1, 0, 0, 1]) / np.sqrt(2))
+    assert np.allclose(psi, expected)
+
+
+def test_purity_lower_bound_depends_on_the_environment_dimension():
+    """純粋状態の縮約：tr ρ_A² ≥ 1/min(N, M)。N=4, M=2 なら下限は 1/2"""
+    local = np.random.default_rng(3)
+    for N, M in [(4, 2), (2, 4), (4, 4), (3, 5)]:
+        low = 10.0
+        for _ in range(500):
+            v = local.normal(size=N * M) + 1j * local.normal(size=N * M)
+            v /= np.linalg.norm(v)
+            r = mp.partial_trace(mp.density(v), N, M)
+            low = min(low, np.trace(r @ r).real)
+            assert np.trace(r @ r).real >= 1 / min(N, M) - 1e-12
+        assert low < 1 / min(N, M) + 0.1  # 下限に近い値まで実際に下がる
+    # 1対1 の関数（M=4）では、下限 1/N = 1/4 に届く
+    r = mp.partial_trace(mp.density(mp.psi_state(lambda x: x, 2, 2)), 4, 4)
+    assert np.isclose(np.trace(r @ r).real, 0.25)
+
+
+def test_readout_error_needs_several_operators_per_outcome():
+    """結果 0 に2つの演算子（√(1-ε) P0, √ε P1）：条件付き状態は diag(1-ε, ε)（階数 2）"""
+    eps = 0.1
+    P0, P1 = mp.proj(0, 2), mp.proj(1, 2)
+    ops = {0: [np.sqrt(1 - eps) * P0, np.sqrt(eps) * P1], 1: [np.sqrt(1 - eps) * P1, np.sqrt(eps) * P0]}
+    assert np.allclose(sum(k.conj().T @ k for m in ops for k in ops[m]), np.eye(2))
+    plus = np.array([1, 1], dtype=complex) / np.sqrt(2)
+    rho = np.outer(plus, plus.conj())
+    unnorm = sum(k @ rho @ k.conj().T for k in ops[0])
+    p0 = np.trace(unnorm).real
+    assert np.isclose(p0, 0.5) and np.allclose(unnorm / p0, np.diag([1 - eps, eps]))
+    assert np.linalg.matrix_rank(unnorm / p0) == 2  # 単一の K0|+⟩ では表せない
+    E0 = sum(k.conj().T @ k for k in ops[0])
+    assert np.allclose(E0, np.diag([1 - eps, eps]))
+
+
+def test_relative_phase_is_not_readable_from_the_environment_alone():
+    for phi in (0.0, 0.7, 2.0):
+        e0 = np.array([1, 0], dtype=complex)
+        e1 = np.array([np.cos(0.9), np.sin(0.9)], dtype=complex)
+        v = (np.kron(mp.ket(0, 2), e0) + np.exp(1j * phi) * np.kron(mp.ket(1, 2), e1)) / np.sqrt(2)
+        rho_b = mp.partial_trace(mp.density(v), 2, 2, "B")
+        assert np.allclose(rho_b, 0.5 * (np.outer(e0, e0.conj()) + np.outer(e1, e1.conj())))
