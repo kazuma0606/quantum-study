@@ -16,7 +16,7 @@
 - **付録C**：クロネッカー積の性質と、Qiskit の並び順
 - **付録D**：検算の一覧
 
-**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと39件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
+**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと40件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
 
 <a id="toc"></a>
 
@@ -890,7 +890,7 @@ $$
 
 これは、$U_f$をかける前に入力レジスタを測定した場合の確率と同じです。**$U_f$は各候補に$|f(x_i)\rangle$というラベルを付けるだけで、入力の振幅$\alpha_i$を変えない**ので、関数を計算しても正解の確率は増えません。均等な重ね合わせでは$\alpha_{x^\ast}=\frac1{\sqrt N}$なので$\frac1N$です。正解の確率を大きくするには、振幅$\alpha_i$そのものを動かす別の操作（グローバー探索の位相オラクルと拡散演算子）が必要です。
 
-なお、入力レジスタを**単独で**測る確率は変わりませんが、結果レジスタとの間には相関が生まれます（均等な重ね合わせでは、$f$ が定数でなければ、$U_f$ は入力と結果をエンタングルさせる。一般の振幅では、振幅が $f$ の同じ値の入力だけに載っていれば積状態のままです。付録B-3）。結果レジスタを測ると入力レジスタの状態が変わることは、付録B（B-2、B-3）で扱います。
+なお、入力レジスタを**単独で**測る確率は変わりませんが、結果レジスタとの間には相関が生まれます（均等な重ね合わせでは、$f$ が定数でなければ、$U_f$ は入力と結果をエンタングルさせる。一般の振幅では、振幅がゼロでない入力の上で $f$ が**複数の値を取る場合に限って**相関が生まれます。たとえば入力が $|0\rangle$ だけなら、非定数の $f$ でも出力は $|0\rangle|f(0)\rangle$ の積状態です。付録B-3）。結果レジスタを測ると入力レジスタの状態が変わることは、付録B（B-2、B-3）で扱います。
 
 ---
 
@@ -1267,7 +1267,7 @@ Part III §2-f-5 の積状態の判定（$2\times2$ では $w_{00}w_{11}=w_{01}w
 | Part VIII の例 | 列が2つとも使われる | $2$ | エンタングルしている |
 | 1対1（$f(x)=x$） | 各行・各列に1つずつ | $N$ | エンタングルしている（均等なら、エントロピーが最大 $\log_2N$） |
 
-階数が積状態かどうかの判定であって、エンタングルメントの**量**を表すわけではない点に注意してください。振幅が偏ると、1対1でも階数やエントロピーは下がります（例：$\alpha=(\sqrt{0.9},\sqrt{0.1},0,0)$ なら $x$ が $00$ と $01$ の2つにだけ載るので階数は $2$、$p_k=(0.9,0.1)$ でエントロピーは約 $0.469$ bit）。また、階数が大きくても、シュミット確率が偏っていればエントロピーは小さくなります（$p=(0.999,0.0005,0.0005)$ は階数 $3$ ですが、$p=(0.5,0.5)$ の階数 $2$ よりエントロピーが小さい）。量の比較には、次のエンタングルメントエントロピーを使います。
+階数が積状態かどうかの判定であって、エンタングルメントの**量**を表すわけではない点に注意してください。1対1の関数では、階数は**振幅がゼロでない入力の個数**で決まり、振幅の偏りだけではエントロピーが下がります。たとえば $\alpha=(\sqrt{0.9},\sqrt{0.1},0,0)$ なら、振幅がゼロでない入力が $00$ と $01$ の2つなので階数は $2$、$p_k=(0.9,0.1)$ でエントロピーは約 $0.469$ bit です。一方、$\alpha=(\sqrt{0.4},\sqrt{0.3},\sqrt{0.2},\sqrt{0.1})$ のように、すべて $0$ でなければ階数は $4$ のままで、偏りの分だけエントロピーが $\log_24=2$ bit より小さくなります。また、階数が大きくても、シュミット確率が偏っていればエントロピーは小さくなります（$p=(0.999,0.0005,0.0005)$ は階数 $3$ ですが、$p=(0.5,0.5)$ の階数 $2$ よりエントロピーが小さい）。量の比較には、次のエンタングルメントエントロピーを使います。
 
 **シュミット分解**：$C$ の特異値分解 $C=USV^\dagger$（$U,V$ はユニタリ、$S$ は特異値 $s_1\ge s_2\ge\cdots\ge0$ を対角に持つ）を使うと、$c_{x,y}=\sum_kU_{xk}\,s_k\,\overline{V_{yk}}$ なので
 
@@ -1384,7 +1384,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 
 # 付録D：検算の一覧
 
-このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（39件）、図のスクリプトの `assert` で確かめています。
+このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（40件）、図のスクリプトの `assert` で確かめています。
 
 | ノートの箇所 | 確かめたこと | テスト |
 |---|---|---|
@@ -1405,6 +1405,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 | 付録A-4 | $\sum K^\dagger K=I$ だが $(\sum K^\dagger)(\sum K)=I+2\sqrt{p(1-p)}X$。振幅減衰の $K_1^\dagger K_1=\gamma\lvert1\rangle\langle1\rvert$ | `test_sum_of_kraus_then_product_is_not_identity` |
 | 付録A-4 | 弱い測定 $K_0$ と、ラベル取り違えの読み出し誤差は、確率が同じで測定後の状態が違う（非対角成分 $\sqrt{\epsilon(1-\epsilon)}$ と $0$） | `test_unsharp_measurement_differs_from_readout_error_after_the_measurement` |
 | 付録B-3 | 階数はエンタングルメントの量でない（偏った振幅の1対1は階数2・約 $0.469$ bit。階数3でも $p=(0.999,\ldots)$ は階数2の $p=(0.5,0.5)$ よりエントロピーが小さい） | `test_rank_is_not_a_measure_of_entanglement` |
+| 付録B-3 | 1対1では階数 $=$ 振幅がゼロでない入力の個数（$\alpha=(\sqrt{0.4},\ldots)$ は階数 $4$ でエントロピーは $2$ bit 未満）。入力が $\lvert0\rangle$ だけなら、非定数の $f$ でも積状態 | `test_injective_function_rank_counts_nonzero_amplitudes` |
 | 付録A-4 | $K_m=\langle m_E\vert U\vert0_E\rangle$ から $\sum K^\dagger K=I$ | `test_stinespring_form_of_kraus` |
 | 付録B-2 | 結果レジスタを測ったときの確率と状態、逆像の重ね合わせ | `test_result_register_collapse_for_example`、`test_result_register_collapse_is_uniform_on_preimage` |
 | 付録B-3 | 係数行列の階数（定数 $1$、例 $2$、1対1 $4$）、階数 $1$ ⇔ 積状態、シュミット係数とエントロピー | `test_rank_of_coefficient_matrix_decides_product_form`、`test_schmidt_numbers_of_example_and_entropy` |

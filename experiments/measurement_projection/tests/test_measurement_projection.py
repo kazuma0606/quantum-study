@@ -447,3 +447,14 @@ def test_rank_is_not_a_measure_of_entanglement():
     assert np.linalg.matrix_rank(C) == 2
     assert np.isclose(mp.entropy_bits(mp.schmidt_probabilities(psi, 4, 4)), 0.469, atol=1e-3)
     assert mp.entropy_bits([0.999, 0.0005, 0.0005]) < mp.entropy_bits([0.5, 0.5])
+
+
+def test_injective_function_rank_counts_nonzero_amplitudes():
+    """付録B-3：1対1では階数 = 振幅がゼロでない入力の個数。偏りだけならエントロピーが下がる"""
+    alpha = np.sqrt(np.array([0.4, 0.3, 0.2, 0.1]), dtype=complex)
+    psi = mp.psi_state(lambda x: x, 2, 2, alpha)
+    assert np.linalg.matrix_rank(mp.coefficient_matrix(psi, 4, 4)) == 4
+    assert mp.entropy_bits(mp.schmidt_probabilities(psi, 4, 4)) < 2.0
+    # 入力が |0⟩ だけなら、非定数の f でも積状態（階数 1）
+    psi0 = mp.psi_state(F_EXAMPLE, 2, 1, np.array([1, 0, 0, 0], dtype=complex))
+    assert np.linalg.matrix_rank(mp.coefficient_matrix(psi0, 4, 2)) == 1
