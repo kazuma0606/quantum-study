@@ -112,6 +112,9 @@ $$
 - $f(x)$：候補$x$に対して計算する関数の値（ビット列）。$|f(x)\rangle$はその計算基底ベクトルです。
 - **入力レジスタ**：$x$を入れる量子ビットの組。**結果レジスタ**：$f(x)$を書き込む量子ビットの組。
 - $I$：結果レジスタ上の恒等演算子。
+- **レジスタの次元**：入力レジスタは $q_A$ 量子ビット、結果レジスタは $q_B$ 量子ビットで、状態空間は $\mathcal H_A=(\mathbb C^2)^{\otimes q_A}\cong\mathbb C^{d_A}$、$\mathcal H_B=(\mathbb C^2)^{\otimes q_B}\cong\mathbb C^{d_B}$（$d_A=2^{q_A}$、$d_B=2^{q_B}$）です。全体は $\mathcal H_A\otimes\mathcal H_B\cong\mathbb C^{d_Ad_B}$ です。$|x_i\rangle\in\mathcal H_A$、$|f(x)\rangle\in\mathcal H_B$ です。
+- **候補の個数**：$N$ 個の候補は、$d_A$ 個ある入力レジスタの基底のうちの $N$ 個です（$N\le d_A$）。Part VIII の例は $N=d_A=4$ です。入力レジスタの全基底を使う場合（$N=d_A$）、付録と別ノートでは、入力レジスタの次元 $d_A$ を $N$、結果レジスタの次元 $d_B$ を $M$ と書きます（演算子 $M_x$ とは別のもので、添字がありません）。
+- **演算子の大きさ**：$P_{x^\ast}\in\mathbb C^{d_A\times d_A}$（Part II）、$I\in\mathbb C^{d_B\times d_B}$、$M_{x^\ast}=P_{x^\ast}\otimes I\in\mathbb C^{d_Ad_B\times d_Ad_B}$（Part III §1）です。
 
 ---
 
@@ -131,7 +134,7 @@ $$
 |\Psi\rangle:=\frac1{\sqrt N}\sum_{i=1}^N|x_i\rangle|f(x_i)\rangle
 $$
 
-となります。これは入力レジスタと結果レジスタを合わせた量子状態です。
+となります。これは入力レジスタと結果レジスタを合わせた量子状態です（$|x_i\rangle\in\mathcal H_A$、$|f(x_i)\rangle\in\mathcal H_B$、$|\Psi\rangle\in\mathcal H_A\otimes\mathcal H_B$。次元は「記法と約束」の宣言のとおり）。
 
 **求めたいもの**：この状態で入力レジスタを測定したとき、正解$x^\ast$が得られる確率$P(x^\ast)$。
 
@@ -153,7 +156,7 @@ $$
 P_{x^\ast}:=|x^\ast\rangle\langle x^\ast|
 $$
 
-と定義します。これは、正解$x^\ast$の方向（1次元の部分空間）への**射影演算子**です。
+と定義します。これは、正解$x^\ast$の方向（1次元の部分空間）への**射影演算子**です。$|x^\ast\rangle\in\mathcal H_A=\mathbb C^{d_A}$（縦ベクトル）、$\langle x^\ast|$ は横ベクトルなので、$P_{x^\ast}$ は $d_A\times d_A$ の行列です。
 
 **作用**：候補の基底ベクトル$|x_i\rangle$に作用させると、ブラとケットの積$\langle x^\ast|x_i\rangle$が数になるので：
 
@@ -211,6 +214,8 @@ M_{x^\ast}:=P_{x^\ast}\otimes I=|x^\ast\rangle\langle x^\ast|\otimes I
 $$
 
 と定義します。
+
+**次元**：$P_{x^\ast}$ は $d_A\times d_A$、$I$ は $d_B\times d_B$ の単位行列なので、$M_{x^\ast}$ は $d_Ad_B\times d_Ad_B$ の行列で、全体の状態（$d_Ad_B$ 次元）に作用します。Part III §2-a の記号では $A=P_{x^\ast}$（$m=d_A$）、$B=I$（$n=d_B$）にあたります。
 
 <a id="p3-2"></a>
 
@@ -734,7 +739,7 @@ $$
 |\Phi\rangle=\sum_{x,y}c_{x,y}\,|x\rangle|y\rangle
 $$
 
-と展開します（$x$は入力、$y$は結果の基底ラベル、$c_{x,y}$は複素数の係数）。
+と展開します（$x=0,\dots,d_A-1$ は入力、$y=0,\dots,d_B-1$ は結果の基底ラベル、$c_{x,y}$ は複素数の係数。$|\Phi\rangle\in\mathcal H_A\otimes\mathcal H_B$）。以下、一般の $x$ について $P_x:=|x\rangle\langle x|\in\mathbb C^{d_A\times d_A}$、$M_x:=P_x\otimes I\in\mathbb C^{d_Ad_B\times d_Ad_B}$ と書きます（$x=x^\ast$ なら Part II・Part III の $P_{x^\ast}$、$M_{x^\ast}$）。
 
 <a id="p4-2"></a>
 
@@ -929,6 +934,20 @@ $$
 
 （最初の2文字が入力、最後の1文字が結果です。）
 
+**記法と次元の宣言**：この例で使う空間・ベクトル・演算子の大きさを、先にまとめます。
+
+| 対象 | 記号 | 空間・大きさ |
+|---|---|---|
+| 入力レジスタ | $q_A=2$ | $\mathcal H_A=\mathbb C^4$（$d_A=4$）、基底 $\lvert00\rangle,\lvert01\rangle,\lvert10\rangle,\lvert11\rangle$ |
+| 結果レジスタ | $q_B=1$ | $\mathcal H_B=\mathbb C^2$（$d_B=2$）、基底 $\lvert0\rangle,\lvert1\rangle$ |
+| 全体 | $\mathcal H_A\otimes\mathcal H_B$ | $\mathbb C^8$（$d_Ad_B=8$）、基底 $\lvert000\rangle,\dots,\lvert111\rangle$（2進数の順） |
+| 状態 | $\lvert\Psi\rangle$ | $\mathbb C^8$ の縦ベクトル（8成分） |
+| 射影演算子 | $P_{11}=\lvert11\rangle\langle11\rvert$ | $4\times4$ の行列 |
+| 恒等演算子 | $I_2$ | $2\times2$ の単位行列 |
+| 測定の演算子 | $M_{11}=P_{11}\otimes I_2$ | $8\times8$ の行列 |
+
+候補の個数は $N=4=d_A$ で、すべての基底が候補です。行列のテンソル積は $(P_{11}\otimes I_2)_{(k,l),(k',l')}=(P_{11})_{kk'}(I_2)_{ll'}$（Part III §2-d）で、行と列の番号 $(k,l)$ は $2k+l$ の順に並べます（$k$ が入力、$l$ が結果）。
+
 <a id="p8-2"></a>
 
 ## 2. 列ベクトルで書く
@@ -1051,7 +1070,7 @@ Part IV §3の(IV-1)で、入力が各値になる基底の係数を数えると
 
 本編は、「入力が $x^\ast$ になる確率」だけを求めました。ここでは、(1) 入力レジスタのすべての値についての測定をまとめて見ると確率の和が $1$ になること、(2) 測定した**後**の状態、(3) 射影測定をさらに一般にした測定（POVM）を扱います。
 
-**前提**：この付録では、入力レジスタの全基底 $|0\rangle,\dots,|N-1\rangle$（$N=2^q$）について考えます（本編の候補 $x_1,\dots,x_N$ が全基底にあたる場合です）。$P_x:=|x\rangle\langle x|$、$M_x:=P_x\otimes I$（$I$ は結果レジスタ上の恒等演算子）です。
+**前提**：この付録では、入力レジスタの全基底 $|0\rangle,\dots,|N-1\rangle$（$N=2^q$）について考えます（本編の候補 $x_1,\dots,x_N$ が全基底にあたる場合です）。結果レジスタの次元を $M$（$=d_B$）とします（演算子 $M_x$ とは別のものです）。$P_x:=|x\rangle\langle x|$、$M_x:=P_x\otimes I$（$I$ は結果レジスタ上の恒等演算子）です。
 
 <a id="A-1"></a>
 
@@ -1197,7 +1216,7 @@ $$
 
 ## B-1. 係数行列
 
-状態 $|\Phi\rangle=\sum_{x,y}c_{x,y}|x\rangle|y\rangle$（Part IV §1）の係数を、入力 $x$ を行、結果 $y$ を列とする $N\times M$ の行列 $C=(c_{x,y})$ に並べます。$|\Psi\rangle$（振幅 $\alpha_x$）では
+状態 $|\Phi\rangle=\sum_{x,y}c_{x,y}|x\rangle|y\rangle$（Part IV §1）の係数を、入力 $x$ を行、結果 $y$ を列とする $N\times M$ の行列 $C=(c_{x,y})$ に並べます（$N$ は入力レジスタの次元 $d_A$、$M$ は結果レジスタの次元 $d_B$）。$|\Psi\rangle$（振幅 $\alpha_x$）では
 
 $$
 c_{x,y}=\alpha_x\,\delta_{y,f(x)}
@@ -1269,7 +1288,7 @@ Part III §2-f-5 の積状態の判定（$2\times2$ では $w_{00}w_{11}=w_{01}w
 
 | 関数 | 係数行列 | 階数 | 状態 |
 |---|---|---|---|
-| 定数 $f(x)=0$ | 第0列だけがゼロでない | $1$ | 積状態：$\big(\sum_x\alpha_x|x\rangle\big)\otimes|0\rangle$ |
+| 定数 $f(x)=0$ | 第0列だけがゼロでない | $1$ | 積状態：$\big(\sum_x\alpha_x\lvert x\rangle\big)\otimes\lvert0\rangle$ |
 | Part VIII の例 | 列が2つとも使われる | $2$ | エンタングルしている |
 | 1対1（$f(x)=x$） | 各行・各列に1つずつ | $N$ | エンタングルしている（均等なら、エントロピーが最大 $\log_2N$） |
 
