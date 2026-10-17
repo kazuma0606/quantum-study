@@ -1222,7 +1222,7 @@ $$
 c_{x,y}=\alpha_x\,\delta_{y,f(x)}
 $$
 
-で、候補に対応する各行にはゼロでない成分がちょうど1つあります（候補でない入力の行はゼロ行です。以下の例は、すべての基底が候補の場合）。Part VIII の例（$N=4$、$M=2$、$\alpha_x=\tfrac12$、$f(x)=1\Leftrightarrow x=11$）では
+で、候補で、かつ振幅 $\alpha_x\ne0$ の入力に対応する各行には、ゼロでない成分がちょうど1つあります（候補でない入力や、$\alpha_x=0$ の入力の行はゼロ行です。以下の例は、すべての基底が候補の場合）。Part VIII の例（$N=4$、$M=2$、$\alpha_x=\tfrac12$、$f(x)=1\Leftrightarrow x=11$）では
 
 $$
 C=\frac12\begin{pmatrix}1&0\\1&0\\1&0\\0&1\end{pmatrix}
