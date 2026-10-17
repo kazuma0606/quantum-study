@@ -235,7 +235,7 @@ def mp05():
     assert [int(np.linalg.matrix_rank(mp.coefficient_matrix(mp.psi_state(f, 2, k), 4, 2**k))) for _, f, k, _, _ in cases] == [1, 2, 4]
     s_ex = mp.schmidt_probabilities(mp.psi_state(F_EX, 2, 1), 4, 2)
     assert np.allclose(sorted(s_ex), [0.25, 0.75]) and np.isclose(mp.entropy_bits(s_ex), 0.8113, atol=1e-4)
-    fig.suptitle(r"係数行列 $C=(c_{x,y})$：階数 $1$ なら積状態、階数が大きいほどエンタングルしている", fontsize=11.5, y=1.02)
+    fig.suptitle(r"係数行列 $C=(c_{x,y})$：階数 $1$ ⇔ 積状態（エンタングルメントの量はエントロピーで測る）", fontsize=11.5, y=1.02)
     fig.tight_layout()
     fig.savefig(OUT / "mp05_coefficient_matrices.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
     plt.close(fig)

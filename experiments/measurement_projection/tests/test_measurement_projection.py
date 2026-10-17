@@ -419,3 +419,31 @@ def test_environment_picture_gives_kraus_sum():
     rho = mp.density(rand_state(2))
     big = U @ np.kron(rho, mp.proj(0, 2)) @ U.conj().T
     assert np.allclose(mp.partial_trace(big, 2, 2, "A"), sum(k @ rho @ k.conj().T for k in K))
+
+
+def test_unsharp_measurement_differs_from_readout_error_after_the_measurement():
+    """付録A-4：弱い測定 K_0 と、射影測定＋ラベルの取り違え（確率 ε）は、結果の確率は同じだが、測定後の状態が違う"""
+    eps = 0.1
+    plus = np.array([1, 1], dtype=complex) / np.sqrt(2)
+    K0, _ = mp.unsharp_measurement_kraus(eps)
+    v = K0 @ plus
+    p0 = float(np.vdot(v, v).real)
+    post_weak = np.outer(v, v.conj()) / p0
+    # ラベル取り違えの模型：結果ラベル 0 の条件付き状態は (1-ε)|0⟩⟨0| + ε|1⟩⟨1|（|+⟩ では確率 1/2 ずつ）
+    P0, P1 = mp.proj(0, 2), mp.proj(1, 2)
+    p0_mis = (1 - eps) * np.vdot(plus, P0 @ plus).real + eps * np.vdot(plus, P1 @ plus).real
+    post_mis = ((1 - eps) * P0 @ np.outer(plus, plus.conj()) @ P0 + eps * P1 @ np.outer(plus, plus.conj()) @ P1) / p0_mis
+    assert np.isclose(p0, p0_mis)
+    assert np.allclose(post_mis, np.diag([1 - eps, eps]))
+    assert abs(post_weak[0, 1]) > 0.1 and abs(post_mis[0, 1]) < 1e-12  # 弱い測定にはコヒーレンスが残る
+    assert np.isclose(abs(post_weak[0, 1]), np.sqrt(eps * (1 - eps)))
+
+
+def test_rank_is_not_a_measure_of_entanglement():
+    """付録B-3：階数は積状態の判定。振幅が偏ると 1対1 でも階数・エントロピーは下がり、階数が大きくてもエントロピーは小さくなりうる"""
+    alpha = np.array([np.sqrt(0.9), np.sqrt(0.1), 0, 0], dtype=complex)
+    psi = mp.psi_state(lambda x: x, 2, 2, alpha)
+    C = mp.coefficient_matrix(psi, 4, 4)
+    assert np.linalg.matrix_rank(C) == 2
+    assert np.isclose(mp.entropy_bits(mp.schmidt_probabilities(psi, 4, 4)), 0.469, atol=1e-3)
+    assert mp.entropy_bits([0.999, 0.0005, 0.0005]) < mp.entropy_bits([0.5, 0.5])

@@ -448,7 +448,7 @@ $K_m$ の組を、**クラウス表現**と呼びます。本編の付録A-4 の
 | Part IV §1 | 例の $\rho_A$、固有値 $\frac34,\frac14$、固有ベクトル、$\rho_B=\operatorname{diag}(\frac34,\frac14)$、(III-4) の分解 | `test_reduced_state_of_the_example` |
 | Part IV §2 | 定数関数：純粋、1対1：$\frac14I_4$（純度 $\frac14$） | `test_constant_and_injective_functions` |
 | Part V §1、§2 | $p_0=\frac1N\sum\rho_{xx'}$：$1$、$\frac58$、$\frac14$（全体に $H^{\otimes2}\otimes I$ をかけた直接計算とも一致） | `test_interference_after_hadamard_depends_on_the_result_register` |
-| Part V §3 | コヒーレンス $=\frac12|\cos\theta|$（$\theta$ を6通り）、$p_0=\frac12(1+\cos\theta)$、$\theta=\frac\pi2$ で $\rho_A=\frac12I$ | `test_visibility_and_environment_overlap` |
+| Part V §3 | $|\rho_{01}|=\frac12|\cos\theta|$（コヒーレンス $2|\rho_{01}|=|\cos\theta|$。$\theta$ を6通り）、$p_0=\frac12(1+\cos\theta)$、$\theta=\frac\pi2$ で $\rho_A=\frac12I$ | `test_visibility_and_environment_overlap` |
 | Part VI | $\operatorname{Tr}_E[U(\rho\otimes|0\rangle\langle0|)U^\dagger]=\sum K_m\rho K_m^\dagger$ | `test_environment_picture_gives_kraus_sum` |
 | 図 | mp07、mp08 の各値を本文の式と `assert` で照合 | `figures/make_measurement_projection_figures.py` |
 
