@@ -1,6 +1,6 @@
 # quantum
 
-> **作成** 2026-09-17　**更新** 2026-10-11
+> **作成** 2026-09-17　**更新** 2026-10-17
 > リポジトリ全体の入口。目的（理論の整理 → 実装 → テスト → 可視化）、
 > フォルダの構成、研究ノートの一覧（ジャンル別）、ノートブック・実験・Lean への案内。
 
@@ -112,6 +112,13 @@ quantum/
 | ノート | 内容 |
 |---|---|
 | [vandermonde_finite_difference_spectral](研究ノート/07_数値計算/vandermonde_finite_difference_spectral.md) | ヴァンデルモンド行列と、関数を行列にする2つの方法（差分法・スペクトル法、クランク・ニコルソン法とトーマス法、スレーター行列式・ラフリン波動関数） |
+
+### 08_量子コンピュータ
+
+| ノート | 内容 |
+|---|---|
+| [measurement_projection_born_rule](研究ノート/08_量子コンピュータ/measurement_projection_born_rule.md) | 射影演算子による測定確率の計算（$P(x^\ast)=\frac1N$ の導出、テンソル積の作用の証明、ボルン則。付録：射影測定とPOVM、結果レジスタの測定とエンタングルメント、クロネッカー積とQiskitの並び順、検算の一覧。図・Qiskit での検算つき） |
+| [partial_trace_reduced_density_matrix](研究ノート/08_量子コンピュータ/partial_trace_reduced_density_matrix.md) | 部分トレースと縮約密度行列（入力レジスタだけを見る。$\rho_A=CC^\dagger$、結果レジスタが入力を覚えると干渉が消える仕組み、環境を使った見方（Kraus 表現）。図・検算つき） |
 
 学習の候補と今後の計画は、[docs/learning_roadmap.md](docs/learning_roadmap.md) と [docs/roadmap.md](docs/roadmap.md) にあります。
 

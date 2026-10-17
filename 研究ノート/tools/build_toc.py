@@ -20,7 +20,7 @@
 見出しを増やす・直す・番号を振り直したときは、もう一度実行すれば目次が更新される（何度実行しても同じ結果になる）。
 
 アンカー名の規則:
-  Part n          → p{n}（Part 0 は p0）、付録 → appA / appB / appC、補遺 → supp、まとめ → summary
+  Part n          → p{n}（Part 0 は p0）、付録 → appA / appB / appC / appD、補遺 → supp、まとめ → summary
   Part の節 "## 2."      → p{n}-2        小項目 "### 4-c." → p{n}-4c（補遺は supp-2、supp-2c）
   付録の節 "## A-3." / "### B-2-5." → A-3 / B-2-5、付録の「まとめ」→ A-sum / B-sum / C-sum
 """
@@ -36,7 +36,7 @@ ROMAN = {"0": 0, "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, 
 LATEX = {r"\Gamma": "Γ", r"\partial": "∂", r"\nabla": "∇", r"\theta": "θ", r"\phi": "φ", r"\Omega": "Ω", r"\Sigma": "Σ",
          r"\ne": "≠", r"\sqrt": "√", r"\ln": "ln", r"\det": "det", r"\tilde": "~", r"\mathbf": "", r"\mathbb": "",
          r"\operatorname": "", r"\bar": "", r"\varepsilon": "ε", r"\delta": "δ", r"\mu": "μ", r"\nu": "ν", r"\ast": "*",
-         r"\mathcal": "", r"\mathfrak": "", r"\mathrm": "", r"\text": "", r"\circ": "∘", r"\times": "×",
+         r"\mathcal": "", r"\mathfrak": "", r"\mathrm": "", r"\text": "", r"\circ": "∘", r"\times": "×", r"\otimes": "⊗",
          r"\to": "→", r"\mapsto": "↦", r"\langle": "⟨", r"\rangle": "⟩", r"\omega": "ω", r"\star": "⋆", r"\Delta": "Δ",
          r"\alpha": "α", r"\beta": "β", r"\lambda": "λ", r"\sigma": "σ", r"\psi": "ψ", r"\chi": "χ", r"\rho": "ρ",
          r"\leq": "≤", r"\geq": "≥", r"\le": "≤", r"\ge": "≥", r"\infty": "∞", r"\cdot": "·", r"\ker": "ker",
@@ -85,7 +85,7 @@ def classify(lines, global_style=False):
                 seen_title = True
                 continue
             mp = re.match(r"^Part ([0IVX]+)：", text)
-            ma = re.match(r"^付録([ABC])：", text)
+            ma = re.match(r"^付録([ABCD])：", text)
             if mp:
                 part = f"p{ROMAN[mp.group(1)]}"
                 out.append((i, 1, part, text, part))
