@@ -427,7 +427,7 @@ $K_m$ の組を、**クラウス表現**と呼びます。本編の付録A-4 の
 | I | 純粋状態の密度行列 $\rho=\vert\Phi\rangle\langle\Phi\vert$、期待値 $\langle A\rangle=\operatorname{tr}(\rho A)$ |
 | II | 部分トレース $\operatorname{Tr}_B(X\otimes Y)=X\operatorname{tr}Y$。成分は $B$ の添字を揃えて足す。$\operatorname{tr}[(X_A\otimes I)\rho]=\operatorname{tr}[X_A\rho_A]$：$A$ についての予言は $\rho_A$ だけで決まる |
 | III | $\rho_A=CC^\dagger$。対角成分が $P(x)$、固有値がシュミット係数の2乗、$\rho_A=\sum_yP(y)\vert\phi_y\rangle\langle\phi_y\vert$（結果を忘れた混合状態） |
-| IV | 本編の例：$\rho_A=\frac34\verts\rangle\langle s\vert+\frac14\vert11\rangle\langle11\vert$。定数関数は純粋、1対1は最大混合 |
+| IV | 本編の例：$\rho_A=\frac34\vert s\rangle\langle s\vert+\frac14\vert11\rangle\langle11\vert$。定数関数は純粋、1対1は最大混合 |
 | V | $p_0=\frac1N\sum\rho_{xx'}$：定数 $1$、例 $\frac58$、1対1 $\frac14$。結果レジスタが入力を覚えるほど干渉が消える（デコヒーレンスと同じ仕組み） |
 | VI | $\operatorname{Tr}_E[U(\rho\otimes\vert0_E\rangle\langle0_E\vert)U^\dagger]=\sum_mK_m\rho K_m^\dagger$。系だけを見ると、ユニタリな発展が一般の変化（量子チャネル）に見える |
 
@@ -452,7 +452,7 @@ $K_m$ の組を、**クラウス表現**と呼びます。本編の付録A-4 の
 | Part V §3 | $f(x_1x_0)=x_0$ では、結果レジスタとエンタングルしたままでも、$H^{\otimes2}$ の後の分布が $(\frac12,\frac12,0,0)$（干渉が残る） | `test_interference_survives_between_inputs_with_the_same_result` |
 | Part III §3 | 純粋状態の縮約で $\operatorname{tr}\rho_A^2\ge\frac1{\min(N,M)}$（$N=4,M=2$ は $\frac12$） | `test_purity_lower_bound_depends_on_the_environment_dimension` |
 | Part VI | 相対位相 $\varphi$ は、環境単独の状態 $\rho_B$ に現れない | `test_relative_phase_is_not_readable_from_the_environment_alone` |
-| Part VI | $(\rho_A)_{0,1}=\frac12e^{-i\varphi}\langle e_1\verte_0\rangle$（位相は系の非対角成分に残り、大きさが縮む） | `test_relative_phase_stays_in_the_system_coherence` |
+| Part VI | $(\rho_A)_{0,1}=\frac12e^{-i\varphi}\langle e_1\vert e_0\rangle$（位相は系の非対角成分に残り、大きさが縮む） | `test_relative_phase_stays_in_the_system_coherence` |
 | Part VI | $\operatorname{Tr}_E[U(\rho\otimes\vert0\rangle\langle0\vert)U^\dagger]=\sum K_m\rho K_m^\dagger$ | `test_environment_picture_gives_kraus_sum` |
 | 図 | mp07、mp08 の各値を本文の式と `assert` で照合 | `figures/make_measurement_projection_figures.py` |
 
