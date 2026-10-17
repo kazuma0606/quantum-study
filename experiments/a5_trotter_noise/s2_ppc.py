@@ -57,6 +57,10 @@ def main() -> None:
     args = ap.parse_args()
     meta = json.loads((OUT / f"{args.tag}_meta.json").read_text(encoding="utf-8"))
     a = argparse.Namespace(**meta["args"])
+    if meta["args"].get("zcorr"):
+        # --zcorr の当てはめは、T1 専用の回路の (制御, 標的) の組を1点として log_lik に保存する。このスクリプトは k ごとに1点
+        # ずつ並べるので、点の数と順番が合わず、k̂ も複製データ（組の相関）も正しく作れない（10/17 の確認）。対象外にする
+        raise SystemExit(f"{args.tag}：--zcorr の当てはめは、事後予測チェックの対象外（組単位の k̂ と、相関つきの複製データに未対応）")
     prep, _ = s2_fit.build_data(a)
     d = np.load(OUT / f"{args.tag}_draws.npz")
     theta = d["theta"].reshape(-1, 2, 15)

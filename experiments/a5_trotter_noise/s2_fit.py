@@ -493,8 +493,14 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
             obs.append(np.stack([y[i0], y[i1]], -1))
             keep[i0] = False
             keep[i1] = False
-        numpyro.sample("yz", dist.MultivariateNormal(jnp.concatenate(locs), covariance_matrix=jnp.concatenate(covs)),
-                       obs=np.concatenate(obs))
+        loc_z, cov_z = jnp.concatenate(locs), jnp.concatenate(covs)
+        if opts["robust"]:
+            # --robust と併用するときは、組の観測も外れ値に強い形にする：自由度 4 の2変量 t 分布（尺度行列は上の共分散。
+            # 10/17 の確認：組だけ正規分布のままで、--robust が残りの観測にしか効いていなかった）
+            numpyro.sample("yz", dist.MultivariateStudentT(4.0, loc_z, scale_tril=jnp.linalg.cholesky(cov_z)),
+                           obs=np.concatenate(obs))
+        else:
+            numpyro.sample("yz", dist.MultivariateNormal(loc_z, covariance_matrix=cov_z), obs=np.concatenate(obs))
     if opts["robust"]:
         # 外れ値に強い尤度：自由度 4 の t 分布（正規分布より裾が重く、外れた点の重みが自動で下がる。深層学習の Huber 損失に近い）
         numpyro.sample("y", dist.StudentT(4.0, mu[keep], sd_obs[keep]), obs=y[keep])
