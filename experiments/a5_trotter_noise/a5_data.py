@@ -172,7 +172,7 @@ MIXED_JOB = "synthetic_mixed_{pair}"
 def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tuple[float, float] = (1.0, 1.0),
                         shots_trotter: int = 8000, shots_probe: int = 3000,
                         t1_probe: bool = False, readout: tuple[float, float] | None = None,
-                        t1_shots: int | None = None) -> tuple[list[dict], list[dict]]:
+                        t1_shots: int | None = None, t1_ks: tuple[int, ...] | None = None) -> tuple[list[dict], list[dict]]:
     """来月の測り方の予行演習用：1本のジョブ（組ごと）に、次を混ぜた合成データ。
       トロッター回路（1次・2次、ツイリングなし、n=1〜14、8000 ショット）、監視用の回路（制御の Z 位相・標的の X 回転、k=12）、
       制御 |1> の Z の測定（反転を戻す。22–23 は k=1〜4、142–143 は k=2〜12）
@@ -212,7 +212,7 @@ def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tup
             # T1 専用の回路（制御 |0>・|1>、k=2〜24）。両方の量子ビットの <Z>。
             # 2つの量子ビットは同じショットで同時に測るので、4通りの同時の結果を多項分布で引き、量子ビットごとの読み出しの誤り
             # （e01 = P(1 と読む | 0)、e10 = P(0 と読む | 1)、補正していない生の値）をかけてから集計する（10/15 の監査）
-            ks = (2, 4, 8, 16, 24)
+            ks = tuple(t1_ks) if t1_ks else (2, 4, 8, 16, 24)
             n_sh = t1_shots or shots_probe
             e01, e10 = readout if readout is not None else (0.0, 0.0)
             conf = np.array([[1 - e01, e10], [e01, 1 - e10]])           # 行が読んだ値、列が本当の値

@@ -51,7 +51,14 @@ FORMS = {
 }
 I_ZI = nm.LABELS15.index("ZI")
 KMAX = 12
-KMAX_T1 = 24                                # T1 専用の回路の、CX の組の回数の上限
+KMAX_T1 = 24                                # T1 専用の回路の、CX の組の回数の上限（既定。データの k がこれより大きければ、そちらに合わせる）
+
+
+def kmax_t1(prep) -> int:
+    """T1 専用の回路の予測を作る k の上限：データの最大の k（KMAX_T1 より小さければ KMAX_T1）。10/17 の監査：k = 32, 48 の
+    データを渡すと、上限 24 までしか予測を作らず添字が範囲外になっていた。"""
+    ks = [int(np.max(g["k"])) for g in prep.get("zgroups", {}).values() if len(g["k"])]
+    return max([KMAX_T1] + ks)
 GAMMA_T1 = 6e-4                            # CX ごとの振幅減衰の目安（0.1 μs / 160 μs）
 CALIB_R = np.array([0.00182, 0.00213])     # 較正の CZ 誤差の中央値（113 日分、22-23 と 142-143。calibration_history_ibm_fez.csv）
 
@@ -75,6 +82,7 @@ def add_common_args(ap) -> None:
                     help="合成データに、来月の測り方（1本のジョブにトロッター回路・監視用の回路・制御 |1> の Z の測定を混ぜる）を組ごとに加える")
     ap.add_argument("--t1-probe", action="store_true", help="--mixed-job に、T1 専用の回路（制御 |0>・|1>、k=2〜24）を加える")
     ap.add_argument("--t1-shots", type=int, help="T1 専用の回路のショット数（既定は直接の測定と同じ 3000）")
+    ap.add_argument("--t1-ks", type=int, nargs="+", help="T1 専用の回路の CX の組の回数の並び（既定 2 4 8 16 24）")
     ap.add_argument("--syn-ro", type=float, nargs=2,
                     help="合成データの T1 専用の回路に、読み出しの誤り（e01 = P(1|0)、e10 = P(0|1)）を入れる")
     ap.add_argument("--zcorr", action="store_true",
@@ -134,6 +142,8 @@ def make_tag(args) -> str:
         tag += f"_sro{args.syn_ro[0]:g}-{args.syn_ro[1]:g}"
     if getattr(args, "t1_shots", None):
         tag += f"_t1s{args.t1_shots}"
+    if getattr(args, "t1_ks", None):
+        tag += "_t1k" + "-".join(map(str, args.t1_ks))
     if args.extra_c1:
         tag += "_c1" if getattr(args, "c1_design", "all") == "all" else "_c1rec"
     if args.label:
@@ -209,6 +219,7 @@ def build_data(args):
             t_mix, p_mix = a5_data.synthetic_mixed_job(truths, rng_mix, noise_scale=noise,
                                                        t1_probe=getattr(args, "t1_probe", False),
                                                        t1_shots=getattr(args, "t1_shots", None),
+                                                       t1_ks=tuple(args.t1_ks) if getattr(args, "t1_ks", None) else None,
                                                        readout=tuple(args.syn_ro) if getattr(args, "syn_ro", None) else None)
             trotter, probes = trotter + t_mix, probes + p_mix
         if args.extra_c1:
@@ -314,7 +325,7 @@ def predictions(theta_job, p_job, prep, gamma_job=None):
         else:
             err = jax.vmap(lambda th, p, ga: nm.error_sup(th, p, False, ga))(theta_job[g["job"]], p_job[g["job"]],
                                                                              gamma_job[g["job"]])
-        z = jax.vmap(lambda e: nm.t1_probe_z(e, c1, tuple(range(KMAX_T1 + 1)))[q])(err)
+        z = jax.vmap(lambda e: nm.t1_probe_z(e, c1, tuple(range(kmax_t1(prep) + 1)))[q])(err)
         mus.append(z[jnp.arange(len(g["k"])), jnp.asarray(g["k"])])
         ys.append(g["z"])
         sds.append(g["sigma"])
@@ -453,7 +464,7 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
                 errs = jax.vmap(lambda a, b: nm.error_sup(a, b, False))(th, pp)
             else:
                 errs = jax.vmap(lambda a, b, c: nm.error_sup(a, b, False, c))(th, pp, gamma_job[jobs])
-            P = jax.vmap(lambda e: nm.t1_probe_probs(e, c1, tuple(range(KMAX_T1 + 1))))(errs)[jnp.arange(len(jobs)), jnp.asarray(g0["k"])]
+            P = jax.vmap(lambda e: nm.t1_probe_probs(e, c1, tuple(range(kmax_t1(prep) + 1))))(errs)[jnp.arange(len(jobs)), jnp.asarray(g0["k"])]
             if e01 is not None:
                 pr = prep["job_pair"][jobs]
 

@@ -159,7 +159,9 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     # 保存名に組を入れる（同じ --tag で組だけ変えると上書きされるため。10/17 の監査）。10/16 までの結果は、入れる前の名前のまま
     pair_name = ["22-23", "142-143"][args.pair]
-    stem = f"{args.tag}_pair{pair_name}"
+    # k の並びと、回転を推定するかどうかも保存名に入れる（10/17 の監査：条件だけ変えると上書きされる）。
+    # 10/17 までの結果は、入れる前の名前のまま
+    stem = f"{args.tag}_pair{pair_name}_k{'-'.join(map(str, args.ks))}" + ("_freerot" if args.free_rot else "")
     expect = make_expect(fixed_theta(args.pair), args.free_rot)
     TRUE_REST["p"] = TRUE_P[args.pair]
     log(f"組の条件：{pair_name}（回転は{'推定する（6個）' if args.free_rot else '当てはめの事後平均に固定'}、"
