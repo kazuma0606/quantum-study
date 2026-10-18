@@ -1181,6 +1181,28 @@ $$
 
 となります。つまり**$X$ の第 $(k,l)$ 列が取り出されます**。したがって、2つの $mn\times mn$ 行列が、すべての基底ベクトル $|k\rangle\otimes|l\rangle$ に対して同じベクトルを返すなら、すべての列が一致するので、行列として等しくなります。
 
+**事実1：スカラーは、テンソル積の外に出せる**。$c\in\mathbb C$（複素数）、$|u\rangle,|u_1\rangle,|u_2\rangle\in\mathcal H_A$、$|v\rangle\in\mathcal H_B$ のとき
+
+$$
+(c|u\rangle)\otimes|v\rangle=c\,\big(|u\rangle\otimes|v\rangle\big)=|u\rangle\otimes(c|v\rangle),\qquad(|u_1\rangle+|u_2\rangle)\otimes|v\rangle=|u_1\rangle\otimes|v\rangle+|u_2\rangle\otimes|v\rangle
+$$
+
+です（第2因子の和も同様）。これはテンソル積の定義（成分は $u_kv_l$）から、成分ごとに確かめられます。第 $(k,l)$ 成分を、定義 $(|u\rangle\otimes|v\rangle)_{(k,l)}=u_kv_l$ で計算すると
+
+$$
+\big((c|u\rangle)\otimes|v\rangle\big)_{(k,l)}=(cu_k)\,v_l=c\,(u_kv_l)=\big(c\,(|u\rangle\otimes|v\rangle)\big)_{(k,l)}
+$$
+
+$$
+\big(|u\rangle\otimes(c|v\rangle)\big)_{(k,l)}=u_k\,(cv_l)=c\,(u_kv_l)=\big(c\,(|u\rangle\otimes|v\rangle)\big)_{(k,l)}
+$$
+
+$$
+\big((|u_1\rangle+|u_2\rangle)\otimes|v\rangle\big)_{(k,l)}=(u_{1,k}+u_{2,k})\,v_l=u_{1,k}v_l+u_{2,k}v_l
+$$
+
+です。2つ目の式の途中で $u_k(cv_l)=c(u_kv_l)$ としているのは、**複素数どうしの積は順序を入れ替えてよい**（$\mathbb C$ の積の可換性：$u_kc=cu_k$）からです。すべての成分が等しいので、ベクトルとして等しくなります。ここで使っているのは、「成分が数どうしの積 $u_kv_l$ で定義されている」ことだけで、行列の性質ではありません。
+
 **補題1（テンソル積同士の積はテンソル積）**：
 
 $$
@@ -1310,13 +1332,21 @@ $$
 (A\otimes B)^T=A^T\otimes B^T,\qquad(A\otimes B)^\dagger=A^\dagger\otimes B^\dagger
 $$
 
-**証明**：共役転置の定義は、「行と列の番号を入れ替えて、複素共役を取る」です。成分は
+**証明**：転置の定義は「行と列の番号を入れ替える」、共役転置の定義は「さらに複素共役を取る」です：$(X^T)_{\alpha\beta}=X_{\beta\alpha}$、$(X^\dagger)_{\alpha\beta}=\overline{X_{\beta\alpha}}$。まず転置の成分を、行の番号 $(k,l)$、列の番号 $(k',l')$ で計算します。
+
+$$
+\big[(A\otimes B)^T\big]_{(k,l),(k',l')}=(A\otimes B)_{(k',l'),(k,l)}=A_{k'k}\,B_{l'l}=(A^T)_{kk'}\,(B^T)_{ll'}
+$$
+
+最初の等号が転置の定義、2番目がテンソル積の定義（行が $(k',l')$、列が $(k,l)$ なので $A_{k'k}B_{l'l}$）、3番目が $A^T,B^T$ の定義です。右辺は $A^T\otimes B^T$ の第 $(k,l),(k',l')$ 成分なので、$(A\otimes B)^T=A^T\otimes B^T$ です。
+
+共役転置は、同じ計算の途中で複素共役を取ります。複素数の積の複素共役は、複素共役の積（$\overline{ab}=\bar a\,\bar b$）なので
 
 $$
 \big[(A\otimes B)^\dagger\big]_{(k,l),(k',l')}=\overline{(A\otimes B)_{(k',l'),(k,l)}}=\overline{A_{k'k}\,B_{l'l}}=\overline{A_{k'k}}\;\overline{B_{l'l}}=(A^\dagger)_{kk'}\,(B^\dagger)_{ll'}
 $$
 
-で、$A^\dagger\otimes B^\dagger$ の成分です。複素共役を取らなければ転置の式になります。$\square$
+で、$A^\dagger\otimes B^\dagger$ の成分です。$\square$
 
 **補題4（ユニタリ性）**：$U_1\in\mathbb C^{m\times m}$、$U_2\in\mathbb C^{n\times n}$ がユニタリなら、$U_1\otimes U_2$ もユニタリです。
 
@@ -1324,6 +1354,12 @@ $$
 
 $$
 (U_1\otimes U_2)^\dagger(U_1\otimes U_2)=(U_1^\dagger\otimes U_2^\dagger)(U_1\otimes U_2)=U_1^\dagger U_1\otimes U_2^\dagger U_2=I_m\otimes I_n=I_{mn}
+$$
+
+です。1番目の等号は補題3、2番目は (A-1)（$A=U_1^\dagger$、$A'=U_1$、$B=U_2^\dagger$、$B'=U_2$）、3番目は $U_1,U_2$ がユニタリ（$U_1^\dagger U_1=I_m$、$U_2^\dagger U_2=I_n$）であること、最後は補題2 です。ユニタリ行列の定義は $W^\dagger W=I$ ですが、正方行列では $W^\dagger W=I$ なら $WW^\dagger=I$ も成り立ちます（$W^\dagger$ が $W$ の逆行列になる）。同じ計算を順序を変えて行っても
+
+$$
+(U_1\otimes U_2)(U_1\otimes U_2)^\dagger=(U_1\otimes U_2)(U_1^\dagger\otimes U_2^\dagger)=U_1U_1^\dagger\otimes U_2U_2^\dagger=I_m\otimes I_n=I_{mn}
 $$
 
 です。$\square$ 別々のレジスタに作用するゲートを並べたものはユニタリ、ということです。
@@ -1340,17 +1376,61 @@ $$
 \operatorname{tr}(A\otimes B)=\sum_{k,l}(A\otimes B)_{(k,l),(k,l)}=\sum_{k,l}A_{kk}B_{ll}=\Big(\sum_kA_{kk}\Big)\Big(\sum_lB_{ll}\Big)
 $$
 
-です。$\square$
-
-**補題6（固有値）**：$Au=\lambda u$、$Bv=\mu v$（$u\neq0$、$v\neq0$）なら、$\lambda\mu$ は $A\otimes B$ の固有値です。
-
-**証明**：(III-1) と双線形性で
+です。最後の等号は、二重和を先に $l$ で、次に $k$ で足すと
 
 $$
-(A\otimes B)(u\otimes v)=Au\otimes Bv=\lambda u\otimes\mu v=\lambda\mu\,(u\otimes v)
+\sum_k\sum_lA_{kk}B_{ll}=\sum_kA_{kk}\Big(\sum_lB_{ll}\Big)=\Big(\sum_lB_{ll}\Big)\sum_kA_{kk}
 $$
 
-です。$u\otimes v$ の成分 $u_kv_l$ は、$u,v$ にゼロでない成分があればゼロでないものがあるので、$u\otimes v\neq0$ です。$\square$
+となることによります（$A_{kk}$ は $l$ によらない定数なので、$l$ の和の外に出せます。内側の和 $\sum_lB_{ll}$ は $k$ によらない定数なので、$k$ の和の外に出せます）。$\square$
+
+**例**：$A=\begin{pmatrix}1&2\\3&4\end{pmatrix}$（$\operatorname{tr}A=5$）、$B=I_2$（$\operatorname{tr}B=2$）のとき、$A\otimes I_2$ は $A$ の各成分に $I_2$ を掛けて並べた $4\times4$ 行列で、対角成分は $1\cdot1,\ 1\cdot1,\ 4\cdot1,\ 4\cdot1$ です。
+
+$$
+\operatorname{tr}(A\otimes I_2)=1+1+4+4=10=5\cdot2=\operatorname{tr}A\cdot\operatorname{tr}I_2
+$$
+
+**補題6（固有値）**：$u\in\mathbb C^m$ が $A$ の固有ベクトルで固有値が $\lambda$、$v\in\mathbb C^n$ が $B$ の固有ベクトルで固有値が $\mu$ とします。つまり
+
+$$
+Au=\lambda u,\quad u\neq0\qquad(\lambda\in\mathbb C),\qquad\qquad Bv=\mu v,\quad v\neq0\qquad(\mu\in\mathbb C)
+$$
+
+です（固有ベクトルは、ゼロベクトルでないベクトルです）。このとき、$u\otimes v$ は $A\otimes B$ の固有ベクトルで、固有値は $\lambda\mu$ です。
+
+**証明**：(III-1) で $(A\otimes B)(u\otimes v)=Au\otimes Bv$ です。固有値の式 $Au=\lambda u$、$Bv=\mu v$ を代入すると、$\lambda u\otimes\mu v$ になります。ここから $\lambda\mu$ を外に出す段階を、事実1 で1つずつ行います。まず、第1因子の $\lambda$ を外に出します（事実1 の第1式で $c=\lambda$）。
+
+$$
+(\lambda u)\otimes(\mu v)=\lambda\,\big(u\otimes(\mu v)\big)
+$$
+
+次に、第2因子の $\mu$ を外に出します（事実1 の第2式で $c=\mu$）。
+
+$$
+u\otimes(\mu v)=\mu\,(u\otimes v)
+$$
+
+2つを合わせて
+
+$$
+(A\otimes B)(u\otimes v)=Au\otimes Bv=(\lambda u)\otimes(\mu v)=\lambda\,\mu\,(u\otimes v)
+$$
+
+です。成分で直接確かめても、第 $(k,l)$ 成分は $(\lambda u_k)(\mu v_l)=\lambda\mu\,(u_kv_l)$ で一致します。固有ベクトルには $u\otimes v\neq0$ が必要ですが、これは次のように確かめられます。$u\neq0$ なので $u_{k_0}\neq0$ となる $k_0$ があり、$v\neq0$ なので $v_{l_0}\neq0$ となる $l_0$ があります。すると $u\otimes v$ の第 $(k_0,l_0)$ 成分は $u_{k_0}v_{l_0}$ で、ゼロでない2つの複素数の積はゼロでないので、$u\otimes v\neq0$ です。$\square$
+
+**3個以上の場合**：$C\in\mathbb C^{r\times r}$ とその固有ベクトル $w\in\mathbb C^r$（$Cw=\varphi w$、$w\neq0$）を加えて、$A\otimes B\otimes C$ を考えます。Part III §2-f の定義で、$u\otimes v\otimes w$ の第 $(k,l,s)$ 成分は $u_kv_lw_s$ で、$(A\otimes B\otimes C)(u\otimes v\otimes w)=Au\otimes Bv\otimes Cw$ が成り立ちます（Part III §2-f-3）。固有値の式を代入して、成分で計算すると
+
+$$
+\big(Au\otimes Bv\otimes Cw\big)_{(k,l,s)}=(\lambda u_k)(\mu v_l)(\varphi w_s)=\lambda\mu\varphi\,(u_kv_lw_s)
+$$
+
+なので
+
+$$
+(A\otimes B\otimes C)(u\otimes v\otimes w)=\lambda\mu\varphi\,(u\otimes v\otimes w)
+$$
+
+です。固有値 $\lambda,\mu,\varphi$ は、どれも複素数（スカラー）で、成分の積の中から順序を気にせず外に出せるので、**何個でも**外に出せます。行列そのもの（$A,B,C$）は、順序を入れ替えられないので、同じようには外に出せません。
 
 $A,B$ が対角化できる場合は、これで**すべての**固有値が出ます。$A=S\Lambda S^{-1}$、$B=T\Theta T^{-1}$（$\Lambda=\mathrm{diag}(\lambda_k)$、$\Theta=\mathrm{diag}(\mu_l)$）とすると、(A-1) を使って
 
@@ -1372,19 +1452,103 @@ $$
 \det(A\otimes B)=(\det A)^n\,(\det B)^m
 $$
 
-**証明**：(A-1) から $A\otimes B=(A\otimes I_n)(I_m\otimes B)$ なので、行列式の積の公式で $\det(A\otimes B)=\det(A\otimes I_n)\cdot\det(I_m\otimes B)$ です。2つの因子を別々に求めます。
-
-*$I_m\otimes B$*：成分は $(I_m\otimes B)_{(k,l),(k',l')}=\delta_{kk'}B_{ll'}$ で、$k\neq k'$ ならゼロです。同じ $k$ の行と列だけが $B$ でつながるので、$B$ を $m$ 個対角に並べたブロック対角行列です。ブロック対角行列の行列式は、各ブロックの行列式の積なので、$\det(I_m\otimes B)=(\det B)^m$ です（$B$ のブロックが2個の場合の確認：$\begin{pmatrix}B&0\\0&B\end{pmatrix}=\begin{pmatrix}B&0\\0&I_n\end{pmatrix}\begin{pmatrix}I_n&0\\0&B\end{pmatrix}$ で、右下が単位行列の行列は、単位行列の行について余因子展開を繰り返すと、行列式が $\det B$ になります。もう一方も同じで、積の公式から $(\det B)^2$ です。個数が増えても同様です）。
-
-*$A\otimes I_n$*：成分は $\delta_{ll'}A_{kk'}$ で、同じ $l$ の行と列だけが $A$ でつながりますが、番号の並び $(k,l)$ では $A$ の成分が離れて並びます。そこで、$\mathcal H_A\otimes\mathcal H_B$ の基底 $|k\rangle\otimes|l\rangle$ を $|l\rangle\otimes|k\rangle$ に移す $mn\times mn$ の置換行列 $\Pi$ を考えます（$\mathcal H_B\otimes\mathcal H_A$ の基底への入れ替え）。基底ベクトル $|l\rangle\otimes|k\rangle$ に $\Pi(A\otimes I_n)\Pi^{-1}$ を作用させると、(III-1) から
+**証明**：(A-1) で $A'=I_m$、$B=I_n$ とすると（帰結の1番目）
 
 $$
-|l\rangle\otimes|k\rangle\ \xrightarrow{\Pi^{-1}}\ |k\rangle\otimes|l\rangle\ \xrightarrow{A\otimes I_n}\ A|k\rangle\otimes|l\rangle\ \xrightarrow{\Pi}\ |l\rangle\otimes A|k\rangle
+A\otimes B=(A\otimes I_n)(I_m\otimes B)
 $$
 
-で、$(I_n\otimes A)\big(|l\rangle\otimes|k\rangle\big)=|l\rangle\otimes A|k\rangle$ と同じです。事実0 から $\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ です。$I_n\otimes A$ の成分は、番号の組を $(l,k)$ として $(I_n\otimes A)_{(l,k),(l',k')}=\delta_{ll'}A_{kk'}$ で、$l\neq l'$ なら $0$ です。同じ $l$ の行と列だけが $A$ でつながるので、$A$ を $n$ 個並べたブロック対角行列で、$\det(I_n\otimes A)=(\det A)^n$ です。相似変換は行列式を変えない（$\det(\Pi X\Pi^{-1})=\det\Pi\cdot\det X\cdot(\det\Pi)^{-1}=\det X$）ので、$\det(A\otimes I_n)=(\det A)^n$ です。
+です。行列式の積の公式 $\det(XY)=\det X\cdot\det Y$ から
 
-2つを掛けて、$\det(A\otimes B)=(\det A)^n(\det B)^m$ です。$\square$
+$$
+\det(A\otimes B)=\det(A\otimes I_n)\cdot\det(I_m\otimes B)
+$$
+
+なので、右辺の2つの因子を別々に求めます。
+
+**手順1：$\det(I_m\otimes B)$**。成分は
+
+$$
+(I_m\otimes B)_{(k,l),(k',l')}=\delta_{kk'}\,B_{ll'}
+$$
+
+で、$k\neq k'$ ならゼロです。同じ $k$ の行と列だけが $B$ でつながるので、$B$ を $m$ 個対角に並べたブロック対角行列になります。
+
+$$
+I_m\otimes B=\begin{pmatrix}B&&\\&\ddots&\\&&B\end{pmatrix}\quad(B\text{ が }m\text{ 個})
+$$
+
+ブロック対角行列の行列式は、各ブロックの行列式の積なので
+
+$$
+\det(I_m\otimes B)=(\det B)^m
+$$
+
+です。この「ブロック対角行列の行列式は積」を、ブロックが2個の場合で確かめます。
+
+$$
+\begin{pmatrix}B&0\\0&B\end{pmatrix}=\begin{pmatrix}B&0\\0&I_n\end{pmatrix}\begin{pmatrix}I_n&0\\0&B\end{pmatrix}
+$$
+
+右辺の各行列は、片方のブロックが単位行列です。単位行列の部分の行について余因子展開を繰り返すと、行列式は残りのブロックの行列式、つまり $\det B$ になります。積の公式から全体は $(\det B)^2$ です。ブロックの個数が増えても同じです。
+
+**手順2：$\det(A\otimes I_n)$**。成分は $A_{kk'}\delta_{ll'}$ です。同じ $l$ の行と列だけが $A$ でつながりますが、番号の並び $(k,l)$ では、$A$ の成分が離れて並んでいます。そこで、基底の並びを入れ替える置換行列 $\Pi$ を使います。
+
+$$
+\Pi\big(|k\rangle\otimes|l\rangle\big)=|l\rangle\otimes|k\rangle,\qquad\Pi\in\mathbb C^{mn\times mn}
+$$
+
+（$\mathcal H_A\otimes\mathcal H_B$ の基底を、$\mathcal H_B\otimes\mathcal H_A$ の基底に移します。各列に $1$ が1つだけある行列です。）基底ベクトル $|l\rangle\otimes|k\rangle$ に、$\Pi(A\otimes I_n)\Pi^{-1}$ を右から順に作用させると、(III-1) から
+
+$$
+|l\rangle\otimes|k\rangle\ \xrightarrow{\ \Pi^{-1}\ }\ |k\rangle\otimes|l\rangle\ \xrightarrow{\ A\otimes I_n\ }\ A|k\rangle\otimes|l\rangle\ \xrightarrow{\ \Pi\ }\ |l\rangle\otimes A|k\rangle
+$$
+
+です。一方、(III-1) から
+
+$$
+(I_n\otimes A)\big(|l\rangle\otimes|k\rangle\big)=|l\rangle\otimes A|k\rangle
+$$
+
+なので、すべての基底ベクトルで同じ結果になります。事実0 から、行列として
+
+$$
+\Pi\,(A\otimes I_n)\,\Pi^{-1}=I_n\otimes A
+$$
+
+です。$I_n\otimes A$ の成分は、番号の組を $(l,k)$ として
+
+$$
+(I_n\otimes A)_{(l,k),(l',k')}=\delta_{ll'}\,A_{kk'}
+$$
+
+で、$l\neq l'$ なら $0$ です。したがって、手順1 と同じく $A$ を $n$ 個並べたブロック対角行列で
+
+$$
+\det(I_n\otimes A)=(\det A)^n
+$$
+
+です。相似変換は行列式を変えません：
+
+$$
+\det\big(\Pi X\Pi^{-1}\big)=\det\Pi\cdot\det X\cdot(\det\Pi)^{-1}=\det X
+$$
+
+なので、$X=A\otimes I_n$ として
+
+$$
+\det(A\otimes I_n)=\det\big(\Pi(A\otimes I_n)\Pi^{-1}\big)=\det(I_n\otimes A)=(\det A)^n
+$$
+
+です。
+
+**手順3：まとめ**。手順1・2 の結果を、最初の式に代入します。
+
+$$
+\det(A\otimes B)=\det(A\otimes I_n)\cdot\det(I_m\otimes B)=(\det A)^n\,(\det B)^m
+$$
+
+$\square$
 
 **数値による確認**：(A-1)、補題3〜7 と $\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ は、ランダムな複素行列（$2\times2$ と $3\times3$ の組合せ）でも数値で確かめました（付録D）。
 

@@ -317,6 +317,12 @@ def test_swap_permutation_turns_a_kron_i_into_i_kron_a():
     mu, T = np.linalg.eig(B)
     ST = np.kron(S, T)
     assert np.allclose(ST @ np.kron(np.diag(la), np.diag(mu)) @ np.linalg.inv(ST), np.kron(A, B))
+    # 補題6（3個）：Au=λu、Bv=μv、Cw=φw なら (A⊗B⊗C)(u⊗v⊗w)=λμφ(u⊗v⊗w)
+    Cm = rand_c(2, 2)
+    (la3, U3), (mu3, V3), (ph3, W3) = np.linalg.eig(A), np.linalg.eig(B), np.linalg.eig(Cm)
+    u3, v3, w3 = U3[:, 0], V3[:, 1], W3[:, 1]
+    x3 = np.kron(np.kron(u3, v3), w3)
+    assert np.allclose(np.kron(np.kron(A, B), Cm) @ x3, la3[0] * mu3[1] * ph3[1] * x3)
     # 補題2：成分 δδ から I_m⊗I_n = I_mn
     assert np.allclose(np.kron(np.eye(m), np.eye(n)), np.eye(m * n))
 
