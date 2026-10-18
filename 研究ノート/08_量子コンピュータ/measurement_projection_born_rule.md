@@ -1484,7 +1484,13 @@ $$
 
 **証明**：
 
-**手順0：2つの因子に分ける**。(A-1) で $A'=I_m$、$B=I_n$ とすると（帰結の1番目）
+**手順0：2つの因子に分ける**。(A-1) の記号をはっきり区別して $(A_1\otimes B_1)(A_2\otimes B_2)=A_1A_2\otimes B_1B_2$ と書き、$A_1=A$、$B_1=I_n$、$A_2=I_m$、$B_2=B$ を代入します（この補題の $A,B$ は、$A_1=A$ と $B_2=B$ にだけ入ります）。
+
+$$
+(A\otimes I_n)(I_m\otimes B)=AI_m\otimes I_nB=A\otimes B
+$$
+
+つまり
 
 $$
 A\otimes B=(A\otimes I_n)(I_m\otimes B)
