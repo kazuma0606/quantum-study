@@ -1206,13 +1206,97 @@ $$
 **帰結**：
 
 - $A'=I_m$、$B=I_n$ とすると、$(A\otimes I_n)(I_m\otimes B')=AI_m\otimes I_nB'=A\otimes B'$ になります（Part III §2-f-7 の式）。
-- 両方がテンソル積なら、積もテンソル積です。例：$(X\otimes I_2)(I_2\otimes Z)=X\otimes Z$。
-- 片方がテンソル積でなくても、積がテンソル積になることがあります。例：$\mathrm{CNOT}\cdot\mathrm{CNOT}=I_4=I_2\otimes I_2$（CNOT は自分自身の逆行列）。
+- 両方がテンソル積なら、積もテンソル積です。例：(A-1) で $A=X$、$A'=I_2$、$B=I_2$、$B'=Z$ とすると、$(X\otimes I_2)(I_2\otimes Z)=XI_2\otimes I_2Z=X\otimes Z$ です。ブロック行列で確かめると、$X\otimes I_2$ は $X$ の各成分に $I_2$ を掛けて並べたもの、$I_2\otimes Z$ は $I_2$ の各成分に $Z$ を掛けて並べたもの（$Z$ が2個、対角に並ぶ）なので
+
+$$
+(X\otimes I_2)(I_2\otimes Z)=\begin{pmatrix}0\cdot I_2&1\cdot I_2\\1\cdot I_2&0\cdot I_2\end{pmatrix}\begin{pmatrix}Z&0\\0&Z\end{pmatrix}=\begin{pmatrix}0\cdot Z+I_2\cdot0&0\cdot0+I_2Z\\I_2Z+0\cdot0&I_2\cdot0+0\cdot Z\end{pmatrix}=\begin{pmatrix}0&Z\\Z&0\end{pmatrix}=\begin{pmatrix}0\cdot Z&1\cdot Z\\1\cdot Z&0\cdot Z\end{pmatrix}=X\otimes Z
+$$
+
+で、一致します。
+- 因子がテンソル積でなくても、積がテンソル積になることがあります。例：$\mathrm{CNOT}\cdot\mathrm{CNOT}=I_4=I_2\otimes I_2$（導出は下の例）。
 - したがって、「行列の積で書かれているから分けられない」のではなく、**結果の行列が $B_1\otimes B_2$ の形に書けるか**で判断します（Part III §2-g-1）。
+
+**例：$\mathrm{CNOT}\cdot\mathrm{CNOT}$ を、飛ばさずに計算する**。2量子ビット（$\mathbb C^4$）で、第1量子ビットが制御、第2量子ビットが標的の CNOT は、$\mathrm{CNOT}\,|a\rangle|b\rangle=|a\rangle|b\oplus a\rangle$（$\oplus$ は mod 2 の足し算）です。
+
+*(1) 行列を求める*：基底ベクトルの行き先は
+
+$$
+|00\rangle\mapsto|00\rangle,\qquad|01\rangle\mapsto|01\rangle,\qquad|10\rangle\mapsto|11\rangle,\qquad|11\rangle\mapsto|10\rangle
+$$
+
+です。事実0（基底ベクトルに作用させると、行列の列が出る）から、第1〜4列がこれらの行き先で、
+
+$$
+\mathrm{CNOT}=\begin{pmatrix}1&0&0&0\\0&1&0&0\\0&0&0&1\\0&0&1&0\end{pmatrix}=\begin{pmatrix}I_2&0\\0&X\end{pmatrix},\qquad X=\begin{pmatrix}0&1\\1&0\end{pmatrix}
+$$
+
+です。右の形は、$4\times4$ を $2\times2$ のブロックに区切ったもので、左上が $I_2$、右下が $X$、右上と左下が $2\times2$ のゼロ行列です（Part III §2-g-2 と同じ）。
+
+*(2) テンソル積の和で書く*：$P_0=\begin{pmatrix}1&0\\0&0\end{pmatrix}$、$P_1=\begin{pmatrix}0&0\\0&1\end{pmatrix}$ とすると、$P_0\otimes I_2$ は「$P_0$ の各成分に $I_2$ を掛けて並べたブロック行列」（Part III §2-d）なので
+
+$$
+P_0\otimes I_2=\begin{pmatrix}1\cdot I_2&0\cdot I_2\\0\cdot I_2&0\cdot I_2\end{pmatrix}=\begin{pmatrix}I_2&0\\0&0\end{pmatrix},\qquad P_1\otimes X=\begin{pmatrix}0\cdot X&0\cdot X\\0\cdot X&1\cdot X\end{pmatrix}=\begin{pmatrix}0&0\\0&X\end{pmatrix}
+$$
+
+です。足すと (1) のブロック行列になるので
+
+$$
+\mathrm{CNOT}=P_0\otimes I_2+P_1\otimes X
+$$
+
+です。この形は、$P_0\otimes I_2$ と $P_1\otimes X$ という**2つのテンソル積の和**で、1つのテンソル積 $B_1\otimes B_2$ の形ではありません（和は積の形を保たない）。
+
+*(3) 2乗を展開する*：補題2（和に対する線形性）で展開し、各項に (A-1) を使うと
+
+$$
+\mathrm{CNOT}^2=(P_0\otimes I_2)(P_0\otimes I_2)+(P_0\otimes I_2)(P_1\otimes X)+(P_1\otimes X)(P_0\otimes I_2)+(P_1\otimes X)(P_1\otimes X)
+$$
+
+$$
+=P_0P_0\otimes I_2I_2+P_0P_1\otimes I_2X+P_1P_0\otimes XI_2+P_1P_1\otimes XX
+$$
+
+です。ここで、$2\times2$ の行列の積を直接計算すると
+
+$$
+P_0P_0=P_0,\qquad P_1P_1=P_1,\qquad P_0P_1=\begin{pmatrix}1&0\\0&0\end{pmatrix}\begin{pmatrix}0&0\\0&1\end{pmatrix}=\begin{pmatrix}0&0\\0&0\end{pmatrix},\qquad P_1P_0=0
+$$
+
+$$
+X^2=\begin{pmatrix}0&1\\1&0\end{pmatrix}\begin{pmatrix}0&1\\1&0\end{pmatrix}=\begin{pmatrix}0\cdot0+1\cdot1&0\cdot1+1\cdot0\\1\cdot0+0\cdot1&1\cdot1+0\cdot0\end{pmatrix}=I_2
+$$
+
+です。零行列とのテンソル積は零行列なので（成分が $0\cdot B_{ll'}=0$）、2番目と3番目の項は $0$ になり、
+
+$$
+\mathrm{CNOT}^2=P_0\otimes I_2+P_1\otimes I_2=(P_0+P_1)\otimes I_2=I_2\otimes I_2=I_4
+$$
+
+です（補題2 の線形性と、$P_0+P_1=\begin{pmatrix}1&0\\0&1\end{pmatrix}=I_2$、$I_2\otimes I_2=I_4$）。
+
+*(4) ブロック行列での確認*：(1) のブロック表示どうしの積は、ブロックごとに計算できて
+
+$$
+\begin{pmatrix}I_2&0\\0&X\end{pmatrix}\begin{pmatrix}I_2&0\\0&X\end{pmatrix}=\begin{pmatrix}I_2I_2+0\cdot0&I_2\cdot0+0\cdot X\\0\cdot I_2+X\cdot0&0\cdot0+XX\end{pmatrix}=\begin{pmatrix}I_2&0\\0&X^2\end{pmatrix}=\begin{pmatrix}I_2&0\\0&I_2\end{pmatrix}=I_4
+$$
+
+で、(3) と一致します。右下のブロックが $X^2$ で、$X^2=I_2$ だから単位行列になる点が肝心です。$X^2\ne I_2$ の行列なら、右下は $X^2$ のまま残り、単位行列にはなりません。
+
+*まとめ*：CNOT は $B_1\otimes B_2$ の形に書けません（Part III §2-g-2）が、CNOT どうしの積は $I_2\otimes I_2$ というテンソル積の形になります。「行列の積で書かれているか」ではなく、「結果が積の形か」で判断する、ということの例です。
 
 **補題2（和に対する線形性、単位行列）**：$(A+A')\otimes B=A\otimes B+A'\otimes B$、$A\otimes(B+B')=A\otimes B+A\otimes B'$、$I_m\otimes I_n=I_{mn}$。
 
-**証明**：定義の成分 $A_{kk'}B_{ll'}$ は、$A$ についても $B$ についても1次式なので、和と定数倍は成分ごとに分配されます。単位行列は、成分が
+**証明**：定義の成分で、和の第 $(k,l),(k',l')$ 成分を計算します。
+
+$$
+\big((A+A')\otimes B\big)_{(k,l),(k',l')}=(A+A')_{kk'}\,B_{ll'}=(A_{kk'}+A'_{kk'})\,B_{ll'}=A_{kk'}B_{ll'}+A'_{kk'}B_{ll'}=\big(A\otimes B+A'\otimes B\big)_{(k,l),(k',l')}
+$$
+
+$$
+\big(A\otimes(B+B')\big)_{(k,l),(k',l')}=A_{kk'}\,(B_{ll'}+B'_{ll'})=A_{kk'}B_{ll'}+A_{kk'}B'_{ll'}=\big(A\otimes B+A\otimes B'\big)_{(k,l),(k',l')}
+$$
+
+すべての成分が等しいので、行列として等しくなります。定数倍 $(cA)\otimes B=c\,(A\otimes B)$ も、同様に $cA_{kk'}B_{ll'}$ で確かめられます。単位行列は、成分が
 
 $$
 (I_m\otimes I_n)_{(k,l),(k',l')}=\delta_{kk'}\,\delta_{ll'}=\delta_{(k,l),(k',l')}
@@ -1274,7 +1358,13 @@ $$
 A\otimes B=(S\otimes T)(\Lambda\otimes\Theta)(S^{-1}\otimes T^{-1}),\qquad(S\otimes T)(S^{-1}\otimes T^{-1})=SS^{-1}\otimes TT^{-1}=I_{mn}
 $$
 
-です。$\Lambda\otimes\Theta$ は対角行列で、対角成分（第 $(k,l)$ 成分）は $\lambda_k\mu_l$ なので、固有値は $\lambda_k\mu_l$ の $mn$ 個すべてです。
+です。$\Lambda\otimes\Theta$ の成分は
+
+$$
+(\Lambda\otimes\Theta)_{(k,l),(k',l')}=\Lambda_{kk'}\Theta_{ll'}=\lambda_k\delta_{kk'}\cdot\mu_l\delta_{ll'}=\lambda_k\mu_l\,\delta_{(k,l),(k',l')}
+$$
+
+なので、対角行列で、第 $(k,l)$ 対角成分は $\lambda_k\mu_l$ です。相似な行列の固有値は等しいので、$A\otimes B$ の固有値は $\lambda_k\mu_l$ の $mn$ 個すべてです。
 
 **補題7（行列式）**：
 
@@ -1284,7 +1374,7 @@ $$
 
 **証明**：(A-1) から $A\otimes B=(A\otimes I_n)(I_m\otimes B)$ なので、行列式の積の公式で $\det(A\otimes B)=\det(A\otimes I_n)\cdot\det(I_m\otimes B)$ です。2つの因子を別々に求めます。
 
-*$I_m\otimes B$*：成分は $(I_m\otimes B)_{(k,l),(k',l')}=\delta_{kk'}B_{ll'}$ で、$k\neq k'$ ならゼロです。同じ $k$ の行と列だけが $B$ でつながるので、$B$ を $m$ 個対角に並べたブロック対角行列です。ブロック対角行列の行列式は、各ブロックの行列式の積なので、$\det(I_m\otimes B)=(\det B)^m$ です。
+*$I_m\otimes B$*：成分は $(I_m\otimes B)_{(k,l),(k',l')}=\delta_{kk'}B_{ll'}$ で、$k\neq k'$ ならゼロです。同じ $k$ の行と列だけが $B$ でつながるので、$B$ を $m$ 個対角に並べたブロック対角行列です。ブロック対角行列の行列式は、各ブロックの行列式の積なので、$\det(I_m\otimes B)=(\det B)^m$ です（$B$ のブロックが2個の場合の確認：$\begin{pmatrix}B&0\\0&B\end{pmatrix}=\begin{pmatrix}B&0\\0&I_n\end{pmatrix}\begin{pmatrix}I_n&0\\0&B\end{pmatrix}$ で、右下が単位行列の行列は、単位行列の行について余因子展開を繰り返すと、行列式が $\det B$ になります。もう一方も同じで、積の公式から $(\det B)^2$ です。個数が増えても同様です）。
 
 *$A\otimes I_n$*：成分は $\delta_{ll'}A_{kk'}$ で、同じ $l$ の行と列だけが $A$ でつながりますが、番号の並び $(k,l)$ では $A$ の成分が離れて並びます。そこで、$\mathcal H_A\otimes\mathcal H_B$ の基底 $|k\rangle\otimes|l\rangle$ を $|l\rangle\otimes|k\rangle$ に移す $mn\times mn$ の置換行列 $\Pi$ を考えます（$\mathcal H_B\otimes\mathcal H_A$ の基底への入れ替え）。基底ベクトル $|l\rangle\otimes|k\rangle$ に $\Pi(A\otimes I_n)\Pi^{-1}$ を作用させると、(III-1) から
 
@@ -1292,7 +1382,7 @@ $$
 |l\rangle\otimes|k\rangle\ \xrightarrow{\Pi^{-1}}\ |k\rangle\otimes|l\rangle\ \xrightarrow{A\otimes I_n}\ A|k\rangle\otimes|l\rangle\ \xrightarrow{\Pi}\ |l\rangle\otimes A|k\rangle
 $$
 
-で、$(I_n\otimes A)\big(|l\rangle\otimes|k\rangle\big)=|l\rangle\otimes A|k\rangle$ と同じです。事実0 から $\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ です。$I_n\otimes A$ は $A$ を $n$ 個並べたブロック対角行列で、相似変換は行列式を変えない（$\det(\Pi X\Pi^{-1})=\det\Pi\cdot\det X\cdot(\det\Pi)^{-1}=\det X$）ので、$\det(A\otimes I_n)=(\det A)^n$ です。
+で、$(I_n\otimes A)\big(|l\rangle\otimes|k\rangle\big)=|l\rangle\otimes A|k\rangle$ と同じです。事実0 から $\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ です。$I_n\otimes A$ の成分は、番号の組を $(l,k)$ として $(I_n\otimes A)_{(l,k),(l',k')}=\delta_{ll'}A_{kk'}$ で、$l\neq l'$ なら $0$ です。同じ $l$ の行と列だけが $A$ でつながるので、$A$ を $n$ 個並べたブロック対角行列で、$\det(I_n\otimes A)=(\det A)^n$ です。相似変換は行列式を変えない（$\det(\Pi X\Pi^{-1})=\det\Pi\cdot\det X\cdot(\det\Pi)^{-1}=\det X$）ので、$\det(A\otimes I_n)=(\det A)^n$ です。
 
 2つを掛けて、$\det(A\otimes B)=(\det A)^n(\det B)^m$ です。$\square$
 

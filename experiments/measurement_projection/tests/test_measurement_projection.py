@@ -89,6 +89,12 @@ def test_mixed_product_of_tensor_products_and_cnot_squared():
     assert np.allclose(np.kron(U1, U2) @ np.kron(V1, V2), np.kron(U1 @ V1, U2 @ V2))
     assert np.allclose(mp.CNOT @ mp.CNOT, np.eye(4)) and np.allclose(np.kron(mp.I2, mp.I2), np.eye(4))
     assert np.allclose(np.kron(mp.X, mp.I2) @ np.kron(mp.I2, mp.Z), np.kron(mp.X, mp.Z))  # (X⊗I)(I⊗Z)=X⊗Z
+    # 付録A-1 の例：CNOT = P0⊗I + P1⊗X（ブロック [[I,0],[0,X]]）、X^2 = I、P0P1 = 0
+    P0, P1 = np.diag([1.0, 0.0]).astype(complex), np.diag([0.0, 1.0]).astype(complex)
+    assert np.allclose(mp.CNOT, np.kron(P0, mp.I2) + np.kron(P1, mp.X))
+    assert np.allclose(mp.CNOT, np.block([[mp.I2, np.zeros((2, 2))], [np.zeros((2, 2)), mp.X]]))
+    assert np.allclose(mp.X @ mp.X, mp.I2) and np.allclose(P0 @ P1, 0) and np.allclose(P0 + P1, mp.I2)
+    assert np.allclose(np.kron(P0, mp.I2) @ np.kron(P1, mp.X), 0)  # 交差項は 0
 
 
 def test_born_rule_and_projector_agree_for_random_states():
