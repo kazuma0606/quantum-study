@@ -11,12 +11,12 @@
 - **Part IV**：確率は、取り出した成分のノルムの2乗（ボルン則）
 - **Part V**〜**VII**：$|\Psi\rangle$ に当てはめる、ノルムの2乗、一般の入力
 - **Part VIII**：数値例（4候補・正解1個）
-- **付録A**：完全な射影測定、測定後の状態、POVM
+- **付録A**：テンソル積の性質（準備）、完全な射影測定、測定後の状態、POVM
 - **付録B**：結果レジスタを測る、係数行列とエンタングルメント
-- **付録C**：クロネッカー積の性質と、Qiskit の並び順
+- **付録C**：Qiskit の並び順
 - **付録D**：検算の一覧
 
-**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと45件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
+**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと48件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
 
 <a id="toc"></a>
 
@@ -51,18 +51,17 @@
   - [6. 他の候補](#p8-6)
 - [まとめ](#summary)
 - [付録A：完全な射影測定、測定後の状態、POVM](#appA)
-  - [A-1. 完全性：確率の和が1になる](#A-1)
-  - [A-2. 測定後の状態（射影仮説）](#A-2)
-  - [A-3. 同じ測定をもう一度すると](#A-3)
-  - [A-4. 一般の測定と POVM](#A-4)
+  - [A-1. 準備：テンソル積の性質](#A-1)
+  - [A-2. 完全性：確率の和が1になる](#A-2)
+  - [A-3. 測定後の状態（射影仮説）](#A-3)
+  - [A-4. 同じ測定をもう一度すると](#A-4)
+  - [A-5. 一般の測定と POVM](#A-5)
 - [付録B：結果レジスタを測る、係数行列とエンタングルメント](#appB)
   - [B-1. 係数行列](#B-1)
   - [B-2. 結果レジスタを測る](#B-2)
   - [B-3. 積状態の判定：係数行列の階数](#B-3)
-- [付録C：クロネッカー積の性質と、Qiskit の並び順](#appC)
-  - [C-1. テンソル積同士の積はテンソル積](#C-1)
-  - [C-2. そのほかの性質](#C-2)
-  - [C-3. Qiskit の並び順](#C-3)
+- [付録C：Qiskit の並び順](#appC)
+  - [C-1. Qiskit の並び順](#C-1)
 - [付録D：検算の一覧](#appD)
 
 <!-- toc:end -->
@@ -625,7 +624,7 @@ $A$と$B$自身が可換かどうか（そもそも大きさが違えば$AB$も�
 
 **括弧の位置は変えてよい**：一方、Part III §2-f-4で見た通り、成分で$(u_kv_l)w_r=u_k(v_lw_r)$なので、括弧の位置は変えてよく（結合法則にあたる）、$\bigotimes$は括弧なしで書けます。テンソル積は「順序は変えられないが、括弧は自由」という点で、行列の積と同じ性質を持っています。
 
-**テンソル積どうしの積** $(U_1\otimes U_2)(V_1\otimes V_2)=U_1V_1\otimes U_2V_2$ は、同じ方法で示せます（付録C-1）。
+**テンソル積どうしの積** $(U_1\otimes U_2)(V_1\otimes V_2)=U_1V_1\otimes U_2V_2$ は、同じ方法で示せます（付録A-1 の (A-1)）。
 
 <a id="p3-2g"></a>
 
@@ -825,7 +824,7 @@ $$
 
 **取り出した成分のノルムの2乗が、入力レジスタの測定確率です。** 物理の仮定はボルン則（Part IV §2）だけで、それ以外は線形代数から導かれています。
 
-（なお、Part IIの$P_x^\dagger=P_x$、$P_x^2=P_x$と、$I^\dagger=I$、$I^2=I$から$(P_x\otimes I)^\dagger(P_x\otimes I)=P_x\otimes I$となるので、$\|(P_x\otimes I)|\Phi\rangle\|^2=\langle\Phi|(P_x\otimes I)|\Phi\rangle$とも書けます。）この形から、全部の$x$について確率を足すと$1$になること、測定した後の状態がどうなるかは、付録A（A-1、A-2）で扱います。
+（なお、Part IIの$P_x^\dagger=P_x$、$P_x^2=P_x$と、$I^\dagger=I$、$I^2=I$から$(P_x\otimes I)^\dagger(P_x\otimes I)=P_x\otimes I$となるので、$\|(P_x\otimes I)|\Phi\rangle\|^2=\langle\Phi|(P_x\otimes I)|\Phi\rangle$とも書けます。）この形から、全部の$x$について確率を足すと$1$になること、測定した後の状態がどうなるかは、付録A（A-2、A-3）で扱います。
 
 ---
 
@@ -952,31 +951,49 @@ $$
 
 ## 2. 列ベクトルで書く
 
-2量子ビットの基底を$|00\rangle,|01\rangle,|10\rangle,|11\rangle$の順に並べると$|11\rangle=(0,0,0,1)^T$です。3量子ビットの基底を$|000\rangle,|001\rangle,|010\rangle,|011\rangle,|100\rangle,|101\rangle,|110\rangle,|111\rangle$の順に並べると、$|\Psi\rangle$に現れるのは1番目、3番目、5番目、8番目なので：
+$|\Psi\rangle$ は4つの基底ベクトルの和 $\frac12(|000\rangle+|010\rangle+|100\rangle+|111\rangle)$ なので、**それぞれを8成分の列ベクトルにして足す**だけです。
+
+**基底ベクトルの列ベクトル**：3量子ビットの基底 $|abc\rangle$ は8個あり、ラベルを2進数と読んだ順（$000,001,\dots,111$）に、上から $1,2,\dots,8$ 番目と数えます（$|abc\rangle$ は $4a+2b+c+1$ 番目）。基底ベクトル $|abc\rangle$ は、**その番号の成分だけが $1$ で、ほかの7個が $0$** の列ベクトルです。たとえば $|100\rangle$ は $4\cdot1+0+0+1=5$ 番目なので $(0,0,0,0,1,0,0,0)^T$ です。これは、テンソル積の定義（Part III §2-c）で $|10\rangle\otimes|0\rangle$ を計算した結果とも一致します：
 
 $$
-|\Psi\rangle=\tfrac12\begin{pmatrix}1&0&1&0&1&0&0&1\end{pmatrix}^T
+|10\rangle|0\rangle=\begin{pmatrix}0\\0\\1\\0\end{pmatrix}\otimes\begin{pmatrix}1\\0\end{pmatrix}=\begin{pmatrix}0\cdot\binom10\\0\cdot\binom10\\1\cdot\binom10\\0\cdot\binom10\end{pmatrix}=\begin{pmatrix}0\\0\\0\\0\\1\\0\\0\\0\end{pmatrix}
 $$
+
+**4つの項を足す**：同じ規則で、$|000\rangle$ は1番目、$|010\rangle$ は3番目、$|100\rangle$ は5番目、$|111\rangle$ は8番目だけが $1$ の列ベクトルです。足し算は成分ごとなので、
+
+$$
+|\Psi\rangle=\tfrac12\left[\begin{pmatrix}1\\0\\0\\0\\0\\0\\0\\0\end{pmatrix}+\begin{pmatrix}0\\0\\1\\0\\0\\0\\0\\0\end{pmatrix}+\begin{pmatrix}0\\0\\0\\0\\1\\0\\0\\0\end{pmatrix}+\begin{pmatrix}0\\0\\0\\0\\0\\0\\0\\1\end{pmatrix}\right]=\tfrac12\begin{pmatrix}1\\0\\1\\0\\1\\0\\0\\1\end{pmatrix}
+$$
+
+です。成分が $\frac12$ になるのは1, 3, 5, 8番目だけですが、これは「その位置が選ばれた」のではなく、**状態に含まれる4つの基底ベクトルの番号がそうなっているだけ**です（含まれない $|001\rangle,|011\rangle,|101\rangle,|110\rangle$ の位置、つまり2, 4, 6, 7番目は $0$）。
+
+**確認**：成分の2乗の和は $4\cdot\frac14=1$ で、規格化されています。
 
 <a id="p8-3"></a>
 
 ## 3. 射影演算子を行列で書く
 
-Part IIの定義から、$P_{11}$はケット（縦ベクトル）とブラ（横ベクトル）の積です：
+**$P_{11}$**：Part IIの定義から、$P_{11}=|11\rangle\langle11|$は、ケット（縦ベクトル）とブラ（横ベクトル）の積です。$|11\rangle=(0,0,0,1)^T$ のブラは、成分が実数なので、そのまま横にした$\langle11|=(0,0,0,1)$です。
 
 $$
-P_{11}=|11\rangle\langle11|=\begin{pmatrix}0\\0\\0\\1\end{pmatrix}\begin{pmatrix}0&0&0&1\end{pmatrix}=\begin{pmatrix}0&0&0&0\\0&0&0&0\\0&0&0&0\\0&0&0&1\end{pmatrix}
+P_{11}=\begin{pmatrix}0\\0\\0\\1\end{pmatrix}\begin{pmatrix}0&0&0&1\end{pmatrix}=\begin{pmatrix}0&0&0&0\\0&0&0&0\\0&0&0&0\\0&0&0&1\end{pmatrix}
 $$
 
-（第$(k,l)$成分は、縦ベクトルの第$k$成分と横ベクトルの第$l$成分の積で、$k=l=4$のときだけ$1$です。）
+第$(k,l)$成分は、縦ベクトルの第$k$成分と横ベクトルの第$l$成分の積で、$k=l=4$のときだけ$1\cdot1=1$、ほかはすべて$0$です。
 
-Part IIIの$M_{11}=P_{11}\otimes I_2$（$I_2$は$2\times2$の単位行列）は、Part III §2の行列のテンソル積の定義から、$P_{11}$の各成分に$I_2$を掛けて並べた$8\times8$行列です。$P_{11}$でゼロでない成分は$(4,4)$成分の$1$だけなので、右下の$2\times2$のブロックだけが$1\cdot I_2$になります：
+**$M_{11}=P_{11}\otimes I_2$**：行列のテンソル積は、「$P_{11}$の各成分に、$I_2$の全体を掛けて、並べたブロック行列」です（Part III §2-d）。$P_{11}$は$4\times4$なので、$2\times2$のブロックが$4\times4$個並び、全体は$8\times8$です。第$(k,l)$ブロックは$(P_{11})_{kl}\cdot I_2$です。
+
+$$
+M_{11}=\begin{pmatrix}0\cdot I_2&0\cdot I_2&0\cdot I_2&0\cdot I_2\\0\cdot I_2&0\cdot I_2&0\cdot I_2&0\cdot I_2\\0\cdot I_2&0\cdot I_2&0\cdot I_2&0\cdot I_2\\0\cdot I_2&0\cdot I_2&0\cdot I_2&1\cdot I_2\end{pmatrix}
+$$
+
+ゼロでないのは、第$(4,4)$ブロックの$1\cdot I_2=\begin{pmatrix}1&0\\0&1\end{pmatrix}$だけです。**第$k$ブロック行は、全体の第$2k-1$行と第$2k$行**にあたり、第$4$ブロック行は7行目と8行目、第$4$ブロック列は7列目と8列目です。したがって、$8\times8$の行列では、7行7列と8行8列の2か所だけが$1$です。
 
 $$
 M_{11}=\begin{pmatrix}0&0&0&0&0&0&0&0\\0&0&0&0&0&0&0&0\\0&0&0&0&0&0&0&0\\0&0&0&0&0&0&0&0\\0&0&0&0&0&0&0&0\\0&0&0&0&0&0&0&0\\0&0&0&0&0&0&1&0\\0&0&0&0&0&0&0&1\end{pmatrix}
 $$
 
-第7行7列と第8行8列が$1$なのは、入力レジスタが$11$である基底が、7番目の$|110\rangle$と8番目の$|111\rangle$の2つだからです。
+7行7列と8行8列が$1$なのは、**入力レジスタが$11$である基底が、全体の7番目の$|110\rangle$と8番目の$|111\rangle$の2つだから**です（結果レジスタの値が$0$でも$1$でも、入力が$11$なら残す、という意味。$I_2$が「結果レジスタには何もしない」にあたります）。対角行列で、対角成分が$(0,0,0,0,0,0,1,1)$です。
 
 ![P11 ⊗ I2 の行列](figures/mp02_block_matrix.png)
 
@@ -986,56 +1003,100 @@ $$
 
 ## 4. 状態に作用させる（Part Vの確認）
 
-**行列の積で**：$M_{11}$は第7成分と第8成分だけを残し、他をゼロにします。$|\Psi\rangle$の第7成分は$0$、第8成分は$\frac12$なので：
+同じ$M_{11}|\Psi\rangle$を、2通りで計算して、一致することを確かめます。
+
+**(a) 行列の積で**：行列とベクトルの積の第$i$成分は、$\sum_jM_{ij}\Psi_j$（$M_{11}$の第$i$行と$|\Psi\rangle$の内積）です。$M_{11}$は対角行列なので、第$i$成分は$M_{ii}\Psi_i$だけになります。$|\Psi\rangle=\tfrac12(1,0,1,0,1,0,0,1)^T$ の各成分に、対角成分$(0,0,0,0,0,0,1,1)$を掛けると：
+
+| 成分$i$ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| $M_{ii}$ | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
+| $\Psi_i$ | $\frac12$ | 0 | $\frac12$ | 0 | $\frac12$ | 0 | 0 | $\frac12$ |
+| $M_{ii}\Psi_i$ | 0 | 0 | 0 | 0 | 0 | 0 | 0 | $\frac12$ |
+
+7番目は、$M_{77}=1$ですが$\Psi_7=0$なので$0$です。8番目だけが$1\cdot\frac12=\frac12$です。
 
 $$
-M_{11}|\Psi\rangle=\tfrac12\begin{pmatrix}0&0&0&0&0&0&0&1\end{pmatrix}^T=\tfrac12|111\rangle
+M_{11}|\Psi\rangle=\begin{pmatrix}0&0&0&0&0&0&0&\tfrac12\end{pmatrix}^T=\tfrac12|111\rangle
 $$
 
-**各項ごとに**（Part III §4の線形性と(III-2)で）：
+**(b) 各項ごとに**（Part III §4の線形性と(III-2)で）：$|\Psi\rangle$の4つの項に、$M_{11}$を1つずつ作用させます。
 
 $$
 M_{11}|\Psi\rangle=\tfrac12\big(M_{11}|00\rangle|0\rangle+M_{11}|01\rangle|0\rangle+M_{11}|10\rangle|0\rangle+M_{11}|11\rangle|1\rangle\big)
 $$
 
-$\delta_{11,00}=\delta_{11,01}=\delta_{11,10}=0$、$\delta_{11,11}=1$なので、最初の3項はゼロ、最後の項は$|11\rangle|1\rangle=|111\rangle$で：
+(III-2)の$M_{x^\ast}\big(|x_i\rangle|f(x_i)\rangle\big)=\delta_{x^\ast,x_i}|x^\ast\rangle|f(x_i)\rangle$で$x^\ast=11$とすると、各項は、
+
+| 項 | $x_i$ | $\delta_{11,x_i}$ | 結果 |
+|---|---|---|---|
+| $M_{11}\lvert00\rangle\lvert0\rangle$ | $00$ | $0$ | $0$ |
+| $M_{11}\lvert01\rangle\lvert0\rangle$ | $01$ | $0$ | $0$ |
+| $M_{11}\lvert10\rangle\lvert0\rangle$ | $10$ | $0$ | $0$ |
+| $M_{11}\lvert11\rangle\lvert1\rangle$ | $11$ | $1$ | $\lvert11\rangle\lvert1\rangle=\lvert111\rangle$ |
+
+なので、最初の3項はゼロ、最後の項だけが残ります。
 
 $$
 M_{11}|\Psi\rangle=\tfrac12|111\rangle
 $$
 
-2つの計算は一致し、Part Vの式$\frac1{\sqrt N}|x^\ast\rangle|f(x^\ast)\rangle$で$N=4$、$x^\ast=11$、$f(x^\ast)=1$としたものにもなっています。
+(a)と(b)は一致しました。また、これは、Part Vの式$\frac1{\sqrt N}|x^\ast\rangle|f(x^\ast)\rangle$で、$N=4$、$x^\ast=11$、$f(x^\ast)=1$としたものにもなっています（$\frac1{\sqrt4}=\frac12$、$|x^\ast\rangle|f(x^\ast)\rangle=|11\rangle|1\rangle=|111\rangle$）。
 
 <a id="p8-5"></a>
 
 ## 5. ノルムの2乗（Part VIの確認）
 
+$M_{11}|\Psi\rangle=\tfrac12|111\rangle$ のノルムの2乗を、2通りで計算します。
+
+**(a) 成分で**：ベクトル$v=(0,\dots,0,\tfrac12)^T$のノルムの2乗は、成分の絶対値の2乗の和です。0でない成分は8番目の$\frac12$だけなので、
+
+$$
+\|v\|^2=\sum_i|v_i|^2=\Big(\tfrac12\Big)^2=\tfrac14
+$$
+
+**(b) 内積で**：Part VIと同じく、係数$\frac12$（実数）と基底ベクトルに分けて、
+
 $$
 P(11)=\big\|\tfrac12|111\rangle\big\|^2=\tfrac12\cdot\tfrac12\,\langle111|111\rangle=\tfrac14\cdot1=\tfrac14
 $$
 
-Part VIの$\frac1N$で$N=4$としたものと一致します。
+です（$\langle111|111\rangle=1$：規格化された基底ベクトルの内積）。(a)と(b)は一致し、Part VIの$\frac1N$で$N=4$としたものとも一致します。
 
 <a id="p8-6"></a>
 
 ## 6. 他の候補
 
-Part IV §3の(IV-1)で、入力が各値になる基底の係数を数えると：
+正解が$11$以外でも、同じ計算で確かめます。入力が$x$の項だけを残す演算子$M_x=P_x\otimes I_2$は、この Part の §3 と同じ作り方で、「入力が$x$である2つの基底の位置が$1$、ほかが$0$」の対角行列です。$|\Psi\rangle$の8個の成分を、**入力が同じもの2個ずつ**（入力$00$は1・2番目、$01$は3・4番目、$10$は5・6番目、$11$は7・8番目）に区切って見ます。
 
-| 入力$x$ | 該当する基底 | 係数 | 確率 |
+$$
+|\Psi\rangle=\tfrac12\big(\underbrace{1,\ 0}_{x=00},\ \underbrace{1,\ 0}_{x=01},\ \underbrace{1,\ 0}_{x=10},\ \underbrace{0,\ 1}_{x=11}\big)^T
+$$
+
+各ペアの2つの成分は、結果レジスタが$|0\rangle$か$|1\rangle$か、に対応します（ペアの1つ目が結果$|0\rangle$、2つ目が結果$|1\rangle$）。Part IV §3の(IV-1)$P(x)=\sum_y|c_{x,y}|^2$は、**そのペアの成分の絶対値の2乗の和**です。
+
+| 入力$x$ | 該当する基底 | 係数（結果$y=0$、$y=1$） | 確率$P(x)=\sum_y\lvert c_{x,y}\rvert^2$ |
 |---|---|---|---|
-| $00$ | $\lvert000\rangle$、$\lvert001\rangle$ | $\tfrac12$、$0$ | $\tfrac14$ |
-| $01$ | $\lvert010\rangle$、$\lvert011\rangle$ | $\tfrac12$、$0$ | $\tfrac14$ |
-| $10$ | $\lvert100\rangle$、$\lvert101\rangle$ | $\tfrac12$、$0$ | $\tfrac14$ |
-| $11$ | $\lvert110\rangle$、$\lvert111\rangle$ | $0$、$\tfrac12$ | $\tfrac14$ |
+| $00$ | $\lvert000\rangle$、$\lvert001\rangle$ | $\tfrac12$、$0$ | $\frac14+0=\tfrac14$ |
+| $01$ | $\lvert010\rangle$、$\lvert011\rangle$ | $\tfrac12$、$0$ | $\frac14+0=\tfrac14$ |
+| $10$ | $\lvert100\rangle$、$\lvert101\rangle$ | $\tfrac12$、$0$ | $\frac14+0=\tfrac14$ |
+| $11$ | $\lvert110\rangle$、$\lvert111\rangle$ | $0$、$\tfrac12$ | $0+\frac14=\tfrac14$ |
 
-4つの候補の確率はすべて$\frac14$で、合計は$1$です。関数の値をすべての候補について計算したにもかかわらず、正解の確率はランダムに1つ選ぶのと同じ$\frac14$のままです。
+$M_x|\Psi\rangle$も、同じペアだけを残したベクトルです。
+
+| 正解$x^\ast$ | $M_{x^\ast}\lvert\Psi\rangle$ | ノルムの2乗 |
+|---|---|---|
+| $00$ | $\tfrac12\lvert000\rangle$（1番目だけ） | $\tfrac14$ |
+| $01$ | $\tfrac12\lvert010\rangle$（3番目だけ） | $\tfrac14$ |
+| $10$ | $\tfrac12\lvert100\rangle$（5番目だけ） | $\tfrac14$ |
+| $11$ | $\tfrac12\lvert111\rangle$（8番目だけ） | $\tfrac14$ |
+
+4つの候補の確率はすべて$\frac14$で、合計は$1$です。**関数の値をすべての候補について計算したにもかかわらず、正解の確率は、ランダムに1つ選ぶのと同じ$\frac14$のまま**です（Part VII）。
 
 ![状態の成分と確率](figures/mp03_amplitudes.png)
 
 *左：$|\Psi\rangle$ の8成分（橙は入力が $11$ の基底）。中：$M_{11}|\Psi\rangle=\frac12|111\rangle$（入力が $11$ の成分だけが残る）。右：入力 $x$ の確率はどれも $\frac14=\frac1N$。図を描くときに、成分と確率を本文の式で確かめています。*
 
-**この先**：入力レジスタを測った**後**の状態は付録A（A-2）、結果レジスタを測るとどうなるか、$|\Psi\rangle$ がどれだけエンタングルしているかは付録B、教科書の式と Qiskit の並び順の違いは付録Cで扱います。
+**この先**：入力レジスタを測った**後**の状態は付録A（A-3）、結果レジスタを測るとどうなるか、$|\Psi\rangle$ がどれだけエンタングルしているかは付録B、教科書の式と Qiskit の並び順の違いは付録Cで扱います。
 
 ---
 
@@ -1061,124 +1122,460 @@ Part IV §3の(IV-1)で、入力が各値になる基底の係数を数えると
 
 **この付録の内容**
 
-- [A-1. 完全性：確率の和が1になる](#A-1)
-- [A-2. 測定後の状態（射影仮説）](#A-2)
-- [A-3. 同じ測定をもう一度すると](#A-3)
-- [A-4. 一般の測定と POVM](#A-4)
+- [A-1. 準備：テンソル積の性質](#A-1)
+- [A-2. 完全性：確率の和が1になる](#A-2)
+- [A-3. 測定後の状態（射影仮説）](#A-3)
+- [A-4. 同じ測定をもう一度すると](#A-4)
+- [A-5. 一般の測定と POVM](#A-5)
 
 <!-- part-toc:end -->
 
-本編は、「入力が $x^\ast$ になる確率」だけを求めました。ここでは、(1) 入力レジスタのすべての値についての測定をまとめて見ると確率の和が $1$ になること、(2) 測定した**後**の状態、(3) 射影測定をさらに一般にした測定（POVM）を扱います。
-
-**前提**：この付録では、入力レジスタの全基底 $|0\rangle,\dots,|N-1\rangle$（$N=2^q$）について考えます（本編の候補 $x_1,\dots,x_N$ が全基底にあたる場合です）。結果レジスタの次元を $M$（$=d_B$）とします（演算子 $M_x$ とは別のものです）。$P_x:=|x\rangle\langle x|$、$M_x:=P_x\otimes I$（$I$ は結果レジスタ上の恒等演算子）です。
+本編は、「入力が $x^\ast$ になる確率」だけを求めました。ここでは、(1) 行列のテンソル積の性質（以後の準備）、(2) 入力レジスタのすべての値についての測定をまとめて見ると確率の和が $1$ になること、(3) 測定した**後**の状態、(4) 射影測定をさらに一般にした測定（POVM）を扱います。各節は、本編と、それより前の節だけを使います。
 
 <a id="A-1"></a>
 
-## A-1. 完全性：確率の和が1になる
+## A-1. 準備：テンソル積の性質
+
+付録A・付録Bでは、行列のテンソル積について、次の性質を使います。ここで**証明してから**使います。前提にするのは、本編 Part III の定義（§2-c のベクトル、§2-d の行列）と、(III-1)（§2-e で証明済み）だけです。
+
+**記法と次元の宣言**（Part III §2-a と同じ形式）：2つのレジスタの空間、ベクトル、演算子を
+
+$$
+\mathcal H_A=\mathbb C^m,\qquad\mathcal H_B=\mathbb C^n,\qquad|u\rangle\in\mathcal H_A,\qquad|v\rangle\in\mathcal H_B,\qquad A,A'\in\mathbb C^{m\times m},\qquad B,B'\in\mathbb C^{n\times n}
+$$
+
+と宣言します。計算基底は、$\mathcal H_A$ の $|k\rangle$（$k=0,\dots,m-1$）と $\mathcal H_B$ の $|l\rangle$（$l=0,\dots,n-1$）で、どちらも正規直交です。複合系 $\mathcal H_A\otimes\mathcal H_B\cong\mathbb C^{mn}$ の基底は $|k\rangle\otimes|l\rangle$ で、列ベクトルの上から数えた番号（0から数える）は $\alpha=kn+l$ です（Part III §2-c）。本編・付録での対応は、$m=d_A$、$n=d_B$ です。
+
+| 対象 | 属する空間・写像 | 次元・大きさ |
+|---|---|---|
+| $\lvert u\rangle$、$\lvert k\rangle$ | $\mathcal H_A$ | $m$ |
+| $\lvert v\rangle$、$\lvert l\rangle$ | $\mathcal H_B$ | $n$ |
+| $\lvert u\rangle\otimes\lvert v\rangle$、$\lvert k\rangle\otimes\lvert l\rangle$ | $\mathcal H_A\otimes\mathcal H_B$ | $mn$ |
+| $A$、$A'$、$AA'$ | $\mathcal H_A\to\mathcal H_A$ | $m\times m$ |
+| $B$、$B'$、$BB'$ | $\mathcal H_B\to\mathcal H_B$ | $n\times n$ |
+| $A\otimes B$、$A'\otimes B'$、$AA'\otimes BB'$ | $\mathcal H_A\otimes\mathcal H_B\to\mathcal H_A\otimes\mathcal H_B$ | $mn\times mn$ |
+
+**使う定義と事実**：成分の番号は、行も列も組で表します。
+
+$$
+\big(|u\rangle\otimes|v\rangle\big)_{(k,l)}=u_k\,v_l\qquad(\text{Part III §2-c})
+$$
+
+$$
+\big(A\otimes B\big)_{(k,l),(k',l')}=A_{kk'}\,B_{ll'}\qquad(\text{Part III §2-d})
+$$
+
+$$
+(XY)_{\alpha\beta}=\sum_\gamma X_{\alpha\gamma}Y_{\gamma\beta},\qquad(X\mathbf z)_\alpha=\sum_\beta X_{\alpha\beta}z_\beta\qquad(\text{行列の積、行列とベクトルの積})
+$$
+
+$$
+(A\otimes B)\big(|u\rangle\otimes|v\rangle\big)=A|u\rangle\otimes B|v\rangle\qquad(\text{III-1})
+$$
+
+**事実0：行列は、基底ベクトルへの作用で決まる**。基底ベクトル $|k\rangle\otimes|l\rangle$ は、第 $(k,l)$ 成分だけが $1$ で、ほかの成分が $0$ です。これに $mn\times mn$ の行列 $X$ を掛けると、行列とベクトルの積の定義で、$\beta=(k,l)$ の項だけが残り、
+
+$$
+\Big[X\big(|k\rangle\otimes|l\rangle\big)\Big]_\alpha=\sum_\beta X_{\alpha\beta}\,\delta_{\beta,(k,l)}=X_{\alpha,(k,l)}
+$$
+
+となります。つまり**$X$ の第 $(k,l)$ 列が取り出されます**。したがって、2つの $mn\times mn$ 行列が、すべての基底ベクトル $|k\rangle\otimes|l\rangle$ に対して同じベクトルを返すなら、すべての列が一致するので、行列として等しくなります。
+
+**補題1（テンソル積同士の積はテンソル積）**：
+
+$$
+\boxed{(A\otimes B)(A'\otimes B')=AA'\otimes BB'}\tag{A-1}
+$$
+
+**証明（基底ベクトルへの作用で）**：左辺を $|k\rangle\otimes|l\rangle$ に作用させます。行列の積は右から順に作用するので、(III-1) を2回使うと
+
+$$
+(A\otimes B)(A'\otimes B')\big(|k\rangle\otimes|l\rangle\big)=(A\otimes B)\big(A'|k\rangle\otimes B'|l\rangle\big)=AA'|k\rangle\otimes BB'|l\rangle
+$$
+
+です。右辺 $AA'\otimes BB'$ に (III-1) を使っても、同じ $AA'|k\rangle\otimes BB'|l\rangle$ です。すべての基底ベクトルで一致するので、事実0から行列として等しくなります。$\square$
+
+**証明（成分で、(III-1) を使わない確認）**：左辺の第 $(k,l),(k',l')$ 成分は、行列の積の定義で、途中の添字 $(k'',l'')$ について足して
+
+$$
+\sum_{k''=0}^{m-1}\sum_{l''=0}^{n-1}A_{kk''}B_{ll''}\,A'_{k''k'}B'_{l''l'}=\Big(\sum_{k''}A_{kk''}A'_{k''k'}\Big)\Big(\sum_{l''}B_{ll''}B'_{l''l'}\Big)=(AA')_{kk'}\,(BB')_{ll'}
+$$
+
+です。これは $AA'\otimes BB'$ の第 $(k,l),(k',l')$ 成分そのものです（和が $k''$ と $l''$ に分かれて、因子ごとにまとまる）。$\square$
+
+**帰結**：
+
+- $A'=I_m$、$B=I_n$ とすると、$(A\otimes I_n)(I_m\otimes B')=AI_m\otimes I_nB'=A\otimes B'$ になります（Part III §2-f-7 の式）。
+- 両方がテンソル積なら、積もテンソル積です。例：$(X\otimes I_2)(I_2\otimes Z)=X\otimes Z$。
+- 片方がテンソル積でなくても、積がテンソル積になることがあります。例：$\mathrm{CNOT}\cdot\mathrm{CNOT}=I_4=I_2\otimes I_2$（CNOT は自分自身の逆行列）。
+- したがって、「行列の積で書かれているから分けられない」のではなく、**結果の行列が $B_1\otimes B_2$ の形に書けるか**で判断します（Part III §2-g-1）。
+
+**補題2（和に対する線形性、単位行列）**：$(A+A')\otimes B=A\otimes B+A'\otimes B$、$A\otimes(B+B')=A\otimes B+A\otimes B'$、$I_m\otimes I_n=I_{mn}$。
+
+**証明**：定義の成分 $A_{kk'}B_{ll'}$ は、$A$ についても $B$ についても1次式なので、和と定数倍は成分ごとに分配されます。単位行列は、成分が
+
+$$
+(I_m\otimes I_n)_{(k,l),(k',l')}=\delta_{kk'}\,\delta_{ll'}=\delta_{(k,l),(k',l')}
+$$
+
+なので、$mn\times mn$ の単位行列です。$\square$
+
+**補題3（転置・共役転置）**：
+
+$$
+(A\otimes B)^T=A^T\otimes B^T,\qquad(A\otimes B)^\dagger=A^\dagger\otimes B^\dagger
+$$
+
+**証明**：共役転置の定義は、「行と列の番号を入れ替えて、複素共役を取る」です。成分は
+
+$$
+\big[(A\otimes B)^\dagger\big]_{(k,l),(k',l')}=\overline{(A\otimes B)_{(k',l'),(k,l)}}=\overline{A_{k'k}\,B_{l'l}}=\overline{A_{k'k}}\;\overline{B_{l'l}}=(A^\dagger)_{kk'}\,(B^\dagger)_{ll'}
+$$
+
+で、$A^\dagger\otimes B^\dagger$ の成分です。複素共役を取らなければ転置の式になります。$\square$
+
+**補題4（ユニタリ性）**：$U_1\in\mathbb C^{m\times m}$、$U_2\in\mathbb C^{n\times n}$ がユニタリなら、$U_1\otimes U_2$ もユニタリです。
+
+**証明**：補題3 と (A-1)、補題2 を順に使うと
+
+$$
+(U_1\otimes U_2)^\dagger(U_1\otimes U_2)=(U_1^\dagger\otimes U_2^\dagger)(U_1\otimes U_2)=U_1^\dagger U_1\otimes U_2^\dagger U_2=I_m\otimes I_n=I_{mn}
+$$
+
+です。$\square$ 別々のレジスタに作用するゲートを並べたものはユニタリ、ということです。
+
+**補題5（トレース）**：
+
+$$
+\operatorname{tr}(A\otimes B)=\operatorname{tr}A\cdot\operatorname{tr}B
+$$
+
+**証明**：トレースは対角成分の和で、対角成分は $(k,l)=(k',l')$ のときなので
+
+$$
+\operatorname{tr}(A\otimes B)=\sum_{k,l}(A\otimes B)_{(k,l),(k,l)}=\sum_{k,l}A_{kk}B_{ll}=\Big(\sum_kA_{kk}\Big)\Big(\sum_lB_{ll}\Big)
+$$
+
+です。$\square$
+
+**補題6（固有値）**：$Au=\lambda u$、$Bv=\mu v$（$u\neq0$、$v\neq0$）なら、$\lambda\mu$ は $A\otimes B$ の固有値です。
+
+**証明**：(III-1) と双線形性で
+
+$$
+(A\otimes B)(u\otimes v)=Au\otimes Bv=\lambda u\otimes\mu v=\lambda\mu\,(u\otimes v)
+$$
+
+です。$u\otimes v$ の成分 $u_kv_l$ は、$u,v$ にゼロでない成分があればゼロでないものがあるので、$u\otimes v\neq0$ です。$\square$
+
+$A,B$ が対角化できる場合は、これで**すべての**固有値が出ます。$A=S\Lambda S^{-1}$、$B=T\Theta T^{-1}$（$\Lambda=\mathrm{diag}(\lambda_k)$、$\Theta=\mathrm{diag}(\mu_l)$）とすると、(A-1) を使って
+
+$$
+A\otimes B=(S\otimes T)(\Lambda\otimes\Theta)(S^{-1}\otimes T^{-1}),\qquad(S\otimes T)(S^{-1}\otimes T^{-1})=SS^{-1}\otimes TT^{-1}=I_{mn}
+$$
+
+です。$\Lambda\otimes\Theta$ は対角行列で、対角成分（第 $(k,l)$ 成分）は $\lambda_k\mu_l$ なので、固有値は $\lambda_k\mu_l$ の $mn$ 個すべてです。
+
+**補題7（行列式）**：
+
+$$
+\det(A\otimes B)=(\det A)^n\,(\det B)^m
+$$
+
+**証明**：(A-1) から $A\otimes B=(A\otimes I_n)(I_m\otimes B)$ なので、行列式の積の公式で $\det(A\otimes B)=\det(A\otimes I_n)\cdot\det(I_m\otimes B)$ です。2つの因子を別々に求めます。
+
+*$I_m\otimes B$*：成分は $(I_m\otimes B)_{(k,l),(k',l')}=\delta_{kk'}B_{ll'}$ で、$k\neq k'$ ならゼロです。同じ $k$ の行と列だけが $B$ でつながるので、$B$ を $m$ 個対角に並べたブロック対角行列です。ブロック対角行列の行列式は、各ブロックの行列式の積なので、$\det(I_m\otimes B)=(\det B)^m$ です。
+
+*$A\otimes I_n$*：成分は $\delta_{ll'}A_{kk'}$ で、同じ $l$ の行と列だけが $A$ でつながりますが、番号の並び $(k,l)$ では $A$ の成分が離れて並びます。そこで、$\mathcal H_A\otimes\mathcal H_B$ の基底 $|k\rangle\otimes|l\rangle$ を $|l\rangle\otimes|k\rangle$ に移す $mn\times mn$ の置換行列 $\Pi$ を考えます（$\mathcal H_B\otimes\mathcal H_A$ の基底への入れ替え）。基底ベクトル $|l\rangle\otimes|k\rangle$ に $\Pi(A\otimes I_n)\Pi^{-1}$ を作用させると、(III-1) から
+
+$$
+|l\rangle\otimes|k\rangle\ \xrightarrow{\Pi^{-1}}\ |k\rangle\otimes|l\rangle\ \xrightarrow{A\otimes I_n}\ A|k\rangle\otimes|l\rangle\ \xrightarrow{\Pi}\ |l\rangle\otimes A|k\rangle
+$$
+
+で、$(I_n\otimes A)\big(|l\rangle\otimes|k\rangle\big)=|l\rangle\otimes A|k\rangle$ と同じです。事実0 から $\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ です。$I_n\otimes A$ は $A$ を $n$ 個並べたブロック対角行列で、相似変換は行列式を変えない（$\det(\Pi X\Pi^{-1})=\det\Pi\cdot\det X\cdot(\det\Pi)^{-1}=\det X$）ので、$\det(A\otimes I_n)=(\det A)^n$ です。
+
+2つを掛けて、$\det(A\otimes B)=(\det A)^n(\det B)^m$ です。$\square$
+
+**数値による確認**：(A-1)、補題3〜7 と $\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ は、ランダムな複素行列（$2\times2$ と $3\times3$ の組合せ）でも数値で確かめました（付録D）。
+
+**この準備を使う場所**：
+
+| 性質 | 使う場所 |
+|---|---|
+| (A-1) | A-2（$M_xM_{x'}$）、付録B-2（$M_xM'_y$）、Part III §2-f-7 |
+| 補題2（線形性、単位行列） | A-2（$\sum_xM_x=I$） |
+| 補題3（共役転置） | Part IV §7（$M_x^\dagger=M_x$） |
+| 補題4（ユニタリ性） | 回路の1層（別々のレジスタへのゲート）がユニタリであること |
+| 補題5（トレース） | 例：$\operatorname{tr}M_x=\operatorname{tr}P_x\cdot\operatorname{tr}I_M=M$ |
+| 補題6、7 | 参考（固有値と行列式） |
+
+
+<a id="A-2"></a>
+
+## A-2. 完全性：確率の和が1になる
+
+**記法と次元の宣言**：入力レジスタは $q$ 量子ビット、$N=2^q$ として、結果レジスタの次元を $M$（$=d_B$）とします。
+
+$$
+\mathcal H_A=\mathbb C^N,\qquad\mathcal H_B=\mathbb C^M,\qquad|x\rangle\in\mathcal H_A,\qquad P_x:=|x\rangle\langle x|\in\mathbb C^{N\times N},\qquad M_x:=P_x\otimes I_M\in\mathbb C^{NM\times NM}
+$$
+
+$|x\rangle$ は入力レジスタの計算基底（$x=0,\dots,N-1$。本編の候補 $x_1,\dots,x_N$ が全基底にあたる場合）、$I_M$ は結果レジスタ上の恒等演算子です。演算子 $M_x$ と次元 $M$ は別のものです。A-1 の記号との対応は、$m=N$、$n=M$ です。
+
+| 対象 | 属する空間・写像 | 次元・大きさ |
+|---|---|---|
+| $\lvert x\rangle$ | $\mathcal H_A$ | $N$ |
+| $P_x$ | $\mathcal H_A\to\mathcal H_A$ | $N\times N$ |
+| $I_M$ | $\mathcal H_B\to\mathcal H_B$ | $M\times M$ |
+| $M_x=P_x\otimes I_M$ | $\mathcal H_A\otimes\mathcal H_B\to\mathcal H_A\otimes\mathcal H_B$ | $NM\times NM$ |
+| $\lvert\Phi\rangle$ | $\mathcal H_A\otimes\mathcal H_B$ | $NM$ |
 
 **(a) $M_x$ どうしは直交する**：
 
 $$
-M_xM_{x'}=\delta_{xx'}\,M_x\tag{A-1}
+M_xM_{x'}=\delta_{xx'}\,M_x\tag{A-2}
 $$
 
-**証明**：付録C-1の式 $(U_1\otimes U_2)(V_1\otimes V_2)=U_1V_1\otimes U_2V_2$ で $U_1=P_x$、$V_1=P_{x'}$、$U_2=V_2=I$ とすると $M_xM_{x'}=P_xP_{x'}\otimes I$ です。$P_xP_{x'}=|x\rangle\langle x|x'\rangle\langle x'|=\delta_{xx'}|x\rangle\langle x|$（正規直交性 $\langle x|x'\rangle=\delta_{xx'}$）なので、$M_xM_{x'}=\delta_{xx'}P_x\otimes I=\delta_{xx'}M_x$ です。
-
-**(b) 足すと恒等演算子になる**：テンソル積は各因子について線形（Part III §2-c の双線形性）なので、
+**証明**：(A-1) で $A=P_x$、$A'=P_{x'}$、$B=B'=I_M$ とすると
 
 $$
-\sum_xM_x=\Big(\sum_xP_x\Big)\otimes I=I_N\otimes I=I\tag{A-2}
+M_xM_{x'}=(P_x\otimes I_M)(P_{x'}\otimes I_M)=P_xP_{x'}\otimes I_MI_M=P_xP_{x'}\otimes I_M
 $$
 
-です。ここで $\sum_x|x\rangle\langle x|=I_N$（正規直交基底の**完全性関係**。$|\psi\rangle=\sum_x|x\rangle\langle x|\psi\rangle$ と書けることの言い換え）を使いました。
-
-**(c) 確率の和**：Part IV §7 の括弧書きの式 $P(x)=\langle\Phi|M_x|\Phi\rangle$ を $x$ について足し、(A-2) を使うと
+です。$P_xP_{x'}$ は、正規直交性 $\langle x|x'\rangle=\delta_{xx'}$ から
 
 $$
-\sum_xP(x)=\Big\langle\Phi\Big|\Big(\sum_xM_x\Big)\Big|\Phi\Big\rangle=\langle\Phi|\Phi\rangle=1\tag{A-3}
+P_xP_{x'}=|x\rangle\langle x|x'\rangle\langle x'|=\delta_{xx'}\,|x\rangle\langle x'|=\delta_{xx'}\,|x\rangle\langle x|=\delta_{xx'}P_x
+$$
+
+です（$\delta_{xx'}\neq0$ なら $x=x'$）。したがって $M_xM_{x'}=\delta_{xx'}P_x\otimes I_M=\delta_{xx'}M_x$ です。$\square$
+
+**(b) 足すと恒等演算子になる**：まず、正規直交基底の**完全性関係**
+
+$$
+\sum_xP_x=\sum_x|x\rangle\langle x|=I_N
+$$
+
+を示します。任意のベクトル $|\psi\rangle=\sum_{x'}\psi_{x'}|x'\rangle$ に作用させると、$\langle x|\psi\rangle=\psi_x$ なので $\sum_x|x\rangle\langle x|\psi\rangle=\sum_x\psi_x|x\rangle=|\psi\rangle$ で、すべてのベクトルを変えないから $I_N$ です。補題2（和に対する線形性、$I_N\otimes I_M=I_{NM}$）を使うと
+
+$$
+\sum_xM_x=\Big(\sum_xP_x\Big)\otimes I_M=I_N\otimes I_M=I_{NM}\tag{A-3}
+$$
+
+です。
+
+**(c) 確率の和**：Part IV §7 の括弧書きの式 $P(x)=\langle\Phi|M_x|\Phi\rangle$ を $x$ について足し、(A-3) を使うと
+
+$$
+\sum_xP(x)=\Big\langle\Phi\Big|\Big(\sum_xM_x\Big)\Big|\Phi\Big\rangle=\langle\Phi|I_{NM}|\Phi\rangle=\langle\Phi|\Phi\rangle=1\tag{A-4}
 $$
 
 です。本編の $P(x)=\sum_y|c_{x,y}|^2$ を $x$ で足して $\sum_{x,y}|c_{x,y}|^2=\langle\Phi|\Phi\rangle=1$ としても、同じことです（Part IV §3）。**射影演算子の完全系（直交し、足すと $I$）が、「起こりうる結果の確率を足すとちょうど $1$」を保証しています。**
 
-<a id="A-2"></a>
 
-## A-2. 測定後の状態（射影仮説）
+<a id="A-3"></a>
+
+## A-3. 測定後の状態（射影仮説）
 
 本編で使った物理の仮定は、ボルン則（Part IV §2）だけでした。測定した**後**の状態を決めるには、もう1つ仮定が要ります。
+
+**記法と次元の宣言**：A-2 と同じく、$\mathcal H_A=\mathbb C^N$（入力レジスタ）、$\mathcal H_B=\mathbb C^M$（結果レジスタ）で、測定前の状態は規格化されたベクトル
+
+$$
+|\Phi\rangle\in\mathcal H_A\otimes\mathcal H_B=\mathbb C^{NM},\qquad\langle\Phi|\Phi\rangle=1
+$$
+
+です。入力が $x$ になる確率は $P(x)=\|M_x\Phi\|^2=\langle\Phi|M_x|\Phi\rangle$ で、$M_x\in\mathbb C^{NM\times NM}$ は A-2 の射影演算子です（$M_x^\dagger=M_x$、$M_x^2=M_x$）。
 
 **仮定（射影仮説）**：入力レジスタの測定で $x$ が得られたとき、測定直後の状態は
 
 $$
-|\Phi_x\rangle:=\frac{M_x|\Phi\rangle}{\sqrt{P(x)}}\tag{A-4}
+|\Phi_x\rangle:=\frac{M_x|\Phi\rangle}{\sqrt{P(x)}}\tag{A-5}
 $$
 
 になる（$P(x)>0$ のとき）。
 
-**規格化の確認**：$P(x)=\|M_x\Phi\|^2$ なので、$\|\Phi_x\|^2=\dfrac{\|M_x\Phi\|^2}{P(x)}=1$ です。$\sqrt{P(x)}$ で割るのは、射影した状態の長さが $\sqrt{P(x)}<1$ に縮んでいるのを、$1$ に戻すためです。
+**規格化の確認**：$P(x)=\|M_x\Phi\|^2$ なので、ノルムは $\sqrt{P(x)}$ という正の実数で割っても向きを変えず、
+
+$$
+\|\Phi_x\|^2=\Big\|\frac{M_x\Phi}{\sqrt{P(x)}}\Big\|^2=\frac{\|M_x\Phi\|^2}{P(x)}=1
+$$
+
+です。$\sqrt{P(x)}$ で割るのは、射影した状態の長さが $\sqrt{P(x)}\le1$ に縮んでいるのを、$1$ に戻すためです。
 
 **例（Part VIII の $|\Psi\rangle$）**：Part V の結果から $M_{11}|\Psi\rangle=\tfrac12|111\rangle$、$P(11)=\tfrac14$ なので
 
 $$
-|\Psi_{11}\rangle=\frac{\tfrac12|111\rangle}{\sqrt{1/4}}=|11\rangle|1\rangle
+|\Psi_{11}\rangle=\frac{\tfrac12|111\rangle}{\sqrt{1/4}}=\frac{\tfrac12|111\rangle}{\tfrac12}=|11\rangle|1\rangle
 $$
 
-です。ほかの入力も同様に、$|\Psi_{00}\rangle=|00\rangle|0\rangle$、$|\Psi_{01}\rangle=|01\rangle|0\rangle$、$|\Psi_{10}\rangle=|10\rangle|0\rangle$ で、測定後は**積状態**になります（結果レジスタは、入力に対応する $|f(x)\rangle$ に決まる）。一般の振幅 $\alpha_x$ の場合は $\alpha_x/|\alpha_x|$ が全体の位相として残りますが、全体の位相は状態を変えません（図 A-1 の左上と右上：$|\alpha_i|^2=0.1,0.2,0.3,0.4$ の例で、$10$ を測ると確率 $0.3$ で $|10\rangle|0\rangle$ になる）。
+です。ほかの入力も、Part VIII §6 の表（$M_x|\Psi\rangle=\tfrac12|x\rangle|f(x)\rangle$、$P(x)=\tfrac14$）から同じ計算で
+
+$$
+|\Psi_{00}\rangle=|00\rangle|0\rangle,\qquad|\Psi_{01}\rangle=|01\rangle|0\rangle,\qquad|\Psi_{10}\rangle=|10\rangle|0\rangle
+$$
+
+となり、測定後は**積状態**になります（結果レジスタは、入力に対応する $|f(x)\rangle$ に決まる）。
+
+一般の振幅 $\alpha_x$（$\alpha_x\ne0$）の場合は、Part V・VII と同じ計算で $M_x|\Psi\rangle=\alpha_x|x\rangle|f(x)\rangle$、$P(x)=|\alpha_x|^2$ なので
+
+$$
+|\Psi_x\rangle=\frac{\alpha_x|x\rangle|f(x)\rangle}{|\alpha_x|}=\frac{\alpha_x}{|\alpha_x|}\,|x\rangle|f(x)\rangle
+$$
+
+です。$\alpha_x/|\alpha_x|$ は絶対値が $1$ の複素数（全体の位相）で、全体の位相は状態を変えません（図 A-1 の左上と右上：$|\alpha_i|^2=0.1,0.2,0.3,0.4$ の例で、$10$ を測ると確率 $0.3$ で $|10\rangle|0\rangle$ になる）。
 
 ![測定後の状態と、誤差のある測定](figures/mp04_post_measurement.png)
 
-*図 A-1。左上：測定前の $|c|^2$（$|\alpha_i|^2=0.1,0.2,0.3,0.4$、$f$ は Part VIII と同じ）。右上：入力を測って $10$ が出たとき（確率 $0.3$）、状態は $|10\rangle|0\rangle$ になる。左下：結果レジスタを測って $0$ が出たとき（確率 $0.6$、付録B-2）、入力は $|00\rangle,|01\rangle,|10\rangle$ の重ね合わせ（$|c|^2$ は $0.1:0.2:0.3$ の比）に残る。右下：誤差 $\epsilon$ のある $Z$ 測定（A-4）で、結果 $0$ の確率が $\epsilon>0$ では $1$ にも $0$ にも届かない。図を描くときに、これらの確率と状態を本文の式で確かめています。*
-
-<a id="A-3"></a>
-
-## A-3. 同じ測定をもう一度すると
-
-(A-4) の状態に、同じ測定をもう一度行います。$M_x^2=M_x$ ((A-1) で $x=x'$) なので、
-
-$$
-M_x|\Phi_x\rangle=\frac{M_x^2|\Phi\rangle}{\sqrt{P(x)}}=|\Phi_x\rangle,\qquad\|M_x\Phi_x\|^2=1
-$$
-
-で、2回目も同じ $x$ が**確率 $1$** で出ます。別の $x'\ne x$ については $M_{x'}M_x=0$ ((A-1)) なので、確率は $0$ です。**測定は再現できる**、というのが射影測定の性質です。
+*図 A-1。左上：測定前の $|c|^2$（$|\alpha_i|^2=0.1,0.2,0.3,0.4$、$f$ は Part VIII と同じ）。右上：入力を測って $10$ が出たとき（確率 $0.3$）、状態は $|10\rangle|0\rangle$ になる。左下：結果レジスタを測って $0$ が出たとき（確率 $0.6$、付録B-2）、入力は $|00\rangle,|01\rangle,|10\rangle$ の重ね合わせ（$|c|^2$ は $0.1:0.2:0.3$ の比）に残る。右下：誤差 $\epsilon$ のある $Z$ 測定（A-5）で、結果 $0$ の確率が $\epsilon>0$ では $1$ にも $0$ にも届かない。図を描くときに、これらの確率と状態を本文の式で確かめています。*
 
 <a id="A-4"></a>
 
-## A-4. 一般の測定と POVM
+## A-4. 同じ測定をもう一度すると
+
+(A-5) の状態 $|\Phi_x\rangle$（ノルム $1$）に、同じ測定をもう一度行います。(A-2) で $x'=x$ とすると $M_x^2=M_x$ なので、
+
+$$
+M_x|\Phi_x\rangle=\frac{M_x\,M_x|\Phi\rangle}{\sqrt{P(x)}}=\frac{M_x|\Phi\rangle}{\sqrt{P(x)}}=|\Phi_x\rangle
+$$
+
+です。2回目に $x$ が出る確率は、ノルムの2乗で
+
+$$
+\|M_x\Phi_x\|^2=\|\Phi_x\|^2=1
+$$
+
+となり、同じ $x$ が**確率 $1$** で出ます。別の $x'\ne x$ については、(A-2) から $M_{x'}M_x=0$ なので
+
+$$
+M_{x'}|\Phi_x\rangle=\frac{M_{x'}M_x|\Phi\rangle}{\sqrt{P(x)}}=0,\qquad\|M_{x'}\Phi_x\|^2=0
+$$
+
+で、確率は $0$ です。**測定は再現できる**、というのが射影測定の性質です。測定後の状態 $|\Phi_x\rangle$ は、入力レジスタが $x$ に確定した状態になっています。
+
+<a id="A-5"></a>
+
+## A-5. 一般の測定と POVM
+
+**記法と次元の宣言**：測定される系の状態空間を $\mathcal H=\mathbb C^d$ とし、$|\Phi\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=1$）、$K_m\in\mathbb C^{d\times d}$（結果の添字 $m$ ごとに1つ）とします。入力レジスタの射影測定なら、系は全体 $\mathcal H_A\otimes\mathcal H_B$ で $d=NM$、$K_m=M_x$ です。下の例では1量子ビットで $d=2$ です。
 
 射影測定は、測定の演算子 $M_x$ が $M_x^2=M_x=M_x^\dagger$（射影演算子）という強い条件を満たす場合です。条件をゆるめて、
 
 $$
-\sum_mK_m^\dagger K_m=I\tag{A-5}
+\sum_mK_m^\dagger K_m=I\tag{A-6}
 $$
 
 を満たす演算子の組 $\{K_m\}$ を、**測定演算子**として一般に扱えます。結果 $m$ の確率と測定後の状態は
 
 $$
-P(m)=\|K_m\Phi\|^2=\langle\Phi|K_m^\dagger K_m|\Phi\rangle,\qquad|\Phi_m\rangle=\frac{K_m|\Phi\rangle}{\sqrt{P(m)}}\tag{A-6}
+P(m)=\|K_m\Phi\|^2=\langle\Phi|K_m^\dagger K_m|\Phi\rangle,\qquad|\Phi_m\rangle=\frac{K_m|\Phi\rangle}{\sqrt{P(m)}}\tag{A-7}
 $$
 
-です。(A-5) は、$\sum_mP(m)=\langle\Phi|\sum_mK_m^\dagger K_m|\Phi\rangle=1$ にするための条件です。$E_m:=K_m^\dagger K_m$ は、固有値が $0$ 以上のエルミート演算子で、$\sum_mE_m=I$ を満たします。この $\{E_m\}$ を **POVM**（正作用素値測度）と呼びます。確率 $P(m)=\langle\Phi|E_m|\Phi\rangle$ は $E_m$ だけで決まり、測定後の状態まで決めるには $K_m$ が要ります（$K_m$ には、$E_m$ を変えない任意のユニタリ変換 $K_m\to V_mK_m$ の不定性があります）。射影測定は、$K_m=M_x$ のとき（$E_m=M_x$）です。
-
-**例：誤差のある $Z$ 測定**。1量子ビットで
+です。(A-6) は、すべての結果の確率の和を $1$ にするための条件です：
 
 $$
-K_0=\begin{pmatrix}\sqrt{1-\epsilon}&0\\0&\sqrt\epsilon\end{pmatrix},\qquad K_1=\begin{pmatrix}\sqrt\epsilon&0\\0&\sqrt{1-\epsilon}\end{pmatrix}
+\sum_mP(m)=\sum_m\langle\Phi|K_m^\dagger K_m|\Phi\rangle=\Big\langle\Phi\Big|\Big(\sum_mK_m^\dagger K_m\Big)\Big|\Phi\Big\rangle=\langle\Phi|\Phi\rangle=1
 $$
 
-とします。(A-5) を確かめると、$K_0^\dagger K_0+K_1^\dagger K_1=\mathrm{diag}\big((1-\epsilon)+\epsilon,\ \epsilon+(1-\epsilon)\big)=I$ です。$E_0=\mathrm{diag}(1-\epsilon,\ \epsilon)$ なので、状態 $\cos\frac\theta2|0\rangle+\sin\frac\theta2|1\rangle$ で結果 $0$ が出る確率は
+**POVM**：$E_m:=K_m^\dagger K_m$ は、エルミート演算子で、固有値が $0$ 以上です。エルミートなのは
+
+$$
+E_m^\dagger=(K_m^\dagger K_m)^\dagger=K_m^\dagger K_m=E_m
+$$
+
+から、固有値が $0$ 以上なのは、任意のベクトル $v$ について
+
+$$
+\langle v|E_m|v\rangle=\langle v|K_m^\dagger K_m|v\rangle=\|K_mv\|^2\ge0
+$$
+
+だからです。(A-6) は $\sum_mE_m=I$ と書けます。この $\{E_m\}$ を **POVM**（正作用素値測度）と呼びます。確率 $P(m)=\langle\Phi|E_m|\Phi\rangle$ は $E_m$ だけで決まり、測定後の状態まで決めるには $K_m$ が要ります。$K_m$ には、$E_m$ を変えない任意のユニタリ変換 $K_m\to V_mK_m$ の不定性があります：
+
+$$
+(V_mK_m)^\dagger(V_mK_m)=K_m^\dagger V_m^\dagger V_mK_m=K_m^\dagger K_m=E_m
+$$
+
+ですが、測定後の状態は $V_mK_m|\Phi\rangle/\sqrt{P(m)}$ に変わります。射影測定は、$K_m=M_x$ のとき（$E_m=M_x^\dagger M_x=M_x$）です。
+
+**例：誤差のある $Z$ 測定**。1量子ビット（$d=2$）で
+
+$$
+K_0=\begin{pmatrix}\sqrt{1-\epsilon}&0\\0&\sqrt\epsilon\end{pmatrix},\qquad K_1=\begin{pmatrix}\sqrt\epsilon&0\\0&\sqrt{1-\epsilon}\end{pmatrix}\qquad(0\le\epsilon\le1)
+$$
+
+とします。(A-6) を確かめると
+
+$$
+K_0^\dagger K_0+K_1^\dagger K_1=\mathrm{diag}\big((1-\epsilon)+\epsilon,\ \epsilon+(1-\epsilon)\big)=I
+$$
+
+です。$E_0=\mathrm{diag}(1-\epsilon,\ \epsilon)$ なので、状態 $\cos\frac\theta2|0\rangle+\sin\frac\theta2|1\rangle$ で結果 $0$ が出る確率は
 
 $$
 P(0)=(1-\epsilon)\cos^2\frac\theta2+\epsilon\sin^2\frac\theta2
 $$
 
-です。$\epsilon=0$ なら通常の $Z$ 測定（$K_0=|0\rangle\langle0|$）、$\epsilon>0$ では、$|0\rangle$（$\theta=0$）でも結果 $0$ の確率が $1-\epsilon$ にとどまり、$|1\rangle$ でも $\epsilon$ の確率で $0$ が出ます（図 A-1 の右下）。**注意（読み出し誤差との違い）**：結果の確率だけを見れば、「射影測定をして、結果ラベルを確率 $\epsilon$ で取り違える」読み出し誤差と同じです。しかし**測定後の状態は違います**。状態 $|+\rangle$、$\epsilon=0.1$ で結果 $0$ が出たとき（確率はどちらも $\frac12$）、ラベルの取り違えの模型では測定後の状態は $(1-\epsilon)|0\rangle\langle0|+\epsilon|1\rangle\langle1|$ で非対角成分が $0$ ですが、$K_0$ による測定後の状態は $\propto(\sqrt{1-\epsilon},\ \sqrt\epsilon)^T$ の純粋状態で、非対角成分が $\sqrt{\epsilon(1-\epsilon)}=0.3$ 残ります（数値で確認）。ただし、この「ラベル取り違え」の模型は、結果 $0$ に**複数の演算子**が対応するので、(A-6) のような1結果1演算子の形では書けません（結果 $0$ の後の状態 $\mathrm{diag}(0.9,\,0.1)$ は階数 $2$ の混合状態で、単一の $K_0|+\rangle$ では表せない）。一般の測定は、結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当てて、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすものです（(A-6) は各 $m$ に $\alpha$ が1つの場合）。このとき、結果 $m$ の確率と、測定後の状態（密度行列）は
+です。$\epsilon=0$ なら通常の $Z$ 測定（$K_0=|0\rangle\langle0|$）です。$\epsilon>0$ では、$|0\rangle$（$\theta=0$）でも結果 $0$ の確率が $1-\epsilon$ にとどまり、$|1\rangle$（$\theta=\pi$）でも $\epsilon$ の確率で $0$ が出ます（図 A-1 の右下）。また
 
 $$
-P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-7}
+K_0^2=\mathrm{diag}(1-\epsilon,\ \epsilon)\ne K_0
 $$
 
-です。ラベル取り違えの模型は、$K_{0,1}=\sqrt{1-\epsilon}\,P_0$、$K_{0,2}=\sqrt\epsilon\,P_1$（結果 $0$ の2つの経路）、$K_{1,1}=\sqrt{1-\epsilon}\,P_1$、$K_{1,2}=\sqrt\epsilon\,P_0$ で、$\rho_0\propto(1-\epsilon)P_0\rho P_0+\epsilon P_1\rho P_1$、$E_0=(1-\epsilon)P_0+\epsilon P_1$ になります。以下では、1結果1演算子の場合 (A-6) を扱います。また $K_0^2=\mathrm{diag}(1-\epsilon,\ \epsilon)\ne K_0$ なので、$\epsilon>0$ の $K_0$ は射影演算子ではありません。結果 $0$ の後の状態 $\propto(\sqrt{1-\epsilon}\cos\frac\theta2,\ \sqrt\epsilon\sin\frac\theta2)^T$ は $|0\rangle$ に完全には崩れません（弱い測定）。
+なので、$\epsilon>0$ の $K_0$ は射影演算子ではありません。結果 $0$ の後の状態は $\propto(\sqrt{1-\epsilon}\cos\frac\theta2,\ \sqrt\epsilon\sin\frac\theta2)^T$ で、$|0\rangle$ に完全には崩れません（弱い測定）。
 
-**注意：足す順序**：(A-5) は、各 $K_m^\dagger K_m$ を作ってから足す条件で、$\big(\sum_mK_m^\dagger\big)\big(\sum_mK_m\big)=\sum_{m,m'}K_m^\dagger K_{m'}$ ではありません。後者には、$m\ne m'$ の**交差項** $K_m^\dagger K_{m'}$ が入ります。例：ビット反転の測定演算子 $K_0=\sqrt{1-p}\,I$、$K_1=\sqrt p\,X$ では、$K_0^\dagger K_0+K_1^\dagger K_1=(1-p)I+pI=I$ ですが、
+**1結果1演算子で書けない測定**：結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当て、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすものを、一般の測定とします（(A-7) は各 $m$ に $\alpha$ が1つの場合です）。状態を密度行列 $\rho\in\mathbb C^{d\times d}$ で書くと、結果 $m$ の確率と、測定後の状態は
+
+$$
+P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-8}
+$$
+
+です。
+
+**注意（読み出し誤差との違い）**：上の例は、結果の確率だけを見れば、「射影測定をして、結果ラベルを確率 $\epsilon$ で取り違える」読み出し誤差と同じです。しかし**測定後の状態は違います**。状態 $|+\rangle=\frac{1}{\sqrt2}(|0\rangle+|1\rangle)$、$\epsilon=0.1$ で結果 $0$ が出たとき、2つの模型を比べます（確率はどちらも $P(0)=\frac12$）。
+
+*$K_0$ による測定*：
+
+$$
+K_0|+\rangle=\frac{1}{\sqrt2}\begin{pmatrix}\sqrt{0.9}\\\sqrt{0.1}\end{pmatrix},\qquad P(0)=\|K_0|+\rangle\|^2=\frac12(0.9+0.1)=\frac12
+$$
+
+で、規格化すると $(\sqrt{0.9},\sqrt{0.1})^T$ です。測定後の密度行列は
+
+$$
+\rho_0=\begin{pmatrix}0.9&\sqrt{0.9}\sqrt{0.1}\\\sqrt{0.9}\sqrt{0.1}&0.1\end{pmatrix}=\begin{pmatrix}0.9&0.3\\0.3&0.1\end{pmatrix}
+$$
+
+で、純粋状態です。非対角成分は $\sqrt{\epsilon(1-\epsilon)}=0.3$ 残ります。
+
+*ラベル取り違えの模型*：結果 $0$ の経路が2つあります（実際に $|0\rangle$ で取り違えなし、実際に $|1\rangle$ で取り違えあり）。(A-8) の演算子は
+
+$$
+K_{0,1}=\sqrt{1-\epsilon}\,P_0,\qquad K_{0,2}=\sqrt\epsilon\,P_1,\qquad K_{1,1}=\sqrt{1-\epsilon}\,P_1,\qquad K_{1,2}=\sqrt\epsilon\,P_0
+$$
+
+で、結果 $0$ について $E_0=(1-\epsilon)P_0+\epsilon P_1$、$\rho_0\propto(1-\epsilon)P_0\rho P_0+\epsilon P_1\rho P_1$ です。$\rho=|+\rangle\langle+|$ のとき、$P_0\rho P_0=\frac12P_0$、$P_1\rho P_1=\frac12P_1$ なので
+
+$$
+\sum_\alpha K_{0\alpha}\rho K_{0\alpha}^\dagger=0.9\cdot\frac12P_0+0.1\cdot\frac12P_1=\frac12\mathrm{diag}(0.9,\ 0.1)
+$$
+
+で、規格化すると $\rho_0=\mathrm{diag}(0.9,\ 0.1)$ です。非対角成分は $0$ で、階数 $2$ の混合状態です。
+
+結果 $0$ に**複数の演算子**が対応するので、この模型は (A-7) の1結果1演算子の形では書けません（単一の $K_0|+\rangle$ は純粋状態になるため）。以下では、1結果1演算子の場合 (A-7) を扱います。
+
+**注意：足す順序**：(A-6) は、各 $K_m^\dagger K_m$ を作ってから足す条件です。
+
+$$
+\Big(\sum_mK_m^\dagger\Big)\Big(\sum_mK_m\Big)=\sum_{m,m'}K_m^\dagger K_{m'}
+$$
+
+とは別物で、後者には $m\ne m'$ の**交差項** $K_m^\dagger K_{m'}$ が入ります。例：ビット反転の測定演算子 $K_0=\sqrt{1-p}\,I$、$K_1=\sqrt p\,X$ では
+
+$$
+K_0^\dagger K_0+K_1^\dagger K_1=(1-p)I+pI=I
+$$
+
+ですが、
 
 $$
 \Big(\sum_mK_m^\dagger\Big)\Big(\sum_mK_m\Big)=\big(\sqrt{1-p}\,I+\sqrt p\,X\big)^2=I+2\sqrt{p(1-p)}\,X\ne I\qquad(0<p<1)
@@ -1186,13 +1583,19 @@ $$
 
 です（$X^2=I$ を使いました）。
 
-**環境を使った見方**：系と環境 $E$ をまとめた状態にユニタリ演算子 $U$ を作用させ、環境の初期状態を $|0_E\rangle$、環境を基底 $|m_E\rangle$ で測ったとき、系に作用する演算子は $K_m=\langle m_E|U|0_E\rangle$ です。$U^\dagger U=I$ と環境の完全性関係 $\sum_m|m_E\rangle\langle m_E|=I_E$ から
+**環境を使った見方**：系 $\mathcal H=\mathbb C^d$ と環境 $\mathcal H_E=\mathbb C^r$ をまとめた空間 $\mathcal H\otimes\mathcal H_E$ に、ユニタリ演算子 $U$ を作用させます。環境の初期状態を $|0_E\rangle$、環境の計算基底を $|m_E\rangle$（$m=0,\dots,r-1$）とし、環境を基底で測ります。系の状態 $|\Phi\rangle$ について、$|m_E\rangle$ の係数を $K_m|\Phi\rangle$ と書くと
+
+$$
+U\big(|\Phi\rangle\otimes|0_E\rangle\big)=\sum_m\big(K_m|\Phi\rangle\big)\otimes|m_E\rangle,\qquad K_m=\langle m_E|U|0_E\rangle\in\mathbb C^{d\times d}
+$$
+
+です。環境が $m$ になる確率は、この係数のノルムの2乗 $\|K_m\Phi\|^2$ です。$U^\dagger U=I$ と環境の完全性関係 $\sum_m|m_E\rangle\langle m_E|=I_E$ から
 
 $$
 \sum_mK_m^\dagger K_m=\langle0_E|U^\dagger\Big(\sum_m|m_E\rangle\langle m_E|\Big)U|0_E\rangle=\langle0_E|U^\dagger U|0_E\rangle=I
 $$
 
-となり、(A-5) が自動的に成り立ちます。逆に、任意の POVM は、系を拡張した空間の射影測定として実現できることが知られています（ナイマルクの拡張定理。ここでは証明せず、事実として引用します）。系の側から見ると、環境との相互作用で、射影測定が一般の測定に見える、ということです（[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)の T1 の緩和などの量子チャネルも、同じ形の $K_m$ の組で書けます）。
+となり、(A-6) が自動的に成り立ちます。逆に、任意の POVM は、系を拡張した空間の射影測定として実現できることが知られています（ナイマルクの拡張定理。ここでは証明せず、事実として引用します）。系の側から見ると、環境との相互作用で、射影測定が一般の測定に見える、ということです（[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)の T1 の緩和などの量子チャネルも、同じ形の $K_m$ の組で書けます）。
 
 ---
 
@@ -1211,6 +1614,21 @@ $$
 <!-- part-toc:end -->
 
 本編では入力レジスタだけを測りました。ここでは、**結果レジスタ**を測ったとき入力レジスタに何が残るか、そして $|\Psi\rangle$ がどれだけエンタングルしているかを、係数行列で調べます。
+
+**記法と次元の宣言**（付録A-1・A-2 と同じ流儀）：入力レジスタの空間を $\mathcal H_A=\mathbb C^N$、結果レジスタの空間を $\mathcal H_B=\mathbb C^M$ とし、計算基底を $|x\rangle$（$x=0,\dots,N-1$）、$|y\rangle$（$y=0,\dots,M-1$）とします。状態は
+
+$$
+|\Phi\rangle=\sum_{x=0}^{N-1}\sum_{y=0}^{M-1}c_{x,y}\,|x\rangle\otimes|y\rangle\in\mathcal H_A\otimes\mathcal H_B,\qquad\langle\Phi|\Phi\rangle=1
+$$
+
+です。この付録で使う対象の大きさは次の通りです（$M$ は結果レジスタの次元で、演算子 $M_x$ や $M'_y$ とは別のものです）。
+
+| 対象 | 属する空間・写像 | 次元・大きさ |
+|---|---|---|
+| $\lvert\Phi\rangle$ | $\mathcal H_A\otimes\mathcal H_B$ | $NM$ |
+| 係数行列 $C=(c_{x,y})$ | 行が入力 $x$、列が結果 $y$ | $N\times M$ |
+| $P_x=\lvert x\rangle\langle x\rvert$、$M_x=P_x\otimes I_M$ | 入力を測る | $N\times N$、$NM\times NM$ |
+| $P_y=\lvert y\rangle\langle y\rvert$、$M'_y=I_N\otimes P_y$ | 結果を測る | $M\times M$、$NM\times NM$ |
 
 <a id="B-1"></a>
 
@@ -1238,7 +1656,13 @@ $$
 
 ## B-2. 結果レジスタを測る
 
-結果レジスタが $y$ になる測定の演算子を $M'_y:=I_N\otimes|y\rangle\langle y|$ とします。Part III §3 と同じ計算（(III-1) と線形性）で、基底 $|x\rangle|y'\rangle$ に作用させると
+結果レジスタが $y$ になる測定の演算子を
+
+$$
+M'_y:=I_N\otimes P_y\in\mathbb C^{NM\times NM},\qquad P_y:=|y\rangle\langle y|\in\mathbb C^{M\times M}
+$$
+
+とします。A-2 の $M_x$ と同じ計算（(A-1) と、入力・結果の役割を入れ替えたもの）で、$M'_yM'_{y'}=\delta_{yy'}M'_y$、$\sum_yM'_y=I_{NM}$、$M'^\dagger_y=M'_y$ が成り立ちます。Part III §3 と同じ計算（(III-1) と線形性）で、基底 $|x\rangle|y'\rangle$ に作用させると
 
 $$
 M'_y\big(|x\rangle|y'\rangle\big)=|x\rangle\otimes|y\rangle\langle y|y'\rangle=\delta_{y,y'}\,|x\rangle|y\rangle
@@ -1250,7 +1674,13 @@ $$
 M'_y|\Phi\rangle=\sum_{x}c_{x,y}\,|x\rangle|y\rangle=\Big(\sum_xc_{x,y}|x\rangle\Big)\otimes|y\rangle\tag{B-1}
 $$
 
-です。確率は $P(y)=\|M'_y\Phi\|^2=\sum_x|c_{x,y}|^2$（Part IV §6 と同じ計算）で、測定後の状態は
+です。確率は、(B-1) の右辺のノルムの2乗で、Part IV §5 の内積の式 $(\langle a|\langle b|)(|c\rangle|d\rangle)=\langle a|c\rangle\langle b|d\rangle$ を使うと
+
+$$
+P(y)=\|M'_y\Phi\|^2=\Big\|\Big(\sum_xc_{x,y}|x\rangle\Big)\otimes|y\rangle\Big\|^2=\sum_{x,x'}\overline{c_{x,y}}\,c_{x',y}\,\langle x|x'\rangle\,\langle y|y\rangle=\sum_x|c_{x,y}|^2
+$$
+
+です（$\langle x|x'\rangle=\delta_{xx'}$、$\langle y|y\rangle=1$）。測定後の状態は
 
 $$
 |\Phi_y\rangle=\frac{1}{\sqrt{P(y)}}\Big(\sum_xc_{x,y}|x\rangle\Big)\otimes|y\rangle\tag{B-2}
@@ -1272,7 +1702,19 @@ $$
 
 です（$\frac12(|00\rangle+|01\rangle+|10\rangle)\big/\sqrt{3/4}=(|00\rangle+|01\rangle+|10\rangle)/\sqrt3$）。確率の和は $\tfrac34+\tfrac14=1$ です。
 
-**入力と結果の両方を測る**：付録C-1の式から $M_xM'_y=(P_x\otimes I)(I\otimes P_y)=P_x\otimes P_y=M'_yM_x$ で、順序を入れ替えても同じです。同時確率は $P(x,y)=\|M_xM'_y\Phi\|^2=|c_{x,y}|^2$ で、ボルン則（Part IV §2）そのものです。
+**入力と結果の両方を測る**：付録A-1 の (A-1) から、
+
+$$
+M_xM'_y=(P_x\otimes I_M)(I_N\otimes P_y)=P_xI_N\otimes I_MP_y=P_x\otimes P_y,\qquad M'_yM_x=(I_N\otimes P_y)(P_x\otimes I_M)=I_NP_x\otimes P_yI_M=P_x\otimes P_y
+$$
+
+なので、順序を入れ替えても同じです。(B-1) の $M'_y|\Phi\rangle$ に $M_x$ を作用させると、$P_x\sum_{x'}c_{x',y}|x'\rangle=c_{x,y}|x\rangle$ なので
+
+$$
+M_xM'_y|\Phi\rangle=c_{x,y}\,|x\rangle\otimes|y\rangle,\qquad P(x,y)=\|M_xM'_y\Phi\|^2=|c_{x,y}|^2
+$$
+
+で、同時確率はボルン則（Part IV §2）そのものです。
 
 <a id="B-3"></a>
 
@@ -1294,13 +1736,31 @@ Part III §2-f-5 の積状態の判定（$2\times2$ では $w_{00}w_{11}=w_{01}w
 
 階数が積状態かどうかの判定であって、エンタングルメントの**量**を表すわけではない点に注意してください。1対1の関数では、階数は**振幅がゼロでない入力の個数**で決まり、振幅の偏りだけではエントロピーが下がります。たとえば $\alpha=(\sqrt{0.9},\sqrt{0.1},0,0)$ なら、振幅がゼロでない入力が $00$ と $01$ の2つなので階数は $2$、$p_k=(0.9,0.1)$ でエントロピーは約 $0.469$ bit です。一方、$\alpha=(\sqrt{0.4},\sqrt{0.3},\sqrt{0.2},\sqrt{0.1})$ のように、すべて $0$ でなければ階数は $4$ のままで、偏りの分だけエントロピーが $\log_24=2$ bit より小さくなります。また、階数が大きくても、シュミット確率が偏っていればエントロピーは小さくなります（$p=(0.999,0.0005,0.0005)$ は階数 $3$ ですが、$p=(0.5,0.5)$ の階数 $2$ よりエントロピーが小さい）。量の比較には、次のエンタングルメントエントロピーを使います。
 
-**シュミット分解**：$C$ の特異値分解 $C=USV^\dagger$（$U,V$ はユニタリ、$S$ は特異値 $s_1\ge s_2\ge\cdots\ge0$ を対角に持つ）を使うと、$c_{x,y}=\sum_kU_{xk}\,s_k\,\overline{V_{yk}}$ なので
+**シュミット分解**：$C\in\mathbb C^{N\times M}$ の特異値分解を
+
+$$
+C=USV^\dagger,\qquad U\in\mathbb C^{N\times N},\quad V\in\mathbb C^{M\times M}\ (\text{ユニタリ}),\qquad S\in\mathbb R^{N\times M}\ (\text{対角成分が特異値 }s_1\ge s_2\ge\cdots\ge0)
+$$
+
+とします。$S$ の非対角成分は $0$ なので、行列の積の成分は
+
+$$
+c_{x,y}=(USV^\dagger)_{xy}=\sum_{k,k'}U_{xk}\,S_{kk'}\,(V^\dagger)_{k'y}=\sum_kU_{xk}\,s_k\,\overline{V_{yk}}
+$$
+
+です。これを $|\Phi\rangle=\sum_{x,y}c_{x,y}|x\rangle|y\rangle$ に代入し、和の順序を入れ替えると
 
 $$
 |\Phi\rangle=\sum_ks_k\Big(\sum_xU_{xk}|x\rangle\Big)\otimes\Big(\sum_y\overline{V_{yk}}|y\rangle\Big)=\sum_ks_k\,|u_k\rangle\otimes|v_k\rangle\tag{B-4}
 $$
 
-です。$U,V$ の列は正規直交なので、$\{|u_k\rangle\}$、$\{|v_k\rangle\}$ も正規直交で、$\sum_ks_k^2=\sum|c_{x,y}|^2=1$ です（係数行列のフロベニウスノルム）。ゼロでない特異値の個数が $C$ の階数で、**階数 $1$ のときだけ積状態**です。
+です。$U,V$ はユニタリで、列が正規直交なので、$|u_k\rangle=\sum_xU_{xk}|x\rangle$、$|v_k\rangle=\sum_y\overline{V_{yk}}|y\rangle$ も正規直交です：
+
+$$
+\langle u_k|u_{k'}\rangle=\sum_x\overline{U_{xk}}\,U_{xk'}=(U^\dagger U)_{kk'}=\delta_{kk'},\qquad\langle v_k|v_{k'}\rangle=\sum_yV_{yk}\,\overline{V_{yk'}}=\overline{(V^\dagger V)_{k'k}}=\delta_{kk'}
+$$
+
+また、$\sum_ks_k^2=\sum_{x,y}|c_{x,y}|^2=1$ です（ユニタリ変換で係数行列のフロベニウスノルムが変わらない）。ゼロでない特異値の個数が $C$ の階数で、**階数 $1$ のときだけ積状態**です。
 
 **エンタングルメントエントロピー**：$p_k:=s_k^2$ を確率と見て、$S:=-\sum_kp_k\log_2p_k$ を、エンタングルメントの大きさの指標とします（積状態で $0$）。
 
@@ -1310,7 +1770,7 @@ $$
 | Part VIII の例 | $(\tfrac34,\tfrac14)$ | $-\tfrac34\log_2\tfrac34-\tfrac14\log_2\tfrac14\approx0.811$ bit |
 | 1対1（$N=4$、均等） | $(\tfrac14,\tfrac14,\tfrac14,\tfrac14)$ | $\log_24=2$ bit |
 
-Part VIII の例の $p_k=(\tfrac34,\tfrac14)$ は、$C^TC=\tfrac14\begin{pmatrix}3&0\\0&1\end{pmatrix}$ の固有値です。この例では $C^TC$ が対角なので、その対角成分が、結果レジスタの確率 $P(y)=(\tfrac34,\tfrac14)$（B-2）と一致しています（図 B-1）。
+Part VIII の例の $p_k=(\tfrac34,\tfrac14)$ は、$C^TC=\tfrac14\begin{pmatrix}3&0\\0&1\end{pmatrix}$ の固有値です（$C^TC$ の $(y,y')$ 成分は $\sum_xc_{x,y}c_{x,y'}$ なので、第0列同士は $\frac14(1+1+1)=\frac34$、第1列同士は $\frac14$、第0列と第1列は、どの行でも片方が $0$ なので $0$。特異値は $s_k=\sqrt{p_k}$ です）。この例では $C^TC$ が対角なので、その対角成分が、結果レジスタの確率 $P(y)=(\tfrac34,\tfrac14)$（B-2）と一致しています（図 B-1）。
 
 ![係数行列と階数](figures/mp05_coefficient_matrices.png)
 
@@ -1322,58 +1782,19 @@ Part VIII の例の $p_k=(\tfrac34,\tfrac14)$ は、$C^TC=\tfrac14\begin{pmatrix
 
 <a id="appC"></a>
 
-# 付録C：クロネッカー積の性質と、Qiskit の並び順
+# 付録C：Qiskit の並び順
 
 <!-- part-toc:start -->
 
 **この付録の内容**
 
-- [C-1. テンソル積同士の積はテンソル積](#C-1)
-- [C-2. そのほかの性質](#C-2)
-- [C-3. Qiskit の並び順](#C-3)
+- [C-1. Qiskit の並び順](#C-1)
 
 <!-- part-toc:end -->
 
 <a id="C-1"></a>
 
-## C-1. テンソル積同士の積はテンソル積
-
-$$
-\boxed{(U_1\otimes U_2)(V_1\otimes V_2)=U_1V_1\otimes U_2V_2}\tag{C-1}
-$$
-
-**証明**：両辺を、任意の基底ベクトル $|k\rangle\otimes|l\rangle$ に作用させて比べます。左辺は、右の行列から順に作用させ、(III-1) を2回使うと：
-
-$$
-(U_1\otimes U_2)(V_1\otimes V_2)\big(|k\rangle\otimes|l\rangle\big)=(U_1\otimes U_2)\big(V_1|k\rangle\otimes V_2|l\rangle\big)=U_1V_1|k\rangle\otimes U_2V_2|l\rangle
-$$
-
-右辺も (III-1) から $U_1V_1|k\rangle\otimes U_2V_2|l\rangle$ です。行列を基底ベクトルに作用させた結果はその行列の列なので（2つの行列のすべての列が一致すれば、行列として等しい。Part III §2-f-7 の準備を参照）、両辺は等しくなります。$\square$
-
-**帰結**：
-
-- $U,V$ がどちらもテンソル積なら、$UV$ もテンソル積です。例えば $(X\otimes I_2)(I_2\otimes Z)=X\otimes Z$。
-- $U,V$ がテンソル積でなくても、積がテンソル積になることがあります。例えば $\mathrm{CNOT}\cdot\mathrm{CNOT}=I_4=I_2\otimes I_2$（CNOT は自分自身の逆行列）。
-- したがって、「行列の積で書かれているから分けられない」のではなく、Part III §2-g-1 の通り、**結果の行列が $B_1\otimes B_2$ の形に書けるか**で判断します。
-- $U_1=A$、$U_2=I_4$、$V_1=I_2$、$V_2=B$ とすると $AI_2\otimes I_4B=A\otimes B$ で、Part III §2-f-7 の $(A\otimes I_n)(I_m\otimes B)=A\otimes B$ になります。
-
-<a id="C-2"></a>
-
-## C-2. そのほかの性質
-
-行列 $A\in\mathbb C^{m\times m}$、$B\in\mathbb C^{n\times n}$ について、成分は $(A\otimes B)_{(k,l),(k',l')}=A_{kk'}B_{ll'}$ です（Part III §2-d）。
-
-- **転置・共役転置**：$(A\otimes B)^T=A^T\otimes B^T$、$(A\otimes B)^\dagger=A^\dagger\otimes B^\dagger$。成分 $(k,l),(k',l')$ の入れ替えと複素共役が、$A_{kk'}$ と $B_{ll'}$ にそれぞれ独立に働くからです。
-- **ユニタリ性**：$U_1,U_2$ がユニタリなら、(C-1) と上の式から $(U_1\otimes U_2)^\dagger(U_1\otimes U_2)=U_1^\dagger U_1\otimes U_2^\dagger U_2=I\otimes I=I$ で、$U_1\otimes U_2$ もユニタリです。別々のレジスタに作用するゲートを並べたものは、ユニタリです。
-- **トレース**：$\operatorname{tr}(A\otimes B)=\sum_{k,l}A_{kk}B_{ll}=\operatorname{tr}A\cdot\operatorname{tr}B$（対角成分は $(k,l)=(k',l')$ のとき）。
-- **固有値**：$Au=\lambda u$、$Bv=\mu v$ なら、(III-1) から $(A\otimes B)(u\otimes v)=\lambda\mu\,(u\otimes v)$ なので、固有値の積 $\lambda\mu$ が $A\otimes B$ の固有値です（$A,B$ が対角化できるなら、これですべての固有値が出ます）。
-- **行列式**：$\det(A\otimes B)=(\det A)^n(\det B)^m$。$(A\otimes B)=(A\otimes I_n)(I_m\otimes B)$（Part III §2-f-7）で、$I_m\otimes B$ は $B$ を $m$ 個並べたブロック対角行列なので $\det=(\det B)^m$、$A\otimes I_n$ は行と列の並べ替えで $A$ を $n$ 個並べたブロック対角行列になるので $\det=(\det A)^n$ です（後者は、並べ替えが行と列に同じ置換を施す相似変換で、行列式を変えないことを使います。ここでは事実として引用します）。
-
-トレース、転置、共役転置、混合積、固有値、行列式の式は、ランダムな複素行列（$2\times2$ と $3\times3$）でも数値で確かめました。
-
-<a id="C-3"></a>
-
-## C-3. Qiskit の並び順
+## C-1. Qiskit の並び順
 
 本編の教科書流の記法では、$|x_1x_2y\rangle$ の**左が第1の因子**で、$|u\rangle\otimes|v\rangle\otimes|w\rangle$ の成分は $u$ が最上位の添字です。Qiskit は、**ラベルの右端が量子ビット $q_0$** で、$|q_{n-1}\cdots q_1q_0\rangle$ と書きます（添字 $=\sum_jq_j2^j$）。
 
@@ -1409,7 +1830,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 
 # 付録D：検算の一覧
 
-このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（45件）、図のスクリプトの `assert` で確かめています。
+このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（48件）、図のスクリプトの `assert` で確かめています。
 
 | ノートの箇所 | 確かめたこと | テスト |
 |---|---|---|
@@ -1418,26 +1839,29 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 | Part III §2-f | $(A\otimes I_n)(I_m\otimes B)=A\otimes B=(I_m\otimes B)(A\otimes I_n)$、$X\otimes I\ne I\otimes X$、$A\otimes I_m$ の次元 | `test_identity_commutes_with_other_register_operator` |
 | Part III §2-f-5 | $\lvert\Phi^+\rangle$ は積状態でない。積状態の条件 $w_{00}w_{11}=w_{01}w_{10}$ | `test_entangled_state_is_not_product` |
 | Part III §2-g-2 | CNOT は $B_1\otimes B_2$ に書けない（再配置行列の階数 $2$） | `test_cnot_is_not_a_tensor_product` |
-| 付録C-1 | $(U_1\otimes U_2)(V_1\otimes V_2)=U_1V_1\otimes U_2V_2$、$\mathrm{CNOT}^2=I$ | `test_mixed_product_of_tensor_products_and_cnot_squared` |
+| 付録A-1 | $(A\otimes B)(A'\otimes B')=AA'\otimes BB'$（(A-1)）、$\mathrm{CNOT}^2=I$ | `test_mixed_product_of_tensor_products_and_cnot_squared` |
 | Part IV | $P(x)=\sum_y\lvert c_{x,y}\rvert^2=\lVert(P_x\otimes I)\Phi\rVert^2=\langle\Phi\vert P_x\otimes I\vert\Phi\rangle$、$(P\otimes I)^\dagger(P\otimes I)=P\otimes I$ | `test_born_rule_and_projector_agree_for_random_states` |
 | Part IV §5 | $(\langle a\lvert\langle b\rvert)(\lvert c\rangle\lvert d\rangle)=\langle a\vert c\rangle\langle b\vert d\rangle$ | `test_inner_product_of_tensor_products_4_2` |
 | Part V、VI | $M_{x}\lvert\Psi\rangle=\frac1{\sqrt N}\lvert x\rangle\lvert f(x)\rangle$、$P(x)=\frac1N$（3つの $(n_{\mathrm{in}},n_{\mathrm{out}})$） | `test_uniform_superposition_gives_one_over_N` |
 | Part VII | $P(x^\ast)=\lvert\alpha_{x^\ast}\rvert^2$ | `test_general_amplitudes_give_alpha_squared` |
 | Part VIII | $\lvert\Psi\rangle$ の成分、$M_{11}$ の対角、$M_{11}\lvert\Psi\rangle=\frac12\lvert111\rangle$、確率 $\frac14$ | `test_example_8` |
-| 付録A-1 | $M_xM_{x'}=\delta M_x$、$\sum M_x=I$、$\sum P(x)=1$ | `test_projective_measurement_is_complete` |
-| 付録A-2、A-3 | 測定後の状態の規格化、再現性、Part VIII の測定後の状態 | `test_post_measurement_state_and_repeatability`、`test_post_measurement_of_example_is_a_product_state` |
-| 付録A-4 | $\sum K^\dagger K=I$、$P(0)=(1-\epsilon)\cos^2+\epsilon\sin^2$、$\epsilon=0$ で射影測定、$K_0$ は射影でない | `test_general_measurement_kraus_completeness` |
-| 付録A-4 | $\sum K^\dagger K=I$ だが $(\sum K^\dagger)(\sum K)=I+2\sqrt{p(1-p)}X$。振幅減衰の $K_1^\dagger K_1=\gamma\lvert1\rangle\langle1\rvert$ | `test_sum_of_kraus_then_product_is_not_identity` |
-| 付録A-4 | 弱い測定 $K_0$ と、ラベル取り違えの読み出し誤差は、確率が同じで測定後の状態が違う（非対角成分 $\sqrt{\epsilon(1-\epsilon)}$ と $0$） | `test_unsharp_measurement_differs_from_readout_error_after_the_measurement` |
+| Part VIII §2〜§6 | 基底の番号 $4a+2b+c+1$、4つの項の列ベクトル（1・3・5・8番目）、$M_x$ の対角と成分ごとの積、入力ごとのペアの確率 | `test_part8_column_vector_walkthrough` |
+| 付録A-2 | $M_xM_{x'}=\delta M_x$、$\sum M_x=I$、$\sum P(x)=1$ | `test_projective_measurement_is_complete` |
+| 付録A-3、A-4 | 測定後の状態の規格化、再現性、Part VIII の測定後の状態 | `test_post_measurement_state_and_repeatability`、`test_post_measurement_of_example_is_a_product_state` |
+| 付録A-5 | $\sum K^\dagger K=I$、$P(0)=(1-\epsilon)\cos^2+\epsilon\sin^2$、$\epsilon=0$ で射影測定、$K_0$ は射影でない | `test_general_measurement_kraus_completeness` |
+| 付録A-5 | $\sum K^\dagger K=I$ だが $(\sum K^\dagger)(\sum K)=I+2\sqrt{p(1-p)}X$。振幅減衰の $K_1^\dagger K_1=\gamma\lvert1\rangle\langle1\rvert$ | `test_sum_of_kraus_then_product_is_not_identity` |
+| 付録A-5 | 弱い測定 $K_0$ と、ラベル取り違えの読み出し誤差は、確率が同じで測定後の状態が違う（非対角成分 $\sqrt{\epsilon(1-\epsilon)}$ と $0$） | `test_unsharp_measurement_differs_from_readout_error_after_the_measurement` |
 | 付録B-3 | 階数はエンタングルメントの量でない（偏った振幅の1対1は階数2・約 $0.469$ bit。階数3でも $p=(0.999,\ldots)$ は階数2の $p=(0.5,0.5)$ よりエントロピーが小さい） | `test_rank_is_not_a_measure_of_entanglement` |
-| 付録A-4 | ラベル取り違えの読み出し誤差は、結果 $0$ に2つの演算子が要る（条件付き状態 $\mathrm{diag}(1-\epsilon,\epsilon)$ は階数 $2$、$E_0=(1-\epsilon)P_0+\epsilon P_1$） | `test_readout_error_needs_several_operators_per_outcome` |
+| 付録A-5 | ラベル取り違えの読み出し誤差は、結果 $0$ に2つの演算子が要る（条件付き状態 $\mathrm{diag}(1-\epsilon,\epsilon)$ は階数 $2$、$E_0=(1-\epsilon)P_0+\epsilon P_1$） | `test_readout_error_needs_several_operators_per_outcome` |
 | 付録B-3 | 1対1では階数 $=$ 振幅がゼロでない入力の個数（$\alpha=(\sqrt{0.4},\ldots)$ は階数 $4$ でエントロピーは $2$ bit 未満）。入力が $\lvert0\rangle$ だけなら、非定数の $f$ でも積状態 | `test_injective_function_rank_counts_nonzero_amplitudes` |
-| 付録A-4 | $K_m=\langle m_E\vert U\vert0_E\rangle$ から $\sum K^\dagger K=I$ | `test_stinespring_form_of_kraus` |
+| 付録A-5 | $K_m=\langle m_E\vert U\vert0_E\rangle$ から $\sum K^\dagger K=I$ | `test_stinespring_form_of_kraus` |
 | 付録B-2 | 結果レジスタを測ったときの確率と状態、逆像の重ね合わせ | `test_result_register_collapse_for_example`、`test_result_register_collapse_is_uniform_on_preimage` |
 | 付録B-3 | 係数行列の階数（定数 $1$、例 $2$、1対1 $4$）、階数 $1$ ⇔ 積状態、シュミット係数とエントロピー | `test_rank_of_coefficient_matrix_decides_product_form`、`test_schmidt_numbers_of_example_and_entropy` |
 | 付録B | $CC^\dagger$ の対角成分が $P(x)$ | `test_reduced_state_diagonal_is_input_probability` |
-| 付録C-2 | トレース、転置、共役転置、固有値、行列式、ユニタリ性 | `test_tensor_product_invariants` |
-| 付録C-3 | Qiskit の並び順、cx(1, 0) の行列、Part VIII の回路の状態ベクトルと確率。$q_0$ に $X$ は $I\otimes X$、$q_1$ に $X$ は $X\otimes I$ | `test_qiskit_ordering_matches_the_note`、`test_qiskit_single_qubit_gate_positions` |
+| 付録A-1 | トレース、転置、共役転置、固有値、行列式、ユニタリ性、$\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ | `test_tensor_product_invariants` |
+| 付録A-1 | 大きさの違う組での混合積、$\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$、$\det(A\otimes I_n)=(\det A)^n$、$A\otimes B$ の対角化 | `test_swap_permutation_turns_a_kron_i_into_i_kron_a` |
+| 付録B-2、B-3 | $M'_y$ の直交・完全性、$M_xM'_y=P_x\otimes P_y=M'_yM_x$、$M_xM'_y\Phi=c_{x,y}\lvert xangle\lvert yangle$、特異値分解の成分式とシュミット基底の正規直交性 | `test_result_projectors_and_schmidt_expansion_components` |
+| 付録C-1 | Qiskit の並び順、cx(1, 0) の行列、Part VIII の回路の状態ベクトルと確率。$q_0$ に $X$ は $I\otimes X$、$q_1$ に $X$ は $X\otimes I$ | `test_qiskit_ordering_matches_the_note`、`test_qiskit_single_qubit_gate_positions` |
 | 図 | 各図の値を本文の式と `assert` で照合 | `figures/make_measurement_projection_figures.py` |
 
 ```bash

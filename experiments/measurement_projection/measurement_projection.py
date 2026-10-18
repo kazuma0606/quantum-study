@@ -1,9 +1,9 @@
 """射影演算子による測定確率のノート（研究ノート/08_量子コンピュータ/measurement_projection_born_rule.md）の検算。
 
 本編：テンソル積の作用 (A⊗B)(u⊗v)=Au⊗Bv、P(x*)=‖(P_x*⊗I)|Ψ⟩‖²=1/N、④のボルン則の式、⑧の4候補の数値例
-付録A：完全な射影測定、測定後の状態、POVM
+付録A：テンソル積の性質（準備）、完全な射影測定、測定後の状態、POVM
 付録B：係数行列の階数とエンタングルメント、結果レジスタを測ったときの入力の状態
-付録C：クロネッカー積の性質、Qiskit の並び順
+付録C：Qiskit の並び順
 
 使い方:
     uv run python experiments/measurement_projection/measurement_projection.py   # 値を表示する

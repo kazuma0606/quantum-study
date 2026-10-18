@@ -291,6 +291,60 @@ def test_tensor_product_invariants():
     assert np.allclose(W.conj().T @ W, np.eye(6))
 
 
+def test_swap_permutation_turns_a_kron_i_into_i_kron_a():
+    """付録A-1 補題7：Π(A⊗I_n)Π^{-1} = I_n⊗A、(A⊗B)(A'⊗B') = AA'⊗BB'（大きさが違う組）、A⊗B の対角化"""
+    m, n = 2, 3
+    A, B = rand_c(m, m), rand_c(n, n)
+    Ap, Bp = rand_c(m, m), rand_c(n, n)
+    assert np.allclose(np.kron(A, B) @ np.kron(Ap, Bp), np.kron(A @ Ap, B @ Bp))
+    # Π：|k>|l> -> |l>|k>（番号 k*n+l -> l*m+k）
+    Pi = np.zeros((m * n, m * n))
+    for k in range(m):
+        for l in range(n):
+            Pi[l * m + k, k * n + l] = 1.0
+    assert np.allclose(Pi @ np.kron(A, np.eye(n)) @ np.linalg.inv(Pi), np.kron(np.eye(n), A))
+    # det(A⊗I_n) = det(A)^n、det(I_m⊗B) = det(B)^m
+    assert np.isclose(np.linalg.det(np.kron(A, np.eye(n))), np.linalg.det(A) ** n)
+    assert np.isclose(np.linalg.det(np.kron(np.eye(m), B)), np.linalg.det(B) ** m)
+    # 補題6：A=SΛS^{-1}、B=TΘT^{-1} なら A⊗B=(S⊗T)(Λ⊗Θ)(S⊗T)^{-1}
+    la, S = np.linalg.eig(A)
+    mu, T = np.linalg.eig(B)
+    ST = np.kron(S, T)
+    assert np.allclose(ST @ np.kron(np.diag(la), np.diag(mu)) @ np.linalg.inv(ST), np.kron(A, B))
+    # 補題2：成分 δδ から I_m⊗I_n = I_mn
+    assert np.allclose(np.kron(np.eye(m), np.eye(n)), np.eye(m * n))
+
+
+def test_result_projectors_and_schmidt_expansion_components():
+    """付録B：M'_y の直交・完全性、M_x M'_y = P_x⊗P_y = M'_y M_x、M_x M'_y Φ = c_xy |x>|y>、SVD の成分式とシュミット基底の正規直交性"""
+    N, Mdim = 4, 3
+    rng = np.random.default_rng(7)
+    C = rng.normal(size=(N, Mdim)) + 1j * rng.normal(size=(N, Mdim))
+    C /= np.linalg.norm(C)
+    Phi = C.reshape(-1)  # 成分 (x, y) の番号は x*Mdim + y
+    Px = [np.outer(np.eye(N)[x], np.eye(N)[x]) for x in range(N)]
+    Py = [np.outer(np.eye(Mdim)[y], np.eye(Mdim)[y]) for y in range(Mdim)]
+    Mp = [np.kron(np.eye(N), q) for q in Py]
+    assert np.allclose(sum(Mp), np.eye(N * Mdim))
+    for y in range(Mdim):
+        for y2 in range(Mdim):
+            assert np.allclose(Mp[y] @ Mp[y2], (y == y2) * Mp[y])
+        for x in range(N):
+            Mx = np.kron(Px[x], np.eye(Mdim))
+            assert np.allclose(Mx @ Mp[y], np.kron(Px[x], Py[y]))
+            assert np.allclose(Mp[y] @ Mx, np.kron(Px[x], Py[y]))
+            ket_xy = np.kron(np.eye(N)[x], np.eye(Mdim)[y])
+            assert np.allclose(Mx @ Mp[y] @ Phi, C[x, y] * ket_xy)
+    U, s, Vh = np.linalg.svd(C)
+    V = Vh.conj().T
+    k = len(s)
+    recon = sum(s[i] * np.outer(U[:, i], V[:, i].conj()) for i in range(k))
+    assert np.allclose(recon, C)  # c_xy = sum_k U_xk s_k conj(V_yk)
+    assert np.allclose(U.conj().T @ U, np.eye(N))
+    assert np.allclose(V.conj().T @ V, np.eye(Mdim))
+    assert np.isclose(np.sum(s**2), 1.0)
+
+
 def test_qiskit_ordering_matches_the_note():
     qc, sv = mp.qiskit_example()
     psi = mp.psi_state(F_EXAMPLE, 2, 1)
@@ -315,7 +369,7 @@ def test_qiskit_ordering_matches_the_note():
 
 
 def test_qiskit_single_qubit_gate_positions():
-    """付録C-3：q0 に X は I⊗X、q1 に X は X⊗I（教科書の第1 = q1）"""
+    """付録C-1：q0 に X は I⊗X、q1 に X は X⊗I（教科書の第1 = q1）"""
     from qiskit import QuantumCircuit
     from qiskit.quantum_info import Operator, Statevector
 
@@ -422,7 +476,7 @@ def test_environment_picture_gives_kraus_sum():
 
 
 def test_unsharp_measurement_differs_from_readout_error_after_the_measurement():
-    """付録A-4：弱い測定 K_0 と、射影測定＋ラベルの取り違え（確率 ε）は、結果の確率は同じだが、測定後の状態が違う"""
+    """付録A-5：弱い測定 K_0 と、射影測定＋ラベルの取り違え（確率 ε）は、結果の確率は同じだが、測定後の状態が違う"""
     eps = 0.1
     plus = np.array([1, 1], dtype=complex) / np.sqrt(2)
     K0, _ = mp.unsharp_measurement_kraus(eps)
@@ -523,3 +577,28 @@ def test_relative_phase_stays_in_the_system_coherence():
         v = (np.kron(mp.ket(0, 2), e0) + np.exp(1j * phi) * np.kron(mp.ket(1, 2), e1)) / np.sqrt(2)
         ra = mp.partial_trace(mp.density(v), 2, 2)
         assert np.isclose(ra[0, 1], 0.5 * np.exp(-1j * phi) * np.vdot(e1, e0))
+
+
+def test_part8_column_vector_walkthrough():
+    """Part VIII §2〜§6：基底の番号 4a+2b+c+1、各項の列ベクトル、M_x の対角、M_x|Ψ⟩ とノルムの2乗"""
+    # 番号：|abc⟩ は上から 4a+2b+c+1 番目（0 始まりなら 4a+2b+c）
+    for a in (0, 1):
+        for b in (0, 1):
+            for c in (0, 1):
+                v = np.kron(np.kron(mp.ket(a, 2), mp.ket(b, 2)), mp.ket(c, 2))
+                assert np.argmax(v) + 1 == 4 * a + 2 * b + c + 1
+    # 4つの項の列ベクトルと、足した結果
+    terms = [np.kron(mp.ket(x, 4), mp.ket(1 if x == 3 else 0, 2)) for x in range(4)]
+    assert [int(np.argmax(v)) + 1 for v in terms] == [1, 3, 5, 8]
+    assert np.allclose(sum(terms) / 2, 0.5 * np.array([1, 0, 1, 0, 1, 0, 0, 1]))
+    psi = mp.psi_state(F_EXAMPLE, 2, 1)
+    # §4：M_11 の対角と、成分ごとの積
+    M11 = mp.M_op(3, 4, 2)
+    assert np.allclose(np.diag(M11), [0, 0, 0, 0, 0, 0, 1, 1])
+    assert np.allclose(np.diag(M11).real * psi, [0, 0, 0, 0, 0, 0, 0, 0.5])
+    # §6：入力 x の項だけを残す M_x と、入力ごとのペア（2個ずつ）の成分
+    for x, pos in zip(range(4), [1, 3, 5, 8]):
+        v = mp.M_op(x, 4, 2) @ psi
+        assert np.allclose(v, 0.5 * mp.ket(pos - 1, 8)) and np.isclose(np.vdot(v, v).real, 0.25)
+        pair = psi[2 * x: 2 * x + 2]
+        assert np.isclose(np.sum(np.abs(pair) ** 2), 0.25)

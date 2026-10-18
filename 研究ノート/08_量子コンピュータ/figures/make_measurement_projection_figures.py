@@ -166,7 +166,7 @@ def mp04():
     psi = mp.psi_state(F_EX, 2, 1, alpha)
     post_in, p10 = mp.post_measurement_state(psi, 2, 4, 2)  # 入力 10 を測る
     post_out, py0 = mp.result_register_collapse(psi, 0, 4, 2)  # 結果 0 を測る
-    assert np.isclose(p10, 0.3) and np.isclose(py0, 0.6)  # 付録A-2、付録B-2 の確率
+    assert np.isclose(p10, 0.3) and np.isclose(py0, 0.6)  # 付録A-3、付録B-2 の確率
     assert np.allclose(np.abs(post_in), mp.ket(4, 8).real)  # |10⟩|0⟩（添字 4。位相 α_x は残る）
     eps_list = [0.0, 0.1, 0.3]
     th = np.linspace(0, np.pi, 200)
@@ -191,7 +191,7 @@ def mp04():
     for eps, c in zip(eps_list, [C_A, C_B, C_C]):
         K0, K1 = mp.unsharp_measurement_kraus(eps)
         p0 = np.array([np.linalg.norm(K0 @ np.array([np.cos(t / 2), np.sin(t / 2)])) ** 2 for t in th])
-        assert np.allclose(p0, (1 - eps) * np.cos(th / 2) ** 2 + eps * np.sin(th / 2) ** 2)  # 付録A-4 の式
+        assert np.allclose(p0, (1 - eps) * np.cos(th / 2) ** 2 + eps * np.sin(th / 2) ** 2)  # 付録A-5 の式
         ax.plot(th, p0, color=c, lw=2, label=rf"$\epsilon={eps}$" + ("（射影測定）" if eps == 0 else ""))
     ax.set_xlabel(r"$\theta$（状態 $\cos\frac{\theta}{2}|0\rangle+\sin\frac{\theta}{2}|1\rangle$）", fontsize=9)
     ax.set_ylabel(r"結果 $0$ の確率", fontsize=9)
@@ -250,7 +250,7 @@ def mp06():
     cx10.cx(1, 0)
     cx01.cx(0, 1)
     A10, A01 = np.round(Operator(cx10).data.real), np.round(Operator(cx01).data.real)
-    assert np.allclose(A10, mp.CNOT.real) and not np.allclose(A01, mp.CNOT.real)  # 付録C-3
+    assert np.allclose(A10, mp.CNOT.real) and not np.allclose(A01, mp.CNOT.real)  # 付録C-1
 
     fig = plt.figure(figsize=(12, 6))
     ax = fig.add_axes([0.02, 0.5, 0.96, 0.46])
