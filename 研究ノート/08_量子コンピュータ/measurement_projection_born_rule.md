@@ -1521,7 +1521,7 @@ $$
 K_0^2=\mathrm{diag}(1-\epsilon,\ \epsilon)\ne K_0\qquad(0<\epsilon<1)
 $$
 
-なので、$0<\epsilon<1$ の $K_0$ は射影演算子ではありません（$\epsilon=0$ と $\epsilon=1$ では、$K_0^2=K_0$ で、$K_0$ は $|0\rangle\langle0|$、$|1\rangle\langle1|$ という射影演算子です）。$0<\epsilon<1$ のとき、結果 $0$ の後の状態は $\propto(\sqrt{1-\epsilon}\cos\frac\theta2,\ \sqrt\epsilon\sin\frac\theta2)^T$ で、$|0\rangle$ にも $|1\rangle$ にも完全には崩れません（弱い測定）。
+なので、$0<\epsilon<1$ の $K_0$ は射影演算子ではありません（$\epsilon=0$ と $\epsilon=1$ では、$K_0^2=K_0$ で、$K_0$ は $|0\rangle\langle0|$、$|1\rangle\langle1|$ という射影演算子です）。$0<\epsilon<1$ のとき、結果 $0$ の後の状態は $\propto(\sqrt{1-\epsilon}\cos\frac\theta2,\ \sqrt\epsilon\sin\frac\theta2)^T$ です。入力が $|0\rangle$（$\theta=0$）なら $|0\rangle$、$|1\rangle$（$\theta=\pi$）なら $|1\rangle$ のままですが、**$0<\theta<\pi$ の重ね合わせ入力**では、$\cos\frac\theta2$ も $\sin\frac\theta2$ もゼロでないので、どちらの基底状態にも完全には崩れません（弱い測定）。
 
 **1結果1演算子で書けない測定**：結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当て、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすものを、一般の測定とします（(A-7) は各 $m$ に $\alpha$ が1つの場合です）。状態を密度行列 $\rho\in\mathbb C^{d\times d}$ で書くと、結果 $m$ の確率と、測定後の状態は
 
