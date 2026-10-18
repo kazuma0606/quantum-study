@@ -1390,69 +1390,101 @@ $$
 \operatorname{tr}(A\otimes I_2)=1+1+4+4=10=5\cdot2=\operatorname{tr}A\cdot\operatorname{tr}I_2
 $$
 
-**補題6（固有値）**：$u\in\mathbb C^m$ が $A$ の固有ベクトルで固有値が $\lambda$、$v\in\mathbb C^n$ が $B$ の固有ベクトルで固有値が $\mu$ とします。つまり
+**補題6（固有ベクトルのテンソル積は、テンソル積の固有ベクトル）**：$u\in\mathbb C^m$ が $A$ の固有ベクトルで固有値が $\lambda$、$v\in\mathbb C^n$ が $B$ の固有ベクトルで固有値が $\mu$ とします。つまり
 
 $$
 Au=\lambda u,\quad u\neq0\qquad(\lambda\in\mathbb C),\qquad\qquad Bv=\mu v,\quad v\neq0\qquad(\mu\in\mathbb C)
 $$
 
-です（固有ベクトルは、ゼロベクトルでないベクトルです）。このとき、$u\otimes v$ は $A\otimes B$ の固有ベクトルで、固有値は $\lambda\mu$ です。
+です（固有ベクトルは、ゼロベクトルでないベクトルです）。このとき
 
-**証明**：(III-1) で $(A\otimes B)(u\otimes v)=Au\otimes Bv$ です。固有値の式 $Au=\lambda u$、$Bv=\mu v$ を代入すると、$\lambda u\otimes\mu v$ になります。ここから $\lambda\mu$ を外に出す段階を、事実1 で1つずつ行います。まず、第1因子の $\lambda$ を外に出します（事実1 の第1式で $c=\lambda$）。
+$$
+\boxed{(A\otimes B)(u\otimes v)=\lambda\mu\,(u\otimes v),\qquad u\otimes v\neq0}
+$$
+
+が成り立ちます。つまり、**$u\otimes v$ は $A\otimes B$ の固有ベクトルで、固有値は $\lambda\mu$** です（各行列の固有値を、積 $\lambda\mu$ として外に出せる、という主張です）。
+
+**証明の方針**：左辺を (III-1) で $Au\otimes Bv$ に直し、固有値の式を代入し、$\lambda$ と $\mu$ を事実1 でテンソル積の外に出して、右辺の形にします。最後に、$u\otimes v\neq0$（固有ベクトルの条件）を確かめます。
+
+**証明**：
+
+*(1) (III-1) を使う*：
+
+$$
+(A\otimes B)(u\otimes v)=Au\otimes Bv
+$$
+
+*(2) 固有値の式を代入する*：$Au=\lambda u$、$Bv=\mu v$ なので
+
+$$
+Au\otimes Bv=(\lambda u)\otimes(\mu v)
+$$
+
+*(3) 第1因子の $\lambda$ を外に出す*（事実1 の第1式で $c=\lambda$）：
 
 $$
 (\lambda u)\otimes(\mu v)=\lambda\,\big(u\otimes(\mu v)\big)
 $$
 
-次に、第2因子の $\mu$ を外に出します（事実1 の第2式で $c=\mu$）。
+*(4) 第2因子の $\mu$ を外に出す*（事実1 の第2式で $c=\mu$）：
 
 $$
 u\otimes(\mu v)=\mu\,(u\otimes v)
 $$
 
-2つを合わせて
+*(5) まとめる*：(1)〜(4) をつなげると
 
 $$
 (A\otimes B)(u\otimes v)=Au\otimes Bv=(\lambda u)\otimes(\mu v)=\lambda\,\mu\,(u\otimes v)
 $$
 
-です。成分で直接確かめても、第 $(k,l)$ 成分は $(\lambda u_k)(\mu v_l)=\lambda\mu\,(u_kv_l)$ で一致します。固有ベクトルには $u\otimes v\neq0$ が必要ですが、これは次のように確かめられます。$u\neq0$ なので $u_{k_0}\neq0$ となる $k_0$ があり、$v\neq0$ なので $v_{l_0}\neq0$ となる $l_0$ があります。すると $u\otimes v$ の第 $(k_0,l_0)$ 成分は $u_{k_0}v_{l_0}$ で、ゼロでない2つの複素数の積はゼロでないので、$u\otimes v\neq0$ です。$\square$
+です。成分で直接確かめても、第 $(k,l)$ 成分は $(\lambda u_k)(\mu v_l)=\lambda\mu\,(u_kv_l)$ で一致します。
 
-**3個以上の場合**：$C\in\mathbb C^{r\times r}$ とその固有ベクトル $w\in\mathbb C^r$（$Cw=\varphi w$、$w\neq0$）を加えて、$A\otimes B\otimes C$ を考えます。Part III §2-f の定義で、$u\otimes v\otimes w$ の第 $(k,l,s)$ 成分は $u_kv_lw_s$ で、$(A\otimes B\otimes C)(u\otimes v\otimes w)=Au\otimes Bv\otimes Cw$ が成り立ちます（Part III §2-f-3）。固有値の式を代入して、成分で計算すると
+*(6) $u\otimes v\neq0$ を確かめる*（固有ベクトルはゼロベクトルでないことが必要）：$u\neq0$ なので $u_{k_0}\neq0$ となる $k_0$ があり、$v\neq0$ なので $v_{l_0}\neq0$ となる $l_0$ があります。すると $u\otimes v$ の第 $(k_0,l_0)$ 成分は $u_{k_0}v_{l_0}$ で、ゼロでない2つの複素数の積はゼロでないので、$u\otimes v\neq0$ です。$\square$
 
-$$
-\big(Au\otimes Bv\otimes Cw\big)_{(k,l,s)}=(\lambda u_k)(\mu v_l)(\varphi w_s)=\lambda\mu\varphi\,(u_kv_lw_s)
-$$
-
-なので
+**3個以上の場合**：$C\in\mathbb C^{r\times r}$ とその固有ベクトル $w\in\mathbb C^r$（$Cw=\varphi w$、$w\neq0$）を加えると
 
 $$
 (A\otimes B\otimes C)(u\otimes v\otimes w)=\lambda\mu\varphi\,(u\otimes v\otimes w)
 $$
 
-です。固有値 $\lambda,\mu,\varphi$ は、どれも複素数（スカラー）で、成分の積の中から順序を気にせず外に出せるので、**何個でも**外に出せます。行列そのもの（$A,B,C$）は、順序を入れ替えられないので、同じようには外に出せません。
+が成り立ちます。**証明**：Part III §2-f の定義で、$u\otimes v\otimes w$ の第 $(k,l,s)$ 成分は $u_kv_lw_s$ で、$(A\otimes B\otimes C)(u\otimes v\otimes w)=Au\otimes Bv\otimes Cw$ が成り立ちます（Part III §2-f-3）。固有値の式を代入して、成分で計算すると
 
-$A,B$ が対角化できる場合は、これで**すべての**固有値が出ます。$A=S\Lambda S^{-1}$、$B=T\Theta T^{-1}$（$\Lambda=\mathrm{diag}(\lambda_k)$、$\Theta=\mathrm{diag}(\mu_l)$）とすると、(A-1) を使って
+$$
+\big(Au\otimes Bv\otimes Cw\big)_{(k,l,s)}=(\lambda u_k)(\mu v_l)(\varphi w_s)=\lambda\mu\varphi\,(u_kv_lw_s)
+$$
+
+で、右辺の第 $(k,l,s)$ 成分と一致します。$\square$ 固有値 $\lambda,\mu,\varphi$ は、どれも複素数（スカラー）で、成分の積の中から順序を気にせず外に出せるので、**何個でも**外に出せます。行列そのもの（$A,B,C$）は、順序を入れ替えられないので、同じようには外に出せません。
+
+**系（対角化できるとき、すべての固有値が出る）**：$A=S\Lambda S^{-1}$、$B=T\Theta T^{-1}$（$\Lambda=\mathrm{diag}(\lambda_1,\dots,\lambda_m)$、$\Theta=\mathrm{diag}(\mu_1,\dots,\mu_n)$）と対角化できるなら、$A\otimes B$ の固有値は、$\lambda_k\mu_l$（$k=1,\dots,m$、$l=1,\dots,n$）の $mn$ 個すべてです。
+
+**証明**：(A-1) を使うと
 
 $$
 A\otimes B=(S\otimes T)(\Lambda\otimes\Theta)(S^{-1}\otimes T^{-1}),\qquad(S\otimes T)(S^{-1}\otimes T^{-1})=SS^{-1}\otimes TT^{-1}=I_{mn}
 $$
 
-です。$\Lambda\otimes\Theta$ の成分は
+なので、$A\otimes B$ は $\Lambda\otimes\Theta$ と相似です。$\Lambda\otimes\Theta$ の成分は
 
 $$
 (\Lambda\otimes\Theta)_{(k,l),(k',l')}=\Lambda_{kk'}\Theta_{ll'}=\lambda_k\delta_{kk'}\cdot\mu_l\delta_{ll'}=\lambda_k\mu_l\,\delta_{(k,l),(k',l')}
 $$
 
-なので、対角行列で、第 $(k,l)$ 対角成分は $\lambda_k\mu_l$ です。相似な行列の固有値は等しいので、$A\otimes B$ の固有値は $\lambda_k\mu_l$ の $mn$ 個すべてです。
+なので、対角行列で、第 $(k,l)$ 対角成分は $\lambda_k\mu_l$ です。相似な行列の固有値は等しいので、$A\otimes B$ の固有値は $\lambda_k\mu_l$ の $mn$ 個すべてです。$\square$
 
-**補題7（行列式）**：
+**補題7（行列式）**：$A\in\mathbb C^{m\times m}$、$B\in\mathbb C^{n\times n}$ のとき
 
 $$
-\det(A\otimes B)=(\det A)^n\,(\det B)^m
+\boxed{\det(A\otimes B)=(\det A)^n\,(\det B)^m}
 $$
 
-**証明**：(A-1) で $A'=I_m$、$B=I_n$ とすると（帰結の1番目）
+が成り立ちます（$A\otimes B$ は $mn\times mn$ の行列で、$A$ の行列式は $B$ の次元 $n$ 乗、$B$ の行列式は $A$ の次元 $m$ 乗になります）。
+
+**証明の方針**：$A\otimes B$ を、$A\otimes I_n$ と $I_m\otimes B$ の積に分けて、行列式の積の公式を使います。$I_m\otimes B$ は $B$ を並べたブロック対角行列なので、行列式がすぐ求まります。$A\otimes I_n$ は、基底の並びを入れ替える置換行列 $\Pi$ で $I_n\otimes A$（$A$ を並べたブロック対角行列）に直してから、行列式を求めます。
+
+**証明**：
+
+**手順0：2つの因子に分ける**。(A-1) で $A'=I_m$、$B=I_n$ とすると（帰結の1番目）
 
 $$
 A\otimes B=(A\otimes I_n)(I_m\otimes B)
