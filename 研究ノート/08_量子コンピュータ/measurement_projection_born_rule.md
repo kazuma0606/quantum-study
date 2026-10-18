@@ -1518,10 +1518,10 @@ $$
 です。$\epsilon=0$ なら通常の $Z$ 測定（$K_0=|0\rangle\langle0|$）、$\epsilon=1$ なら結果の $0,1$ が入れ替わるだけの $Z$ 測定（$K_0=|1\rangle\langle1|$）です。$0<\epsilon<1$ では、$|0\rangle$（$\theta=0$）でも結果 $0$ の確率が $1-\epsilon$ にとどまり、$|1\rangle$（$\theta=\pi$）でも $\epsilon$ の確率で $0$ が出ます（図 A-1 の右下）。また
 
 $$
-K_0^2=\mathrm{diag}(1-\epsilon,\ \epsilon)\ne K_0
+K_0^2=\mathrm{diag}(1-\epsilon,\ \epsilon)\ne K_0\qquad(0<\epsilon<1)
 $$
 
-なので、$0<\epsilon<1$ の $K_0$ は射影演算子ではありません（$\epsilon=0$ と $\epsilon=1$ では、$K_0$ は $|0\rangle\langle0|$、$|1\rangle\langle1|$ で、どちらも射影演算子です）。結果 $0$ の後の状態は $\propto(\sqrt{1-\epsilon}\cos\frac\theta2,\ \sqrt\epsilon\sin\frac\theta2)^T$ で、$|0\rangle$ に完全には崩れません（弱い測定）。
+なので、$0<\epsilon<1$ の $K_0$ は射影演算子ではありません（$\epsilon=0$ と $\epsilon=1$ では、$K_0^2=K_0$ で、$K_0$ は $|0\rangle\langle0|$、$|1\rangle\langle1|$ という射影演算子です）。$0<\epsilon<1$ のとき、結果 $0$ の後の状態は $\propto(\sqrt{1-\epsilon}\cos\frac\theta2,\ \sqrt\epsilon\sin\frac\theta2)^T$ で、$|0\rangle$ にも $|1\rangle$ にも完全には崩れません（弱い測定）。
 
 **1結果1演算子で書けない測定**：結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当て、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすものを、一般の測定とします（(A-7) は各 $m$ に $\alpha$ が1つの場合です）。状態を密度行列 $\rho\in\mathbb C^{d\times d}$ で書くと、結果 $m$ の確率と、測定後の状態は
 
