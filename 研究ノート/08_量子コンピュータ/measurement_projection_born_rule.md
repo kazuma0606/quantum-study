@@ -16,7 +16,7 @@
 - **付録C**：Qiskit の並び順
 - **付録D**：検算の一覧
 
-**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと49件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
+**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと50件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
 
 <a id="toc"></a>
 
@@ -1894,13 +1894,87 @@ $$
 \sum_mP(m)=\sum_m\langle\Phi|K_m^\dagger K_m|\Phi\rangle=\Big\langle\Phi\Big|\Big(\sum_mK_m^\dagger K_m\Big)\Big|\Phi\Big\rangle=\langle\Phi|\Phi\rangle=1
 $$
 
-**$K_m$ とクラウス表現の関係**：ここでの $K_m$ は、量子チャネルのクラウス表現に出てくるクラウス演算子と**同じもの**です。密度行列 $\rho$ の状態で結果 $m$ が出たときの（規格化前の）状態は $K_m\rho K_m^\dagger$ で、結果を区別せずに平均した状態は $\sum_mK_m\rho K_m^\dagger$ です。状態に作用するのは、左に $K_m$、右に $K_m^\dagger$ を掛けた形です。$K_m^\dagger K_m$ は、確率
+**$K_m$ とクラウス表現の関係**：ここでの $K_m$ は、量子チャネルのクラウス表現に出てくるクラウス演算子と**同じもの**です。密度行列 $\rho$ の状態で結果 $m$ が出たときの（規格化前の）状態は $K_m\rho K_m^\dagger$ で、結果を区別せずに平均した状態は $\sum_mK_m\rho K_m^\dagger$ です。以下で、この形の意味と、トレースがなぜ確率になるかを、順に確かめます。
+
+**$K_m\rho K_m^\dagger$ の意味（純粋状態の場合）**：$\rho=|\Phi\rangle\langle\Phi|$ のとき、結果 $m$ の後の（規格化前の）ケットは $K_m|\Phi\rangle$（(A-7)）で、そのブラ（共役転置）は $\big(K_m|\Phi\rangle\big)^\dagger=\langle\Phi|K_m^\dagger$ です。ケットとブラの積を作ると
 
 $$
-\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(K_m^\dagger K_m\rho\big)
+K_m\rho K_m^\dagger=K_m|\Phi\rangle\langle\Phi|K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger
 $$
 
-（トレースの巡回性 $\operatorname{tr}(XY)=\operatorname{tr}(YX)$ で $K_m^\dagger$ を左端に移した）と、完全性の条件 (A-6) に現れる組み合わせです。
+で、$\rho$ の**ケット側（左）に $K_m$、ブラ側（右）に $K_m^\dagger$** が掛かっています。これが、密度行列を左右から $K_m$、$K_m^\dagger$ で挟む形の意味で、「測定後のケットを $K_m|\Phi\rangle$ にする」ことを、ケットとブラの両方で行ったものです。
+
+**数値例**：1量子ビットで、$|\Phi\rangle=\frac1{\sqrt2}(|0\rangle+|1\rangle)$、$K_0=|0\rangle\langle0|=\begin{pmatrix}1&0\\0&0\end{pmatrix}$（結果 $0$ の測定演算子。射影演算子の場合）とします。密度行列は、列ベクトル $\frac1{\sqrt2}(1,1)^T$ と行ベクトル $\frac1{\sqrt2}(1,1)$ の積（列×行）で
+
+$$
+\rho=|\Phi\rangle\langle\Phi|=\frac12\begin{pmatrix}1&1\\1&1\end{pmatrix}
+$$
+
+です。左から $K_0$ を掛けると、$K_0$ の第2行がゼロなので、$\rho$ の第2行がゼロになります。
+
+$$
+K_0\rho=\frac12\begin{pmatrix}1&0\\0&0\end{pmatrix}\begin{pmatrix}1&1\\1&1\end{pmatrix}=\frac12\begin{pmatrix}1&1\\0&0\end{pmatrix}
+$$
+
+さらに右から $K_0^\dagger=K_0$ を掛けると、$K_0^\dagger$ の第2列がゼロなので、第2列がゼロになります。
+
+$$
+K_0\rho K_0^\dagger=\frac12\begin{pmatrix}1&1\\0&0\end{pmatrix}\begin{pmatrix}1&0\\0&0\end{pmatrix}=\frac12\begin{pmatrix}1&0\\0&0\end{pmatrix}=\frac12|0\rangle\langle0|
+$$
+
+です。ケットで見ても、$K_0|\Phi\rangle=\frac1{\sqrt2}|0\rangle$ で、$\big(K_0|\Phi\rangle\big)\big(K_0|\Phi\rangle\big)^\dagger=\frac1{\sqrt2}|0\rangle\cdot\frac1{\sqrt2}\langle0|=\frac12|0\rangle\langle0|$ と一致します。**結果 $0$ が出る確率は $\frac12$**（$|\Phi\rangle$ の $|0\rangle$ の係数 $\frac1{\sqrt2}$ の2乗）で、$K_0\rho K_0^\dagger$ のトレース（対角成分の和）$\frac12+0=\frac12$ に一致します。
+
+**なぜトレースが確率になるか**：
+
+*(1) 外積のトレースは内積*：復習です。$|a\rangle$ は列ベクトル、$\langle b|$ はそれを横にして複素共役を取った行ベクトルで、**外積** $|a\rangle\langle b|$ は列ベクトル×行ベクトルの $d\times d$ 行列、トレースは対角成分の和です。たとえば実数の $a=(1,2)^T$、$b=(3,4)^T$ なら
+
+$$
+|a\rangle\langle b|=\begin{pmatrix}1\\2\end{pmatrix}\begin{pmatrix}3&4\end{pmatrix}=\begin{pmatrix}3&4\\6&8\end{pmatrix},\qquad\operatorname{tr}\big(|a\rangle\langle b|\big)=3+8=11,\qquad\langle b|a\rangle=3\cdot1+4\cdot2=11
+$$
+
+で、トレースと内積が一致します。これを一般に示します。基底 $|j\rangle$ で $\operatorname{tr}\big(|a\rangle\langle b|\big)=\sum_j\langle j|a\rangle\langle b|j\rangle$ です。数 $\langle j|a\rangle$ と $\langle b|j\rangle$ の順序を入れ替え、完全性関係 $\sum_j|j\rangle\langle j|=I$ を使うと
+
+$$
+\operatorname{tr}\big(|a\rangle\langle b|\big)=\sum_j\langle b|j\rangle\langle j|a\rangle=\langle b|\Big(\sum_j|j\rangle\langle j|\Big)|a\rangle=\langle b|a\rangle
+$$
+
+です。
+
+*(2) 純粋状態の確率*：(1) で $|a\rangle=|b\rangle=K_m|\Phi\rangle$ とすると
+
+$$
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\Big(\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger\Big)=\big\|K_m\Phi\big\|^2=P(m)
+$$
+
+で、(A-7) の確率に一致します。**トレースが確率になる理由は、「外積のトレースが内積（ケットの長さの2乗）になる」ことです。**
+
+*(3) 混合状態の確率*：$\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$）なら、トレースの線形性と (2) から
+
+$$
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\sum_jp_j\operatorname{tr}\big(K_m|\psi_j\rangle\langle\psi_j|K_m^\dagger\big)=\sum_jp_j\,\|K_m\psi_j\|^2
+$$
+
+です。各純粋状態 $|\psi_j\rangle$ で結果 $m$ が出る確率 $\|K_m\psi_j\|^2$ の、重み $p_j$ による平均になっています。
+
+*(4) トレースの巡回性*：2つの行列を掛ける順序を入れ替えても、トレースは変わらない、という性質です。たとえば $X=\begin{pmatrix}1&2\\3&4\end{pmatrix}$、$Y=\begin{pmatrix}0&1\\1&0\end{pmatrix}$ なら、$XY=\begin{pmatrix}2&1\\4&3\end{pmatrix}$（トレース $5$）、$YX=\begin{pmatrix}3&4\\1&2\end{pmatrix}$（トレース $5$）で一致します（$XY\neq YX$ でも）。一般には、$\operatorname{tr}(XY)=\sum_{i,j}X_{ij}Y_{ji}$ で、数の順序と和の文字を入れ替えると $\sum_{j,i}Y_{ji}X_{ij}=\operatorname{tr}(YX)$ なので、$\operatorname{tr}(XY)=\operatorname{tr}(YX)$ です。$X=K_m$、$Y=\rho K_m^\dagger$ とすると
+
+$$
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(\rho K_m^\dagger K_m\big)=\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)
+$$
+
+（2つ目の等号は、同じ性質を $X=\rho$、$Y=K_m^\dagger K_m$ に使った）です。
+
+*(5) 確率の和*：(A-6) $\sum_mK_m^\dagger K_m=I$ と (4) から
+
+$$
+\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\Big(\sum_mK_m^\dagger K_m\,\rho\Big)=\operatorname{tr}\rho=1
+$$
+
+で、結果を区別せずに平均した状態 $\sum_mK_m\rho K_m^\dagger$ のトレースも $1$ です。
+
+（行列の指数関数との関係 $\det(e^A)=e^{\operatorname{tr}A}$ という別の等式がありますが、ここでは使いません。ここで使うのは、外積のトレースが内積になること (1) と、トレースの巡回性 (4) だけです。）
+
+(4) に現れた $K_m^\dagger K_m$ は、確率と、完全性の条件 (A-6) の両方に現れる組み合わせです。次の A-5-2 で、この組み合わせに名前を付けます。
 
 <a id="A-5-2"></a>
 
@@ -2343,7 +2417,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 
 # 付録D：検算の一覧
 
-このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（49件）、図のスクリプトの `assert` で確かめています。
+このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（50件）、図のスクリプトの `assert` で確かめています。
 
 | ノートの箇所 | 確かめたこと | テスト |
 |---|---|---|
@@ -2368,6 +2442,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 | 付録A-5 | ラベル取り違えの読み出し誤差は、結果 $0$ に2つの演算子が要る（条件付き状態 $\mathrm{diag}(1-\epsilon,\epsilon)$ は階数 $2$、$E_0=(1-\epsilon)P_0+\epsilon P_1$） | `test_readout_error_needs_several_operators_per_outcome` |
 | 付録B-3 | 1対1では階数 $=$ 振幅がゼロでない入力の個数（$\alpha=(\sqrt{0.4},\ldots)$ は階数 $4$ でエントロピーは $2$ bit 未満）。入力が $\lvert0\rangle$ だけなら、非定数の $f$ でも積状態 | `test_injective_function_rank_counts_nonzero_amplitudes` |
 | 付録A-5 | $K_m=\langle m_E\vert U\vert0_E\rangle$ から $\sum K^\dagger K=I$ | `test_stinespring_form_of_kraus` |
+| 付録A-5-1 | $\operatorname{tr}(\lvert a\rangle\langle b\rvert)=\langle b\vert a\rangle$、$\operatorname{tr}(K_m\rho K_m^\dagger)=\lVert K_m\Phi\rVert^2$（純粋状態）、混合状態では確率の平均、$\operatorname{tr}(K\rho K^\dagger)=\operatorname{tr}(K^\dagger K\rho)$（巡回性）、$\sum_m\operatorname{tr}(K_m\rho K_m^\dagger)=1$ | `test_trace_of_kraus_form_is_the_outcome_probability` |
 | 付録B-2 | 結果レジスタを測ったときの確率と状態、逆像の重ね合わせ | `test_result_register_collapse_for_example`、`test_result_register_collapse_is_uniform_on_preimage` |
 | 付録B-3 | 係数行列の階数（定数 $1$、例 $2$、1対1 $4$）、階数 $1$ ⇔ 積状態、シュミット係数とエントロピー | `test_rank_of_coefficient_matrix_decides_product_form`、`test_schmidt_numbers_of_example_and_entropy` |
 | 付録B | $CC^\dagger$ の対角成分が $P(x)$ | `test_reduced_state_diagonal_is_input_probability` |

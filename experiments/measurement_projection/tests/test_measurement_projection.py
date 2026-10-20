@@ -428,6 +428,35 @@ def test_partial_trace_note_derivation_steps():
     assert np.allclose(mp.partial_trace(full, d, rr, keep="A"), sum(K @ rho_s @ K.conj().T for K in Ks))
 
 
+def test_trace_of_kraus_form_is_the_outcome_probability():
+    """付録A-5-1：tr(|a><b|)=<b|a>、tr(KρK†)=‖KΦ‖²（純粋状態）、混合状態では確率の平均、巡回性、Σ_m tr(K_m ρ K_m†)=1"""
+    d = 3
+    a, b = rand_c(d), rand_c(d)
+    assert np.isclose(np.trace(np.outer(a, b.conj())), np.vdot(b, a))
+    # 測定演算子の組：Σ K†K = I（ランダムな等長写像を d×d に分割して作る）
+    from scipy.stats import unitary_group
+
+    W = unitary_group.rvs(2 * d, random_state=13)[:, :d]  # (2d)×d、W†W = I
+    Ks = [W[:d, :], W[d:, :]]
+    assert np.allclose(sum(K.conj().T @ K for K in Ks), np.eye(d))
+    # 純粋状態
+    phi = rand_state(d)
+    rho = np.outer(phi, phi.conj())
+    for K in Ks:
+        assert np.isclose(np.trace(K @ rho @ K.conj().T).real, np.linalg.norm(K @ phi) ** 2)
+        assert np.isclose(np.trace(K @ rho @ K.conj().T), np.trace(K.conj().T @ K @ rho))  # 巡回性
+    # 混合状態：確率の平均
+    psis = [rand_state(d) for _ in range(3)]
+    ps = np.array([0.5, 0.3, 0.2])
+    rho_mix = sum(p * np.outer(v, v.conj()) for p, v in zip(ps, psis))
+    for K in Ks:
+        avg = sum(p * np.linalg.norm(K @ v) ** 2 for p, v in zip(ps, psis))
+        assert np.isclose(np.trace(K @ rho_mix @ K.conj().T).real, avg)
+    # 確率の和と、平均した状態のトレース
+    assert np.isclose(sum(np.trace(K @ rho_mix @ K.conj().T) for K in Ks).real, 1.0)
+    assert np.isclose(np.trace(sum(K @ rho_mix @ K.conj().T for K in Ks)).real, 1.0)
+
+
 def test_qiskit_ordering_matches_the_note():
     qc, sv = mp.qiskit_example()
     psi = mp.psi_state(F_EXAMPLE, 2, 1)
