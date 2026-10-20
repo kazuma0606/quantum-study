@@ -52,15 +52,27 @@ def note_files(args: list[str]) -> list[Path]:
 
 
 def strip_code(lines: list[str]) -> list[tuple[int, str]]:
-    """コードブロックと、表の行・見出し・HTML コメント・箇条書きの記号以外を、(行番号, 本文) で返す。"""
+    """コードブロックと HTML コメント（複数行にまたがるものを含む）を除いた行を、(行番号, 本文) で返す。"""
     out: list[tuple[int, str]] = []
     in_code = False
+    in_comment = False
     for i, line in enumerate(lines, 1):
         if line.strip().startswith("```"):
             in_code = not in_code
             continue
         if in_code:
             continue
+        if in_comment:
+            if "-->" in line:
+                in_comment = False
+                line = line.split("-->", 1)[1]
+            else:
+                continue
+        # 1行で閉じるコメントを除く。開いたまま終わるコメントは、以降の行を読み飛ばす
+        line = re.sub(r"<!--.*?-->", "", line)
+        if "<!--" in line:
+            line = line.split("<!--", 1)[0]
+            in_comment = True
         out.append((i, line))
     return out
 
