@@ -760,13 +760,13 @@ $$
 
 ## 4. 成分を取り出す
 
-Part III §3の計算は、候補$x_i$に限らず一般の基底$|x'\rangle|y\rangle$でも同じなので、$P_x:=|x\rangle\langle x|$について
+Part III §3の計算は、候補$x_i$に限らず一般の基底$|x'\rangle|y\rangle$でも同じです。(III-1)で$P_x\otimes I$を$|x'\rangle\otimes|y\rangle$に作用させ、$P_x|x'\rangle=|x\rangle\langle x|x'\rangle=\delta_{x,x'}|x\rangle$（正規直交性$\langle x|x'\rangle=\delta_{x,x'}$）を使うと、$P_x:=|x\rangle\langle x|$について
 
 $$
-(P_x\otimes I)\,|x'\rangle|y\rangle=\delta_{x,x'}\,|x\rangle|y\rangle
+(P_x\otimes I)\,|x'\rangle|y\rangle=\big(P_x|x'\rangle\big)\otimes\big(I|y\rangle\big)=\big(\delta_{x,x'}|x\rangle\big)\otimes|y\rangle=\delta_{x,x'}\,|x\rangle|y\rangle
 $$
 
-です。Part III §4の線形性で$|\Phi\rangle$の和の各項に作用させます：
+です（最後の等号は、スカラー$\delta_{x,x'}$をテンソル積の外に出しています：Part III §2-cの双線形性）。Part III §4の線形性で$|\Phi\rangle$の和の各項に作用させます：
 
 $$
 (P_x\otimes I)|\Phi\rangle=\sum_{x',y}c_{x',y}\,\delta_{x,x'}\,|x\rangle|y\rangle
@@ -788,13 +788,13 @@ $$
 \big(\langle a|\langle b|\big)\big(|c\rangle|d\rangle\big)=\langle a|c\rangle\,\langle b|d\rangle\tag{IV-2}
 $$
 
-**導出**：ブラは、ケットの成分を複素共役にして横に並べたものです。$|a\rangle|b\rangle$の成分は$a_kb_l$なので、そのブラの成分は$a_k^\ast b_l^\ast$です。内積は対応する成分の積の和なので：
+**導出**：ブラは、ケットの成分を複素共役にして横に並べたものです。$|a\rangle|b\rangle$の成分は$a_kb_l$なので、そのブラの成分は$a_k^\ast b_l^\ast$です。内積は対応する成分の積の和なので、複素数の積の順序を入れ替えて$a_k^\ast c_k$と$b_l^\ast d_l$をまとめ、分配法則$\big(\sum_ks_k\big)\big(\sum_lt_l\big)=\sum_k\sum_ls_kt_l$を右から左に使うと：
 
 $$
-\sum_{k,l}a_k^\ast b_l^\ast\,c_kd_l=\Big(\sum_ka_k^\ast c_k\Big)\Big(\sum_lb_l^\ast d_l\Big)=\langle a|c\rangle\langle b|d\rangle
+\sum_{k,l}a_k^\ast b_l^\ast\,c_kd_l=\sum_{k,l}\big(a_k^\ast c_k\big)\big(b_l^\ast d_l\big)=\Big(\sum_ka_k^\ast c_k\Big)\Big(\sum_lb_l^\ast d_l\Big)=\langle a|c\rangle\langle b|d\rangle
 $$
 
-（ここでも$k$と$l$の和が独立に分かれます。）
+（$k$と$l$の和が独立に分かれます。）
 
 <a id="p4-6"></a>
 
@@ -806,7 +806,13 @@ $$
 \langle w|w\rangle=\sum_y\sum_{y'}c_{x,y}^\ast\,c_{x,y'}\,\big(\langle x|\langle y|\big)\big(|x\rangle|y'\rangle\big)
 $$
 
-(IV-2)と正規直交性から$\big(\langle x|\langle y|\big)\big(|x\rangle|y'\rangle\big)=\langle x|x\rangle\langle y|y'\rangle=1\cdot\delta_{y,y'}$なので、$y'=y$の項だけが残り：
+(IV-2)と正規直交性から$\big(\langle x|\langle y|\big)\big(|x\rangle|y'\rangle\big)=\langle x|x\rangle\langle y|y'\rangle=1\cdot\delta_{y,y'}$なので
+
+$$
+\|w\|^2=\sum_y\sum_{y'}c_{x,y}^\ast\,c_{x,y'}\,\delta_{y,y'}
+$$
+
+です。各$y$について、$y'$の和は$y'=y$の項だけが残るので：
 
 $$
 \big\|(P_x\otimes I)|\Phi\rangle\big\|^2=\sum_yc_{x,y}^\ast c_{x,y}=\sum_y|c_{x,y}|^2
@@ -824,7 +830,13 @@ $$
 
 **取り出した成分のノルムの2乗が、入力レジスタの測定確率です。** 物理の仮定はボルン則（Part IV §2）だけで、それ以外は線形代数から導かれています。
 
-（なお、Part IIの$P_x^\dagger=P_x$、$P_x^2=P_x$と、$I^\dagger=I$、$I^2=I$から$(P_x\otimes I)^\dagger(P_x\otimes I)=P_x\otimes I$となるので、$\|(P_x\otimes I)|\Phi\rangle\|^2=\langle\Phi|(P_x\otimes I)|\Phi\rangle$とも書けます。）この形から、全部の$x$について確率を足すと$1$になること、測定した後の状態がどうなるかは、付録A（A-2、A-3）で扱います。
+（なお、Part IIの$P_x^\dagger=P_x$、$P_x^2=P_x$と、$I^\dagger=I$、$I^2=I$に、共役転置の性質$(A\otimes B)^\dagger=A^\dagger\otimes B^\dagger$と混合積の公式(A-1)（どちらも付録A-1で証明）を使うと
+
+$$
+(P_x\otimes I)^\dagger(P_x\otimes I)=(P_x^\dagger\otimes I^\dagger)(P_x\otimes I)=P_x^\dagger P_x\otimes I^\dagger I=P_x^2\otimes I=P_x\otimes I
+$$
+
+となるので、$\|(P_x\otimes I)|\Phi\rangle\|^2=\langle\Phi|(P_x\otimes I)^\dagger(P_x\otimes I)|\Phi\rangle=\langle\Phi|(P_x\otimes I)|\Phi\rangle$とも書けます。）この形から、全部の$x$について確率を足すと$1$になること、測定した後の状態がどうなるかは、付録A（A-2、A-3）で扱います。
 
 ---
 
@@ -886,7 +898,25 @@ $$
 \sum_{i=1}^N\alpha_i|x_i\rangle,\qquad\sum_{i=1}^N|\alpha_i|^2=1
 $$
 
-の場合、$U_f$をかけた後の状態は（線形性から）$\sum_i\alpha_i|x_i\rangle|f(x_i)\rangle$です。Part Vの$\frac1{\sqrt N}$が$\alpha_i$に置き換わるだけなので、Part Vと同じ計算で$M_{x^\ast}$を作用させると$\alpha_{x^\ast}|x^\ast\rangle|f(x^\ast)\rangle$が残り（$\alpha_{x^\ast}$は$x_i=x^\ast$となる$i$の$\alpha_i$）、Part VIと同じ計算でノルムの2乗は（$\alpha_{x^\ast}$は一般に複素数なので$\alpha_{x^\ast}^\ast\alpha_{x^\ast}$として）：
+の場合、$U_f$をかけた後の状態は、$U_f$が線形で$U_f|x_i\rangle|0\cdots0\rangle=|x_i\rangle|f(x_i)\rangle$なので
+
+$$
+U_f\Big(\sum_i\alpha_i|x_i\rangle\Big)|0\cdots0\rangle=\sum_i\alpha_i\,U_f|x_i\rangle|0\cdots0\rangle=\sum_i\alpha_i|x_i\rangle|f(x_i)\rangle
+$$
+
+です。Part Vの$\frac1{\sqrt N}$が$\alpha_i$に置き換わるだけなので、Part Vと同じ計算（$\alpha_i$は定数なので外に出る）で、$M_{x^\ast}$を作用させると
+
+$$
+M_{x^\ast}\sum_i\alpha_i|x_i\rangle|f(x_i)\rangle=\sum_i\alpha_i\,\delta_{x^\ast,x_i}\,|x^\ast\rangle|f(x_i)\rangle=\alpha_{x^\ast}|x^\ast\rangle|f(x^\ast)\rangle
+$$
+
+が残ります（$\alpha_{x^\ast}$は$x_i=x^\ast$となる$i$の$\alpha_i$）。Part VIと同じ計算で、ブラの係数は複素共役$\alpha_{x^\ast}^\ast$になり（$\alpha_{x^\ast}$は一般に複素数）、(IV-2)から
+
+$$
+P(x^\ast)=\alpha_{x^\ast}^\ast\alpha_{x^\ast}\,\langle x^\ast|x^\ast\rangle\langle f(x^\ast)|f(x^\ast)\rangle=\alpha_{x^\ast}^\ast\alpha_{x^\ast}\cdot1\cdot1
+$$
+
+です。つまり：
 
 $$
 \boxed{P(x^\ast)=|\alpha_{x^\ast}|^2}
@@ -1445,35 +1475,97 @@ $$
 
 *(6) $u\otimes v\neq0$ を確かめる*（固有ベクトルはゼロベクトルでないことが必要）：$u\neq0$ なので $u_{k_0}\neq0$ となる $k_0$ があり、$v\neq0$ なので $v_{l_0}\neq0$ となる $l_0$ があります。すると $u\otimes v$ の第 $(k_0,l_0)$ 成分は $u_{k_0}v_{l_0}$ で、ゼロでない2つの複素数の積はゼロでないので、$u\otimes v\neq0$ です。$\square$
 
-**3個以上の場合**：$C\in\mathbb C^{r\times r}$ とその固有ベクトル $w\in\mathbb C^r$（$Cw=\varphi w$、$w\neq0$）を加えると
+**3個以上の場合**：$C\in\mathbb C^{r\times r}$ とその固有ベクトル $w\in\mathbb C^r$（$Cw=\varphi w$、$w\neq0$、$\varphi\in\mathbb C$）を加えると
 
 $$
-(A\otimes B\otimes C)(u\otimes v\otimes w)=\lambda\mu\varphi\,(u\otimes v\otimes w)
+\boxed{(A\otimes B\otimes C)(u\otimes v\otimes w)=\lambda\mu\varphi\,(u\otimes v\otimes w)}
 $$
 
-が成り立ちます。**証明**：Part III §2-f の定義で、$u\otimes v\otimes w$ の第 $(k,l,s)$ 成分は $u_kv_lw_s$ で、$(A\otimes B\otimes C)(u\otimes v\otimes w)=Au\otimes Bv\otimes Cw$ が成り立ちます（Part III §2-f-3）。固有値の式を代入して、成分で計算すると
+が成り立ちます。
+
+**証明**：Part III §2-f の定義（成分で書いたもの）を使います。$u\otimes v\otimes w$ の第 $(k,l,s)$ 成分は $u_kv_lw_s$、$A\otimes B\otimes C$ の第 $(k,l,s),(k',l',s')$ 成分は $A_{kk'}B_{ll'}C_{ss'}$ です。左辺の第 $(k,l,s)$ 成分を、行列とベクトルの積の定義で計算します。
+
+*(1) 積の定義*：すべての列の番号 $(k',l',s')$ について足して
 
 $$
-\big(Au\otimes Bv\otimes Cw\big)_{(k,l,s)}=(\lambda u_k)(\mu v_l)(\varphi w_s)=\lambda\mu\varphi\,(u_kv_lw_s)
+\big[(A\otimes B\otimes C)(u\otimes v\otimes w)\big]_{(k,l,s)}=\sum_{k',l',s'}A_{kk'}B_{ll'}C_{ss'}\;u_{k'}v_{l'}w_{s'}
 $$
 
-で、右辺の第 $(k,l,s)$ 成分と一致します。$\square$ 固有値 $\lambda,\mu,\varphi$ は、どれも複素数（スカラー）で、成分の積の中から順序を気にせず外に出せるので、**何個でも**外に出せます。行列そのもの（$A,B,C$）は、順序を入れ替えられないので、同じようには外に出せません。
-
-**系（対角化できるとき、すべての固有値が出る）**：$A=S\Lambda S^{-1}$、$B=T\Theta T^{-1}$（$\Lambda=\mathrm{diag}(\lambda_1,\dots,\lambda_m)$、$\Theta=\mathrm{diag}(\mu_1,\dots,\mu_n)$）と対角化できるなら、$A\otimes B$ の固有値は、$\lambda_k\mu_l$（$k=1,\dots,m$、$l=1,\dots,n$）の $mn$ 個すべてです。
-
-**証明**：(A-1) を使うと
+*(2) 和を因子ごとに分ける*：複素数の積の順序を入れ替えて $A_{kk'}u_{k'}$、$B_{ll'}v_{l'}$、$C_{ss'}w_{s'}$ をまとめ、分配法則を右から左に使うと
 
 $$
-A\otimes B=(S\otimes T)(\Lambda\otimes\Theta)(S^{-1}\otimes T^{-1}),\qquad(S\otimes T)(S^{-1}\otimes T^{-1})=SS^{-1}\otimes TT^{-1}=I_{mn}
+\sum_{k',l',s'}\big(A_{kk'}u_{k'}\big)\big(B_{ll'}v_{l'}\big)\big(C_{ss'}w_{s'}\big)=\Big(\sum_{k'}A_{kk'}u_{k'}\Big)\Big(\sum_{l'}B_{ll'}v_{l'}\Big)\Big(\sum_{s'}C_{ss'}w_{s'}\Big)=(Au)_k\,(Bv)_l\,(Cw)_s
 $$
 
-なので、$A\otimes B$ は $\Lambda\otimes\Theta$ と相似です。$\Lambda\otimes\Theta$ の成分は
+*(3) 固有値の式を代入する*：$Au=\lambda u$ なので $(Au)_k=\lambda u_k$、同様に $(Bv)_l=\mu v_l$、$(Cw)_s=\varphi w_s$ です。複素数の積の順序を入れ替えて
+
+$$
+(Au)_k(Bv)_l(Cw)_s=(\lambda u_k)(\mu v_l)(\varphi w_s)=\lambda\mu\varphi\,(u_kv_lw_s)
+$$
+
+*(4) 右辺と比べる*：右辺 $\lambda\mu\varphi\,(u\otimes v\otimes w)$ の第 $(k,l,s)$ 成分は $\lambda\mu\varphi\,(u_kv_lw_s)$ で、(3) と一致します。すべての成分で一致するので、等式が成り立ちます。$\square$
+
+固有値 $\lambda,\mu,\varphi$ は、どれも複素数（スカラー）で、成分の積の中から順序を気にせず外に出せるので、**何個でも**外に出せます。行列そのもの（$A,B,C$）は、順序を入れ替えられないので、同じようには外に出せません。$u\otimes v\otimes w\neq0$ も、$2$ 個の場合と同様に、ゼロでない成分 $u_{k_0},v_{l_0},w_{s_0}$ の積が第 $(k_0,l_0,s_0)$ 成分になることから分かります。
+
+**系（対角化できるとき、すべての固有値が出る）**：$A=S\Lambda S^{-1}$、$B=T\Theta T^{-1}$（$S\in\mathbb C^{m\times m}$、$T\in\mathbb C^{n\times n}$ は正則、$\Lambda=\mathrm{diag}(\lambda_1,\dots,\lambda_m)$、$\Theta=\mathrm{diag}(\mu_1,\dots,\mu_n)$）と対角化できるなら、$A\otimes B$ の固有値は、$\lambda_k\mu_l$（$k=1,\dots,m$、$l=1,\dots,n$）の $mn$ 個すべてです。
+
+**証明の方針**：$A\otimes B$ が、対角行列 $\Lambda\otimes\Theta$ と相似（$P(\Lambda\otimes\Theta)P^{-1}$ の形）であることを示し、相似な行列の固有値は等しいことを使います。
+
+**証明**：
+
+*(1) $A\otimes B$ を書き換える*：$A=S\Lambda S^{-1}$、$B=T\Theta T^{-1}$ を代入して
+
+$$
+A\otimes B=\big(S\Lambda S^{-1}\big)\otimes\big(T\Theta T^{-1}\big)
+$$
+
+*(2) (A-1) を2回、右辺から左辺に使う*：(A-1) を $(A_1\otimes B_1)(A_2\otimes B_2)=A_1A_2\otimes B_1B_2$ と書き、まず $A_1=S$、$B_1=T$、$A_2=\Lambda$、$B_2=\Theta$ とすると
+
+$$
+(S\otimes T)(\Lambda\otimes\Theta)=S\Lambda\otimes T\Theta
+$$
+
+です。次に $A_1=S\Lambda$、$B_1=T\Theta$、$A_2=S^{-1}$、$B_2=T^{-1}$ とすると
+
+$$
+(S\Lambda\otimes T\Theta)(S^{-1}\otimes T^{-1})=S\Lambda S^{-1}\otimes T\Theta T^{-1}
+$$
+
+です。2つをつなげると
+
+$$
+(S\otimes T)(\Lambda\otimes\Theta)(S^{-1}\otimes T^{-1})=S\Lambda S^{-1}\otimes T\Theta T^{-1}=A\otimes B
+$$
+
+*(3) $S\otimes T$ が逆行列を持つ*：(A-1) と補題2（$I_m\otimes I_n=I_{mn}$）から
+
+$$
+(S\otimes T)(S^{-1}\otimes T^{-1})=SS^{-1}\otimes TT^{-1}=I_m\otimes I_n=I_{mn}
+$$
+
+で、順序を入れ替えた積 $(S^{-1}\otimes T^{-1})(S\otimes T)$ も同様に $I_{mn}$ です。したがって $(S\otimes T)^{-1}=S^{-1}\otimes T^{-1}$ で、(2) は $A\otimes B=P(\Lambda\otimes\Theta)P^{-1}$（$P:=S\otimes T$）の形、つまり相似です。
+
+*(4) $\Lambda\otimes\Theta$ は対角行列*：成分は
 
 $$
 (\Lambda\otimes\Theta)_{(k,l),(k',l')}=\Lambda_{kk'}\Theta_{ll'}=\lambda_k\delta_{kk'}\cdot\mu_l\delta_{ll'}=\lambda_k\mu_l\,\delta_{(k,l),(k',l')}
 $$
 
-なので、対角行列で、第 $(k,l)$ 対角成分は $\lambda_k\mu_l$ です。相似な行列の固有値は等しいので、$A\otimes B$ の固有値は $\lambda_k\mu_l$ の $mn$ 個すべてです。$\square$
+なので、対角行列で、第 $(k,l)$ 対角成分は $\lambda_k\mu_l$ です。$m=n=2$ なら
+
+$$
+\Lambda\otimes\Theta=\mathrm{diag}\big(\lambda_1\mu_1,\ \lambda_1\mu_2,\ \lambda_2\mu_1,\ \lambda_2\mu_2\big)
+$$
+
+です。
+
+*(5) 相似な行列の固有値は等しい*：$A\otimes B=PDP^{-1}$（$D:=\Lambda\otimes\Theta$）なら、固有多項式は
+
+$$
+\det\big(xI-PDP^{-1}\big)=\det\big(P(xI-D)P^{-1}\big)=\det P\cdot\det(xI-D)\cdot(\det P)^{-1}=\det(xI-D)
+$$
+
+で、$A\otimes B$ と $D$ の固有多項式が一致します。したがって固有値も等しく、$D$ の固有値は対角成分 $\lambda_k\mu_l$（$mn$ 個）なので、$A\otimes B$ の固有値は $\lambda_k\mu_l$ の $mn$ 個すべてです。$\square$
 
 **補題7（行列式）**：$A\in\mathbb C^{m\times m}$、$B\in\mathbb C^{n\times n}$ のとき
 
@@ -2152,13 +2244,29 @@ Part VIII の例の $p_k=(\tfrac34,\tfrac14)$ は、$C^TC=\tfrac14\begin{pmatrix
 
 ## C-1. Qiskit の並び順
 
-本編の教科書流の記法では、$|x_1x_2y\rangle$ の**左が第1の因子**で、$|u\rangle\otimes|v\rangle\otimes|w\rangle$ の成分は $u$ が最上位の添字です。Qiskit は、**ラベルの右端が量子ビット $q_0$** で、$|q_{n-1}\cdots q_1q_0\rangle$ と書きます（添字 $=\sum_jq_j2^j$）。
+**記法と次元の宣言**：$q$ 量子ビットの系の状態空間は $\mathcal H=\mathbb C^{2^q}$（$2^q$ 次元）で、計算基底は $2^q$ 個の $|b_1b_2\cdots b_q\rangle$（$b_j\in\{0,1\}$）です。ここでは、同じ基底ベクトルを2つの流儀で書き表します。
 
 | | 教科書（本編） | Qiskit |
 |---|---|---|
-| ラベル | $\lvert\text{第1}\ \text{第2}\ \text{第3}\rangle$ | $\lvert q_2\,q_1\,q_0\rangle$ |
-| 添字（3量子ビット） | $4\cdot\text{第1}+2\cdot\text{第2}+\text{第3}$ | $4q_2+2q_1+q_0$ |
-| 対応 | 第1 $\leftrightarrow q_2$、第2 $\leftrightarrow q_1$、第3 $\leftrightarrow q_0$ | 番号の大きい方から順に |
+| 量子ビットの呼び方 | 第 $1,2,\dots,q$ | 番号 $0,1,\dots,q-1$（$q_0,q_1,\dots$） |
+| 基底ベクトルのラベル | $\lvert b_1b_2\cdots b_q\rangle$（**左が第1**） | $\lvert q_{q-1}\cdots q_1q_0\rangle$（**右端が $q_0$**） |
+| 列ベクトルの添字（0から数える） | $\sum_{j=1}^{q}b_j\,2^{\,q-j}$（第1が最上位の桁） | $\sum_{i=0}^{q-1}q_i\,2^{\,i}$（$q_0$ が最下位の桁） |
+
+どちらも、ラベルを2進数と読んだ値が、列ベクトルの添字（上から何番目か、0から数える）です。違いは、**どの量子ビットが2進数の最上位の桁か**だけです。教科書の $\otimes$ は、$|u\rangle\otimes|v\rangle\otimes|w\rangle$ の成分で $u$ が最上位の添字になる並べ方です（Part III §2-c）。
+
+**対応を導く**：同じ基底ベクトルについて、教科書の第 $j$ 量子ビットの値 $b_j$ が、Qiskit の番号 $i$ の量子ビットの値 $q_i$ にあたるとします。添字が一致する条件は
+
+$$
+\sum_{j=1}^{q}b_j\,2^{\,q-j}=\sum_{i=0}^{q-1}q_i\,2^{\,i}
+$$
+
+です。左辺の第 $j$ 項の重みは $2^{q-j}$、右辺の第 $i$ 項の重みは $2^i$ なので、**重みが等しい項どうし**、つまり $i=q-j$ を対応させると、$b_j=q_{q-j}$ のとき両辺が一致します。したがって
+
+$$
+\text{第 }j\ \leftrightarrow\ q_{q-j}\qquad(\text{第1}\leftrightarrow q_{q-1},\ \text{第2}\leftrightarrow q_{q-2},\ \dots,\ \text{第 }q\leftrightarrow q_0)
+$$
+
+で、**番号の大きい方から順に**対応します。3量子ビット（$q=3$）なら、第1 $\leftrightarrow q_2$、第2 $\leftrightarrow q_1$、第3 $\leftrightarrow q_0$ で、添字は $4\cdot\text{第1}+2\cdot\text{第2}+\text{第3}=4q_2+2q_1+q_0$ です。
 
 ![教科書とQiskitの並び順](figures/mp06_qiskit_order.png)
 
@@ -2166,9 +2274,44 @@ Part VIII の例の $p_k=(\tfrac34,\tfrac14)$ は、$C^TC=\tfrac14\begin{pmatrix
 
 **確かめた例**：
 
-1. 2量子ビットの回路で量子ビット $q_0$ に $X$ をかけると、状態ベクトルは $(0,1,0,0)^T$、ラベルは `'01'`（$q_1=0$、$q_0=1$）です。教科書の「第1量子ビットに $X$」は $X\otimes I_2$ なので $|00\rangle\to|10\rangle=(0,0,1,0)^T$ で、Qiskit では $q_1$ に $X$ をかけたもの（`x(1)`）にあたります。
-2. 教科書の CNOT（制御が左＝第1）の行列 $\begin{pmatrix}1&0&0&0\\0&1&0&0\\0&0&0&1\\0&0&1&0\end{pmatrix}$ は、Qiskit の `cx(1, 0)`（制御 $q_1$、標的 $q_0$）の行列と一致しました。`cx(0, 1)` の行列は別物です。
-3. **Part VIII の回路**を、入力レジスタを $q_2,q_1$、結果レジスタを $q_0$ として作ります：
+**例1：1つの量子ビットに $X$ をかける**（$q=2$、第1 $\leftrightarrow q_1$、第2 $\leftrightarrow q_0$）。
+
+- Qiskit で量子ビット $q_0$ に $X$ をかけると、$|00\rangle$（添字 $0$）が $q_0=1$ になるので $|01\rangle$（添字 $2\cdot0+1=1$）です。状態ベクトルは、添字 $1$（上から2番目）の成分だけが $1$ の $(0,1,0,0)^T$、ラベルは `'01'`（$q_1=0$、$q_0=1$）です。
+- 教科書の「第1量子ビットに $X$」は $X\otimes I_2$ で、(III-1) から
+
+$$
+(X\otimes I_2)\big(|0\rangle\otimes|0\rangle\big)=X|0\rangle\otimes I_2|0\rangle=|1\rangle\otimes|0\rangle=|10\rangle
+$$
+
+です。ラベル $10$ の添字は $2\cdot1+0=2$ なので、列ベクトルは $(0,0,1,0)^T$ です。第1 $\leftrightarrow q_1$ なので、これは Qiskit では $q_1$ に $X$ をかけたもの（`x(1)`）にあたります。
+
+**例2：CNOT の行列**。教科書の CNOT（制御が左＝第1、標的が第2）は $|a\rangle|b\rangle\mapsto|a\rangle|b\oplus a\rangle$（$\oplus$ は mod 2 の足し算）です。基底ベクトルの行き先は
+
+$$
+|00\rangle\mapsto|00\rangle,\quad|01\rangle\mapsto|01\rangle,\quad|10\rangle\mapsto|11\rangle,\quad|11\rangle\mapsto|10\rangle
+$$
+
+で、第 $0,1,2,3$ 列がこの行き先なので
+
+$$
+\mathrm{CNOT}=\begin{pmatrix}1&0&0&0\\0&1&0&0\\0&0&0&1\\0&0&1&0\end{pmatrix}
+$$
+
+です。Qiskit の `cx(1, 0)`（制御 $q_1$、標的 $q_0$）は、ラベル $|q_1q_0\rangle$ で $|q_1,q_0\rangle\mapsto|q_1,q_0\oplus q_1\rangle$ なので、ラベルの行き先が上と同じで、**同じ行列**になります（第1 $\leftrightarrow q_1$、第2 $\leftrightarrow q_0$ のため）。一方、`cx(0, 1)`（制御 $q_0$、標的 $q_1$）は $|q_1,q_0\rangle\mapsto|q_1\oplus q_0,q_0\rangle$ で、行き先が
+
+$$
+|00\rangle\mapsto|00\rangle,\quad|01\rangle\mapsto|11\rangle,\quad|10\rangle\mapsto|10\rangle,\quad|11\rangle\mapsto|01\rangle
+$$
+
+なので、行列は
+
+$$
+\begin{pmatrix}1&0&0&0\\0&0&0&1\\0&0&1&0\\0&1&0&0\end{pmatrix}
+$$
+
+となり、**別の行列**です。Qiskit の `Operator` で調べても、この通りでした。
+
+**例3：Part VIII の回路**。入力レジスタを $q_2,q_1$、結果レジスタを $q_0$ として作ります：
 
 ```python
 qc = QuantumCircuit(3)
@@ -2176,7 +2319,21 @@ qc.h(2); qc.h(1)      # 入力レジスタを均等な重ね合わせに
 qc.ccx(2, 1, 0)       # f(x)=1 ⇔ x=11：入力がどちらも 1 のとき、結果レジスタを反転
 ```
 
-この回路の状態ベクトルは $\tfrac12(1,0,1,0,1,0,0,1)^T$ で、Part VIII の $|\Psi\rangle$ と**完全に一致**します（教科書の第1を番号の大きい量子ビットに対応させたため）。入力レジスタ $(q_2,q_1)$ の確率は、`Statevector.probabilities([2, 1])` で $(\tfrac14,\tfrac14,\tfrac14,\tfrac14)$ です。$M_{11}=P_{11}\otimes I_2$ を、この状態ベクトルに行列として作用させても、$\tfrac12|111\rangle$ になります。
+状態を順に追います。初期状態は $|000\rangle$ で、$q_2,q_1$ に $H$ をかけると
+
+$$
+\tfrac12\big(|00\rangle+|01\rangle+|10\rangle+|11\rangle\big)\otimes|0\rangle=\tfrac12\big(|000\rangle+|010\rangle+|100\rangle+|110\rangle\big)
+$$
+
+です（ラベルは $|q_2q_1q_0\rangle$）。次に、`ccx(2, 1, 0)` は $q_2=q_1=1$ のときだけ $q_0$ を反転するので、$|110\rangle\mapsto|111\rangle$ で、ほかの3つは変わらず
+
+$$
+\tfrac12\big(|000\rangle+|010\rangle+|100\rangle+|111\rangle\big)
+$$
+
+です。添字は $4q_2+2q_1+q_0$ で、$|000\rangle,|010\rangle,|100\rangle,|111\rangle$ がそれぞれ $0,2,4,7$（0から数える）なので、状態ベクトルは $\tfrac12(1,0,1,0,1,0,0,1)^T$ です。これは Part VIII の $|\Psi\rangle$ と**完全に一致**します（教科書の第1を番号の大きい量子ビットに対応させたため）。
+
+入力レジスタ $(q_2,q_1)$ の確率は、`Statevector.probabilities([2, 1])` で $(\tfrac14,\tfrac14,\tfrac14,\tfrac14)$ です。$q_0$ の値について足し合わせると、たとえば $(q_2,q_1)=(1,1)$ の確率は、添字 $6,7$ の成分の2乗の和 $0+\tfrac14=\tfrac14$ です。$M_{11}=P_{11}\otimes I_2$ を、この状態ベクトルに行列として作用させても、$\tfrac12|111\rangle$ になります（Part VIII §4）。
 
 Qiskit のコードと教科書の式を突き合わせるときは、最初に、**量子ビットの番号とラベルの並び順の対応**を決めてください。
 
