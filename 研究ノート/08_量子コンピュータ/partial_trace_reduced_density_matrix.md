@@ -638,10 +638,10 @@ $$
 
 で、(VI-1) です。$\square$
 
-**トレースが保たれる条件**：$\operatorname{tr}\rho_S'=1$ は、$\operatorname{tr}\rho_S'=\operatorname{tr}\big(\sum_mK_m^\dagger K_m\,\rho_S\big)$（トレースの巡回性）と $\operatorname{tr}\rho_S=1$ から、$\sum_mK_m^\dagger K_m=I$ が成り立つときです。これは、$U^\dagger U=I$ と環境の完全性関係 $\sum_m|m_E\rangle\langle m_E|=I_E$ から
+**トレースが保たれる条件**：$\operatorname{tr}\rho_S'=1$ は、$\operatorname{tr}\rho_S'=\operatorname{tr}\big(\sum_mK_m^\dagger K_m\,\rho_S\big)$（トレースの巡回性）と $\operatorname{tr}\rho_S=1$ から、$\sum_mK_m^\dagger K_m=I$ が成り立つときです。これは、$U^\dagger U=I$ と環境の完全性関係 $\sum_m|m_E\rangle\langle m_E|=I_E$ から導かれます。$\big(I\otimes|m_E\rangle\big)\big(I\otimes\langle m_E|\big)=I_d\otimes|m_E\rangle\langle m_E|$（$dr\times dr$）で、足すと $I_d\otimes I_E=I_{dr}$ なので
 
 $$
-\sum_mK_m^\dagger K_m=\big(I\otimes\langle0_E|\big)U^\dagger\Big(\sum_m|m_E\rangle\langle m_E|\Big)U\big(I\otimes|0_E\rangle\big)=\big(I\otimes\langle0_E|\big)U^\dagger U\big(I\otimes|0_E\rangle\big)=I
+\sum_mK_m^\dagger K_m=\big(I\otimes\langle0_E|\big)U^\dagger\Big(I_d\otimes\sum_m|m_E\rangle\langle m_E|\Big)U\big(I\otimes|0_E\rangle\big)=\big(I\otimes\langle0_E|\big)U^\dagger U\big(I\otimes|0_E\rangle\big)=I
 $$
 
 となって、自動的に成り立ちます（本編の付録A-5-1 の (A-6) と同じ条件）。

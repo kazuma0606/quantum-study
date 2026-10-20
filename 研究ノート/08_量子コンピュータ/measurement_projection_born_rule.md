@@ -2037,10 +2037,10 @@ $$
 U\big(|\Phi\rangle\otimes|0_E\rangle\big)=\sum_m\big(K_m|\Phi\rangle\big)\otimes|m_E\rangle,\qquad K_m=\langle m_E|U|0_E\rangle\in\mathbb C^{d\times d}
 $$
 
-です。環境が $m$ になる確率は、この係数のノルムの2乗 $\|K_m\Phi\|^2$ です。$U^\dagger U=I$ と環境の完全性関係 $\sum_m|m_E\rangle\langle m_E|=I_E$ から
+です。環境が $m$ になる確率は、この係数のノルムの2乗 $\|K_m\Phi\|^2$ です。$U^\dagger U=I$ と環境の完全性関係 $\sum_m|m_E\rangle\langle m_E|=I_E$ から（環境上の演算子は、系の恒等演算子 $I_d$ とのテンソル積 $I_d\otimes\sum_m|m_E\rangle\langle m_E|=I_{dr}$ として、$U^\dagger$ と $U$ の間に入る）
 
 $$
-\sum_mK_m^\dagger K_m=\langle0_E|U^\dagger\Big(\sum_m|m_E\rangle\langle m_E|\Big)U|0_E\rangle=\langle0_E|U^\dagger U|0_E\rangle=I
+\sum_mK_m^\dagger K_m=\langle0_E|U^\dagger\Big(I_d\otimes\sum_m|m_E\rangle\langle m_E|\Big)U|0_E\rangle=\langle0_E|U^\dagger U|0_E\rangle=I
 $$
 
 となり、(A-6) が自動的に成り立ちます。逆に、任意の POVM は、系を拡張した空間の射影測定として実現できることが知られています（ナイマルクの拡張定理。ここでは証明せず、事実として引用します）。系の側から見ると、環境との相互作用で、射影測定が一般の測定に見える、ということです（[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)の T1 の緩和などの量子チャネルも、同じ形の $K_m$ の組で書けます）。

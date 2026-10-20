@@ -417,7 +417,8 @@ def test_partial_trace_note_derivation_steps():
     # Part VI：K_m = (I⊗<m|) U (I⊗|0>)、ρ⊗|0><0| = (I⊗|0>)ρ(I⊗<0|)、ΣK†K = I
     d, rr = 2, 3
     Uu = unitary_group.rvs(d * rr, random_state=11)
-    rho_s = np.outer(rand_state(d), rand_state(d).conj())
+    psi_s = rand_state(d)
+    rho_s = np.outer(psi_s, psi_s.conj())
     ket0 = np.eye(rr)[0]
     I_ket0 = np.kron(np.eye(d), ket0.reshape(rr, 1))  # (d*rr) x d
     assert np.allclose(np.kron(rho_s, np.outer(ket0, ket0)), I_ket0 @ rho_s @ I_ket0.conj().T)
