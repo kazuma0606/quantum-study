@@ -75,9 +75,13 @@ Pkg.add("Yao")  # 量子回路フレームワーク
 | `notebook-gen` | ノートブックを生成スクリプトから作る・直す |
 | `quantum-experiment` | シミュレータ・実機（IBM、AWS Braket）で実験する |
 
-サブエージェント（`.claude/agents/`）：`note-reviewer`（ノートの点検、編集しない）、`literature-scout`（先行研究の調査）、`lean-prover`（Lean の証明の試行錯誤）。
+サブエージェント（`.claude/agents/`）：
+- ノートの監査（どれも編集しない。ノート1本、または大きな改訂ごとに、プッシュの前に使う）：`granularity-reviewer`（初学者の目で、説明の粒度と論理の飛躍を見る）、`math-auditor`（式を再計算し、端点・次元・量化を見る）、`note-reviewer`（式番号・縦棒・リンク・日付などの形式を見る）。
+- `literature-scout`（先行研究の調査）、`lean-prover`（Lean の証明の試行錯誤）。
 
-補助スクリプトは `tools/`（リンク検査、縦棒の検査、スライダーのチェック、図の書き出しとスクリーンショット、ノートブックの生成スクリプト）。詳細は `tools/README.md`。
+ノートの説明の粒度の方針と、予備知識の線引き（「導出済み」の扱い）は `docs/note_style.md`、どの概念がどのノートで導出済みかは `docs/concepts.md`。
+
+補助スクリプトは `tools/`（リンク検査、縦棒の検査、スライダーのチェック、図の書き出しとスクリーンショット、ノートブックの生成スクリプト、ノートの粒度の機械的な点検 `lint_notes.py`）。詳細は `tools/README.md`（`lint_notes.py` の使い方は、スクリプトの先頭の説明を参照）。
 
 ## 関連プロジェクト
 
