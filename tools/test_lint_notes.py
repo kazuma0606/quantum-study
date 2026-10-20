@@ -129,6 +129,12 @@ def test_display_spanning_lines_each_with_one_marker() -> None:
     assert got and "after" in got[-1][1]
 
 
+def test_heading_and_table_lines_with_display_markers_are_not_paragraphs() -> None:
+    heading = "# " + "".join(f"式$a_{k}$、" for k in range(8)) + "あ" * 450 + " $$x=1$$"
+    table = "| " + "".join(f"$a_{k}$ " for k in range(8)) + "あ" * 450 + " $$x$$ |"
+    assert ln.paragraphs([(1, heading), (2, table), (3, "本文")]) == [(3, "本文")]
+
+
 def test_many_inline_formulas_in_a_long_paragraph_are_reported(tmp_path: Path) -> None:
     para = "".join(f"式$a_{k}$を使い、" for k in range(12)) + "あ" * 400 + "\n"
     assert len(run(tmp_path, para)["式の埋没"]) == 1

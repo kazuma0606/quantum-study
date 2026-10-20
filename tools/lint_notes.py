@@ -156,6 +156,9 @@ def paragraphs(lines: list[tuple[int, str]]) -> list[tuple[int, str]]:
         buf.append(s)
 
     for i, line in lines:
+        if not in_display and line.strip().startswith(("|", "#", "<", "!", "---")):
+            flush()                              # 表・見出し・HTML 行は、$$ を含んでいても段落に入れない
+            continue
         if "$$" in line:
             # $$ の出現ごとに、別行の数式の内側かどうかを切り替える（行のどこにあってもよい）。
             # 数式の外の文章は、区切り記号ごとに、その場で段落へ追加する。数式は段落の区切り。
