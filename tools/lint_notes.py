@@ -13,6 +13,10 @@
 
 コードブロック（``` と ~~~）、インラインコード、HTML コメントの中は点検しない。
 
+注意：これは Markdown の完全な解析ではなく、「確認のきっかけ」を出す補助ツール。出力は、直す・直さないの判断材料で、
+ゼロ件でも「問題なし」の証明にはならない（説明の粒度の判断は granularity-reviewer、式の正しさは math-auditor が見る）。
+まれな書き方への対応（端点の細かい誤検出・見逃し）を、これ以上作り込むことは目的にしない。
+
 使い方（リポジトリのルートから）:
     uv run python tools/lint_notes.py                       # 研究ノート/ 以下すべて
     uv run python tools/lint_notes.py 研究ノート/08_量子コンピュータ   # フォルダを指定
@@ -78,7 +82,8 @@ def mask_code_spans(line: str, fill: str = "x") -> str:
 def remove_comments(line: str, in_comment: bool) -> tuple[str, bool]:
     """1行から HTML コメントの部分を取り除き、(残った本文, 行末でコメントの中にいるか) を返す。
 
-    インラインコードの中の `<!--` や `-->` は、コメントの記号として扱わない。
+    コメントの開始 `<!--` は、インラインコードの中では記号として扱わない。いったん始まったコメントは、
+    HTML の規則どおり、バッククォートに関係なく最初の `-->` で閉じる。
     `<!-->` と `<!--->` は、HTML5 のとおり、すぐ閉じる（空の）コメントとして扱う。
     """
     masked = mask_code_spans(line)
@@ -86,7 +91,7 @@ def remove_comments(line: str, in_comment: bool) -> tuple[str, bool]:
     i = 0
     while i < len(line):
         if in_comment:
-            j = masked.find("-->", i)
+            j = line.find("-->", i)          # コメントの中では、バッククォートを特別扱いせず、最初の --> で閉じる
             if j == -1:
                 return "".join(out), True
             i = j + 3
@@ -144,18 +149,27 @@ def paragraphs(lines: list[tuple[int, str]]) -> list[tuple[int, str]]:
             out.append((start, " ".join(buf)))
             buf = []
 
+    def add(s: str, i: int) -> None:
+        nonlocal start
+        if not buf:
+            start = i
+        buf.append(s)
+
     for i, line in lines:
-        # $$ の出現ごとに、別行の数式の内側かどうかを切り替える（行のどこにあってもよい）
-        kept: list[str] = []
-        segs = line.split("$$")
-        for k, seg in enumerate(segs):
-            if not in_display:
-                kept.append(seg)
-            if k < len(segs) - 1:
-                in_display = not in_display
-                flush()                      # 数式は段落の区切り
-        s = "".join(kept).strip()
-        if in_display and not s:
+        if "$$" in line:
+            # $$ の出現ごとに、別行の数式の内側かどうかを切り替える（行のどこにあってもよい）。
+            # 数式の外の文章は、区切り記号ごとに、その場で段落へ追加する。数式は段落の区切り。
+            segs = line.split("$$")
+            for k, seg in enumerate(segs):
+                s = seg.strip()
+                if not in_display and s:
+                    add(s, i)
+                if k < len(segs) - 1:
+                    in_display = not in_display
+                    flush()
+            continue
+        s = line.strip()
+        if in_display:
             continue
         if not s:
             flush()
@@ -168,9 +182,7 @@ def paragraphs(lines: list[tuple[int, str]]) -> list[tuple[int, str]]:
             if not s:
                 flush()
                 continue
-        if not buf:
-            start = i
-        buf.append(s)
+        add(s, i)
     flush()
     return out
 
@@ -201,7 +213,7 @@ def lint(path: Path) -> dict[str, list[str]]:
     # 3・4. タグの定義と、先取りの参照
     defined: dict[str, int] = {}
     for i, line in body:
-        for m in TAG_RE.finditer(line):
+        for m in TAG_RE.finditer(mask_code_spans(line, " ")):      # インラインコードの中の \tag は定義ではない
             tag = m.group(1)
             if tag in defined:
                 result["タグの重複"].append(f"{path.name}:{i}：\\tag{{{tag}}} は {defined[tag]} 行目でも定義されている")

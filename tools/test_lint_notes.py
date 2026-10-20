@@ -54,9 +54,22 @@ def test_comment_marker_inside_double_backtick_code_is_not_a_comment() -> None:
     assert (2, "next") in ln.strip_code(lines)
 
 
-def test_comment_close_marker_inside_inline_code_does_not_end_a_comment() -> None:
-    got = dict(ln.strip_code(["<!-- メモ `-->` まだコメント", "同様に", "-->", "本文"]))
-    assert "同様に" not in got.get(2, "") and got[4] == "本文"
+def test_comment_ends_at_the_first_close_marker_even_inside_backticks() -> None:
+    """HTML では、コメントの中のバッククォートは特別扱いされず、最初の --> で閉じる"""
+    got = dict(ln.strip_code(["<!-- `-->`", "同様に", "後続"]))
+    assert got[2] == "同様に" and got[3] == "後続"
+
+
+def test_inline_code_tag_is_not_a_definition(tmp_path: Path) -> None:
+    text = "例：`" + BS + "tag{A-1}` と書く。\n\n" + tagged("A-1")
+    res = run(tmp_path, text)
+    assert res["タグの重複"] == [] and res["先取りの参照"] == []
+
+
+def test_text_around_a_same_line_display_is_counted_as_separate_paragraphs(tmp_path: Path) -> None:
+    side = "".join(f"式$a_{k}$を使い、" for k in range(4)) + "あ" * 260
+    res = run(tmp_path, side + " $$x=1$$ " + side + "\n")
+    assert res["式の埋没"] == []
 
 
 def test_degenerate_empty_comments_close_immediately() -> None:
