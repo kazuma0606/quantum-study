@@ -115,7 +115,19 @@ $$
 
 と書けます。
 
-**証明**：トレースの定義 $\operatorname{tr}X=\sum_j\langle j|X|j\rangle$（$|j\rangle$ は $\mathcal H_A\otimes\mathcal H_B$ の計算基底、$mn$ 個）から $\operatorname{tr}(\rho A)=\sum_j\langle j|\Phi\rangle\langle\Phi|A|j\rangle$ です。数 $\langle j|\Phi\rangle$ と $\langle\Phi|A|j\rangle$ の順序を入れ替え、$\sum_j|j\rangle\langle j|=I$（完全性関係）を使うと、$\sum_j\langle\Phi|A|j\rangle\langle j|\Phi\rangle=\langle\Phi|A\big(\sum_j|j\rangle\langle j|\big)|\Phi\rangle=\langle\Phi|A|\Phi\rangle$ です。$\square$
+**証明**：トレースの定義 $\operatorname{tr}X=\sum_j\langle j|X|j\rangle$（$|j\rangle$ は $\mathcal H_A\otimes\mathcal H_B$ の計算基底、$mn$ 個）から
+
+$$
+\operatorname{tr}(\rho A)=\sum_j\langle j|\Phi\rangle\langle\Phi|A|j\rangle
+$$
+
+です。数 $\langle j|\Phi\rangle$ と $\langle\Phi|A|j\rangle$ の順序を入れ替え、完全性関係 $\sum_j|j\rangle\langle j|=I$ を使うと
+
+$$
+\sum_j\langle\Phi|A|j\rangle\langle j|\Phi\rangle=\langle\Phi|A\Big(\sum_j|j\rangle\langle j|\Big)|\Phi\rangle=\langle\Phi|A|\Phi\rangle
+$$
+
+です。$\square$
 
 本編の確率 $P(x)=\langle\Phi|M_x|\Phi\rangle$（本編の Part IV §7）は、(I-2) で $A=M_x=P_x\otimes I$ とした
 
@@ -602,7 +614,19 @@ $$
 
 # Part VI：環境を使った見方
 
-**記法と次元の宣言**：系 $S$ の空間を $\mathcal H_S=\mathbb C^d$、環境 $E$ の空間を $\mathcal H_E=\mathbb C^r$ とし、$|0_E\rangle$ を環境の初期状態、$|m_E\rangle$（$m=0,\dots,r-1$）を環境の計算基底（正規直交）とします。系の密度行列を $\rho_S\in\mathbb C^{d\times d}$、全体のユニタリ演算子を $U\in\mathbb C^{dr\times dr}$（$\mathcal H_S\otimes\mathcal H_E$ 上）とします。系の状態を $|\psi\rangle\mapsto|\psi\rangle\otimes|0_E\rangle$ に送る写像を $I\otimes|0_E\rangle:\mathcal H_S\to\mathcal H_S\otimes\mathcal H_E$（$dr\times d$ 行列）、環境の基底 $\langle m_E|$ を作用させる写像を $I\otimes\langle m_E|:\mathcal H_S\otimes\mathcal H_E\to\mathcal H_S$（$d\times dr$ 行列）と書き、
+**記法と次元の宣言**：系 $S$ と環境 $E$ の空間、系の密度行列、全体のユニタリ演算子を
+
+$$
+\mathcal H_S=\mathbb C^d,\qquad\mathcal H_E=\mathbb C^r,\qquad\rho_S\in\mathbb C^{d\times d},\qquad U\in\mathbb C^{dr\times dr}\ \ (\mathcal H_S\otimes\mathcal H_E\ \text{上のユニタリ})
+$$
+
+とします。$|0_E\rangle$ は環境の初期状態、$|m_E\rangle$（$m=0,\dots,r-1$）は環境の計算基底（正規直交）です。2つの写像を
+
+$$
+I\otimes|0_E\rangle:\mathcal H_S\to\mathcal H_S\otimes\mathcal H_E\ \ (dr\times d),\qquad I\otimes\langle m_E|:\mathcal H_S\otimes\mathcal H_E\to\mathcal H_S\ \ (d\times dr)
+$$
+
+と書きます。前者は $|\psi\rangle\mapsto|\psi\rangle\otimes|0_E\rangle$（系の状態に、環境の初期状態を付け加える）、後者は環境の因子に $\langle m_E|$ を作用させる写像です。これらを使って、
 
 $$
 K_m:=\langle m_E|U|0_E\rangle=\big(I\otimes\langle m_E|\big)\,U\,\big(I\otimes|0_E\rangle\big)\in\mathbb C^{d\times d}
@@ -622,7 +646,25 @@ $$
 
 *(1) $\operatorname{Tr}_E$ の書き方*：(II-2) を $E$ について書くと、$\operatorname{Tr}_EZ=\sum_m\big(I\otimes\langle m_E|\big)\,Z\,\big(I\otimes|m_E\rangle\big)$ です（$\langle m_E|$ は $E$ の因子にだけ作用する）。
 
-*(2) $\rho_S\otimes|0_E\rangle\langle0_E|$ の書き換え*：$\rho_S\otimes|0_E\rangle\langle0_E|=\big(I\otimes|0_E\rangle\big)\,\rho_S\,\big(I\otimes\langle0_E|\big)$ です。実際、右辺を基底ベクトル $|s'\rangle|e\rangle$ に作用させると、$\big(I\otimes\langle0_E|\big)|s'\rangle|e\rangle=\langle0_E|e\rangle\,|s'\rangle$、続けて $\rho_S$ と $\big(I\otimes|0_E\rangle\big)$ を作用させて $\langle0_E|e\rangle\,\rho_S|s'\rangle\otimes|0_E\rangle$ となります。左辺 $\rho_S\otimes|0_E\rangle\langle0_E|$ を同じ基底ベクトルに作用させると、本編の (III-1)（$(X\otimes Y)(u\otimes v)=Xu\otimes Yv$）から $\rho_S|s'\rangle\otimes|0_E\rangle\langle0_E|e\rangle=\langle0_E|e\rangle\,\rho_S|s'\rangle\otimes|0_E\rangle$ で、右辺と一致します。すべての基底ベクトルで一致するので、行列として等しくなります。
+*(2) $\rho_S\otimes|0_E\rangle\langle0_E|$ の書き換え*：次の等式が成り立ちます。
+
+$$
+\rho_S\otimes|0_E\rangle\langle0_E|=\big(I\otimes|0_E\rangle\big)\,\rho_S\,\big(I\otimes\langle0_E|\big)
+$$
+
+基底ベクトル $|s'\rangle|e\rangle$ に両辺を作用させて比べます。右辺は、右の行列から順に作用させると
+
+$$
+\big(I\otimes\langle0_E|\big)|s'\rangle|e\rangle=\langle0_E|e\rangle\,|s'\rangle\ \ \longrightarrow\ \ \langle0_E|e\rangle\,\rho_S|s'\rangle\ \ \longrightarrow\ \ \langle0_E|e\rangle\,\rho_S|s'\rangle\otimes|0_E\rangle
+$$
+
+となります（最後の矢印は $I\otimes|0_E\rangle$ の作用）。左辺は、本編の (III-1)（$(X\otimes Y)(u\otimes v)=Xu\otimes Yv$）から
+
+$$
+\big(\rho_S\otimes|0_E\rangle\langle0_E|\big)|s'\rangle|e\rangle=\rho_S|s'\rangle\otimes|0_E\rangle\langle0_E|e\rangle=\langle0_E|e\rangle\,\rho_S|s'\rangle\otimes|0_E\rangle
+$$
+
+で、右辺と一致します。すべての基底ベクトルで一致するので、行列として等しくなります。
 
 *(3) 代入する*：$Z=U(\rho_S\otimes|0_E\rangle\langle0_E|)U^\dagger$ に (2) を代入し、(1) の左右の $\big(I\otimes\langle m_E|\big)$、$\big(I\otimes|m_E\rangle\big)$ とあわせると
 

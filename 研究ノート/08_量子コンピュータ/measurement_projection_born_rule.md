@@ -1896,7 +1896,27 @@ $$
 
 **$K_m$ とクラウス表現の関係**：ここでの $K_m$ は、量子チャネルのクラウス表現に出てくるクラウス演算子と**同じもの**です。密度行列 $\rho$ の状態で結果 $m$ が出たときの（規格化前の）状態は $K_m\rho K_m^\dagger$ で、結果を区別せずに平均した状態は $\sum_mK_m\rho K_m^\dagger$ です。以下で、この形の意味と、トレースがなぜ確率になるかを、順に確かめます。
 
-**$K_m\rho K_m^\dagger$ の意味（純粋状態の場合）**：$\rho=|\Phi\rangle\langle\Phi|$ のとき、結果 $m$ の後の（規格化前の）ケットは $K_m|\Phi\rangle$（(A-7)）で、そのブラ（共役転置）は $\big(K_m|\Phi\rangle\big)^\dagger=\langle\Phi|K_m^\dagger$ です。ケットとブラの積を作ると
+**$K_m\rho K_m^\dagger$ の意味（純粋状態の場合）**：$\rho=|\Phi\rangle\langle\Phi|$ とします。結果 $m$ の後の状態は、(A-7) で
+
+$$
+|\Phi_m\rangle=\frac{K_m|\Phi\rangle}{\sqrt{P(m)}}
+$$
+
+と**定めました**。これは、射影測定の (A-5) を、$K=M_x$ の場合として含む形に広げた定義で、導かれる式ではありません。分母 $\sqrt{P(m)}$ で割る前の $K_m|\Phi\rangle$ を、**規格化前のケット**と呼びます。その長さの2乗は、(A-7) の第1式から
+
+$$
+\|K_m\Phi\|^2=P(m)
+$$
+
+で、確率がそのまま長さに入っています。なお、結果の確率の和が $1$ になるという条件 (A-6) は、ケットの形を決めるものではありません。
+
+規格化前のケットのブラ（共役転置）は
+
+$$
+\big(K_m|\Phi\rangle\big)^\dagger=\langle\Phi|K_m^\dagger
+$$
+
+です。ケットとブラの積を作ると
 
 $$
 K_m\rho K_m^\dagger=K_m|\Phi\rangle\langle\Phi|K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger
@@ -1956,7 +1976,25 @@ $$
 
 です。各純粋状態 $|\psi_j\rangle$ で結果 $m$ が出る確率 $\|K_m\psi_j\|^2$ の、重み $p_j$ による平均になっています。
 
-*(4) トレースの巡回性*：2つの行列を掛ける順序を入れ替えても、トレースは変わらない、という性質です。たとえば $X=\begin{pmatrix}1&2\\3&4\end{pmatrix}$、$Y=\begin{pmatrix}0&1\\1&0\end{pmatrix}$ なら、$XY=\begin{pmatrix}2&1\\4&3\end{pmatrix}$（トレース $5$）、$YX=\begin{pmatrix}3&4\\1&2\end{pmatrix}$（トレース $5$）で一致します（$XY\neq YX$ でも）。一般には、$\operatorname{tr}(XY)=\sum_{i,j}X_{ij}Y_{ji}$ で、数の順序と和の文字を入れ替えると $\sum_{j,i}Y_{ji}X_{ij}=\operatorname{tr}(YX)$ なので、$\operatorname{tr}(XY)=\operatorname{tr}(YX)$ です。$X=K_m$、$Y=\rho K_m^\dagger$ とすると
+*(4) トレースの巡回性*：2つの行列を掛ける順序を入れ替えても、トレースは変わらない、という性質です。たとえば
+
+$$
+X=\begin{pmatrix}1&2\\3&4\end{pmatrix},\qquad Y=\begin{pmatrix}0&1\\1&0\end{pmatrix}
+$$
+
+なら
+
+$$
+XY=\begin{pmatrix}2&1\\4&3\end{pmatrix}\ \ (\operatorname{tr}XY=5),\qquad YX=\begin{pmatrix}3&4\\1&2\end{pmatrix}\ \ (\operatorname{tr}YX=5)
+$$
+
+で、$XY\neq YX$ でもトレースは一致します。一般には、トレースの定義と行列の積の成分から
+
+$$
+\operatorname{tr}(XY)=\sum_{i,j}X_{ij}Y_{ji}=\sum_{j,i}Y_{ji}X_{ij}=\operatorname{tr}(YX)
+$$
+
+です（数の順序と、和の文字 $i,j$ を入れ替えました）。$X=K_m$、$Y=\rho K_m^\dagger$ とすると
 
 $$
 \operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(\rho K_m^\dagger K_m\big)=\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)
@@ -2043,7 +2081,19 @@ $$
 K_0^2=\mathrm{diag}(1-\epsilon,\ \epsilon)\ne K_0\qquad(0<\epsilon<1)
 $$
 
-なので、$0<\epsilon<1$ の $K_0$ は射影演算子ではありません（$\epsilon=0$ と $\epsilon=1$ では、$K_0^2=K_0$ で、$K_0$ は $|0\rangle\langle0|$、$|1\rangle\langle1|$ という射影演算子です）。$0<\epsilon<1$ のとき、結果 $0$ の後の状態は $\propto(\sqrt{1-\epsilon}\cos\frac\theta2,\ \sqrt\epsilon\sin\frac\theta2)^T$ です。入力が $|0\rangle$（$\theta=0$）なら $|0\rangle$、$|1\rangle$（$\theta=\pi$）なら $|1\rangle$ のままですが、**$0<\theta<\pi$ の重ね合わせ入力**では、$\cos\frac\theta2$ も $\sin\frac\theta2$ もゼロでないので、どちらの基底状態にも完全には崩れません（弱い測定）。
+なので、$0<\epsilon<1$ の $K_0$ は射影演算子ではありません。$\epsilon=0$ と $\epsilon=1$ では $K_0^2=K_0$ で、次のように射影演算子です。
+
+$$
+\epsilon=0:\ K_0=|0\rangle\langle0|,\qquad\epsilon=1:\ K_0=|1\rangle\langle1|
+$$
+
+$0<\epsilon<1$ のとき、結果 $0$ の後の状態は、次のベクトルに比例します。
+
+$$
+\begin{pmatrix}\sqrt{1-\epsilon}\,\cos\frac\theta2\\\sqrt\epsilon\,\sin\frac\theta2\end{pmatrix}
+$$
+
+入力が $|0\rangle$（$\theta=0$）なら $|0\rangle$、$|1\rangle$（$\theta=\pi$）なら $|1\rangle$ のままです。**$0<\theta<\pi$ の重ね合わせ入力**では、$\cos\frac\theta2$ も $\sin\frac\theta2$ もゼロでないので、どちらの基底状態にも完全には崩れません（弱い測定）。
 
 **1結果1演算子で書けない測定**：結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当て、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすものを、一般の測定とします（(A-7) は各 $m$ に $\alpha$ が1つの場合です）。状態を密度行列 $\rho\in\mathbb C^{d\times d}$ で書くと、結果 $m$ の確率と、測定後の状態は
 
@@ -2256,7 +2306,19 @@ Part III §2-f-5 の積状態の判定（$2\times2$ では $w_{00}w_{11}=w_{01}w
 | Part VIII の例 | 列が2つとも使われる | $2$ | エンタングルしている |
 | 1対1（$f(x)=x$） | 各行・各列に1つずつ | $m$ | エンタングルしている（均等なら、エントロピーが最大 $\log_2m$） |
 
-階数が積状態かどうかの判定であって、エンタングルメントの**量**を表すわけではない点に注意してください。1対1の関数では、階数は**振幅がゼロでない入力の個数**で決まり、振幅の偏りだけではエントロピーが下がります。たとえば $\alpha=(\sqrt{0.9},\sqrt{0.1},0,0)$ なら、振幅がゼロでない入力が $00$ と $01$ の2つなので階数は $2$、$p_k=(0.9,0.1)$ でエントロピーは約 $0.469$ bit です。一方、$\alpha=(\sqrt{0.4},\sqrt{0.3},\sqrt{0.2},\sqrt{0.1})$ のように、すべて $0$ でなければ階数は $4$ のままで、偏りの分だけエントロピーが $\log_24=2$ bit より小さくなります。また、階数が大きくても、シュミット確率が偏っていればエントロピーは小さくなります（$p=(0.999,0.0005,0.0005)$ は階数 $3$ ですが、$p=(0.5,0.5)$ の階数 $2$ よりエントロピーが小さい）。量の比較には、次のエンタングルメントエントロピーを使います。
+階数が積状態かどうかの判定であって、エンタングルメントの**量**を表すわけではない点に注意してください。次の4つの例で、階数とエントロピー（$-\sum_kp_k\log_2p_k$）を比べます。
+
+| 例 | シュミット確率 $p_k$ | 階数 | エントロピー |
+|---|---|---|---|
+| 1対1、$\alpha=(\sqrt{0.9},\sqrt{0.1},0,0)$ | $(0.9,\ 0.1)$ | $2$ | 約 $0.469$ bit |
+| 1対1、$\alpha=(\sqrt{0.4},\sqrt{0.3},\sqrt{0.2},\sqrt{0.1})$ | $(0.4,\ 0.3,\ 0.2,\ 0.1)$ | $4$ | 約 $1.846$ bit（$\log_24=2$ bit より小さい） |
+| ある状態 | $(0.999,\ 0.0005,\ 0.0005)$ | $3$ | 約 $0.012$ bit |
+| ある状態 | $(0.5,\ 0.5)$ | $2$ | $1$ bit |
+
+- **1行目と2行目**：1対1の関数では、階数は**振幅がゼロでない入力の個数**で決まります。1行目は、振幅がゼロでない入力が $00$ と $01$ の2つなので階数 $2$、2行目は、すべて $0$ でないので階数 $4$ のままです。どちらも、振幅が偏っている分、エントロピーが最大（階数 $r$ なら $\log_2r$）より小さくなります。
+- **3行目と4行目**：階数が大きくても、シュミット確率が偏っていればエントロピーは小さくなります。3行目は階数 $3$ ですが、4行目の階数 $2$ より、エントロピーが小さいです。
+
+量の比較には、次のエンタングルメントエントロピーを使います。
 
 **シュミット分解**：$C\in\mathbb C^{m\times n}$ の特異値分解を
 
