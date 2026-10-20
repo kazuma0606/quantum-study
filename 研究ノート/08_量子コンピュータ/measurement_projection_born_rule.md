@@ -1127,6 +1127,9 @@ $M_x|\Psi\rangle$も、同じペアだけを残したベクトルです。
 - [A-3. 測定後の状態（射影仮説）](#A-3)
 - [A-4. 同じ測定をもう一度すると](#A-4)
 - [A-5. 一般の測定と POVM](#A-5)
+  - [A-5-1. 測定演算子](#A-5-1)
+  - [A-5-2. POVM とは](#A-5-2)
+  - [A-5-3. 例と、一般の測定](#A-5-3)
 
 <!-- part-toc:end -->
 
@@ -1530,31 +1533,57 @@ $$
 
 右辺の各行列は、片方のブロックが単位行列です。単位行列の部分の行について余因子展開を繰り返すと、行列式は残りのブロックの行列式、つまり $\det B$ になります。積の公式から全体は $(\det B)^2$ です。ブロックの個数が増えても同じです。
 
-**手順2：$\det(A\otimes I_n)$**。成分は $A_{kk'}\delta_{ll'}$ です。同じ $l$ の行と列だけが $A$ でつながりますが、番号の並び $(k,l)$ では、$A$ の成分が離れて並んでいます。そこで、基底の並びを入れ替える置換行列 $\Pi$ を使います。
+**手順2：$\det(A\otimes I_n)$**。成分は $A_{kk'}\delta_{ll'}$ です。同じ $l$ の行と列だけが $A$ でつながりますが、番号の並び $(k,l)$ では、$A$ の成分が離れて並んでいます。そこで、基底の並びを入れ替える置換行列 $\Pi$ を使って、$A\otimes I_n$ を $I_n\otimes A$（$A$ が $n$ 個並んだ形）に直します。手順2 は、次の3つの段階で進めます。
+
+- **2-1**：置換行列 $\Pi$ を定義する。
+- **2-2**：関係式 $\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ を導く。
+- **2-3**：この関係式を使って、$\det(A\otimes I_n)$ を求める。
+
+**2-1. 置換行列 $\Pi$ の定義**：
 
 $$
 \Pi\big(|k\rangle\otimes|l\rangle\big)=|l\rangle\otimes|k\rangle,\qquad\Pi\in\mathbb C^{mn\times mn}
 $$
 
-（$\mathcal H_A\otimes\mathcal H_B$ の基底を、$\mathcal H_B\otimes\mathcal H_A$ の基底に移します。各列に $1$ が1つだけある行列です。）基底ベクトル $|l\rangle\otimes|k\rangle$ に、$\Pi(A\otimes I_n)\Pi^{-1}$ を右から順に作用させると、(III-1) から
+（$\mathcal H_A\otimes\mathcal H_B$ の基底を、$\mathcal H_B\otimes\mathcal H_A$ の基底に移します。各列に $1$ が1つだけある行列です。）$\Pi$ が $|k\rangle\otimes|l\rangle$ を $|l\rangle\otimes|k\rangle$ に移すので、逆行列 $\Pi^{-1}$ は逆向きに、$|l\rangle\otimes|k\rangle$ を $|k\rangle\otimes|l\rangle$ に移します。
+
+**2-2. 関係式の導出**：
+
+$$
+\Pi\,(A\otimes I_n)\,\Pi^{-1}=I_n\otimes A\tag{★}
+$$
+
+を示します。両辺はどちらも $mn\times mn$ の行列です。事実0 から、すべての基底ベクトルに作用させて同じベクトルが出れば（行列に基底ベクトルを作用させると、その行列の列が出てくるので）、行列として等しくなります。そこで、基底ベクトル $|l\rangle\otimes|k\rangle$（第1因子が $n$ 次元、第2因子が $m$ 次元。事実0 の $m$ と $n$ を入れ替えたもの）に、両辺を作用させて比べます。
+
+*左辺*：$\Pi(A\otimes I_n)\Pi^{-1}$ は、右の行列から順に作用させます。
+
+1. $\Pi^{-1}$：2-1 から、$|l\rangle\otimes|k\rangle$ が $|k\rangle\otimes|l\rangle$ に移ります。
+2. $A\otimes I_n$：(III-1) から $(A\otimes I_n)\big(|k\rangle\otimes|l\rangle\big)=A|k\rangle\otimes I_n|l\rangle=A|k\rangle\otimes|l\rangle$ です。
+3. $\Pi$：$A|k\rangle\otimes|l\rangle$ は基底ベクトルではないので、$\Pi$ の定義がそのままは使えません。$A|k\rangle=\sum_{k'}A_{k'k}|k'\rangle$ と展開し、$\Pi$ の線形性と、$\Pi$ の定義を各項に使います。
+
+$$
+\Pi\big(A|k\rangle\otimes|l\rangle\big)=\sum_{k'}A_{k'k}\,\Pi\big(|k'\rangle\otimes|l\rangle\big)=\sum_{k'}A_{k'k}\,|l\rangle\otimes|k'\rangle=|l\rangle\otimes\sum_{k'}A_{k'k}|k'\rangle=|l\rangle\otimes A|k\rangle
+$$
+
+3つをつなげると
 
 $$
 |l\rangle\otimes|k\rangle\ \xrightarrow{\ \Pi^{-1}\ }\ |k\rangle\otimes|l\rangle\ \xrightarrow{\ A\otimes I_n\ }\ A|k\rangle\otimes|l\rangle\ \xrightarrow{\ \Pi\ }\ |l\rangle\otimes A|k\rangle
 $$
 
-です。一方、(III-1) から
+です。
+
+*右辺*：(III-1) から（第1因子が $I_n$、第2因子が $A$）
 
 $$
-(I_n\otimes A)\big(|l\rangle\otimes|k\rangle\big)=|l\rangle\otimes A|k\rangle
+(I_n\otimes A)\big(|l\rangle\otimes|k\rangle\big)=I_n|l\rangle\otimes A|k\rangle=|l\rangle\otimes A|k\rangle
 $$
 
-なので、すべての基底ベクトルで同じ結果になります。事実0 から、行列として
+です。
 
-$$
-\Pi\,(A\otimes I_n)\,\Pi^{-1}=I_n\otimes A
-$$
+*比べる*：左辺と右辺は、すべての基底ベクトル $|l\rangle\otimes|k\rangle$ で同じ $|l\rangle\otimes A|k\rangle$ を返します。事実0 から列がすべて一致するので、(★) が成り立ちます。以降は、この関係式 (★) を使います。
 
-です。$I_n\otimes A$ の成分は、番号の組を $(l,k)$ として
+**2-3. (★) を使って $\det(A\otimes I_n)$ を求める**：$I_n\otimes A$ の成分は、番号の組を $(l,k)$ として
 
 $$
 (I_n\otimes A)_{(l,k),(l',k')}=\delta_{ll'}\,A_{kk'}
@@ -1572,7 +1601,7 @@ $$
 \det\big(\Pi X\Pi^{-1}\big)=\det\Pi\cdot\det X\cdot(\det\Pi)^{-1}=\det X
 $$
 
-なので、$X=A\otimes I_n$ として
+なので、$X=A\otimes I_n$ として、(★) を使うと
 
 $$
 \det(A\otimes I_n)=\det\big(\Pi(A\otimes I_n)\Pi^{-1}\big)=\det(I_n\otimes A)=(\det A)^n
@@ -1606,21 +1635,21 @@ $\square$
 
 ## A-2. 完全性：確率の和が1になる
 
-**記法と次元の宣言**：入力レジスタは $q$ 量子ビット、$N=2^q$ として、結果レジスタの次元を $M$（$=d_B$）とします。
+**記法と次元の宣言**：入力レジスタは $q$ 量子ビット、$m=2^q$ として、結果レジスタの次元を $n$（$=d_B$）とします。
 
 $$
-\mathcal H_A=\mathbb C^N,\qquad\mathcal H_B=\mathbb C^M,\qquad|x\rangle\in\mathcal H_A,\qquad P_x:=|x\rangle\langle x|\in\mathbb C^{N\times N},\qquad M_x:=P_x\otimes I_M\in\mathbb C^{NM\times NM}
+\mathcal H_A=\mathbb C^m,\qquad\mathcal H_B=\mathbb C^n,\qquad|x\rangle\in\mathcal H_A,\qquad P_x:=|x\rangle\langle x|\in\mathbb C^{m\times m},\qquad M_x:=P_x\otimes I_n\in\mathbb C^{mn\times mn}
 $$
 
-$|x\rangle$ は入力レジスタの計算基底（$x=0,\dots,N-1$。本編の候補 $x_1,\dots,x_N$ が全基底にあたる場合）、$I_M$ は結果レジスタ上の恒等演算子です。演算子 $M_x$ と次元 $M$ は別のものです。A-1 の記号との対応は、$m=N$、$n=M$ です。
+$|x\rangle$ は入力レジスタの計算基底（$x=0,\dots,m-1$）、$I_n$ は結果レジスタ上の恒等演算子（$n\times n$）です。次元の文字 $m,n$ は **A-1 と同じ**（$\mathcal H_A=\mathbb C^m$、$\mathcal H_B=\mathbb C^n$）です。基底の添字は、入力の $x$ が A-1 の $k$ に、結果の $y$ が A-1 の $l$ にあたります（本編で値の意味を持つ文字なので、$x,y$ を使います）。本編の候補の個数 $N$ は、すべての基底が候補なら $m$ と一致します。
 
 | 対象 | 属する空間・写像 | 次元・大きさ |
 |---|---|---|
-| $\lvert x\rangle$ | $\mathcal H_A$ | $N$ |
-| $P_x$ | $\mathcal H_A\to\mathcal H_A$ | $N\times N$ |
-| $I_M$ | $\mathcal H_B\to\mathcal H_B$ | $M\times M$ |
-| $M_x=P_x\otimes I_M$ | $\mathcal H_A\otimes\mathcal H_B\to\mathcal H_A\otimes\mathcal H_B$ | $NM\times NM$ |
-| $\lvert\Phi\rangle$ | $\mathcal H_A\otimes\mathcal H_B$ | $NM$ |
+| $\lvert x\rangle$ | $\mathcal H_A$ | $m$ |
+| $P_x$ | $\mathcal H_A\to\mathcal H_A$ | $m\times m$ |
+| $I_n$ | $\mathcal H_B\to\mathcal H_B$ | $n\times n$ |
+| $M_x=P_x\otimes I_n$ | $\mathcal H_A\otimes\mathcal H_B\to\mathcal H_A\otimes\mathcal H_B$ | $mn\times mn$ |
+| $\lvert\Phi\rangle$ | $\mathcal H_A\otimes\mathcal H_B$ | $mn$ |
 
 **(a) $M_x$ どうしは直交する**：
 
@@ -1628,10 +1657,10 @@ $$
 M_xM_{x'}=\delta_{xx'}\,M_x\tag{A-2}
 $$
 
-**証明**：(A-1) で $A=P_x$、$A'=P_{x'}$、$B=B'=I_M$ とすると
+**証明**：(A-1) で $A=P_x$、$A'=P_{x'}$、$B=B'=I_n$ とすると
 
 $$
-M_xM_{x'}=(P_x\otimes I_M)(P_{x'}\otimes I_M)=P_xP_{x'}\otimes I_MI_M=P_xP_{x'}\otimes I_M
+M_xM_{x'}=(P_x\otimes I_n)(P_{x'}\otimes I_n)=P_xP_{x'}\otimes I_nI_n=P_xP_{x'}\otimes I_n
 $$
 
 です。$P_xP_{x'}$ は、正規直交性 $\langle x|x'\rangle=\delta_{xx'}$ から
@@ -1640,18 +1669,18 @@ $$
 P_xP_{x'}=|x\rangle\langle x|x'\rangle\langle x'|=\delta_{xx'}\,|x\rangle\langle x'|=\delta_{xx'}\,|x\rangle\langle x|=\delta_{xx'}P_x
 $$
 
-です（$\delta_{xx'}\neq0$ なら $x=x'$）。したがって $M_xM_{x'}=\delta_{xx'}P_x\otimes I_M=\delta_{xx'}M_x$ です。$\square$
+です（$\delta_{xx'}\neq0$ なら $x=x'$）。したがって $M_xM_{x'}=\delta_{xx'}P_x\otimes I_n=\delta_{xx'}M_x$ です。$\square$
 
 **(b) 足すと恒等演算子になる**：まず、正規直交基底の**完全性関係**
 
 $$
-\sum_xP_x=\sum_x|x\rangle\langle x|=I_N
+\sum_xP_x=\sum_x|x\rangle\langle x|=I_m
 $$
 
-を示します。任意のベクトル $|\psi\rangle=\sum_{x'}\psi_{x'}|x'\rangle$ に作用させると、$\langle x|\psi\rangle=\psi_x$ なので $\sum_x|x\rangle\langle x|\psi\rangle=\sum_x\psi_x|x\rangle=|\psi\rangle$ で、すべてのベクトルを変えないから $I_N$ です。補題2（和に対する線形性、$I_N\otimes I_M=I_{NM}$）を使うと
+を示します。任意のベクトル $|\psi\rangle=\sum_{x'}\psi_{x'}|x'\rangle$ に作用させると、$\langle x|\psi\rangle=\psi_x$ なので $\sum_x|x\rangle\langle x|\psi\rangle=\sum_x\psi_x|x\rangle=|\psi\rangle$ で、すべてのベクトルを変えないから $I_m$ です。補題2（和に対する線形性、$I_m\otimes I_n=I_{mn}$）を使うと
 
 $$
-\sum_xM_x=\Big(\sum_xP_x\Big)\otimes I_M=I_N\otimes I_M=I_{NM}\tag{A-3}
+\sum_xM_x=\Big(\sum_xP_x\Big)\otimes I_n=I_m\otimes I_n=I_{mn}\tag{A-3}
 $$
 
 です。
@@ -1659,7 +1688,7 @@ $$
 **(c) 確率の和**：Part IV §7 の括弧書きの式 $P(x)=\langle\Phi|M_x|\Phi\rangle$ を $x$ について足し、(A-3) を使うと
 
 $$
-\sum_xP(x)=\Big\langle\Phi\Big|\Big(\sum_xM_x\Big)\Big|\Phi\Big\rangle=\langle\Phi|I_{NM}|\Phi\rangle=\langle\Phi|\Phi\rangle=1\tag{A-4}
+\sum_xP(x)=\Big\langle\Phi\Big|\Big(\sum_xM_x\Big)\Big|\Phi\Big\rangle=\langle\Phi|I_{mn}|\Phi\rangle=\langle\Phi|\Phi\rangle=1\tag{A-4}
 $$
 
 です。本編の $P(x)=\sum_y|c_{x,y}|^2$ を $x$ で足して $\sum_{x,y}|c_{x,y}|^2=\langle\Phi|\Phi\rangle=1$ としても、同じことです（Part IV §3）。**射影演算子の完全系（直交し、足すと $I$）が、「起こりうる結果の確率を足すとちょうど $1$」を保証しています。**
@@ -1671,13 +1700,13 @@ $$
 
 本編で使った物理の仮定は、ボルン則（Part IV §2）だけでした。測定した**後**の状態を決めるには、もう1つ仮定が要ります。
 
-**記法と次元の宣言**：A-2 と同じく、$\mathcal H_A=\mathbb C^N$（入力レジスタ）、$\mathcal H_B=\mathbb C^M$（結果レジスタ）で、測定前の状態は規格化されたベクトル
+**記法と次元の宣言**：A-2 と同じく、$\mathcal H_A=\mathbb C^m$（入力レジスタ）、$\mathcal H_B=\mathbb C^n$（結果レジスタ）で、測定前の状態は規格化されたベクトル
 
 $$
-|\Phi\rangle\in\mathcal H_A\otimes\mathcal H_B=\mathbb C^{NM},\qquad\langle\Phi|\Phi\rangle=1
+|\Phi\rangle\in\mathcal H_A\otimes\mathcal H_B=\mathbb C^{mn},\qquad\langle\Phi|\Phi\rangle=1
 $$
 
-です。入力が $x$ になる確率は $P(x)=\|M_x\Phi\|^2=\langle\Phi|M_x|\Phi\rangle$ で、$M_x\in\mathbb C^{NM\times NM}$ は A-2 の射影演算子です（$M_x^\dagger=M_x$、$M_x^2=M_x$）。
+です。入力が $x$ になる確率は $P(x)=\|M_x\Phi\|^2=\langle\Phi|M_x|\Phi\rangle$ で、$M_x\in\mathbb C^{mn\times mn}$ は A-2 の射影演算子です（$M_x^\dagger=M_x$、$M_x^2=M_x$）。
 
 **仮定（射影仮説）**：入力レジスタの測定で $x$ が得られたとき、測定直後の状態は
 
@@ -1749,7 +1778,11 @@ $$
 
 ## A-5. 一般の測定と POVM
 
-**記法と次元の宣言**：測定される系の状態空間を $\mathcal H=\mathbb C^d$ とし、$|\Phi\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=1$）、$K_m\in\mathbb C^{d\times d}$（結果の添字 $m$ ごとに1つ）とします。入力レジスタの射影測定なら、系は全体 $\mathcal H_A\otimes\mathcal H_B$ で $d=NM$、$K_m=M_x$ です。下の例では1量子ビットで $d=2$ です。
+**記法と次元の宣言**：測定される系の状態空間を $\mathcal H=\mathbb C^d$ とし、$|\Phi\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=1$）、$K_m\in\mathbb C^{d\times d}$（結果の添字 $m$ ごとに1つ）とします。入力レジスタの射影測定なら、系は全体 $\mathcal H_A\otimes\mathcal H_B$ で $d=d_Ad_B$（A-1 の $mn$。ここでは $m$ を結果の添字に使うので、次元は $d_A,d_B$ と書きます）、$K_m=M_x$ です。下の例では1量子ビットで $d=2$ です。
+
+<a id="A-5-1"></a>
+
+### A-5-1. 測定演算子
 
 射影測定は、測定の演算子 $M_x$ が $M_x^2=M_x=M_x^\dagger$（射影演算子）という強い条件を満たす場合です。条件をゆるめて、
 
@@ -1769,7 +1802,24 @@ $$
 \sum_mP(m)=\sum_m\langle\Phi|K_m^\dagger K_m|\Phi\rangle=\Big\langle\Phi\Big|\Big(\sum_mK_m^\dagger K_m\Big)\Big|\Phi\Big\rangle=\langle\Phi|\Phi\rangle=1
 $$
 
-**POVM**：$E_m:=K_m^\dagger K_m$ は、エルミート演算子で、固有値が $0$ 以上です。エルミートなのは
+**$K_m$ とクラウス表現の関係**：ここでの $K_m$ は、量子チャネルのクラウス表現に出てくるクラウス演算子と**同じもの**です。密度行列 $\rho$ の状態で結果 $m$ が出たときの（規格化前の）状態は $K_m\rho K_m^\dagger$ で、結果を区別せずに平均した状態は $\sum_mK_m\rho K_m^\dagger$ です。状態に作用するのは、左に $K_m$、右に $K_m^\dagger$ を掛けた形です。$K_m^\dagger K_m$ は、確率
+
+$$
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(K_m^\dagger K_m\rho\big)
+$$
+
+（トレースの巡回性 $\operatorname{tr}(XY)=\operatorname{tr}(YX)$ で $K_m^\dagger$ を左端に移した）と、完全性の条件 (A-6) に現れる組み合わせです。
+
+<a id="A-5-2"></a>
+
+### A-5-2. POVM とは
+
+**POVM の定義**：測定演算子 $K_m$ から $E_m:=K_m^\dagger K_m$ を作ります。この組 $\{E_m\}$ を **POVM**（正作用素値測度、Positive Operator-Valued Measure）と呼びます。$E_m$ は次の2つの性質を持ちます。
+
+1. 各 $E_m$ は、エルミート演算子で、固有値が $0$ 以上です。
+2. $\sum_mE_m=I$ です。
+
+性質1 を確かめます。エルミートなのは
 
 $$
 E_m^\dagger=(K_m^\dagger K_m)^\dagger=K_m^\dagger K_m=E_m
@@ -1781,13 +1831,27 @@ $$
 \langle v|E_m|v\rangle=\langle v|K_m^\dagger K_m|v\rangle=\|K_mv\|^2\ge0
 $$
 
-だからです。(A-6) は $\sum_mE_m=I$ と書けます。この $\{E_m\}$ を **POVM**（正作用素値測度）と呼びます。確率 $P(m)=\langle\Phi|E_m|\Phi\rangle$ は $E_m$ だけで決まり、測定後の状態まで決めるには $K_m$ が要ります。$K_m$ には、$E_m$ を変えない任意のユニタリ変換 $K_m\to V_mK_m$ の不定性があります：
+だからです。性質2 は、(A-6) そのものです。
+
+**なぜ POVM を考えるか**：(A-7) の確率は $P(m)=\langle\Phi|K_m^\dagger K_m|\Phi\rangle=\langle\Phi|E_m|\Phi\rangle$ で、$K_m$ は $K_m^\dagger K_m=E_m$ という組み合わせでしか現れません。したがって、「結果 $m$ がどの確率で出るか」は $E_m$ だけで決まり、$K_m$ そのものは要りません。一方、測定後の状態 $K_m|\Phi\rangle/\sqrt{P(m)}$ は、$K_m$ そのものが決めます。つまり、**確率は $E_m$ が決め、測定後の状態は $K_m$ が決める**、という分担があります。POVM は、このうち確率を決める部分を取り出したものです。
+
+測定後の状態まで決めるには $K_m$ が要りますが、$K_m$ には、$E_m$ を変えない任意のユニタリ変換 $K_m\to V_mK_m$ の不定性があります：
 
 $$
 (V_mK_m)^\dagger(V_mK_m)=K_m^\dagger V_m^\dagger V_mK_m=K_m^\dagger K_m=E_m
 $$
 
 ですが、測定後の状態は $V_mK_m|\Phi\rangle/\sqrt{P(m)}$ に変わります。射影測定は、$K_m=M_x$ のとき（$E_m=M_x^\dagger M_x=M_x$）です。
+
+**POVM という見方が役に立つ理由**：
+
+- **確率を定めるだけなら、$E_m$ だけで測定を指定できます。** 逆に、固有値が $0$ 以上のエルミート演算子の組 $\{E_m\}$ で $\sum_mE_m=I$ を満たすものが与えられたら、$E_m$ の正の平方根 $K_m:=\sqrt{E_m}$（$E_m$ を対角化して、固有値の平方根を取ったもの）を置くと、エルミートなので $K_m^\dagger K_m=K_m^2=E_m$ で、(A-6) を満たす測定演算子になります。つまり、「確率を定める条件」は、この2つの条件（固有値が $0$ 以上のエルミート、和が $I$）で尽きています。
+- **$E_m$ は射影演算子でなくてかまいません。** 射影測定では $E_m=M_x$ で、互いに直交しました。POVM では、$E_m$ どうしが直交しなくてもよく、結果の個数が空間の次元より多くてもよいです（例：1量子ビットの3結果の POVM。ここでは詳しく扱いません）。次の例の $E_0=\mathrm{diag}(1-\epsilon,\ \epsilon)$ も、射影演算子ではありません。
+- **同じ $E_m$ を与える測定でも、測定後の状態は違うことがあります。** 次の例で、誤差のある測定とラベル取り違えの模型が、まさにそうです（結果 $0$ の $E_0$ は同じで、測定後の状態が違います）。
+
+<a id="A-5-3"></a>
+
+### A-5-3. 例と、一般の測定
 
 **例：誤差のある $Z$ 測定**。1量子ビット（$d=2$）で
 
@@ -1907,32 +1971,32 @@ $$
 
 本編では入力レジスタだけを測りました。ここでは、**結果レジスタ**を測ったとき入力レジスタに何が残るか、そして $|\Psi\rangle$ がどれだけエンタングルしているかを、係数行列で調べます。
 
-**記法と次元の宣言**（付録A-1・A-2 と同じ流儀）：入力レジスタの空間を $\mathcal H_A=\mathbb C^N$、結果レジスタの空間を $\mathcal H_B=\mathbb C^M$ とし、計算基底を $|x\rangle$（$x=0,\dots,N-1$）、$|y\rangle$（$y=0,\dots,M-1$）とします。状態は
+**記法と次元の宣言**（付録A-1・A-2 と同じ流儀）：入力レジスタの空間を $\mathcal H_A=\mathbb C^m$、結果レジスタの空間を $\mathcal H_B=\mathbb C^n$ とし、計算基底を $|x\rangle$（$x=0,\dots,m-1$）、$|y\rangle$（$y=0,\dots,n-1$）とします。状態は
 
 $$
-|\Phi\rangle=\sum_{x=0}^{N-1}\sum_{y=0}^{M-1}c_{x,y}\,|x\rangle\otimes|y\rangle\in\mathcal H_A\otimes\mathcal H_B,\qquad\langle\Phi|\Phi\rangle=1
+|\Phi\rangle=\sum_{x=0}^{m-1}\sum_{y=0}^{n-1}c_{x,y}\,|x\rangle\otimes|y\rangle\in\mathcal H_A\otimes\mathcal H_B,\qquad\langle\Phi|\Phi\rangle=1
 $$
 
-です。この付録で使う対象の大きさは次の通りです（$M$ は結果レジスタの次元で、演算子 $M_x$ や $M'_y$ とは別のものです）。
+です。この付録で使う対象の大きさは次の通りです（次元の文字 $m,n$ と、基底の添字 $x,y$（A-1 の $k,l$ にあたる）は、A-1・A-2 と同じです）。
 
 | 対象 | 属する空間・写像 | 次元・大きさ |
 |---|---|---|
-| $\lvert\Phi\rangle$ | $\mathcal H_A\otimes\mathcal H_B$ | $NM$ |
-| 係数行列 $C=(c_{x,y})$ | 行が入力 $x$、列が結果 $y$ | $N\times M$ |
-| $P_x=\lvert x\rangle\langle x\rvert$、$M_x=P_x\otimes I_M$ | 入力を測る | $N\times N$、$NM\times NM$ |
-| $P_y=\lvert y\rangle\langle y\rvert$、$M'_y=I_N\otimes P_y$ | 結果を測る | $M\times M$、$NM\times NM$ |
+| $\lvert\Phi\rangle$ | $\mathcal H_A\otimes\mathcal H_B$ | $mn$ |
+| 係数行列 $C=(c_{x,y})$ | 行が入力 $x$、列が結果 $y$ | $m\times n$ |
+| $P_x=\lvert x\rangle\langle x\rvert$、$M_x=P_x\otimes I_n$ | 入力を測る | $m\times m$、$mn\times mn$ |
+| $P_y=\lvert y\rangle\langle y\rvert$、$M'_y=I_m\otimes P_y$ | 結果を測る | $n\times n$、$mn\times mn$ |
 
 <a id="B-1"></a>
 
 ## B-1. 係数行列
 
-状態 $|\Phi\rangle=\sum_{x,y}c_{x,y}|x\rangle|y\rangle$（Part IV §1）の係数を、入力 $x$ を行、結果 $y$ を列とする $N\times M$ の行列 $C=(c_{x,y})$ に並べます（$N$ は入力レジスタの次元 $d_A$、$M$ は結果レジスタの次元 $d_B$）。$|\Psi\rangle$（振幅 $\alpha_x$）では
+状態 $|\Phi\rangle=\sum_{x,y}c_{x,y}|x\rangle|y\rangle$（Part IV §1）の係数を、入力 $x$ を行、結果 $y$ を列とする $m\times n$ の行列 $C=(c_{x,y})$ に並べます（$m$ は入力レジスタの次元 $d_A$、$n$ は結果レジスタの次元 $d_B$）。$|\Psi\rangle$（振幅 $\alpha_x$）では
 
 $$
 c_{x,y}=\alpha_x\,\delta_{y,f(x)}
 $$
 
-で、候補で、かつ振幅 $\alpha_x\ne0$ の入力に対応する各行には、ゼロでない成分がちょうど1つあります（候補でない入力や、$\alpha_x=0$ の入力の行はゼロ行です。以下の例は、すべての基底が候補の場合）。Part VIII の例（$N=4$、$M=2$、$\alpha_x=\tfrac12$、$f(x)=1\Leftrightarrow x=11$）では
+で、候補で、かつ振幅 $\alpha_x\ne0$ の入力に対応する各行には、ゼロでない成分がちょうど1つあります（候補でない入力や、$\alpha_x=0$ の入力の行はゼロ行です。以下の例は、すべての基底が候補の場合）。Part VIII の例（$m=4$、$n=2$、$\alpha_x=\tfrac12$、$f(x)=1\Leftrightarrow x=11$）では
 
 $$
 C=\frac12\begin{pmatrix}1&0\\1&0\\1&0\\0&1\end{pmatrix}
@@ -1951,10 +2015,10 @@ $$
 結果レジスタが $y$ になる測定の演算子を
 
 $$
-M'_y:=I_N\otimes P_y\in\mathbb C^{NM\times NM},\qquad P_y:=|y\rangle\langle y|\in\mathbb C^{M\times M}
+M'_y:=I_m\otimes P_y\in\mathbb C^{mn\times mn},\qquad P_y:=|y\rangle\langle y|\in\mathbb C^{n\times n}
 $$
 
-とします。A-2 の $M_x$ と同じ計算（(A-1) と、入力・結果の役割を入れ替えたもの）で、$M'_yM'_{y'}=\delta_{yy'}M'_y$、$\sum_yM'_y=I_{NM}$、$M'^\dagger_y=M'_y$ が成り立ちます。Part III §3 と同じ計算（(III-1) と線形性）で、基底 $|x\rangle|y'\rangle$ に作用させると
+とします。A-2 の $M_x$ と同じ計算（(A-1) と、入力・結果の役割を入れ替えたもの）で、$M'_yM'_{y'}=\delta_{yy'}M'_y$、$\sum_yM'_y=I_{mn}$、$M'^\dagger_y=M'_y$ が成り立ちます。Part III §3 と同じ計算（(III-1) と線形性）で、基底 $|x\rangle|y'\rangle$ に作用させると
 
 $$
 M'_y\big(|x\rangle|y'\rangle\big)=|x\rangle\otimes|y\rangle\langle y|y'\rangle=\delta_{y,y'}\,|x\rangle|y\rangle
@@ -1997,7 +2061,7 @@ $$
 **入力と結果の両方を測る**：付録A-1 の (A-1) から、
 
 $$
-M_xM'_y=(P_x\otimes I_M)(I_N\otimes P_y)=P_xI_N\otimes I_MP_y=P_x\otimes P_y,\qquad M'_yM_x=(I_N\otimes P_y)(P_x\otimes I_M)=I_NP_x\otimes P_yI_M=P_x\otimes P_y
+M_xM'_y=(P_x\otimes I_n)(I_m\otimes P_y)=P_xI_m\otimes I_nP_y=P_x\otimes P_y,\qquad M'_yM_x=(I_m\otimes P_y)(P_x\otimes I_n)=I_mP_x\otimes P_yI_n=P_x\otimes P_y
 $$
 
 なので、順序を入れ替えても同じです。(B-1) の $M'_y|\Phi\rangle$ に $M_x$ を作用させると、$P_x\sum_{x'}c_{x',y}|x'\rangle=c_{x,y}|x\rangle$ なので
@@ -2016,7 +2080,7 @@ $$
 
 **証明**：$|u\rangle=\sum_xu_x|x\rangle$、$|v\rangle=\sum_yv_y|y\rangle$ なら、$|u\rangle\otimes|v\rangle=\sum_{x,y}u_xv_y|x\rangle|y\rangle$（Part III §2-c）なので、$c_{x,y}=u_xv_y$、つまり $C=uv^T$（列ベクトル $u$ と行ベクトル $v^T$ の積）で、階数は $1$ です。逆に、階数 $1$ の行列は $C=uv^T$ の形に書けるので、$|\Phi\rangle=\sum_{x,y}u_xv_y|x\rangle|y\rangle=|u\rangle\otimes|v\rangle$ です（零行列は規格化に反するので除く）。$\square$
 
-Part III §2-f-5 の積状態の判定（$2\times2$ では $w_{00}w_{11}=w_{01}w_{10}$、つまり $\det C=0$）は、この主張の $N=M=2$ の場合です。
+Part III §2-f-5 の積状態の判定（$2\times2$ では $w_{00}w_{11}=w_{01}w_{10}$、つまり $\det C=0$）は、この主張の $m=n=2$ の場合です。
 
 **$|\Psi\rangle$ の場合**（振幅 $\alpha_x$ がすべて $0$ でないとき。下の例は均等な重ね合わせ）：
 
@@ -2024,14 +2088,14 @@ Part III §2-f-5 の積状態の判定（$2\times2$ では $w_{00}w_{11}=w_{01}w
 |---|---|---|---|
 | 定数 $f(x)=0$ | 第0列だけがゼロでない | $1$ | 積状態：$\big(\sum_x\alpha_x\lvert x\rangle\big)\otimes\lvert0\rangle$ |
 | Part VIII の例 | 列が2つとも使われる | $2$ | エンタングルしている |
-| 1対1（$f(x)=x$） | 各行・各列に1つずつ | $N$ | エンタングルしている（均等なら、エントロピーが最大 $\log_2N$） |
+| 1対1（$f(x)=x$） | 各行・各列に1つずつ | $m$ | エンタングルしている（均等なら、エントロピーが最大 $\log_2m$） |
 
 階数が積状態かどうかの判定であって、エンタングルメントの**量**を表すわけではない点に注意してください。1対1の関数では、階数は**振幅がゼロでない入力の個数**で決まり、振幅の偏りだけではエントロピーが下がります。たとえば $\alpha=(\sqrt{0.9},\sqrt{0.1},0,0)$ なら、振幅がゼロでない入力が $00$ と $01$ の2つなので階数は $2$、$p_k=(0.9,0.1)$ でエントロピーは約 $0.469$ bit です。一方、$\alpha=(\sqrt{0.4},\sqrt{0.3},\sqrt{0.2},\sqrt{0.1})$ のように、すべて $0$ でなければ階数は $4$ のままで、偏りの分だけエントロピーが $\log_24=2$ bit より小さくなります。また、階数が大きくても、シュミット確率が偏っていればエントロピーは小さくなります（$p=(0.999,0.0005,0.0005)$ は階数 $3$ ですが、$p=(0.5,0.5)$ の階数 $2$ よりエントロピーが小さい）。量の比較には、次のエンタングルメントエントロピーを使います。
 
-**シュミット分解**：$C\in\mathbb C^{N\times M}$ の特異値分解を
+**シュミット分解**：$C\in\mathbb C^{m\times n}$ の特異値分解を
 
 $$
-C=USV^\dagger,\qquad U\in\mathbb C^{N\times N},\quad V\in\mathbb C^{M\times M}\ (\text{ユニタリ}),\qquad S\in\mathbb R^{N\times M}\ (\text{対角成分が特異値 }s_1\ge s_2\ge\cdots\ge0)
+C=USV^\dagger,\qquad U\in\mathbb C^{m\times m},\quad V\in\mathbb C^{n\times n}\ (\text{ユニタリ}),\qquad S\in\mathbb R^{m\times n}\ (\text{対角成分が特異値 }s_1\ge s_2\ge\cdots\ge0)
 $$
 
 とします。$S$ の非対角成分は $0$ なので、行列の積の成分は
@@ -2060,7 +2124,7 @@ $$
 |---|---|---|
 | 定数 | $(1)$ | $0$ bit |
 | Part VIII の例 | $(\tfrac34,\tfrac14)$ | $-\tfrac34\log_2\tfrac34-\tfrac14\log_2\tfrac14\approx0.811$ bit |
-| 1対1（$N=4$、均等） | $(\tfrac14,\tfrac14,\tfrac14,\tfrac14)$ | $\log_24=2$ bit |
+| 1対1（$m=4$、均等） | $(\tfrac14,\tfrac14,\tfrac14,\tfrac14)$ | $\log_24=2$ bit |
 
 Part VIII の例の $p_k=(\tfrac34,\tfrac14)$ は、$C^TC=\tfrac14\begin{pmatrix}3&0\\0&1\end{pmatrix}$ の固有値です（$C^TC$ の $(y,y')$ 成分は $\sum_xc_{x,y}c_{x,y'}$ なので、第0列同士は $\frac14(1+1+1)=\frac34$、第1列同士は $\frac14$、第0列と第1列は、どの行でも片方が $0$ なので $0$。特異値は $s_k=\sqrt{p_k}$ です）。この例では $C^TC$ が対角なので、その対角成分が、結果レジスタの確率 $P(y)=(\tfrac34,\tfrac14)$（B-2）と一致しています（図 B-1）。
 
