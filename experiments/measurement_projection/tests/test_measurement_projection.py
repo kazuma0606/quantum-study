@@ -357,6 +357,76 @@ def test_result_projectors_and_schmidt_expansion_components():
     assert np.isclose(np.sum(s**2), 1.0)
 
 
+def test_partial_trace_note_derivation_steps():
+    """部分トレースのノート：Part II の行列単位、ベル状態、基底によらない、Part III の SVD と階数、(III-4)、Part V の |s>、Part VI の K_m"""
+    from scipy.stats import unitary_group
+
+    # Part II §1：|x><x'|⊗|y><y'| は、((x,y),(x',y')) 成分だけが 1 の行列（番号は x*n+y）
+    m, n = 2, 3
+    for x in range(m):
+        for xp in range(m):
+            for y in range(n):
+                for yp in range(n):
+                    E = np.outer(np.eye(m)[x], np.eye(m)[xp])
+                    F = np.outer(np.eye(n)[y], np.eye(n)[yp])
+                    unit = np.zeros((m * n, m * n))
+                    unit[x * n + y, xp * n + yp] = 1.0
+                    assert np.allclose(np.kron(E, F), unit)
+    # Part II §1：ベル状態の部分トレースは I/2
+    bell = np.array([1, 0, 0, 1]) / np.sqrt(2)
+    assert np.allclose(mp.partial_trace(np.outer(bell, bell.conj()), 2, 2), np.eye(2) / 2)
+    # Part II §2 性質2：B の基底を unitary V で取り替えても、トレースは同じ
+    Z = rand_c(3, 3)
+    V = unitary_group.rvs(3, random_state=5)
+    cols = [V[:, k] for k in range(3)]
+    assert np.isclose(sum(c.conj() @ Z @ c for c in cols), np.trace(Z))
+    # Part III §1、§3：ρ_A = U (S S^T) U†、ρ_B = conj(V)(S^T S)V^T = (C†C)^T、純度の下限（階数 r）
+    mm, nn = 4, 3
+    C = rand_c(mm, nn)
+    C /= np.linalg.norm(C)
+    rho = np.outer(C.reshape(-1), C.reshape(-1).conj())
+    rho_a = mp.partial_trace(rho, mm, nn, keep="A")
+    rho_b = mp.partial_trace(rho, mm, nn, keep="B")
+    U, s, Vh = np.linalg.svd(C)
+    S = np.zeros((mm, nn))
+    S[: len(s), : len(s)] = np.diag(s)
+    Vm = Vh.conj().T
+    assert np.allclose(rho_a, C @ C.conj().T)
+    assert np.allclose(rho_a, U @ (S @ S.T) @ U.conj().T)
+    assert np.allclose(rho_b, C.T @ C.conj()) and np.allclose(rho_b, (C.conj().T @ C).T)
+    assert np.allclose(rho_b, Vm.conj() @ (S.T @ S) @ Vm.T)
+    p = s**2
+    r = int(np.sum(p > 1e-12))
+    assert np.isclose(np.trace(rho_a @ rho_a).real, np.sum(p**2))
+    assert np.sum(p**2) >= 1 / r - 1e-12 and r <= min(mm, nn)
+    # Part III §4：ρ_A = Σ_y P(y)|φ_y><φ_y|
+    py = np.sum(np.abs(C) ** 2, axis=0)
+    mix = sum(py[y] * np.outer(C[:, y] / np.sqrt(py[y]), (C[:, y] / np.sqrt(py[y])).conj()) for y in range(nn))
+    assert np.allclose(mix, rho_a)
+    # Part V §1：H^{⊗q}|0...0> = |s> = (1/√m)Σ|x>、p_0 = <s|ρ_A|s> = (1/m)Σρ_A
+    q = 2
+    Hq = mp.hadamard_all(q)
+    s_vec = np.ones(2**q) / np.sqrt(2**q)
+    assert np.allclose(Hq[:, 0], s_vec)
+    phi = rand_state(4 * 2)
+    rho_phi = np.outer(phi, phi.conj())
+    ra = mp.partial_trace(rho_phi, 4, 2)
+    p0_direct = np.vdot(phi, np.kron(np.outer(s_vec, s_vec.conj()), np.eye(2)) @ phi).real
+    assert np.isclose(p0_direct, (s_vec.conj() @ ra @ s_vec).real)
+    assert np.isclose(p0_direct, np.sum(ra).real / 4)
+    # Part VI：K_m = (I⊗<m|) U (I⊗|0>)、ρ⊗|0><0| = (I⊗|0>)ρ(I⊗<0|)、ΣK†K = I
+    d, rr = 2, 3
+    Uu = unitary_group.rvs(d * rr, random_state=11)
+    rho_s = np.outer(rand_state(d), rand_state(d).conj())
+    ket0 = np.eye(rr)[0]
+    I_ket0 = np.kron(np.eye(d), ket0.reshape(rr, 1))  # (d*rr) x d
+    assert np.allclose(np.kron(rho_s, np.outer(ket0, ket0)), I_ket0 @ rho_s @ I_ket0.conj().T)
+    Ks = [np.kron(np.eye(d), np.eye(rr)[k].reshape(1, rr)) @ Uu @ I_ket0 for k in range(rr)]
+    assert np.allclose(sum(K.conj().T @ K for K in Ks), np.eye(d))
+    full = Uu @ np.kron(rho_s, np.outer(ket0, ket0)) @ Uu.conj().T
+    assert np.allclose(mp.partial_trace(full, d, rr, keep="A"), sum(K @ rho_s @ K.conj().T for K in Ks))
+
+
 def test_qiskit_ordering_matches_the_note():
     qc, sv = mp.qiskit_example()
     psi = mp.psi_state(F_EXAMPLE, 2, 1)
