@@ -7,7 +7,11 @@
 2. 式の埋没：文中の式（$...$）が多い段落。別行の数式にすると読みやすい。
 3. 先取りの参照：式番号 (X-n) が、定義（\\tag{X-n}）より前の位置で参照されている。
    （同じノートの中で、読む順に後ろにある式を前で使っていないかを見る。
-   「本編の (III-1)」のように他のノートの式を指す参照は対象外。）
+   「本編の (III-1)」のように他のノートの式を指す参照は対象外。参照として拾うのは、
+   このノートの \\tag で定義されている番号だけ。半角・全角の括弧に対応する。）
+4. タグの重複：同じ \\tag が2回以上定義されている。
+
+コードブロック（``` と ~~~）、インラインコード、HTML コメントの中は点検しない。
 
 使い方（リポジトリのルートから）:
     uv run python tools/lint_notes.py                       # 研究ノート/ 以下すべて
@@ -15,7 +19,7 @@
     uv run python tools/lint_notes.py path/to/note.md [...]    # ファイルを指定
     uv run python tools/lint_notes.py --summary              # ファイルごとの件数だけ
 
-終了コードは常に 0（点検の結果は報告だけ）。
+終了コードは、点検の結果によらず 0（報告だけ）。存在しないパスを渡したときは、警告を出して 2。
 """
 
 from __future__ import annotations
@@ -29,85 +33,145 @@ ROOT = Path(__file__).resolve().parents[1]
 NOTES = ROOT / "研究ノート"
 
 SKIP_WORDS = ("同様に", "同様にして", "容易に", "明らかに", "明らか", "自明", "つもり", "ほぼ明らか", "計算すると")
+EXCLUDE_DIRS = {".git", ".lake", ".venv", "node_modules", "__pycache__", "figures"}
 TAG_RE = re.compile(r"\\tag\{([^}]+)\}")
-REF_RE = re.compile(r"\(([A-Za-z]{1,3}-[0-9]+|[IVX]+-[0-9]+)\)")
-INLINE_MATH_RE = re.compile(r"(?<!\$)\$(?!\$)[^$\n]+\$(?!\$)")
+CODE_SPAN_RE = re.compile(r"(`+)(?:(?!\1).)+?\1")        # 開きと同じ長さのバッククォート列で閉じる
+INLINE_MATH_RE = re.compile(r"(?<![\$\\])\$(?!\$)(?:\\.|[^$\\\n])+\$(?!\$)")
+NOTE_REF_PREFIX_RE = re.compile(r"本編(?:の付録[A-D](?:-\d+)*)?\s*の\s*$")   # 「本編の (III-1)」など
+FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
 MANY_INLINE = 7          # 1つの段落に、文中の式がこの個数以上あれば報告する
 LONG_PARAGRAPH = 450     # 文字数の目安（式が多い段落のみ対象）
+CATEGORIES = ("飛ばし表現", "式の埋没", "先取りの参照", "タグの重複")
 
 
-def note_files(args: list[str]) -> list[Path]:
+def note_files(args: list[str]) -> tuple[list[Path], list[str]]:
+    """点検するファイルの一覧と、見つからなかったパスの一覧を返す。"""
     if not args:
         args = [str(NOTES)]
     out: list[Path] = []
+    missing: list[str] = []
     for a in args:
         p = Path(a)
         if not p.is_absolute():
-            p = ROOT / p
+            p = Path.cwd() / p
+            if not p.exists():
+                p = ROOT / a
         if p.is_dir():
-            out += sorted(q for q in p.rglob("*.md") if "figures" not in q.parts)
-        elif p.suffix == ".md":
+            for q in sorted(p.rglob("*")):
+                if q.suffix.lower() != ".md" or not q.is_file():
+                    continue
+                if EXCLUDE_DIRS & set(q.relative_to(p).parts[:-1]):   # 渡したフォルダからの相対で判定する
+                    continue
+                out.append(q)
+        elif p.is_file() and p.suffix.lower() == ".md":
             out.append(p)
-    return out
+        else:
+            missing.append(a)
+    return out, missing
+
+
+def mask_code_spans(line: str, fill: str = "x") -> str:
+    """インラインコードの部分を、同じ長さの fill に置き換える（位置を保つ）。"""
+    return CODE_SPAN_RE.sub(lambda m: fill * len(m.group()), line)
+
+
+def remove_comments(line: str, in_comment: bool) -> tuple[str, bool]:
+    """1行から HTML コメントの部分を取り除き、(残った本文, 行末でコメントの中にいるか) を返す。
+
+    インラインコードの中の `<!--` や `-->` は、コメントの記号として扱わない。
+    `<!-->` と `<!--->` は、HTML5 のとおり、すぐ閉じる（空の）コメントとして扱う。
+    """
+    masked = mask_code_spans(line)
+    out: list[str] = []
+    i = 0
+    while i < len(line):
+        if in_comment:
+            j = masked.find("-->", i)
+            if j == -1:
+                return "".join(out), True
+            i = j + 3
+            in_comment = False
+        else:
+            j = masked.find("<!--", i)
+            if j == -1:
+                out.append(line[i:])
+                break
+            out.append(line[i:j])
+            i = j + 4
+            if masked.startswith(">", i):          # <!-->
+                i += 1
+            elif masked.startswith("->", i):       # <!--->
+                i += 2
+            else:
+                in_comment = True
+    return "".join(out), in_comment
 
 
 def strip_code(lines: list[str]) -> list[tuple[int, str]]:
-    """コードブロックと HTML コメント（複数行にまたがるものを含む）を除いた行を、(行番号, 本文) で返す。"""
+    """コードブロック（``` と ~~~）と HTML コメントを除いた行を、(行番号, 本文) で返す。
+
+    - コードブロックの中では、コメントの記号を無視する。閉じるフェンスは、開いたものと同じ文字で、同じ長さ以上。
+    - コメントの処理を、フェンスの判定より先に行う（コメントの中のフェンスは無視される）。
+    """
     out: list[tuple[int, str]] = []
-    in_code = False
+    fence: tuple[str, int] | None = None     # 開いているフェンス（文字, 長さ）
     in_comment = False
     for i, line in enumerate(lines, 1):
-        if line.strip().startswith("```"):
-            in_code = not in_code
+        if fence is not None:
+            m = FENCE_RE.match(line)
+            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1] and not line.strip()[len(m.group(1)):].strip():
+                fence = None
             continue
-        if in_code:
+        line, in_comment = remove_comments(line, in_comment)
+        m = FENCE_RE.match(line)
+        if m and not in_comment:
+            fence = (m.group(1)[0], len(m.group(1)))
             continue
-        if in_comment:
-            if "-->" in line:
-                in_comment = False
-                line = line.split("-->", 1)[1]
-            else:
-                continue
-        # 1行で閉じるコメントを除く。開いたまま終わるコメントは、以降の行を読み飛ばす
-        line = re.sub(r"<!--.*?-->", "", line)
-        if "<!--" in line:
-            line = line.split("<!--", 1)[0]
-            in_comment = True
         out.append((i, line))
     return out
 
 
 def paragraphs(lines: list[tuple[int, str]]) -> list[tuple[int, str]]:
-    """空行で区切った段落（表・見出し・別行の数式・HTML 行は除く）を、(開始行, 本文) で返す。"""
+    """空行・別行の数式・表・見出しで区切った段落を、(開始行, 本文) で返す。別行の数式の中身は含めない。"""
     out: list[tuple[int, str]] = []
     buf: list[str] = []
     start = 0
     in_display = False
+
+    def flush() -> None:
+        nonlocal buf
+        if buf:
+            out.append((start, " ".join(buf)))
+            buf = []
+
     for i, line in lines:
-        s = line.strip()
-        if s.startswith("$$"):
-            # 別行の数式の開始・終了（1行で完結する $$...$$ もある）
-            if s.count("$$") >= 2:
-                continue
-            in_display = not in_display
-            continue
-        if in_display:
+        # $$ の出現ごとに、別行の数式の内側かどうかを切り替える（行のどこにあってもよい）
+        kept: list[str] = []
+        segs = line.split("$$")
+        for k, seg in enumerate(segs):
+            if not in_display:
+                kept.append(seg)
+            if k < len(segs) - 1:
+                in_display = not in_display
+                flush()                      # 数式は段落の区切り
+        s = "".join(kept).strip()
+        if in_display and not s:
             continue
         if not s:
-            if buf:
-                out.append((start, "".join(buf)))
-                buf = []
+            flush()
             continue
-        if s.startswith(("|", "#", "<", "!", ">", "---")):
-            if buf:
-                out.append((start, "".join(buf)))
-                buf = []
+        if s.startswith(("|", "#", "<", "!", "---")):
+            flush()
             continue
+        if s.startswith(">"):
+            s = s.lstrip("> ").strip()
+            if not s:
+                flush()
+                continue
         if not buf:
             start = i
         buf.append(s)
-    if buf:
-        out.append((start, "".join(buf)))
+    flush()
     return out
 
 
@@ -115,11 +179,11 @@ def lint(path: Path) -> dict[str, list[str]]:
     text = path.read_text(encoding="utf-8")
     lines = text.split("\n")
     body = strip_code(lines)
-    result: dict[str, list[str]] = {"飛ばし表現": [], "式の埋没": [], "先取りの参照": []}
+    result: dict[str, list[str]] = {k: [] for k in CATEGORIES}
 
-    # 1. 飛ばし表現
+    # 1. 飛ばし表現（インラインコードの中は除く）
     for i, line in body:
-        s = line.strip()
+        s = mask_code_spans(line.strip(), " ")
         if s.startswith(("|", "#", "<")):
             continue
         for w in SKIP_WORDS:
@@ -129,27 +193,33 @@ def lint(path: Path) -> dict[str, list[str]]:
                 break
 
     # 2. 式の埋没
-    for start, para in paragraphs(body):
+    for start, para in paragraphs([(i, mask_code_spans(line, " ")) for i, line in body]):
         n = len(INLINE_MATH_RE.findall(para))
         if n >= MANY_INLINE and len(para) >= LONG_PARAGRAPH:
             result["式の埋没"].append(f"{path.name}:{start}：文中の式が {n} 個、{len(para)} 文字の段落")
 
-    # 3. 先取りの参照
+    # 3・4. タグの定義と、先取りの参照
     defined: dict[str, int] = {}
     for i, line in body:
         for m in TAG_RE.finditer(line):
-            defined.setdefault(m.group(1), i)
-    for i, line in body:
-        if "\\tag" in line or line.strip().startswith(("#", "<")):
-            continue
-        for m in REF_RE.finditer(line):
             tag = m.group(1)
-            if tag not in defined or defined[tag] <= i:
+            if tag in defined:
+                result["タグの重複"].append(f"{path.name}:{i}：\\tag{{{tag}}} は {defined[tag]} 行目でも定義されている")
+            else:
+                defined[tag] = i
+    if defined:
+        ref_re = re.compile(r"[（(]\s*(" + "|".join(re.escape(t) for t in sorted(defined, key=len, reverse=True)) + r")\s*[）)]")
+        for i, line in body:
+            text_only = INLINE_MATH_RE.sub(" ", mask_code_spans(line, " "))
+            if line.strip().startswith(("#", "<")):
                 continue
-            before = line[max(0, m.start() - 6):m.start()]
-            if "本編の" in before or "本編" in line[max(0, m.start() - 10):m.start()]:
-                continue
-            result["先取りの参照"].append(f"{path.name}:{i}：({tag}) を、定義（{defined[tag]} 行目）より前で参照")
+            for m in ref_re.finditer(text_only):
+                tag = m.group(1)
+                if defined[tag] <= i:
+                    continue
+                if NOTE_REF_PREFIX_RE.search(text_only[:m.start()]):
+                    continue
+                result["先取りの参照"].append(f"{path.name}:{i}：({tag}) を、定義（{defined[tag]} 行目）より前で参照")
     return result
 
 
@@ -160,20 +230,27 @@ def main() -> int:
     args = ap.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
 
-    files = note_files(args.paths)
-    total = {"飛ばし表現": 0, "式の埋没": 0, "先取りの参照": 0}
+    files, missing = note_files(args.paths)
+    for a in missing:
+        print(f"警告：見つからないか、Markdown ではありません：{a}", file=sys.stderr)
+    total = {k: 0 for k in CATEGORIES}
     for f in files:
         try:
             res = lint(f)
         except UnicodeDecodeError:
+            print(f"警告：UTF-8 で読めません：{f}", file=sys.stderr)
             continue
         counts = {k: len(v) for k, v in res.items()}
         for k, v in counts.items():
             total[k] += v
         if not any(counts.values()):
             continue
-        rel = f.relative_to(ROOT)
+        try:
+            rel: Path = f.relative_to(ROOT)
+        except ValueError:
+            rel = f
         print(f"\n■ {rel}  （" + "、".join(f"{k} {v}" for k, v in counts.items() if v) + "）")
         if args.summary:
             continue
@@ -181,7 +258,7 @@ def main() -> int:
             for it in items:
                 print(f"  [{k}] {it}")
     print("\n合計：" + "、".join(f"{k} {v}" for k, v in total.items()) + f"（{len(files)} ファイル）")
-    return 0
+    return 2 if missing else 0
 
 
 if __name__ == "__main__":
