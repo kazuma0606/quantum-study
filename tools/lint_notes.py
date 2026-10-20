@@ -43,6 +43,7 @@ CODE_SPAN_RE = re.compile(r"(`+)(?:(?!\1).)+?\1")        # 開きと同じ長さ
 INLINE_MATH_RE = re.compile(r"(?<![\$\\])\$(?!\$)(?:\\.|[^$\\\n])+\$(?!\$)")
 NOTE_REF_PREFIX_RE = re.compile(r"本編(?:の付録[A-D](?:-\d+)*)?\s*の\s*$")   # 「本編の (III-1)」など
 FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
+LIST_ITEM_RE = re.compile(r"^(?:[-*+]|\d+[.)])\s")
 MANY_INLINE = 7          # 1つの段落に、文中の式がこの個数以上あれば報告する
 LONG_PARAGRAPH = 450     # 文字数の目安（式が多い段落のみ対象）
 CATEGORIES = ("飛ばし表現", "式の埋没", "先取りの参照", "タグの重複")
@@ -185,6 +186,8 @@ def paragraphs(lines: list[tuple[int, str]]) -> list[tuple[int, str]]:
             if not s:
                 flush()
                 continue
+        if LIST_ITEM_RE.match(s):
+            flush()                              # 箇条書きは、項目ごとに別の段落として数える
         add(s, i)
     flush()
     return out

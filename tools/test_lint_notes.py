@@ -135,6 +135,11 @@ def test_heading_and_table_lines_with_display_markers_are_not_paragraphs() -> No
     assert ln.paragraphs([(1, heading), (2, table), (3, "本文")]) == [(3, "本文")]
 
 
+def test_list_items_are_separate_paragraphs() -> None:
+    got = ln.paragraphs([(1, "- 項目1"), (2, "- 項目2"), (3, "1. 番号つき"), (4, "続き")])
+    assert [p for _, p in got] == ["- 項目1", "- 項目2", "1. 番号つき 続き"]
+
+
 def test_many_inline_formulas_in_a_long_paragraph_are_reported(tmp_path: Path) -> None:
     para = "".join(f"式$a_{k}$を使い、" for k in range(12)) + "あ" * 400 + "\n"
     assert len(run(tmp_path, para)["式の埋没"]) == 1
