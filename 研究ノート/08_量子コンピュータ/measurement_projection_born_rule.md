@@ -1,6 +1,6 @@
 # 射影演算子による測定確率の計算 ―$P(x^\ast)=\big\|(|x^\ast\rangle\langle x^\ast|\otimes I)|\Psi\rangle\big\|^2=\tfrac1N$の導出―
 
-> **作成** 2026-10-17　**更新** 2026-10-20
+> **作成** 2026-10-17　**更新** 2026-10-21
 > 入力レジスタを測ると正解の確率が $\frac1N$ になることを、射影演算子 $P_{x^\ast}\otimes I$ とボルン則から導出する。テンソル積の作用の証明、4候補の数値例、付録（完全な射影測定とPOVM、結果レジスタの測定とエンタングルメント、クロネッカー積の性質とQiskitの並び順、検算の一覧）。
 
 関数を計算する量子回路に、すべての候補の均等な重ね合わせを入力したあと、入力レジスタを測定して正解$x^\ast$が得られる確率が$\tfrac1N$であることを、射影演算子を使って導出します。物理の仮定（ボルン則）を使う箇所と、線形代数だけで導ける箇所を区別しながら進めます。最後に4候補の数値例で確認します。
@@ -84,6 +84,7 @@
 | $\langle\phi\vert\psi\rangle$ | 内積。成分で$\sum_k\phi_k^\ast\psi_k$ |
 | $\lVert\psi\rVert$ | ノルム（長さ）。$\lVert\psi\rVert^2:=\langle\psi\vert\psi\rangle$ |
 | $\mathcal L(\mathcal H)$ | $\mathcal H$上の線形演算子（$\mathcal H\to\mathcal H$の線形写像）全体 |
+| $z^\ast$、$A^\ast$ | 複素数$z$の複素共役。ベクトル・行列では、成分ごとに複素共役を取ったもの（複素共役はすべてこの記法で書く。$x^\ast$（正解）とは別の意味） |
 | $A^\dagger$ | $A$の随伴演算子（行列では、転置して複素共役を取ったもの） |
 | $I_{\mathcal H}$、$I_m$ | $\mathcal H$上の恒等演算子、$m\times m$の単位行列 |
 | $\otimes$ | テンソル積（Part III §2で定義） |
@@ -1365,7 +1366,7 @@ $$
 (A\otimes B)^T=A^T\otimes B^T,\qquad(A\otimes B)^\dagger=A^\dagger\otimes B^\dagger
 $$
 
-**証明**：転置の定義は「行と列の番号を入れ替える」、共役転置の定義は「さらに複素共役を取る」です：$(X^T)_{\alpha\beta}=X_{\beta\alpha}$、$(X^\dagger)_{\alpha\beta}=\overline{X_{\beta\alpha}}$。まず転置の成分を、行の番号 $(k,l)$、列の番号 $(k',l')$ で計算します。
+**証明**：転置の定義は「行と列の番号を入れ替える」、共役転置の定義は「さらに複素共役を取る」です：$(X^T)_{\alpha\beta}=X_{\beta\alpha}$、$(X^\dagger)_{\alpha\beta}=X_{\beta\alpha}^\ast$。まず転置の成分を、行の番号 $(k,l)$、列の番号 $(k',l')$ で計算します。
 
 $$
 \big[(A\otimes B)^T\big]_{(k,l),(k',l')}=(A\otimes B)_{(k',l'),(k,l)}=A_{k'k}\,B_{l'l}=(A^T)_{kk'}\,(B^T)_{ll'}
@@ -1373,10 +1374,10 @@ $$
 
 最初の等号が転置の定義、2番目がテンソル積の定義（行が $(k',l')$、列が $(k,l)$ なので $A_{k'k}B_{l'l}$）、3番目が $A^T,B^T$ の定義です。右辺は $A^T\otimes B^T$ の第 $(k,l),(k',l')$ 成分なので、$(A\otimes B)^T=A^T\otimes B^T$ です。
 
-共役転置は、同じ計算の途中で複素共役を取ります。複素数の積の複素共役は、複素共役の積（$\overline{ab}=\bar a\,\bar b$）なので
+共役転置は、同じ計算の途中で複素共役を取ります。複素数の積の複素共役は、複素共役の積（$(ab)^\ast=a^\ast b^\ast$）なので
 
 $$
-\big[(A\otimes B)^\dagger\big]_{(k,l),(k',l')}=\overline{(A\otimes B)_{(k',l'),(k,l)}}=\overline{A_{k'k}\,B_{l'l}}=\overline{A_{k'k}}\;\overline{B_{l'l}}=(A^\dagger)_{kk'}\,(B^\dagger)_{ll'}
+\big[(A\otimes B)^\dagger\big]_{(k,l),(k',l')}=\big((A\otimes B)_{(k',l'),(k,l)}\big)^\ast=\big(A_{k'k}\,B_{l'l}\big)^\ast=A_{k'k}^\ast\;B_{l'l}^\ast=(A^\dagger)_{kk'}\,(B^\dagger)_{ll'}
 $$
 
 で、$A^\dagger\otimes B^\dagger$ の成分です。$\square$
@@ -1814,7 +1815,7 @@ $$
 \|\Phi_x\|^2=\Big\|\frac{M_x\Phi}{\sqrt{P(x)}}\Big\|^2=\frac{\|M_x\Phi\|^2}{P(x)}=1
 $$
 
-です。$\sqrt{P(x)}$ で割るのは、射影した状態の長さが $\sqrt{P(x)}\le1$ に縮んでいるのを、$1$ に戻すためです。
+です。$\sqrt{P(x)}$ で割るのは、射影した状態のノルムが $\sqrt{P(x)}\le1$ に縮んでいるのを、$1$ に戻すためです。
 
 **例（Part VIII の $|\Psi\rangle$）**：Part V の結果から $M_{11}|\Psi\rangle=\tfrac12|111\rangle$、$P(11)=\tfrac14$ なので
 
@@ -1902,13 +1903,29 @@ $$
 |\Phi_m\rangle=\frac{K_m|\Phi\rangle}{\sqrt{P(m)}}
 $$
 
-と**定めました**。これは、射影測定の (A-5) を、$K=M_x$ の場合として含む形に広げた定義で、導かれる式ではありません。分母 $\sqrt{P(m)}$ で割る前の $K_m|\Phi\rangle$ を、**規格化前のケット**と呼びます。その長さの2乗は、(A-7) の第1式から
+と**定めました**。これは、射影測定の (A-5) を、一般の $K_m$ に広げた定義で、導かれる式ではありません。分母 $\sqrt{P(m)}$ で割る前の $K_m|\Phi\rangle$ を、**規格化前のケット**と呼びます。そのノルムの2乗は、(A-7) の第1式から
 
 $$
 \|K_m\Phi\|^2=P(m)
 $$
 
-で、確率がそのまま長さに入っています。なお、結果の確率の和が $1$ になるという条件 (A-6) は、ケットの形を決めるものではありません。
+で、確率がそのまま、規格化前のケットのノルムの2乗になっています。なお、結果の確率の和が $1$ になるという条件 (A-6) は、ケットの形を決めるものではありません。
+
+この規格化前のケットは、(A-7) の第2式の分母を払った形で、規格化後の状態 $|\Phi_m\rangle$ と、次の等式で結ばれています。
+
+$$
+K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle
+$$
+
+右辺は、ノルムが $1$ の状態 $|\Phi_m\rangle$ に、係数 $\sqrt{P(m)}$ を掛けたものです。これが、上のノルムの2乗が $P(m)$ になることと整合しています。
+
+**$K_m$ が射影演算子 $M_x$ の場合**：$K_m=M_x$ とすると、(A-7) は
+
+$$
+|\Phi_x\rangle=\frac{M_x|\Phi\rangle}{\sqrt{P(x)}},\qquad P(x)=\|M_x\Phi\|^2
+$$
+
+となり、(A-5) と、本編 Part IV §7 の確率に一致します。規格化前のケットは $M_x|\Phi\rangle$ で、そのノルムの2乗が $P(x)$ です。たとえば本編 Part VIII では、$M_{11}|\Psi\rangle=\frac12|111\rangle$ で、そのノルムの2乗は $\frac14=P(11)$ です。
 
 規格化前のケットのブラ（共役転置）は
 
@@ -1916,13 +1933,122 @@ $$
 \big(K_m|\Phi\rangle\big)^\dagger=\langle\Phi|K_m^\dagger
 $$
 
-です。ケットとブラの積を作ると
+です。
+
+**積を作る理由**：確率だけを求めるなら、次の**数**で足ります。
+
+$$
+\langle\Phi|K_m^\dagger K_m|\Phi\rangle
+$$
+
+しかし、測定のあとの状態を追うには、状態を数ではなく**行列**として持つ必要があります。たとえば、次の測定に使う場合や、結果を区別せずに平均した次の状態を考える場合です。
+
+$$
+\sum_mK_m\rho K_m^\dagger
+$$
+
+後者は、1つのケットで書けるとは限りません。次の2つの前提を復習してから、具体例で確かめます。
+
+**$\pm$ 基底の復習**：
+
+$$
+|\pm\rangle=\frac1{\sqrt2}\big(|0\rangle\pm|1\rangle\big)
+$$
+
+は、$|0\rangle$ と $|1\rangle$ の**重ね合わせ**で、アダマールゲート $H$ で $H|0\rangle=|+\rangle$、$H|1\rangle=|-\rangle$ となるので、**アダマール基底**と同じものです（パウリ行列 $X$ の固有状態なので、$X$ 基底とも呼びます）。正規直交で、
+
+$$
+\langle+|+\rangle=\frac12(1+1)=1,\qquad\langle+|-\rangle=\frac12(1-1)=0
+$$
+
+です。「$\pm$ 基底で測る」とは、測定演算子を $|+\rangle\langle+|$、$|-\rangle\langle-|$ にすることで、状態 $\rho$ のとき、結果 $\pm$ の確率は $\langle\pm|\rho|\pm\rangle$ です。
+
+**階数（ランク）の復習**：行列の階数は、一次独立な列の最大個数です。$|\psi\rangle=(a,b)^T$（成分が $a,b$ の列ベクトル）のブラは、転置を取って成分を複素共役にした行ベクトル
+
+$$
+\langle\psi|=|\psi\rangle^\dagger=\begin{pmatrix}a^\ast&b^\ast\end{pmatrix}
+$$
+
+です。列×行の積を作ると
+
+$$
+|\psi\rangle\langle\psi|=\begin{pmatrix}a\\b\end{pmatrix}\begin{pmatrix}a^\ast&b^\ast\end{pmatrix}=\begin{pmatrix}aa^\ast&ab^\ast\\ba^\ast&bb^\ast\end{pmatrix}=\begin{pmatrix}|a|^2&ab^\ast\\ba^\ast&|b|^2\end{pmatrix}
+$$
+
+で、第1列は $a^\ast|\psi\rangle$、第2列は $b^\ast|\psi\rangle$、どちらも $|\psi\rangle$ の定数倍なので、階数は $1$ です。$2\times2$ 行列では、階数 $1$ は行列式が $0$ のことで、実際
+
+$$
+|a|^2|b|^2-(ab^\ast)(ba^\ast)=0
+$$
+
+です。したがって、**ケットの $|\psi\rangle\langle\psi|$ は、階数 $1$（行列式 $0$）の行列**です。
+
+**具体例**：状態と測定演算子を、次のようにします。
+
+$$
+|\Phi\rangle=|+\rangle,\qquad\rho=|+\rangle\langle+|,\qquad K_0=|0\rangle\langle0|,\qquad K_1=|1\rangle\langle1|
+$$
+
+規格化前のケットは
+
+$$
+K_0|+\rangle=\frac1{\sqrt2}|0\rangle,\qquad K_1|+\rangle=\frac1{\sqrt2}|1\rangle
+$$
+
+なので、結果ごとの状態は
+
+$$
+K_0\rho K_0^\dagger=\frac12|0\rangle\langle0|,\qquad K_1\rho K_1^\dagger=\frac12|1\rangle\langle1|
+$$
+
+です。結果を区別せずに足すと
+
+$$
+\sum_mK_m\rho K_m^\dagger=\frac12|0\rangle\langle0|+\frac12|1\rangle\langle1|=\frac12I
+$$
+
+です。
+
+**説明**：この $\frac12I$ は、第1列 $(\frac12,0)^T$ と第2列 $(0,\frac12)^T$ が定数倍にならないので、階数は $2$（行列式 $\frac14$）です。ケットの $|\psi\rangle\langle\psi|$ は階数 $1$ なので、階数が違い、$\frac12I$ は**どんなケット $|\psi\rangle$ の $|\psi\rangle\langle\psi|$ にもなりません**。
+
+**重ね合わせと混ぜ物の違い**：$\pm$ 基底で測ると、次のように違いが出ます。
+
+| 状態 | $+$ の確率 | $-$ の確率 |
+|---|---|---|
+| 重ね合わせ $\lvert+\rangle$（$\rho=\lvert+\rangle\langle+\rvert$） | $\lvert\langle+\vert+\rangle\rvert^2=1$ | $\lvert\langle-\vert+\rangle\rvert^2=0$ |
+| 混ぜ物 $\frac12I$ | $\langle+\vert\frac12I\vert+\rangle=\frac12$ | $\langle-\vert\frac12I\vert-\rangle=\frac12$ |
+
+**なぜ密度行列とクラウス表現が必要か**：
+
+- 結果を記録しない（忘れる）と、状態は混ぜ物になります。1つのケットでは書けず、密度行列なら書けます。
+- 現実の測定には、読み出し誤差があります。[付録A-5-3](#A-5-3) の例では、結果 $0$ に**複数の演算子**が対応し、結果 $0$ の後の状態が階数 $2$ の混合状態になって、1つの $K_0|\Phi\rangle$ では表せません。演算子の組 $\{K_{m\alpha}\}$ と、クラウス表現が要ります。
+- 環境との相互作用（ノイズ）も、系だけを見ると、同じ形 $\sum_mK_m\rho K_m^\dagger$ になります（[部分トレースのノート](partial_trace_reduced_density_matrix.md#p6) Part VI）。
+
+純粋状態を行列で表す形が、ケットとブラの積（密度行列と同じ形）です。そこで、規格化前のケットとそのブラの積を作ると
 
 $$
 K_m\rho K_m^\dagger=K_m|\Phi\rangle\langle\Phi|K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger
 $$
 
 で、$\rho$ の**ケット側（左）に $K_m$、ブラ側（右）に $K_m^\dagger$** が掛かっています。これが、密度行列を左右から $K_m$、$K_m^\dagger$ で挟む形の意味で、「測定後のケットを $K_m|\Phi\rangle$ にする」ことを、ケットとブラの両方で行ったものです。
+
+この積
+
+$$
+K_m|\Phi\rangle\langle\Phi|K_m^\dagger
+$$
+
+は $d\times d$ の**行列**で、結果 $m$ が出たあとの**状態そのもの**（規格化前）を表します。確率という**数**は、行列から取り出します。その操作がトレースで、
+
+$$
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\langle\Phi|K_m^\dagger K_m|\Phi\rangle=P(m)
+$$
+
+です（導出は、次の「なぜトレースが確率になるか」の (2)）。数から行列は戻せないので、状態を保つには、行列の形で持つ必要があります。下の数値例では、次のようになります。
+
+$$
+K_0\rho K_0^\dagger=\frac12|0\rangle\langle0|\ \ (\text{行列}),\qquad\operatorname{tr}\big(K_0\rho K_0^\dagger\big)=\frac12\ \ (\text{確率})
+$$
 
 **数値例**：1量子ビットで、$|\Phi\rangle=\frac1{\sqrt2}(|0\rangle+|1\rangle)$、$K_0=|0\rangle\langle0|=\begin{pmatrix}1&0\\0&0\end{pmatrix}$（結果 $0$ の測定演算子。射影演算子の場合）とします。密度行列は、列ベクトル $\frac1{\sqrt2}(1,1)^T$ と行ベクトル $\frac1{\sqrt2}(1,1)$ の積（列×行）で
 
@@ -1966,7 +2092,7 @@ $$
 \operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\Big(\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger\Big)=\big\|K_m\Phi\big\|^2=P(m)
 $$
 
-で、(A-7) の確率に一致します。**トレースが確率になる理由は、「外積のトレースが内積（ケットの長さの2乗）になる」ことです。**
+で、(A-7) の確率に一致します。**トレースが確率になる理由は、「外積のトレースが内積（ケットのノルムの2乗）になる」ことです。**
 
 *(3) 混合状態の確率*：$\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$）なら、トレースの線形性と (2) から
 
@@ -2249,7 +2375,7 @@ $$
 です。確率は、(B-1) の右辺のノルムの2乗で、Part IV §5 の内積の式 $(\langle a|\langle b|)(|c\rangle|d\rangle)=\langle a|c\rangle\langle b|d\rangle$ を使うと
 
 $$
-P(y)=\|M'_y\Phi\|^2=\Big\|\Big(\sum_xc_{x,y}|x\rangle\Big)\otimes|y\rangle\Big\|^2=\sum_{x,x'}\overline{c_{x,y}}\,c_{x',y}\,\langle x|x'\rangle\,\langle y|y\rangle=\sum_x|c_{x,y}|^2
+P(y)=\|M'_y\Phi\|^2=\Big\|\Big(\sum_xc_{x,y}|x\rangle\Big)\otimes|y\rangle\Big\|^2=\sum_{x,x'}c_{x,y}^\ast\,c_{x',y}\,\langle x|x'\rangle\,\langle y|y\rangle=\sum_x|c_{x,y}|^2
 $$
 
 です（$\langle x|x'\rangle=\delta_{xx'}$、$\langle y|y\rangle=1$）。測定後の状態は
@@ -2329,19 +2455,19 @@ $$
 とします。$S$ の非対角成分は $0$ なので、行列の積の成分は
 
 $$
-c_{x,y}=(USV^\dagger)_{xy}=\sum_{k,k'}U_{xk}\,S_{kk'}\,(V^\dagger)_{k'y}=\sum_kU_{xk}\,s_k\,\overline{V_{yk}}
+c_{x,y}=(USV^\dagger)_{xy}=\sum_{k,k'}U_{xk}\,S_{kk'}\,(V^\dagger)_{k'y}=\sum_kU_{xk}\,s_k\,V_{yk}^\ast
 $$
 
 です。これを $|\Phi\rangle=\sum_{x,y}c_{x,y}|x\rangle|y\rangle$ に代入し、和の順序を入れ替えると
 
 $$
-|\Phi\rangle=\sum_ks_k\Big(\sum_xU_{xk}|x\rangle\Big)\otimes\Big(\sum_y\overline{V_{yk}}|y\rangle\Big)=\sum_ks_k\,|u_k\rangle\otimes|v_k\rangle\tag{B-4}
+|\Phi\rangle=\sum_ks_k\Big(\sum_xU_{xk}|x\rangle\Big)\otimes\Big(\sum_yV_{yk}^\ast|y\rangle\Big)=\sum_ks_k\,|u_k\rangle\otimes|v_k\rangle\tag{B-4}
 $$
 
-です。$U,V$ はユニタリで、列が正規直交なので、$|u_k\rangle=\sum_xU_{xk}|x\rangle$、$|v_k\rangle=\sum_y\overline{V_{yk}}|y\rangle$ も正規直交です：
+です。$U,V$ はユニタリで、列が正規直交なので、$|u_k\rangle=\sum_xU_{xk}|x\rangle$、$|v_k\rangle=\sum_yV_{yk}^\ast|y\rangle$ も正規直交です：
 
 $$
-\langle u_k|u_{k'}\rangle=\sum_x\overline{U_{xk}}\,U_{xk'}=(U^\dagger U)_{kk'}=\delta_{kk'},\qquad\langle v_k|v_{k'}\rangle=\sum_yV_{yk}\,\overline{V_{yk'}}=\overline{(V^\dagger V)_{k'k}}=\delta_{kk'}
+\langle u_k|u_{k'}\rangle=\sum_xU_{xk}^\ast\,U_{xk'}=(U^\dagger U)_{kk'}=\delta_{kk'},\qquad\langle v_k|v_{k'}\rangle=\sum_yV_{yk}\,V_{yk'}^\ast=\big((V^\dagger V)_{k'k}\big)^\ast=\delta_{kk'}
 $$
 
 また、$\sum_ks_k^2=\sum_{x,y}|c_{x,y}|^2=1$ です（ユニタリ変換で係数行列のフロベニウスノルムが変わらない）。ゼロでない特異値の個数が $C$ の階数で、**階数 $1$ のときだけ積状態**です。

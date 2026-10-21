@@ -1,6 +1,6 @@
 # 部分トレースと縮約密度行列 ―入力レジスタだけを見る―
 
-> **作成** 2026-10-17　**更新** 2026-10-20
+> **作成** 2026-10-17　**更新** 2026-10-21
 > 2つのレジスタにまたがる状態から、片方のレジスタだけの状態（縮約密度行列）を作る部分トレースの定義と性質、係数行列との関係、結果レジスタとのエンタングルメントで干渉が消える仕組み、環境を使った見方（Kraus 表現）。
 > 検算と図つき。
 
@@ -232,10 +232,10 @@ $$
 **性質2：$B$ の基底によらない**。$(x,x')$ を固定して、$B$ 上の $n\times n$ 行列 $Z$ を $Z_{y,y''}:=\rho_{(x,y),(x',y'')}$ とおくと、(II-2) は $(\operatorname{Tr}_B\rho)_{x,x'}=\sum_yZ_{yy}=\operatorname{tr}Z$ です。$B$ の別の正規直交基底 $|y'_k\rangle=\sum_yV_{yk}|y\rangle$（$V\in\mathbb C^{n\times n}$ はユニタリ行列）で同じ計算をしても、同じ値になります：
 
 $$
-\sum_k\langle y'_k|\,Z\,|y'_k\rangle=\sum_k\sum_{y,y''}\overline{V_{yk}}\,V_{y''k}\,Z_{y,y''}=\sum_{y,y''}\Big(\sum_kV_{y''k}\overline{V_{yk}}\Big)Z_{y,y''}=\sum_{y,y''}(VV^\dagger)_{y'',y}\,Z_{y,y''}=\sum_yZ_{y,y}
+\sum_k\langle y'_k|\,Z\,|y'_k\rangle=\sum_k\sum_{y,y''}V_{yk}^\ast\,V_{y''k}\,Z_{y,y''}=\sum_{y,y''}\Big(\sum_kV_{y''k}V_{yk}^\ast\Big)Z_{y,y''}=\sum_{y,y''}(VV^\dagger)_{y'',y}\,Z_{y,y''}=\sum_yZ_{y,y}
 $$
 
-（途中で、$\langle y'_k|=\sum_y\overline{V_{yk}}\langle y|$ を使い、最後は $VV^\dagger=I$、つまり $(VV^\dagger)_{y'',y}=\delta_{y'',y}$ です。）
+（途中で、$\langle y'_k|=\sum_yV_{yk}^\ast\langle y|$ を使い、最後は $VV^\dagger=I$、つまり $(VV^\dagger)_{y'',y}=\delta_{y'',y}$ です。）
 
 **性質3：エルミートで、固有値が $0$ 以上**：これは Part III で、$|\Phi\rangle$ の場合に $\rho_A=CC^\dagger$ と書けることから分かります。
 
@@ -297,38 +297,38 @@ $$
 **主張**：$\rho=|\Phi\rangle\langle\Phi|$（$|\Phi\rangle=\sum c_{x,y}|x\rangle|y\rangle$）の縮約密度行列は
 
 $$
-\boxed{\rho_A=CC^\dagger}\qquad\big((\rho_A)_{x,x'}=\textstyle\sum_yc_{x,y}\,\overline{c_{x',y}}\big)\tag{III-1}
+\boxed{\rho_A=CC^\dagger}\qquad\big((\rho_A)_{x,x'}=\textstyle\sum_yc_{x,y}\,c_{x',y}^\ast\big)\tag{III-1}
 $$
 
 $$
-\rho_B=C^TC^\ast=(C^\dagger C)^T\qquad\big((\rho_B)_{y,y'}=\textstyle\sum_xc_{x,y}\,\overline{c_{x,y'}}\big)\tag{III-2}
+\rho_B=C^TC^\ast=(C^\dagger C)^T\qquad\big((\rho_B)_{y,y'}=\textstyle\sum_xc_{x,y}\,c_{x,y'}^\ast\big)\tag{III-2}
 $$
 
 です（$C^\ast$ は成分の複素共役）。
 
 **証明**：
 
-*(1) $\rho$ の成分*：$\rho_{(x,y),(x',y')}=\langle x|\langle y|\Phi\rangle\,\langle\Phi|x'\rangle|y'\rangle$ です。基底の正規直交性から $\langle x|\langle y|\Phi\rangle=\sum_{a,b}c_{a,b}\langle x|a\rangle\langle y|b\rangle=c_{x,y}$ で、$\langle\Phi|x'\rangle|y'\rangle$ はその複素共役 $\overline{c_{x',y'}}$ なので
+*(1) $\rho$ の成分*：$\rho_{(x,y),(x',y')}=\langle x|\langle y|\Phi\rangle\,\langle\Phi|x'\rangle|y'\rangle$ です。基底の正規直交性から $\langle x|\langle y|\Phi\rangle=\sum_{a,b}c_{a,b}\langle x|a\rangle\langle y|b\rangle=c_{x,y}$ で、$\langle\Phi|x'\rangle|y'\rangle$ はその複素共役 $c_{x',y'}^\ast$ なので
 
 $$
-\rho_{(x,y),(x',y')}=c_{x,y}\,\overline{c_{x',y'}}
+\rho_{(x,y),(x',y')}=c_{x,y}\,c_{x',y'}^\ast
 $$
 
 *(2) 部分トレース*：(II-2) に代入して
 
 $$
-(\rho_A)_{x,x'}=\sum_y\rho_{(x,y),(x',y)}=\sum_yc_{x,y}\,\overline{c_{x',y}}
+(\rho_A)_{x,x'}=\sum_y\rho_{(x,y),(x',y)}=\sum_yc_{x,y}\,c_{x',y}^\ast
 $$
 
-*(3) $CC^\dagger$ の成分*：行列の積の定義と $(C^\dagger)_{y,x'}=\overline{c_{x',y}}$ から
+*(3) $CC^\dagger$ の成分*：行列の積の定義と $(C^\dagger)_{y,x'}=c_{x',y}^\ast$ から
 
 $$
-(CC^\dagger)_{x,x'}=\sum_yC_{x,y}(C^\dagger)_{y,x'}=\sum_yc_{x,y}\,\overline{c_{x',y}}
+(CC^\dagger)_{x,x'}=\sum_yC_{x,y}(C^\dagger)_{y,x'}=\sum_yc_{x,y}\,c_{x',y}^\ast
 $$
 
 で、(2) と一致します。つまり (III-1) です（$CC^\dagger$ の $(x,x')$ 成分は、$C$ の第 $x$ 行と第 $x'$ 行の内積）。
 
-*(4) $\rho_B$*：$\operatorname{Tr}_A$ について $(\rho_B)_{y,y'}=\sum_x\rho_{(x,y),(x,y')}=\sum_xc_{x,y}\overline{c_{x,y'}}$ です。一方、$(C^TC^\ast)_{y,y'}=\sum_x(C^T)_{y,x}(C^\ast)_{x,y'}=\sum_xc_{x,y}\overline{c_{x,y'}}$ で一致します。また $(C^\dagger C)^T=C^T(C^\dagger)^T=C^TC^\ast$（積の転置は順序が逆になり、$(C^\dagger)^T=C^\ast$）なので、$C^TC^\ast=(C^\dagger C)^T$ です。$\square$
+*(4) $\rho_B$*：$\operatorname{Tr}_A$ について $(\rho_B)_{y,y'}=\sum_x\rho_{(x,y),(x,y')}=\sum_xc_{x,y}c_{x,y'}^\ast$ です。一方、$(C^TC^\ast)_{y,y'}=\sum_x(C^T)_{y,x}(C^\ast)_{x,y'}=\sum_xc_{x,y}c_{x,y'}^\ast$ で一致します。また $(C^\dagger C)^T=C^T(C^\dagger)^T=C^TC^\ast$（積の転置は順序が逆になり、$(C^\dagger)^T=C^\ast$）なので、$C^TC^\ast=(C^\dagger C)^T$ です。$\square$
 
 $\rho_A=CC^\dagger$ は、エルミート（$(CC^\dagger)^\dagger=CC^\dagger$）で、任意のベクトル $v\in\mathbb C^m$ について $\langle v|CC^\dagger|v\rangle=\|C^\dagger v\|^2\ge0$ です。トレースは $\sum_{x,y}|c_{x,y}|^2=1$ です。
 
@@ -365,7 +365,7 @@ $$
 です。$SS^T\in\mathbb R^{m\times m}$、$S^TS\in\mathbb R^{n\times n}$ は、どちらも対角行列で、対角成分は $s_k^2$（$k=1,\dots,r$、残りは $0$）です。$U$ がユニタリなので、$\rho_A=U(SS^T)U^\dagger$ は対角化の形で、固有値は $SS^T$ の対角成分 $s_k^2$ です。$\rho_B$ は
 
 $$
-\rho_B=(C^\dagger C)^T=\big(V(S^TS)V^\dagger\big)^T=\overline{V}\,(S^TS)\,V^T
+\rho_B=(C^\dagger C)^T=\big(V(S^TS)V^\dagger\big)^T=V^\ast\,(S^TS)\,V^T
 $$
 
 （積の転置は順序が逆になり、対角行列は転置しても同じ）で、$\overline V$ もユニタリなので、固有値は同じく $s_k^2$ です。**$\rho_A$ と $\rho_B$ は、ゼロでない固有値が同じ**で、その固有値 $p_k=s_k^2$ が本編の付録B-3 の確率です。
@@ -400,7 +400,7 @@ $$
 
 です（$P(y)=\sum_x|c_{x,y}|^2$。$P(y)=0$ の $y$ は項が $0$ なので除く）。
 
-**導出**：(III-1) の成分を、列ベクトルで書くと $(CC^\dagger)_{x,x'}=\sum_yc_{x,y}\overline{c_{x',y}}=\sum_y(\mathbf c_y)_x\,(\mathbf c_y^\dagger)_{x'}$ なので、$CC^\dagger=\sum_y\mathbf c_y\mathbf c_y^\dagger$ です。$\mathbf c_y$ のノルムの2乗は $\|\mathbf c_y\|^2=\sum_x|c_{x,y}|^2=P(y)$ なので、$\mathbf c_y=\sqrt{P(y)}\,|\phi_y\rangle$（$|\phi_y\rangle$ はノルム $1$）と書けて、$\mathbf c_y\mathbf c_y^\dagger=P(y)|\phi_y\rangle\langle\phi_y|$ です。$\square$
+**導出**：(III-1) の成分を、列ベクトルで書くと $(CC^\dagger)_{x,x'}=\sum_yc_{x,y}c_{x',y}^\ast=\sum_y(\mathbf c_y)_x\,(\mathbf c_y^\dagger)_{x'}$ なので、$CC^\dagger=\sum_y\mathbf c_y\mathbf c_y^\dagger$ です。$\mathbf c_y$ のノルムの2乗は $\|\mathbf c_y\|^2=\sum_x|c_{x,y}|^2=P(y)$ なので、$\mathbf c_y=\sqrt{P(y)}\,|\phi_y\rangle$（$|\phi_y\rangle$ はノルム $1$）と書けて、$\mathbf c_y\mathbf c_y^\dagger=P(y)|\phi_y\rangle\langle\phi_y|$ です。$\square$
 
 $|\phi_y\rangle$ は、本編の付録B-2 の (B-2) の、**結果レジスタを測って $y$ が出たときの入力レジスタの状態**です。したがって、
 
@@ -439,7 +439,7 @@ $$
 \rho_A=CC^\dagger=\frac14\begin{pmatrix}1&1&1&0\\1&1&1&0\\1&1&1&0\\0&0&0&1\end{pmatrix}
 $$
 
-です。成分は、$C$ の行 $\mathbf r_{00}=\mathbf r_{01}=\mathbf r_{10}=\frac12(1,0)$、$\mathbf r_{11}=\frac12(0,1)$ の内積 $(\rho_A)_{x,x'}=\mathbf r_x\cdot\overline{\mathbf r_{x'}}$ です。例：$(\rho_A)_{00,01}=\frac12\cdot\frac12(1\cdot1+0\cdot0)=\frac14$、$(\rho_A)_{00,11}=\frac12\cdot\frac12(1\cdot0+0\cdot1)=0$、$(\rho_A)_{11,11}=\frac14(0\cdot0+1\cdot1)=\frac14$。**対角成分はすべて $\frac14$** で、入力の確率 $P(x)=\frac14$ と一致します（本編の Part VIII §6）。
+です。成分は、$C$ の行 $\mathbf r_{00}=\mathbf r_{01}=\mathbf r_{10}=\frac12(1,0)$、$\mathbf r_{11}=\frac12(0,1)$ の内積 $(\rho_A)_{x,x'}=\mathbf r_x\cdot\mathbf r_{x'}^\ast$ です。例：$(\rho_A)_{00,01}=\frac12\cdot\frac12(1\cdot1+0\cdot0)=\frac14$、$(\rho_A)_{00,11}=\frac12\cdot\frac12(1\cdot0+0\cdot1)=0$、$(\rho_A)_{11,11}=\frac14(0\cdot0+1\cdot1)=\frac14$。**対角成分はすべて $\frac14$** で、入力の確率 $P(x)=\frac14$ と一致します（本編の Part VIII §6）。
 
 **固有値と固有ベクトル**：$|11\rangle$ と他の入力の間の成分は $0$ なので、$\rho_A$ は $00,01,10$ の3行3列のブロック $\frac14J_3$（$J_3$ は全成分が $1$ の行列）と、$|11\rangle$ の $1\times1$ のブロック $\frac14$ に分かれます。$J_3v=(v_1+v_2+v_3)(1,1,1)^T$ なので、$v=(1,1,1)^T/\sqrt3$ では $J_3v=3v$（固有値 $\frac14\cdot3=\frac34$）、$v_1+v_2+v_3=0$ を満たす2次元の空間では $J_3v=0$（固有値 $0$）です。$|11\rangle$ の固有値は $\frac14$ です。
 
@@ -563,7 +563,7 @@ $$
 $$
 
 $$
-(\rho_A)_{0,1}=\sum_yc_{0,y}\overline{c_{1,y}}=\tfrac12\sum_y(e_0)_y\overline{(e_1)_y}=\tfrac12\langle e_1|e_0\rangle=\tfrac12\cos\theta
+(\rho_A)_{0,1}=\sum_yc_{0,y}c_{1,y}^\ast=\tfrac12\sum_y(e_0)_y(e_1)_y^\ast=\tfrac12\langle e_1|e_0\rangle=\tfrac12\cos\theta
 $$
 
 です（$(\rho_A)_{1,0}$ は、その複素共役で $\frac12\cos\theta$）。まとめると
@@ -699,7 +699,7 @@ $$
 の係数は $c_{0,y}=\frac{(e_0)_y}{\sqrt2}$、$c_{1,y}=\frac{e^{i\varphi}(e_1)_y}{\sqrt2}$ なので、(III-1) から
 
 $$
-(\rho_A)_{0,1}=\sum_yc_{0,y}\overline{c_{1,y}}=\frac12e^{-i\varphi}\sum_y(e_0)_y\overline{(e_1)_y}=\frac12e^{-i\varphi}\langle e_1|e_0\rangle
+(\rho_A)_{0,1}=\sum_yc_{0,y}c_{1,y}^\ast=\frac12e^{-i\varphi}\sum_y(e_0)_y(e_1)_y^\ast=\frac12e^{-i\varphi}\langle e_1|e_0\rangle
 $$
 
 です。大きさは $\frac12|\langle e_1|e_0\rangle|$ で、$\varphi$ によらず、環境が入力の値を区別できるほど（$|\langle e_1|e_0\rangle|$ が小さいほど）小さくなります。**縮むのは大きさ**です。位相は、
@@ -710,7 +710,7 @@ $$
 
 で、環境の状態の重なりの位相 $\arg\langle e_1|e_0\rangle$ も混ざります。たとえば Part V §3 の模型で $\theta=\pi$ なら $e_1=-e_0$、$\langle e_1|e_0\rangle=-1$ で、$\varphi=0$ でも $(\rho_A)_{0,1}=-\frac12$ です。$e_0\perp e_1$ なら非対角成分が $0$ で、系単独からは $\varphi$ が読めません。
 
-位相の情報は、環境に持ち出されるのではありません。相対位相 $\varphi$ は、全体の状態（系と環境の組）に保たれたままです。実際、環境単独の状態は、$(\rho_B)_{y,y'}=\sum_xc_{x,y}\overline{c_{x,y'}}$ に代入して
+位相の情報は、環境に持ち出されるのではありません。相対位相 $\varphi$ は、全体の状態（系と環境の組）に保たれたままです。実際、環境単独の状態は、$(\rho_B)_{y,y'}=\sum_xc_{x,y}c_{x,y'}^\ast$ に代入して
 
 $$
 \rho_B=\frac12\Big(|e_0\rangle\langle e_0|+e^{i\varphi}e^{-i\varphi}|e_1\rangle\langle e_1|\Big)=\frac12\big(|e_0\rangle\langle e_0|+|e_1\rangle\langle e_1|\big)
