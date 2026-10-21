@@ -10,6 +10,7 @@
    「本編の (III-1)」のように他のノートの式を指す参照は対象外。参照として拾うのは、
    このノートの \\tag で定義されている番号だけ。半角・全角の括弧に対応する。）
 4. タグの重複：同じ \\tag が2回以上定義されている。
+5. 記法の混在：複素共役を ^\\ast と \\overline（または \\bar）で併用している。同じものに別の記法を使わない。
 
 コードブロック（``` と ~~~）、インラインコード、HTML コメントの中は点検しない。
 
@@ -36,7 +37,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 NOTES = ROOT / "研究ノート"
 
-SKIP_WORDS = ("同様に", "同様にして", "容易に", "明らかに", "明らか", "自明", "つもり", "ほぼ明らか", "計算すると")
+SKIP_WORDS = ("同様に", "同様にして", "容易に", "明らかに", "明らか", "自明", "つもり", "ほぼ明らか", "計算すると", "下にあります", "後述", "あとで説明", "後で説明")
 EXCLUDE_DIRS = {".git", ".lake", ".venv", "node_modules", "__pycache__", "figures"}
 TAG_RE = re.compile(r"\\tag\{([^}]+)\}")
 CODE_SPAN_RE = re.compile(r"(`+)(?:(?!\1).)+?\1")        # 開きと同じ長さのバッククォート列で閉じる
@@ -46,7 +47,10 @@ FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
 LIST_ITEM_RE = re.compile(r"^(?:[-*+]|\d+[.)])\s")
 MANY_INLINE = 7          # 1つの段落に、文中の式がこの個数以上あれば報告する
 LONG_PARAGRAPH = 450     # 文字数の目安（式が多い段落のみ対象）
-CATEGORIES = ("飛ばし表現", "式の埋没", "先取りの参照", "タグの重複")
+CATEGORIES = ("飛ばし表現", "式の埋没", "先取りの参照", "タグの重複", "記法の混在")
+CONJ_OVERLINE_RE = re.compile(r"\\overline\s*\{")
+CONJ_BAR_RE = re.compile(r"\\bar(?![a-zA-Z])")
+CONJ_AST_RE = re.compile(r"\^\s*\\ast")
 
 
 def note_files(args: list[str]) -> tuple[list[Path], list[str]]:
@@ -238,6 +242,18 @@ def lint(path: Path) -> dict[str, list[str]]:
                 if NOTE_REF_PREFIX_RE.search(text_only[:m.start()]):
                     continue
                 result["先取りの参照"].append(f"{path.name}:{i}：({tag}) を、定義（{defined[tag]} 行目）より前で参照")
+
+    # 5. 記法の混在（複素共役を \overline{...}、\bar x、^\ast のうち複数で書いていないか）
+    math_text = "\n".join(mask_code_spans(line, " ") for _, line in body)
+    counts = {
+        "\\overline": len(CONJ_OVERLINE_RE.findall(math_text)),
+        "\\bar": len(CONJ_BAR_RE.findall(math_text)),
+        "^\\ast": len(CONJ_AST_RE.findall(math_text)),
+    }
+    used = [k for k, v in counts.items() if v]
+    if len(used) >= 2:
+        detail = "、".join(f"{k} {counts[k]} 個" for k in used)
+        result["記法の混在"].append(f"{path.name}：複素共役の記法が混在（{detail}）。1つに統一する")
     return result
 
 

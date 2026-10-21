@@ -34,6 +34,11 @@ def test_single_line_html_comment_is_skipped(tmp_path: Path) -> None:
     assert run(tmp_path, "本文<!-- 同様に -->です。\n")["飛ばし表現"] == []
 
 
+def test_postponing_phrases_are_reported(tmp_path: Path) -> None:
+    for phrase in ("復習は下にあります。", "詳しくは後述します。", "あとで説明します。"):
+        assert len(run(tmp_path, phrase + "\n")["飛ばし表現"]) == 1
+
+
 def test_skip_word_in_text_is_reported_after_a_comment(tmp_path: Path) -> None:
     res = run(tmp_path, "<!--\nコメント\n-->\n同様にして示せます。\n")
     assert len(res["飛ばし表現"]) == 1 and ":4：" in res["飛ばし表現"][0]
@@ -184,6 +189,22 @@ def test_three_part_tags_are_recognized(tmp_path: Path) -> None:
 def test_expression_like_n_minus_1_in_math_is_not_a_reference(tmp_path: Path) -> None:
     res = run(tmp_path, "和は $(n-1)$ まで。\n\n" + tagged("n-1"))
     assert res["先取りの参照"] == []
+
+
+def test_mixed_conjugate_notations_are_reported(tmp_path: Path) -> None:
+    text = "$a^" + BS + "ast$ と $" + BS + "overline{b}$ と $" + BS + "bar c$。\n"
+    res = run(tmp_path, text)
+    assert len(res["記法の混在"]) == 1 and "3" not in res["記法の混在"][0].split("（")[0]
+
+
+def test_single_conjugate_notation_is_not_reported(tmp_path: Path) -> None:
+    assert run(tmp_path, "$a^" + BS + "ast$ と $b^" + BS + "ast$。\n")["記法の混在"] == []
+    assert run(tmp_path, "$" + BS + "overline{a}$ だけ。\n")["記法の混在"] == []
+
+
+def test_conjugate_notation_inside_inline_code_is_ignored(tmp_path: Path) -> None:
+    text = "$a^" + BS + "ast$ と、コード例 `" + BS + "overline{b}`。\n"
+    assert run(tmp_path, text)["記法の混在"] == []
 
 
 def test_duplicate_tags_are_reported(tmp_path: Path) -> None:
