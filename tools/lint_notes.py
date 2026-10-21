@@ -48,7 +48,7 @@ LIST_ITEM_RE = re.compile(r"^(?:[-*+]|\d+[.)])\s")
 MANY_INLINE = 7          # 1つの段落に、文中の式がこの個数以上あれば報告する
 LONG_PARAGRAPH = 450     # 文字数の目安（式が多い段落のみ対象）
 CATEGORIES = ("飛ばし表現", "式の埋没", "先取りの参照", "タグの重複", "記法の混在")
-CONJ_OVERLINE_RE = re.compile(r"\\overline\s*\{")
+CONJ_OVERLINE_RE = re.compile(r"\\overline(?![a-zA-Z])")
 CONJ_BAR_RE = re.compile(r"\\bar(?![a-zA-Z])")
 CONJ_AST_RE = re.compile(r"\^\s*\\ast")
 

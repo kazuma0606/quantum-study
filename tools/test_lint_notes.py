@@ -197,6 +197,11 @@ def test_mixed_conjugate_notations_are_reported(tmp_path: Path) -> None:
     assert len(res["記法の混在"]) == 1 and "3" not in res["記法の混在"][0].split("（")[0]
 
 
+def test_overline_without_braces_is_detected(tmp_path: Path) -> None:
+    text = "$V^" + BS + "ast$ と $" + BS + "overline V$。\n"
+    assert len(run(tmp_path, text)["記法の混在"]) == 1
+
+
 def test_single_conjugate_notation_is_not_reported(tmp_path: Path) -> None:
     assert run(tmp_path, "$a^" + BS + "ast$ と $b^" + BS + "ast$。\n")["記法の混在"] == []
     assert run(tmp_path, "$" + BS + "overline{a}$ だけ。\n")["記法の混在"] == []
