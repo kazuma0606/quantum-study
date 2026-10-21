@@ -1963,7 +1963,7 @@ $$
 
 です。「$\pm$ 基底で測る」とは、測定演算子を $|+\rangle\langle+|$、$|-\rangle\langle-|$ にすることで、状態 $\rho$ のとき、結果 $\pm$ の確率は $\langle\pm|\rho|\pm\rangle$ です。
 
-**階数（ランク）の復習**：行列の階数は、一次独立な列の最大個数です。$|\psi\rangle=(a,b)^T$（成分が $a,b$ の列ベクトル）のブラは、転置を取って成分を複素共役にした行ベクトル
+**階数（ランク）の復習**：行列の階数は、一次独立な列の最大個数です。零でないケット $|\psi\rangle=(a,b)^T$（成分が $a,b$ の列ベクトルで、$(a,b)\neq(0,0)$）のブラは、転置を取って成分を複素共役にした行ベクトル
 
 $$
 \langle\psi|=|\psi\rangle^\dagger=\begin{pmatrix}a^\ast&b^\ast\end{pmatrix}
@@ -1975,13 +1975,13 @@ $$
 |\psi\rangle\langle\psi|=\begin{pmatrix}a\\b\end{pmatrix}\begin{pmatrix}a^\ast&b^\ast\end{pmatrix}=\begin{pmatrix}aa^\ast&ab^\ast\\ba^\ast&bb^\ast\end{pmatrix}=\begin{pmatrix}|a|^2&ab^\ast\\ba^\ast&|b|^2\end{pmatrix}
 $$
 
-で、第1列は $a^\ast|\psi\rangle$、第2列は $b^\ast|\psi\rangle$、どちらも $|\psi\rangle$ の定数倍なので、階数は $1$ です。$2\times2$ 行列では、階数 $1$ は行列式が $0$ のことで、実際
+で、第1列は $a^\ast|\psi\rangle$、第2列は $b^\ast|\psi\rangle$、どちらも $|\psi\rangle$ の定数倍で、$|\psi\rangle\neq0$ なので、階数は $1$ です（$|\psi\rangle=0$ なら零行列で、階数は $0$ です）。零でない $2\times2$ 行列では、階数 $1$ は行列式が $0$ のことで、実際
 
 $$
 |a|^2|b|^2-(ab^\ast)(ba^\ast)=0
 $$
 
-です。したがって、**ケットの $|\psi\rangle\langle\psi|$ は、階数 $1$（行列式 $0$）の行列**です。
+です。したがって、**零でないケットの $|\psi\rangle\langle\psi|$ は、階数 $1$（行列式 $0$）の行列**です。
 
 **具体例**：状態と測定演算子を、次のようにします。
 
@@ -2009,7 +2009,7 @@ $$
 
 です。
 
-**説明**：この $\frac12I$ は、第1列 $(\frac12,0)^T$ と第2列 $(0,\frac12)^T$ が定数倍にならないので、階数は $2$（行列式 $\frac14$）です。ケットの $|\psi\rangle\langle\psi|$ は階数 $1$ なので、階数が違い、$\frac12I$ は**どんなケット $|\psi\rangle$ の $|\psi\rangle\langle\psi|$ にもなりません**。
+**説明**：この $\frac12I$ は、第1列 $(\frac12,0)^T$ と第2列 $(0,\frac12)^T$ が定数倍にならないので、階数は $2$（行列式 $\frac14$）です。零でないケットの $|\psi\rangle\langle\psi|$ は階数 $1$ なので、階数が違い、$\frac12I$ は**どんなケット $|\psi\rangle$ の $|\psi\rangle\langle\psi|$ にもなりません**。
 
 **重ね合わせと混ぜ物の違い**：$\pm$ 基底で測ると、次のように違いが出ます。
 

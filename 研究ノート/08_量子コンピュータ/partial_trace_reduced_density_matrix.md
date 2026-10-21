@@ -368,7 +368,7 @@ $$
 \rho_B=(C^\dagger C)^T=\big(V(S^TS)V^\dagger\big)^T=V^\ast\,(S^TS)\,V^T
 $$
 
-（積の転置は順序が逆になり、対角行列は転置しても同じ）で、$\overline V$ もユニタリなので、固有値は同じく $s_k^2$ です。**$\rho_A$ と $\rho_B$ は、ゼロでない固有値が同じ**で、その固有値 $p_k=s_k^2$ が本編の付録B-3 の確率です。
+（積の転置は順序が逆になり、対角行列は転置しても同じ）で、$V^\ast$ もユニタリなので、固有値は同じく $s_k^2$ です。**$\rho_A$ と $\rho_B$ は、ゼロでない固有値が同じ**で、その固有値 $p_k=s_k^2$ が本編の付録B-3 の確率です。
 
 **純度**：$\operatorname{tr}\rho_A^2$ を求めます。$\rho_A=UDU^\dagger$（$D=SS^T$）なので $\rho_A^2=UD^2U^\dagger$ で、トレースの巡回性から
 
@@ -745,7 +745,7 @@ $$
 |---|---|---|
 | Part II §1 | $\operatorname{Tr}_B(X\otimes Y)=X\operatorname{tr}Y$、$\operatorname{Tr}_A(X\otimes Y)=\operatorname{tr}X\,Y$ | `test_partial_trace_definition_on_product_operators` |
 | Part II §3 | $\operatorname{tr}[(X_A\otimes I)\rho]=\operatorname{tr}[X_A\rho_A]$ | `test_expectation_value_needs_only_the_reduced_state` |
-| Part II §1、§2、Part III §1、§3、§4、Part V §1、Part VI | 行列単位 $\lvert x\rangle\langle x'\rvert\otimes\lvert y\rangle\langle y'\rvert$、ベル状態の $\operatorname{Tr}_B=\frac12I_2$、基底によらないトレース、$\rho_A=U(SS^T)U^\dagger$、$\rho_B=\overline V(S^TS)V^T$、純度 $\ge\frac1r$、(III-4) の分解、$H^{\otimes q}\lvert0\rangle=\lvert s\rangle$ と $p_0=\frac1m\sum\rho_{xx'}$、$K_m=\langle m_E\vert U\vert0_E\rangle$ と $\rho\otimes\lvert0\rangle\langle0\rvert=(I\otimes\lvert0\rangle)\rho(I\otimes\langle0\rvert)$ | `test_partial_trace_note_derivation_steps` |
+| Part II §1、§2、Part III §1、§3、§4、Part V §1、Part VI | 行列単位 $\lvert x\rangle\langle x'\rvert\otimes\lvert y\rangle\langle y'\rvert$、ベル状態の $\operatorname{Tr}_B=\frac12I_2$、基底によらないトレース、$\rho_A=U(SS^T)U^\dagger$、$\rho_B=V^\ast(S^TS)V^T$、純度 $\ge\frac1r$、(III-4) の分解、$H^{\otimes q}\lvert0\rangle=\lvert s\rangle$ と $p_0=\frac1m\sum\rho_{xx'}$、$K_m=\langle m_E\vert U\vert0_E\rangle$ と $\rho\otimes\lvert0\rangle\langle0\rvert=(I\otimes\lvert0\rangle)\rho(I\otimes\langle0\rvert)$ | `test_partial_trace_note_derivation_steps` |
 | Part III §1、§3 | $\rho_A=CC^\dagger$、$\rho_B=C^TC^\ast$、固有値がシュミット係数の2乗、トレース 1 | `test_reduced_state_is_C_Cdagger_and_CTCbar` |
 | Part III §2 | $(\rho_A)_{x,x}=P(x)$ | `test_reduced_state_diagonal_is_input_probability` |
 | Part IV §1 | 例の $\rho_A$、固有値 $\frac34,\frac14$、固有ベクトル、$\rho_B=\operatorname{diag}(\frac34,\frac14)$、(III-4) の分解 | `test_reduced_state_of_the_example` |
