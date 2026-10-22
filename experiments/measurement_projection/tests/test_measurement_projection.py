@@ -256,8 +256,13 @@ def test_rank_of_coefficient_matrix_decides_product_form():
     # 階数 1 ⇔ 積状態
     C = np.outer(rand_c(4), rand_c(2))
     psi = C.reshape(-1)
-    u = C[:, 0] / C[0, 0] * C[0, 0]
+    assert np.linalg.matrix_rank(C) == 1  # 外積は階数 1
     assert np.allclose(psi, np.kron(C[:, 0] / C[0, 0], C[0, :]))  # C = u v^T と書ける
+    # 逆向き：積状態 kron(u, v) の係数行列（reshape）は階数 1、ベル状態は階数 2
+    u, v = rand_c(4), rand_c(2)
+    assert np.linalg.matrix_rank(np.kron(u, v).reshape(4, 2)) == 1
+    bell = np.array([1, 0, 0, 1]) / np.sqrt(2)
+    assert np.linalg.matrix_rank(bell.reshape(2, 2)) == 2 and abs(np.linalg.det(bell.reshape(2, 2))) > 0.4
 
 
 def test_schmidt_numbers_of_example_and_entropy():
@@ -457,12 +462,98 @@ def test_trace_of_kraus_form_is_the_outcome_probability():
     assert np.isclose(np.trace(sum(K @ rho_mix @ K.conj().T for K in Ks)).real, 1.0)
 
 
+def test_numeric_examples_added_to_the_main_note():
+    """本編：(III-1) の数値例、(IV-2) の複素ベクトルの例、補題6・7 の例、CNOT の積状態になる入力、B-3 の特異値の関係"""
+    X = np.array([[0, 1], [1, 0]])
+    Z = np.diag([1, -1])
+    u, v = np.array([1, 2]), np.array([3, 4])
+    assert np.array_equal(np.kron(u, v), [3, 4, 6, 8])
+    assert np.array_equal(np.kron(X, Z) @ np.kron(u, v), [6, -8, 3, -4])
+    assert np.array_equal(np.kron(X @ u, Z @ v), [6, -8, 3, -4])
+    # (IV-2)
+    a, b, c, d = np.array([1, 1j]), np.array([1, 1]), np.array([1, 1]), np.array([2, 1])
+    assert np.isclose(np.vdot(a, c) * np.vdot(b, d), 3 - 3j)
+    assert np.isclose(np.vdot(np.kron(a, b), np.kron(c, d)), 3 - 3j)
+    # 補題6：X の固有ベクトル (1,-1)（固有値 -1）と Z の固有ベクトル (0,1)（固有値 -1）
+    u6, v6 = np.array([1, -1]), np.array([0, 1])
+    assert np.array_equal(X @ u6, -u6) and np.array_equal(Z @ v6, -v6)
+    assert np.array_equal(np.kron(X, Z) @ np.kron(u6, v6), (+1) * np.kron(u6, v6))
+    # 補題7
+    A, B = np.diag([1, 2]), np.diag([1, 2, 3])
+    assert np.array_equal(np.diag(np.kron(A, B)), [1, 2, 3, 2, 4, 6])
+    assert np.isclose(np.linalg.det(np.kron(A, B)), 288) and 2**3 * 6**2 == 288
+    # CNOT：|0>|0> は積状態のまま、|+>|0> はベル状態になる
+    assert np.allclose(mp.CNOT @ np.kron([1, 0], [1, 0]), [1, 0, 0, 0])
+    plus = np.array([1, 1]) / np.sqrt(2)
+    assert np.allclose(mp.CNOT @ np.kron(plus, [1, 0]), np.array([1, 0, 0, 1]) / np.sqrt(2))
+    # B-3：s_k^2 は C†C の固有値、Σ s_k^2 = tr(C†C) = ΣΣ|c|^2、階数 = ゼロでない特異値の個数
+    C = rand_c(4, 3)
+    C /= np.linalg.norm(C)
+    s = np.linalg.svd(C, compute_uv=False)
+    assert np.allclose(np.sort(np.linalg.eigvalsh(C.conj().T @ C))[::-1], s**2)
+    assert np.isclose(np.sum(s**2), np.trace(C.conj().T @ C).real) and np.isclose(np.sum(s**2), 1.0)
+    assert np.linalg.matrix_rank(C) == int(np.sum(s > 1e-12))
+    # 零ベクトルの外積は零行列（階数 0）
+    assert np.linalg.matrix_rank(np.outer(np.zeros(2), np.zeros(2))) == 0
+    # B-3 の表のエントロピー
+    H = lambda p: -sum(x * np.log2(x) for x in p if x > 0)
+    assert np.isclose(H([0.9, 0.1]), 0.469, atol=1e-3) and np.isclose(H([0.4, 0.3, 0.2, 0.1]), 1.8464, atol=1e-4)
+    assert np.isclose(H([0.999, 0.0005, 0.0005]), 0.0124, atol=1e-4) and np.isclose(H([0.5, 0.5]), 1.0)
+
+
+def test_numeric_examples_added_to_the_partial_trace_note():
+    """部分トレース：Part I の数値例、Part III §4 のベル状態の2つの分解、Part IV・V の手計算、Part VI の K_m の例"""
+    plus = np.array([1, 1]) / np.sqrt(2)
+    minus = np.array([1, -1]) / np.sqrt(2)
+    # Part I：|+> の密度行列と tr(ρZ) = <+|Z|+> = 0
+    rho = np.outer(plus, plus)
+    Z = np.diag([1, -1])
+    assert np.isclose(np.trace(rho @ Z), 0) and np.isclose(plus @ Z @ plus, 0) and np.isclose(np.trace(rho), 1)
+    # Part III §4：ベル状態の縮約は、Z 基底でも X 基底でも ½I
+    bell = np.array([1, 0, 0, 1]) / np.sqrt(2)
+    assert np.allclose(mp.partial_trace(np.outer(bell, bell), 2, 2), np.eye(2) / 2)
+    assert np.allclose(np.kron(plus, plus) + np.kron(minus, minus), [1, 0, 0, 1])
+    assert np.allclose(np.outer(plus, plus) + np.outer(minus, minus), np.eye(2))
+    # Part V §2：例の p_0 の手計算 3/4·3/4 + 1/4·1/4 = 5/8
+    s = np.ones(4) / 2
+    phi0, phi1 = np.array([1, 1, 1, 0]) / np.sqrt(3), np.array([0, 0, 0, 1])
+    assert np.isclose(3 / 4 * (s @ phi0) ** 2 + 1 / 4 * (s @ phi1) ** 2, 5 / 8)
+    # Part V §3：f(x1 x0) = x0 のとき ρ_A = |+><+|⊗½I、固有値 ½,½,0,0
+    psi = mp.psi_state(lambda x: x & 1, 2, 1)
+    rho_a = mp.partial_trace(np.outer(psi, psi.conj()), 4, 2)
+    assert np.allclose(rho_a, np.kron(np.outer(plus, plus), np.eye(2) / 2))
+    assert np.allclose(np.sort(np.linalg.eigvalsh(rho_a))[::-1], [0.5, 0.5, 0, 0])
+    # Part VI：U = P0⊗V0 + P1⊗V1、K_m = diag(<m|e0>, <m|e1>)、(ρ')_{01} = ½<e1|e0>、直交なら ρ' = ½I
+    th = 0.7
+    e0, e1 = np.array([1.0, 0.0]), np.array([np.cos(th), np.sin(th)])
+
+    def rot(e):
+        return np.array([[e[0], -e[1]], [e[1], e[0]]])
+
+    P0, P1 = np.diag([1.0, 0.0]), np.diag([0.0, 1.0])
+    U = np.kron(P0, rot(e0)) + np.kron(P1, rot(e1))
+    Ks = [np.kron(np.eye(2), np.eye(2)[m].reshape(1, 2)) @ U @ np.kron(np.eye(2), np.array([[1.0], [0.0]])) for m in range(2)]
+    for m in range(2):
+        assert np.allclose(Ks[m], np.diag([e0[m], e1[m]]))
+    assert np.allclose(sum(K.T @ K for K in Ks), np.eye(2))
+    out = sum(K @ rho @ K.T for K in Ks)
+    assert np.isclose(out[0, 1], 0.5 * (e1 @ e0)) and np.allclose(np.diag(out), 0.5)
+    e1o = np.array([0.0, 1.0])
+    Uo = np.kron(P0, rot(e0)) + np.kron(P1, rot(e1o))
+    Ko = [np.kron(np.eye(2), np.eye(2)[m].reshape(1, 2)) @ Uo @ np.kron(np.eye(2), np.array([[1.0], [0.0]])) for m in range(2)]
+    assert np.allclose(Ko[0], P0) and np.allclose(Ko[1], P1)
+    assert np.allclose(sum(K @ rho @ K.T for K in Ko), np.eye(2) / 2)
+    # 純度の上限：Σp² ≤ max p ≤ 1
+    p = np.array([0.5, 0.3, 0.2])
+    assert np.sum(p**2) <= p.max() <= 1
+
+
 def test_qiskit_ordering_matches_the_note():
     qc, sv = mp.qiskit_example()
     psi = mp.psi_state(F_EXAMPLE, 2, 1)
     assert np.allclose(sv.data, psi)  # 教科書の「第1」を番号の大きい量子ビットに対応させると、同じベクトル
     # 入力レジスタ（q2, q1）の確率
-    probs = sv.probabilities([2, 1])  # 戻り値は q2q1 のラベル順（添字 = 2*q2 + q1）
+    probs = sv.probabilities([2, 1])  # 戻り値の添字は q2 + 2*q1（qargs の先頭 q2 が最下位ビット）。一様なので、並び順にはよらない
     assert np.allclose(probs, 0.25)
     # 量子ビット 0 に X → ラベル '01'、ベクトル (0,1,0,0)
     from qiskit import QuantumCircuit
