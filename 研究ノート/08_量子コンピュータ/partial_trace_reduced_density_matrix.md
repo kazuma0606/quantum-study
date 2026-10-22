@@ -1,19 +1,19 @@
 # 部分トレースと縮約密度行列 ―入力レジスタだけを見る―
 
-> **作成** 2026-10-17　**更新** 2026-10-21
-> 2つのレジスタにまたがる状態から、片方のレジスタだけの状態（縮約密度行列）を作る部分トレースの定義と性質、係数行列との関係、結果レジスタとのエンタングルメントで干渉が消える仕組み、環境を使った見方（Kraus 表現）。
+> **作成** 2026-10-17　**更新** 2026-10-22
+> 2つのレジスタにまたがる状態から、片方のレジスタだけの状態（縮約密度行列）を作る部分トレースの定義と性質、係数行列との関係、結果レジスタとのエンタングルメントで干渉が消える仕組み、環境を使った見方（クラウス表現）。
 > 検算と図つき。
 
 [射影演算子による測定確率のノート](measurement_projection_born_rule.md)（以下「本編」）では、関数を計算した後の状態 $|\Psi\rangle=\frac1{\sqrt N}\sum_i|x_i\rangle|f(x_i)\rangle$ について、入力レジスタを測る確率を求めました。このノートでは、同じ状況を**入力レジスタだけの状態**として表します。結果レジスタを「見ない」「無視する」ことを、数式で正確に書くのが部分トレースです。
 
 - **Part I**：なぜ必要か。純粋状態の密度行列と、期待値 $\langle A\rangle=\operatorname{tr}(\rho A)$
-- **Part II**：部分トレースの定義、成分の式、性質（基底によらない。期待値が縮約状態だけで決まる）
+- **Part II**：部分トレースの定義、成分の式、性質（基底によらない。期待値が縮約密度行列だけで決まる）
 - **Part III**：本編の $|\Phi\rangle=\sum c_{x,y}|x\rangle|y\rangle$ の縮約密度行列 $\rho_A=CC^\dagger$。対角成分は確率、固有値はシュミット係数の2乗、混合状態としての見方
 - **Part IV**：本編の例（4候補・正解1個）と、定数関数・1対1の関数の縮約密度行列
 - **Part V**：結果レジスタが入力を「覚える」と、入力の干渉が消えること
-- **Part VI**：環境を使った見方（Kraus 表現）
+- **Part VI**：環境を使った見方（クラウス表現）
 
-**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py)（mp07、mp08）で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（部分トレースの13件を含む）。密度行列の基本は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
+**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py)（mp07、mp08）で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（部分トレースの15件を含む）。密度行列の基本は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
 
 **記法と次元の宣言**（本編の付録A-1・A-2 と同じ流儀）：入力レジスタを系 $A$、結果レジスタを系 $B$ として、空間、ベクトル、基底を
 
@@ -39,7 +39,7 @@ $$
 | $X_A$、$P_x=\lvert x\rangle\langle x\rvert$ | $\mathcal H_A\to\mathcal H_A$ | $m\times m$ |
 | $X_A\otimes I_n$、$M_x=P_x\otimes I_n$ | $\mathcal H_A\otimes\mathcal H_B\to\mathcal H_A\otimes\mathcal H_B$ | $mn\times mn$ |
 
-演算子 $\rho$ の成分を、基底 $|x\rangle|y\rangle$ で $\rho_{(x,y),(x',y')}:=\langle x|\langle y|\,\rho\,|x'\rangle|y'\rangle$ と書きます。式番号は `Part 番号-通し番号`（例：II-3）です。本編の式は「本編の (III-1)」のように書きます。
+演算子 $\rho$ の成分を、基底 $|x\rangle|y\rangle$ で $\rho_{(x,y),(x',y')}:=\langle x|\langle y|\,\rho\,|x'\rangle|y'\rangle$ と書きます。基底のラベル $x$ は、$m=4$ の例では2進文字列 $00,01,10,11$ とも書き、$0,1,2,3$ と読みます。式番号は `Part 番号-通し番号`（例：II-3）です。本編の式は「本編の (III-1)」のように書きます。
 
 <a id="toc"></a>
 
@@ -53,7 +53,7 @@ $$
 - [Part II：部分トレース](#p2)
   - [1. 定義と成分の式](#p2-1)
   - [2. 基本的な性質](#p2-2)
-  - [3. 縮約状態だけで、系 A についての予言が決まる](#p2-3)
+  - [3. 縮約密度行列だけで、系 A についての予言が決まる](#p2-3)
 - [Part III：|Phi⟩ の縮約密度行列](#p3)
   - [1. ρ\_A=CC^dagger](#p3-1)
   - [2. 対角成分は、入力が x になる確率](#p3-2)
@@ -107,7 +107,15 @@ $$
 \rho:=|\Phi\rangle\langle\Phi|\tag{I-1}
 $$
 
-を、**密度行列**と呼びます。演算子 $A$ の期待値は、
+を、**密度行列**と呼びます。以降で使う用語を、先に決めておきます。
+
+- **純粋状態**：$\rho=|\Phi\rangle\langle\Phi|$（状態ベクトルの外積。階数 $1$）。
+- **混合状態**：$\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$）の形（本編の付録A-5-1 と同じ）。一般には階数が $2$ 以上です。
+- **最大混合状態**：$d$ 次元の $\frac1dI$。どの基底で測っても、結果が等確率になります。
+- **純度**：$\operatorname{tr}\rho^2$。純粋状態で $1$、混合しているほど小さくなります。
+- **コヒーレンス**：基底 $|x\rangle$ での $\rho$ の非対角成分 $\rho_{x,x'}$（$x\neq x'$）。
+
+演算子 $A$ の期待値は、
 
 $$
 \langle\Phi|A|\Phi\rangle=\operatorname{tr}(\rho A)\tag{I-2}
@@ -129,6 +137,22 @@ $$
 
 です。$\square$
 
+なお、$\operatorname{tr}(\rho A)=\operatorname{tr}(A\rho)$ です（トレースの巡回性。本編の付録A-5-1 (4)）。以降では、この順序の入れ替えを使います。
+
+**数値例**：1量子ビット（$m=2$ の1つの系）で $|\Phi\rangle=|+\rangle=\frac1{\sqrt2}(|0\rangle+|1\rangle)$、$A=Z=\begin{pmatrix}1&0\\0&-1\end{pmatrix}$ とします。密度行列は
+
+$$
+\rho=|+\rangle\langle+|=\frac12\begin{pmatrix}1&1\\1&1\end{pmatrix}
+$$
+
+（エルミートで、$\operatorname{tr}\rho=\langle\Phi|\Phi\rangle=1$）で、
+
+$$
+\operatorname{tr}(\rho Z)=\operatorname{tr}\Big(\frac12\begin{pmatrix}1&-1\\1&-1\end{pmatrix}\Big)=\frac12(1-1)=0,\qquad\langle+|Z|+\rangle=\frac12(1-1)=0
+$$
+
+で、(I-2) の両辺が一致します。
+
 本編の確率 $P(x)=\langle\Phi|M_x|\Phi\rangle$（本編の Part IV §7）は、(I-2) で $A=M_x=P_x\otimes I$ とした
 
 $$
@@ -149,7 +173,7 @@ $$
 
 - [1. 定義と成分の式](#p2-1)
 - [2. 基本的な性質](#p2-2)
-- [3. 縮約状態だけで、系 A についての予言が決まる](#p2-3)
+- [3. 縮約密度行列だけで、系 A についての予言が決まる](#p2-3)
 
 <!-- part-toc:end -->
 
@@ -237,11 +261,23 @@ $$
 
 （途中で、$\langle y'_k|=\sum_yV_{yk}^\ast\langle y|$ を使い、最後は $VV^\dagger=I$、つまり $(VV^\dagger)_{y'',y}=\delta_{y'',y}$ です。）
 
-**性質3：エルミートで、固有値が $0$ 以上**：これは Part III で、$|\Phi\rangle$ の場合に $\rho_A=CC^\dagger$ と書けることから分かります。
+**性質3：$\rho_A$ はエルミートで、固有値が $0$ 以上**（$\rho$ が密度行列、つまりエルミートで固有値が $0$ 以上のとき）。(II-2) から、エルミート性は
+
+$$
+\big((\rho_A)_{x',x}\big)^\ast=\sum_y\big(\rho_{(x',y),(x,y)}\big)^\ast=\sum_y\rho_{(x,y),(x',y)}=(\rho_A)_{x,x'}
+$$
+
+です（$\rho$ がエルミートなので $\big(\rho_{(x',y),(x,y)}\big)^\ast=\rho_{(x,y),(x',y)}$）。固有値が $0$ 以上であることは、任意のベクトル $v=\sum_xv_x|x\rangle\in\mathcal H_A$ と各 $y$ について $|v,y\rangle:=\sum_xv_x|x\rangle|y\rangle$ とおくと
+
+$$
+\langle v|\rho_A|v\rangle=\sum_{x,x'}v_x^\ast(\rho_A)_{x,x'}v_{x'}=\sum_y\sum_{x,x'}v_x^\ast\,\rho_{(x,y),(x',y)}\,v_{x'}=\sum_y\langle v,y|\rho|v,y\rangle\ge0
+$$
+
+から分かります（各項が $\ge0$ なのは、$\rho$ の固有値が $0$ 以上だから）。$v$ が $\rho_A$ の固有ベクトル（$\rho_Av=\lambda v$）なら、$\langle v|\rho_A|v\rangle=\lambda\|v\|^2$ なので、$\lambda\ge0$ です。
 
 <a id="p2-3"></a>
 
-## 3. 縮約状態だけで、系 A についての予言が決まる
+## 3. 縮約密度行列だけで、系 A についての予言が決まる
 
 **主張**：$A$ の演算子 $X_A\in\mathbb C^{m\times m}$、合成系の演算子 $\rho\in\mathbb C^{mn\times mn}$ について
 
@@ -257,7 +293,7 @@ $$
 
 *(1) 積の形に絞れる理由*：両辺は $\rho$ について線形（トレースも $\operatorname{Tr}_B$ も線形）です。$\rho$ は、Part II §1 の手順1 の基底（どれも積の形）の線形結合で書けるので、基底の各項で両辺が等しければ、一般の $\rho$ でも等しくなります。そこで $\rho=X\otimes Y$（$X\in\mathbb C^{m\times m}$、$Y\in\mathbb C^{n\times n}$）とします。
 
-*(2) 左辺*：(A-1) で $A_1=X_A$、$B_1=I_n$、$A_2=X$、$B_2=Y$ とすると $(X_A\otimes I_n)(X\otimes Y)=X_AX\otimes I_nY=X_AX\otimes Y$ です。補題5（$\operatorname{tr}(P\otimes Q)=\operatorname{tr}P\cdot\operatorname{tr}Q$）から
+*(2) 左辺*：(A-1)（$(A\otimes B)(A'\otimes B')=AA'\otimes BB'$）で $A=X_A$、$B=I_n$、$A'=X$、$B'=Y$ とすると $(X_A\otimes I_n)(X\otimes Y)=X_AX\otimes I_nY=X_AX\otimes Y$ です。補題5（$\operatorname{tr}(P\otimes Q)=\operatorname{tr}P\cdot\operatorname{tr}Q$）から
 
 $$
 \operatorname{tr}\big[X_AX\otimes Y\big]=\operatorname{tr}(X_AX)\,\operatorname{tr}(Y)
@@ -376,7 +412,7 @@ $$
 \operatorname{tr}\rho_A^2=\operatorname{tr}D^2=\sum_kp_k^2
 $$
 
-です。$\sum_kp_k=1$ なので、$1$ になるのは $p$ が1つだけ $1$ のとき、つまり $C$ の階数が $1$（積状態）のときだけです。それ以外では $1$ より小さくなります。
+です。$p_k\le\max_kp_k$ なので、$\sum_kp_k^2\le(\max_kp_k)\sum_kp_k=\max_kp_k\le1$ で、等号が成り立つのは、$p$ の1つだけが $1$（ほかは $0$）のとき、つまり $C$ の階数が $1$（積状態）のときだけです。それ以外では $1$ より小さくなります。
 
 **純度の下限**：$C$ の階数を $r$ とすると、ゼロでない $p_k$ は $r$ 個で、$m\times n$ 行列の階数は $\min(m,n)$ 以下なので $r\le\min(m,n)$ です。コーシー・シュワルツの不等式 $\big(\sum_{k=1}^r1\cdot p_k\big)^2\le r\sum_kp_k^2$ に $\sum_kp_k=1$ を使うと
 
@@ -384,9 +420,9 @@ $$
 1\le r\sum_kp_k^2,\qquad\text{つまり}\qquad\operatorname{tr}\rho_A^2=\sum_kp_k^2\ge\frac1r\ge\frac1{\min(m,n)}
 $$
 
-です。一般の $m$ 次元の密度行列の純度の下限は $1/m$（$m$ 個が等確率）ですが、$1/m$ に届くのは $n\ge m$ のときだけです。本編の例（$m=4$、$n=2$）の下限は $\frac12$ です（乱数種 3 のランダムな純粋状態 500 個で、最小の純度は $0.503$。`test_purity_lower_bound_depends_on_the_environment_dimension` の条件）。
+です。一般の $m$ 次元の密度行列の純度の下限は $1/m$（$m$ 個が等確率。上のコーシー・シュワルツで $r=m$ とした場合）ですが、$1/m$ に届くのは $n\ge m$ のときだけです。本編の例（$m=4$、$n=2$）の下限は $\frac12$ です（ランダムな純粋状態で、数値でも確かめました。付録A）。
 
-**エントロピー**：$S=-\sum_kp_k\log_2p_k$ は、$\rho_A$ の固有値のエントロピーです（本編の付録B-3）。積状態で $0$。
+**エントロピー**：$S_{\mathrm{ent}}=-\sum_kp_k\log_2p_k$ は、$\rho_A$ の固有値のエントロピーです（本編の付録B-3）。積状態で $0$。
 
 <a id="p3-4"></a>
 
@@ -402,11 +438,27 @@ $$
 
 **導出**：(III-1) の成分を、列ベクトルで書くと $(CC^\dagger)_{x,x'}=\sum_yc_{x,y}c_{x',y}^\ast=\sum_y(\mathbf c_y)_x\,(\mathbf c_y^\dagger)_{x'}$ なので、$CC^\dagger=\sum_y\mathbf c_y\mathbf c_y^\dagger$ です。$\mathbf c_y$ のノルムの2乗は $\|\mathbf c_y\|^2=\sum_x|c_{x,y}|^2=P(y)$ なので、$\mathbf c_y=\sqrt{P(y)}\,|\phi_y\rangle$（$|\phi_y\rangle$ はノルム $1$）と書けて、$\mathbf c_y\mathbf c_y^\dagger=P(y)|\phi_y\rangle\langle\phi_y|$ です。$\square$
 
-$|\phi_y\rangle$ は、本編の付録B-2 の (B-2) の、**結果レジスタを測って $y$ が出たときの入力レジスタの状態**です。したがって、
+$|\phi_y\rangle$ は、本編の付録B-2 の (B-2) の測定後の状態 $|\Phi_y\rangle=|\phi_y\rangle\otimes|y\rangle$ の、第1因子（入力レジスタの部分）で、**結果レジスタを測って $y$ が出たときの入力レジスタの状態**です。したがって、
 
 > 結果レジスタを測って結果を**忘れた**ときの入力レジスタは、確率 $P(y)$ で状態 $|\phi_y\rangle$ にある混合状態 $\sum_yP(y)|\phi_y\rangle\langle\phi_y|$ で、これは $\rho_A$ と**一致**します。
 
 (II-3) から、$A$ を測る確率は、$B$ を測っても測らなくても同じです。ただし、(III-4) の分解は一意ではありません。$B$ を別の基底で測ると、別の状態の混合として $\rho_A$ が書けます（同じ $\rho_A$ になる）。**$\rho_A$ という行列は同じでも、どう分解するか（何を測ったか）は決まらない**のが、混合状態の特徴です。
+
+「結果を忘れる」ことを混合状態で表す根拠は、古典的な確率の平均です。確率 $P(y)$ で状態 $|\phi_y\rangle$ が得られる試行を何度も繰り返して、結果を記録しないとき、入力レジスタは、確率 $P(y)$ で $|\phi_y\rangle$ にある混合状態になります。
+
+**例（ベル状態）**：$|\Phi^+\rangle=\frac1{\sqrt2}(|00\rangle+|11\rangle)$ では $C=\frac1{\sqrt2}I_2$、$\rho_A=\frac12I$ です。$B$ を $Z$ 基底（$|0\rangle,|1\rangle$）で測ると、結果 $y=0,1$ が確率 $\frac12$ ずつで、入力レジスタは $|0\rangle$、$|1\rangle$ になり
+
+$$
+\rho_A=\frac12|0\rangle\langle0|+\frac12|1\rangle\langle1|
+$$
+
+です。一方、$|\Phi^+\rangle=\frac1{\sqrt2}\big(|{+}\rangle|{+}\rangle+|{-}\rangle|{-}\rangle\big)$（$|00\rangle+|11\rangle=|{+}{+}\rangle+|{-}{-}\rangle$ から）なので、$B$ を $X$ 基底（$|\pm\rangle$）で測ると、入力レジスタは $|+\rangle$、$|-\rangle$ が確率 $\frac12$ ずつで
+
+$$
+\rho_A=\frac12|{+}\rangle\langle{+}|+\frac12|{-}\rangle\langle{-}|
+$$
+
+です。どちらの分解も、$|0\rangle\langle0|+|1\rangle\langle1|=|{+}\rangle\langle{+}|+|{-}\rangle\langle{-}|=I$ から、**同じ $\frac12I$ になります**。
 
 ---
 
@@ -444,10 +496,10 @@ $$
 **固有値と固有ベクトル**：$|11\rangle$ と他の入力の間の成分は $0$ なので、$\rho_A$ は $00,01,10$ の3行3列のブロック $\frac14J_3$（$J_3$ は全成分が $1$ の行列）と、$|11\rangle$ の $1\times1$ のブロック $\frac14$ に分かれます。$J_3v=(v_1+v_2+v_3)(1,1,1)^T$ なので、$v=(1,1,1)^T/\sqrt3$ では $J_3v=3v$（固有値 $\frac14\cdot3=\frac34$）、$v_1+v_2+v_3=0$ を満たす2次元の空間では $J_3v=0$（固有値 $0$）です。$|11\rangle$ の固有値は $\frac14$ です。
 
 $$
-\rho_A=\frac34\,|s\rangle\langle s|+\frac14\,|11\rangle\langle11|,\qquad|s\rangle=\frac{|00\rangle+|01\rangle+|10\rangle}{\sqrt3}
+\rho_A=\frac34\,|t\rangle\langle t|+\frac14\,|11\rangle\langle11|,\qquad|t\rangle=\frac{|00\rangle+|01\rangle+|10\rangle}{\sqrt3}
 $$
 
-これは (III-4) そのもので、$|s\rangle$ と $|11\rangle$ は、本編の付録B-2 の、結果レジスタを測ったときの入力の状態、$\frac34$ と $\frac14$ はその確率です。また、$\rho_B=(C^\dagger C)^T=\operatorname{diag}\big(\tfrac34,\tfrac14\big)$ で、固有値は $\rho_A$ と同じです（Part III §3）。
+これは (III-4) そのもので、$|t\rangle$ と $|11\rangle$ は、本編の付録B-2 の、結果レジスタを測ったときの入力の状態、$\frac34$ と $\frac14$ はその確率です。また、$C^\dagger C=C^TC=\frac14\begin{pmatrix}3&0\\0&1\end{pmatrix}$（第0列同士は $\frac14(1+1+1)$、第1列同士は $\frac14$、第0列と第1列は $0$）なので、$\rho_B=(C^\dagger C)^T=\operatorname{diag}\big(\tfrac34,\tfrac14\big)$ で、固有値は $\rho_A$ と同じです（Part III §3）。
 
 <a id="p4-2"></a>
 
@@ -458,6 +510,8 @@ $$
 | 定数 $f(x)=0$ | 全成分 $\frac14$（階数 $1$） | $1$ | $1$（純粋状態） | $0$ bit |
 | 例（$f(x)=1\Leftrightarrow x=11$） | 上の行列 | $\frac34,\ \frac14$ | $\frac{9}{16}+\frac1{16}=\frac58$ | $0.811$ bit |
 | 1対1（$f(x)=x$、$n=4$） | $\frac14I_4$ | $\frac14$ が4つ | $\frac14$（$n\ge m$ なので下限 $1/m$ に届く） | $2$ bit |
+
+例の行の純度は $\big(\tfrac34\big)^2+\big(\tfrac14\big)^2=\tfrac9{16}+\tfrac1{16}=\tfrac58$、エントロピーは $-\tfrac34\log_2\tfrac34-\tfrac14\log_2\tfrac14\approx0.311+0.5=0.811$ bit です。
 
 - **定数関数**：結果レジスタが入力の情報を持たないので、入力レジスタは、純粋状態 $|s\rangle=\frac12\sum|x\rangle$ のままです。$\rho_A=|s\rangle\langle s|$。
 - **1対1**：結果レジスタが、入力を完全に覚えているので、入力レジスタは**最大混合状態** $\frac1mI$（どの基底で測っても等確率）で、非対角成分がすべて $0$ です。
@@ -498,13 +552,19 @@ $$
 
 です。
 
-**手順2：確率の式**。入力に $H^{\otimes q}$ をかけ、$00\cdots0$ かどうかを測る（$M_0:=P_{0\cdots0}\otimes I_n$）確率は、$H^{\otimes q}\otimes I_n$ をかけた状態のノルムの2乗です。$M_0$ は射影演算子なので $\|M_0\Psi\|^2=\langle\Psi|M_0|\Psi\rangle$（本編の Part IV §7）で、$|\Psi\rangle=(H^{\otimes q}\otimes I_n)|\Phi\rangle$ とすると
+**手順2：確率の式**。入力に $H^{\otimes q}$ をかけた状態を $|\Phi'\rangle:=\big(H^{\otimes q}\otimes I_n\big)|\Phi\rangle$ とします。これに、入力が $00\cdots0$ かどうかの測定の演算子 $M_0:=P_{0\cdots0}\otimes I_n$ を作用させたもののノルムの2乗が、確率 $p_0$ です。$M_0$ は射影演算子なので $\|M_0\Phi'\|^2=\langle\Phi'|M_0|\Phi'\rangle$（本編の Part IV §7）で、
 
 $$
 p_0=\langle\Phi|\big(H^{\otimes q}\otimes I_n\big)^\dagger\big(P_{0\cdots0}\otimes I_n\big)\big(H^{\otimes q}\otimes I_n\big)|\Phi\rangle
 $$
 
 です。$H^\dagger=H$ から、共役転置の性質（本編の付録A-1 の補題3）で $(H^{\otimes q})^\dagger=H^{\otimes q}$、$\big(H^{\otimes q}\otimes I_n\big)^\dagger=(H^{\otimes q})^\dagger\otimes I_n=H^{\otimes q}\otimes I_n$ です。混合積の公式 (A-1) を2回使うと
+
+$$
+\big(P_{0\cdots0}\otimes I_n\big)\big(H^{\otimes q}\otimes I_n\big)=P_{0\cdots0}H^{\otimes q}\otimes I_n,\qquad\big(H^{\otimes q}\otimes I_n\big)\big(P_{0\cdots0}H^{\otimes q}\otimes I_n\big)=H^{\otimes q}P_{0\cdots0}H^{\otimes q}\otimes I_n
+$$
+
+なので
 
 $$
 p_0=\langle\Phi|\big(H^{\otimes q}P_{0\cdots0}H^{\otimes q}\otimes I_n\big)|\Phi\rangle
@@ -542,7 +602,13 @@ $$
 - 1対1：入力は最大混合状態で、$p_0=\frac14$、つまり**単に等確率に測っているのと同じ**（干渉が見えない）。
 - 本編の例：その中間の $\frac58=0.625$。
 
-全体の状態 $|\Psi\rangle$ に $H^{\otimes2}\otimes I$ をかけて、入力が $00$ になる確率を直接計算しても、3つとも一致します（検算済み）。
+**例の手計算**（(III-4) を使います）：結果が $y=0$ の確率は $\frac34$ で、入力は $|\phi_0\rangle=\frac1{\sqrt3}(|00\rangle+|01\rangle+|10\rangle)$、$y=1$ の確率は $\frac14$ で、入力は $|\phi_1\rangle=|11\rangle$ です。$|s\rangle=\frac12(|00\rangle+|01\rangle+|10\rangle+|11\rangle)$ との重なりは $\langle s|\phi_0\rangle=\frac12\cdot\frac3{\sqrt3}=\frac{\sqrt3}2$、$\langle s|\phi_1\rangle=\frac12$ なので
+
+$$
+p_0=\sum_yP(y)\,|\langle s|\phi_y\rangle|^2=\frac34\cdot\frac34+\frac14\cdot\frac14=\frac9{16}+\frac1{16}=\frac58
+$$
+
+で、表と一致します。全体の状態 $|\Psi\rangle$ に $H^{\otimes2}\otimes I$ をかけて、入力が $00$ になる確率を直接計算しても、3つとも一致します（検算済み）。
 
 <a id="p5-3"></a>
 
@@ -590,7 +656,7 @@ $$
 
 *左：$|\Phi_\theta\rangle$ について、$H$ の後で $0$ が出る確率（青）、コヒーレンス（橙）、エンタングルメントエントロピー（赤の破線）。結果レジスタの2つの状態が直交する $\theta=\frac\pi2$ で、コヒーレンスが $0$、エントロピーが最大になる。右：入力に $H^{\otimes2}$ をかけて $00$ が出る確率（Part V §2）。図を描くときに、(V-3) と $p_0=\frac12(1+\cos\theta)$、$0.625$ などを式で確かめています。*
 
-**まとめると**：結果レジスタが、入力の値の違いを（直交する状態として）記録するほど、**どの値だったかが原理的に分かる**ので、入力の重ね合わせの干渉が消えます。正確には、**異なる結果に対応する入力どうしの干渉が失われ、同じ結果に対応する入力どうしの干渉は残ります**。
+**まとめると**：結果レジスタが、入力の値の違いを（直交する状態として）記録するほど、**どの値だったかが原理的に分かる**ので、入力の重ね合わせの干渉が消えます。正確には、結果レジスタの2つの状態が**直交するとき**（$\langle e_1|e_0\rangle=0$）は、異なる結果に対応する入力どうしの干渉が完全に失われ、**重なりが残るとき**は、干渉は $|\langle e_1|e_0\rangle|$ 倍に縮みます（(V-3)）。同じ結果に対応する入力どうしの干渉は残ります。
 
 **例（干渉が残る場合）**：$f(x_1x_0)=x_0$（上位ビットは結果に関係しない）を、一様な入力に計算すると
 
@@ -598,9 +664,9 @@ $$
 |\Psi\rangle=|{+}\rangle_{x_1}\otimes\frac{|00\rangle+|11\rangle}{\sqrt2}_{x_0B}
 $$
 
-です。結果レジスタ $B$ は下位ビット $x_0$ とエンタングルしたままですが、上位ビット $x_1$ とは積の形です。入力に $H^{\otimes2}$ をかけると分布は $(\frac12,\frac12,0,0)$ となり、上位ビットの干渉は残ります（$\rho_A$ の固有値は $\frac12,\frac12$、階数 $2$。数値で確認）。
+です。結果レジスタ $B$ は下位ビット $x_0$ とエンタングルしたままですが、上位ビット $x_1$ とは積の形です。入力に $H^{\otimes2}$ をかけると分布は $(\frac12,\frac12,0,0)$ となり、上位ビットの干渉は残ります（$\rho_A=|{+}\rangle\langle{+}|_{x_1}\otimes\frac12I_2$ で、固有値は $\frac12,\frac12,0,0$、階数 $2$）。
 
-これは、環境に情報が記録されて系のコヒーレンスが失われる**デコヒーレンス**（脱位相）と同じ仕組みで、結果レジスタが環境の役を果たしています。関数の結果を残したままだと、**結果が異なる入力どうしの干渉**を使うアルゴリズムは働きません。結果レジスタを**逆計算（アンコンピュート）**で $|0\cdots0\rangle$ に戻すと、入力は再び積状態になり、すべての入力どうしの干渉が使えます。$U_f^\dagger U_f=I$ なので
+これは、環境に情報が記録されて系のコヒーレンスが失われる**デコヒーレンス**（脱位相）と同じ仕組みで、結果レジスタが環境の役を果たしています。関数の結果を残したままだと、**結果が異なる入力どうしの干渉**を使うアルゴリズムは働きません。結果レジスタを**逆計算（アンコンピュート）**で $|0\cdots0\rangle$ に戻すと、入力は再び積状態になり、すべての入力どうしの干渉が使えます。$|\Psi\rangle=U_f\big(\frac1{\sqrt m}\sum_x|x\rangle|0\cdots0\rangle\big)$（本編の Part I）で、$U_f^\dagger U_f=I$ なので
 
 $$
 U_f^\dagger|\Psi\rangle=\frac1{\sqrt m}\sum_x|x\rangle|0\cdots0\rangle
@@ -614,16 +680,18 @@ $$
 
 # Part VI：環境を使った見方
 
+この Part は、本編の付録A-5-3 の「環境を使った見方」（測定の場合）を、部分トレースの形でやり直すものです（記号 $K_m$ は同じものです）。この Part の $m$ は環境の基底の添字で、Part III までの次元の $m$ とは別です。
+
 **記法と次元の宣言**：系 $S$ と環境 $E$ の空間、系の密度行列、全体のユニタリ演算子を
 
 $$
-\mathcal H_S=\mathbb C^d,\qquad\mathcal H_E=\mathbb C^r,\qquad\rho_S\in\mathbb C^{d\times d},\qquad U\in\mathbb C^{dr\times dr}\ \ (\mathcal H_S\otimes\mathcal H_E\ \text{上のユニタリ})
+\mathcal H_S=\mathbb C^d,\qquad\mathcal H_E=\mathbb C^{d_E},\qquad\rho_S\in\mathbb C^{d\times d},\qquad U\in\mathbb C^{dd_E\times dd_E}\ \ (\mathcal H_S\otimes\mathcal H_E\ \text{上のユニタリ})
 $$
 
-とします。$|0_E\rangle$ は環境の初期状態、$|m_E\rangle$（$m=0,\dots,r-1$）は環境の計算基底（正規直交）です。2つの写像を
+とします。$|0_E\rangle$ は環境の初期状態、$|m_E\rangle$（$m=0,\dots,d_E-1$）は環境の計算基底（正規直交）です。2つの写像を
 
 $$
-I\otimes|0_E\rangle:\mathcal H_S\to\mathcal H_S\otimes\mathcal H_E\ \ (dr\times d),\qquad I\otimes\langle m_E|:\mathcal H_S\otimes\mathcal H_E\to\mathcal H_S\ \ (d\times dr)
+I\otimes|0_E\rangle:\mathcal H_S\to\mathcal H_S\otimes\mathcal H_E\ \ (dd_E\times d),\qquad I\otimes\langle m_E|:\mathcal H_S\otimes\mathcal H_E\to\mathcal H_S\ \ (d\times dd_E)
 $$
 
 と書きます。前者は $|\psi\rangle\mapsto|\psi\rangle\otimes|0_E\rangle$（系の状態に、環境の初期状態を付け加える）、後者は環境の因子に $\langle m_E|$ を作用させる写像です。これらを使って、
@@ -644,7 +712,7 @@ $$
 
 **導出**：
 
-*(1) $\operatorname{Tr}_E$ の書き方*：(II-2) を $E$ について書くと、$\operatorname{Tr}_EZ=\sum_m\big(I\otimes\langle m_E|\big)\,Z\,\big(I\otimes|m_E\rangle\big)$ です（$\langle m_E|$ は $E$ の因子にだけ作用する）。
+*(1) $\operatorname{Tr}_E$ の書き方*：(II-2) を $E$ について書くと、$\operatorname{Tr}_EZ=\sum_m\big(I\otimes\langle m_E|\big)\,Z\,\big(I\otimes|m_E\rangle\big)$ です（$\langle m_E|$ は $E$ の因子にだけ作用する）。実際、$\big(I\otimes\langle m_E|\big)Z\big(I\otimes|m_E\rangle\big)$ の $(s,s')$ 成分は $\langle s|\langle m_E|\,Z\,|s'\rangle|m_E\rangle=Z_{(s,m),(s',m)}$ で、$m$ について足すと (II-2) になります。
 
 *(2) $\rho_S\otimes|0_E\rangle\langle0_E|$ の書き換え*：次の等式が成り立ちます。
 
@@ -680,17 +748,61 @@ $$
 
 で、(VI-1) です。$\square$
 
-**トレースが保たれる条件**：$\operatorname{tr}\rho_S'=1$ は、$\operatorname{tr}\rho_S'=\operatorname{tr}\big(\sum_mK_m^\dagger K_m\,\rho_S\big)$（トレースの巡回性）と $\operatorname{tr}\rho_S=1$ から、$\sum_mK_m^\dagger K_m=I$ が成り立つときです。これは、$U^\dagger U=I$ と環境の完全性関係 $\sum_m|m_E\rangle\langle m_E|=I_E$ から導かれます。$\big(I\otimes|m_E\rangle\big)\big(I\otimes\langle m_E|\big)=I_d\otimes|m_E\rangle\langle m_E|$（$dr\times dr$）で、足すと $I_d\otimes I_E=I_{dr}$ なので
+**トレースが保たれる条件**：(VI-1) のトレースは、トレースの巡回性から
+
+$$
+\operatorname{tr}\rho_S'=\operatorname{tr}\Big(\sum_mK_m^\dagger K_m\,\rho_S\Big)
+$$
+
+です。したがって、
+
+$$
+\sum_mK_m^\dagger K_m=I
+$$
+
+なら、任意の $\rho_S$ について $\operatorname{tr}\rho_S'=\operatorname{tr}\rho_S=1$ です（逆に、任意の $\rho_S$ で $\operatorname{tr}\rho_S'=\operatorname{tr}\rho_S$ なら、この式が成り立ちます）。この式は、$U^\dagger U=I$ と環境の完全性関係 $\sum_m|m_E\rangle\langle m_E|=I_E$ から導かれます。まず、$dd_E\times dd_E$ の行列として
+
+$$
+\big(I\otimes|m_E\rangle\big)\big(I\otimes\langle m_E|\big)=I_d\otimes|m_E\rangle\langle m_E|,\qquad\sum_mI_d\otimes|m_E\rangle\langle m_E|=I_d\otimes I_E=I_{dd_E}
+$$
+
+です。これを使うと
 
 $$
 \sum_mK_m^\dagger K_m=\big(I\otimes\langle0_E|\big)U^\dagger\Big(I_d\otimes\sum_m|m_E\rangle\langle m_E|\Big)U\big(I\otimes|0_E\rangle\big)=\big(I\otimes\langle0_E|\big)U^\dagger U\big(I\otimes|0_E\rangle\big)=I
 $$
 
-となって、自動的に成り立ちます（本編の付録A-5-1 の (A-6) と同じ条件）。
+となって、成り立つことが確かめられます（本編の付録A-5-1 の (A-6) と同じ条件）。
 
 **系だけを見ると**：ユニタリな全体の発展が、$\sum_mK_m\rho K_m^\dagger$ という、一般の（ユニタリでない）変化に見えます。この $K_m$ の組を、**クラウス表現**と呼びます。本編の付録A-5-1 の測定演算子 $K_m$ と同じものです。ノイズのノート（[noise_modeling_through_mri.md](../05_量子力学/noise_modeling_through_mri.md)）の脱分極、T1、脱位相の量子チャネルも、この形の $K_m$ の組で書けます。
 
-**Part V §3 の模型との対応**：入力 1 量子ビットを系、結果レジスタを環境と見ます。相対位相 $\varphi$ を付けた状態
+**具体例：$K_m$ を計算する**：系 1 量子ビット（$d=2$）、環境 2 次元（$d_E=2$）で、系が $|x\rangle$ のとき環境にユニタリ $V_x$ をかける演算子
+
+$$
+U=|0\rangle\langle0|\otimes V_0+|1\rangle\langle1|\otimes V_1,\qquad V_x|0_E\rangle=|e_x\rangle\ \ (\|e_x\|=1)
+$$
+
+を考えます。$K_m=\langle m_E|U|0_E\rangle$ に、本編の (III-1) を各項で使うと
+
+$$
+K_m=|0\rangle\langle0|\,\langle m_E|V_0|0_E\rangle+|1\rangle\langle1|\,\langle m_E|V_1|0_E\rangle=\begin{pmatrix}\langle m_E|e_0\rangle&0\\0&\langle m_E|e_1\rangle\end{pmatrix}
+$$
+
+です。$\sum_mK_m^\dagger K_m=\mathrm{diag}\big(\sum_m|\langle m_E|e_0\rangle|^2,\ \sum_m|\langle m_E|e_1\rangle|^2\big)=I$（$\|e_x\|=1$）です。系の状態を $\rho_S=|+\rangle\langle+|=\frac12\begin{pmatrix}1&1\\1&1\end{pmatrix}$ とすると、(VI-1) の非対角成分は、環境の完全性関係 $\sum_m|m_E\rangle\langle m_E|=I_E$ を使って
+
+$$
+(\rho_S')_{0,1}=\sum_m\langle m_E|e_0\rangle\,\frac12\,\langle m_E|e_1\rangle^\ast=\frac12\sum_m\langle e_1|m_E\rangle\langle m_E|e_0\rangle=\frac12\langle e_1|e_0\rangle
+$$
+
+です（対角成分は $\frac12$ のまま）。特に $|e_0\rangle=|0_E\rangle$、$|e_1\rangle=|1_E\rangle$（直交）なら、$K_0=|0\rangle\langle0|$、$K_1=|1\rangle\langle1|$ で
+
+$$
+\rho_S'=|0\rangle\langle0|\rho_S|0\rangle\langle0|+|1\rangle\langle1|\rho_S|1\rangle\langle1|=\frac12I
+$$
+
+と、非対角成分が $0$ になります。このように、**環境が系の値を区別できるほど、系の非対角成分（コヒーレンス）の大きさが、重なり $|\langle e_1|e_0\rangle|$ 倍に縮む**ことを、**デコヒーレンス**（脱位相）と呼びます。
+
+**Part V §3 の模型との対応**：入力 1 量子ビットを系（Part III の $\rho_A$ が、ここでの縮約密度行列 $\rho_S'$）、結果レジスタを環境（$\rho_B$ が環境の縮約密度行列）と見ます。相対位相 $\varphi$ を付けた状態
 
 $$
 |\Phi_{\theta,\varphi}\rangle=\frac1{\sqrt2}\big(|0\rangle|e_0\rangle+e^{i\varphi}|1\rangle|e_1\rangle\big)
@@ -708,7 +820,7 @@ $$
 \arg(\rho_A)_{0,1}=-\varphi+\arg\langle e_1|e_0\rangle
 $$
 
-で、環境の状態の重なりの位相 $\arg\langle e_1|e_0\rangle$ も混ざります。たとえば Part V §3 の模型で $\theta=\pi$ なら $e_1=-e_0$、$\langle e_1|e_0\rangle=-1$ で、$\varphi=0$ でも $(\rho_A)_{0,1}=-\frac12$ です。$e_0\perp e_1$ なら非対角成分が $0$ で、系単独からは $\varphi$ が読めません。
+です（$2\pi$ の整数倍の違いを除き、$\langle e_1|e_0\rangle\neq0$ のとき）。環境の状態の重なりの位相 $\arg\langle e_1|e_0\rangle$ も混ざります。たとえば Part V §3 の模型で $\theta=\pi$ なら $e_1=-e_0$、$\langle e_1|e_0\rangle=-1$ で、$\varphi=0$ でも $(\rho_A)_{0,1}=-\frac12$ です。$e_0\perp e_1$ なら非対角成分が $0$ で、系単独からは $\varphi$ が読めません。
 
 位相の情報は、環境に持ち出されるのではありません。相対位相 $\varphi$ は、全体の状態（系と環境の組）に保たれたままです。実際、環境単独の状態は、$(\rho_B)_{y,y'}=\sum_xc_{x,y}c_{x,y'}^\ast$ に代入して
 
@@ -757,6 +869,7 @@ $$
 | Part VI | 相対位相 $\varphi$ は、環境単独の状態 $\rho_B$ に現れない | `test_relative_phase_is_not_readable_from_the_environment_alone` |
 | Part VI | $(\rho_A)_{0,1}=\frac12e^{-i\varphi}\langle e_1\vert e_0\rangle$（位相は系の非対角成分に残り、大きさが縮む） | `test_relative_phase_stays_in_the_system_coherence` |
 | Part VI | $\operatorname{Tr}_E[U(\rho\otimes\vert0\rangle\langle0\vert)U^\dagger]=\sum K_m\rho K_m^\dagger$ | `test_environment_picture_gives_kraus_sum` |
+| Part I §2、Part III §4、Part V §2・§3、Part VI | $\operatorname{tr}(\rho Z)=\langle+\vert Z\vert+\rangle=0$（Part I の数値例）、ベル状態の縮約が $Z$ 基底でも $X$ 基底でも $\frac12I$、例の $p_0$ の手計算 $\frac58$、$f(x_1x_0)=x_0$ の $\rho_A=\lvert{+}\rangle\langle{+}\rvert\otimes\frac12I_2$、$K_m=\mathrm{diag}(\langle m_E\vert e_0\rangle,\langle m_E\vert e_1\rangle)$ と $(\rho_S')_{0,1}=\frac12\langle e_1\vert e_0\rangle$（直交なら $\frac12I$） | `test_numeric_examples_added_to_the_partial_trace_note` |
 | 図 | mp07、mp08 の各値を本文の式と `assert` で照合 | `figures/make_measurement_projection_figures.py` |
 
 ```bash

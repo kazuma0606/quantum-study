@@ -1,6 +1,6 @@
 # 射影演算子による測定確率の計算 ―$P(x^\ast)=\big\|(|x^\ast\rangle\langle x^\ast|\otimes I)|\Psi\rangle\big\|^2=\tfrac1N$の導出―
 
-> **作成** 2026-10-17　**更新** 2026-10-21
+> **作成** 2026-10-17　**更新** 2026-10-22
 > 入力レジスタを測ると正解の確率が $\frac1N$ になることを、射影演算子 $P_{x^\ast}\otimes I$ とボルン則から導出する。テンソル積の作用の証明、4候補の数値例、付録（完全な射影測定とPOVM、結果レジスタの測定とエンタングルメント、クロネッカー積の性質とQiskitの並び順、検算の一覧）。
 
 関数を計算する量子回路に、すべての候補の均等な重ね合わせを入力したあと、入力レジスタを測定して正解$x^\ast$が得られる確率が$\tfrac1N$であることを、射影演算子を使って導出します。物理の仮定（ボルン則）を使う箇所と、線形代数だけで導ける箇所を区別しながら進めます。最後に4候補の数値例で確認します。
@@ -16,7 +16,7 @@
 - **付録C**：Qiskit の並び順
 - **付録D**：検算の一覧
 
-**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと50件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
+**関連ファイル**：図は [figures/make_measurement_projection_figures.py](figures/make_measurement_projection_figures.py) で作っていて、各図の値はスクリプトの中で本文の式と照合しています。式と数値の検算は [experiments/measurement_projection/](../../experiments/measurement_projection/README.md)（スクリプトと52件のテスト、Qiskit での確認と、別ノートの部分トレースの検算を含む）。密度行列と完全性関係は[密度行列のノート](../05_量子力学/density_matrix_bracket_notation.md)、ブラケット記法とボルン則は[ブラケット記法のノート](../05_量子力学/bra_ket_notation_path_integral.md)、パウリ行列とブロッホ球は[パウリ行列のノート](../04_群論・代数/pauli_matrices_derivation_and_group.md)、指数関数とトロッター分解は[行列の指数関数のノート](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md)、ノイズと量子チャネルは[ノイズのノート](../05_量子力学/noise_modeling_through_mri.md)にあります。
 
 <a id="toc"></a>
 
@@ -85,6 +85,7 @@
 | $\lVert\psi\rVert$ | ノルム（長さ）。$\lVert\psi\rVert^2:=\langle\psi\vert\psi\rangle$ |
 | $\mathcal L(\mathcal H)$ | $\mathcal H$上の線形演算子（$\mathcal H\to\mathcal H$の線形写像）全体 |
 | $z^\ast$、$A^\ast$ | 複素数$z$の複素共役。ベクトル・行列では、成分ごとに複素共役を取ったもの（複素共役はすべてこの記法で書く。$x^\ast$（正解）とは別の意味） |
+| $P(x)$、$P_x$ | $P(x)$ は入力が $x$ になる**確率**（数）、$P_x=\lvert x\rangle\langle x\rvert$ は**射影演算子**（行列）。同じ文字だが、別のもの |
 | $A^\dagger$ | $A$の随伴演算子（行列では、転置して複素共役を取ったもの） |
 | $I_{\mathcal H}$、$I_m$ | $\mathcal H$上の恒等演算子、$m\times m$の単位行列 |
 | $\otimes$ | テンソル積（Part III §2で定義） |
@@ -113,7 +114,7 @@ $$
 - **入力レジスタ**：$x$を入れる量子ビットの組。**結果レジスタ**：$f(x)$を書き込む量子ビットの組。
 - $I$：結果レジスタ上の恒等演算子。
 - **レジスタの次元**：入力レジスタは $q_A$ 量子ビット、結果レジスタは $q_B$ 量子ビットで、状態空間は $\mathcal H_A=(\mathbb C^2)^{\otimes q_A}\cong\mathbb C^{d_A}$、$\mathcal H_B=(\mathbb C^2)^{\otimes q_B}\cong\mathbb C^{d_B}$（$d_A=2^{q_A}$、$d_B=2^{q_B}$）です。全体は $\mathcal H_A\otimes\mathcal H_B\cong\mathbb C^{d_Ad_B}$ です。$|x_i\rangle\in\mathcal H_A$、$|f(x)\rangle\in\mathcal H_B$ です。
-- **候補の個数**：$N$ 個の候補は、$d_A$ 個ある入力レジスタの基底のうちの $N$ 個です（$N\le d_A$）。Part VIII の例は $N=d_A=4$ です。入力レジスタの全基底を使う場合（$N=d_A$）、付録と別ノートでは、入力レジスタの次元 $d_A$ を $N$、結果レジスタの次元 $d_B$ を $M$ と書きます（演算子 $M_x$ とは別のもので、添字がありません）。
+- **候補の個数**：$N$ 個の候補は、$d_A$ 個ある入力レジスタの基底のうちの $N$ 個です（$N\le d_A$）。Part VIII の例は $N=d_A=4$ です。入力レジスタの全基底を使う場合（$N=d_A$）、付録A・付録B と部分トレースのノートでは、入力レジスタの次元 $d_A$ を $m$、結果レジスタの次元 $d_B$ を $n$ と書きます（付録A-1 の記号です）。
 - **演算子の大きさ**：$P_{x^\ast}\in\mathbb C^{d_A\times d_A}$（Part II）、$I\in\mathbb C^{d_B\times d_B}$、$M_{x^\ast}=P_{x^\ast}\otimes I\in\mathbb C^{d_Ad_B\times d_Ad_B}$（Part III §1）です。
 
 ---
@@ -384,6 +385,26 @@ $$
 
 **補足**：ステップ1〜3（左辺の計算）だけを見ると、「テンソル積の行列とベクトルの積を、成分で書き直した」計算に見えます。それが右辺の成分(R)と一致することを確かめるところまでが、(III-1)の証明です。この証明は線形代数だけで、ボルン則のような量子力学の公理は使っていません。具体的な数値を入れて確かめると成り立つのは、ステップ3の「独立な2つの和が積に分かれる」ことを、各成分で見ていることにあたります。
 
+**数値例**：$A=X=\begin{pmatrix}0&1\\1&0\end{pmatrix}$、$B=Z=\begin{pmatrix}1&0\\0&-1\end{pmatrix}$、$|u\rangle=(1,2)^T$、$|v\rangle=(3,4)^T$ で (III-1) を確かめます。$A\otimes B$ は、$A$ の各成分に $B$ を掛けて並べたブロック行列（Part III §2-d）で
+
+$$
+A\otimes B=\begin{pmatrix}0\cdot Z&1\cdot Z\\1\cdot Z&0\cdot Z\end{pmatrix}=\begin{pmatrix}0&0&1&0\\0&0&0&-1\\1&0&0&0\\0&-1&0&0\end{pmatrix}
+$$
+
+です。左辺は、$|u\rangle\otimes|v\rangle=(1\cdot3,\ 1\cdot4,\ 2\cdot3,\ 2\cdot4)^T=(3,4,6,8)^T$ に $A\otimes B$ を掛けて
+
+$$
+(A\otimes B)\big(|u\rangle\otimes|v\rangle\big)=(6,\ -8,\ 3,\ -4)^T
+$$
+
+です。右辺は、$A|u\rangle=(2,1)^T$、$B|v\rangle=(3,-4)^T$ から
+
+$$
+A|u\rangle\otimes B|v\rangle=(2\cdot3,\ 2\cdot(-4),\ 1\cdot3,\ 1\cdot(-4))^T=(6,\ -8,\ 3,\ -4)^T
+$$
+
+で、両辺が一致します。
+
 <a id="p3-2f"></a>
 
 ### 2-f. 3つ以上のテンソル積
@@ -595,7 +616,7 @@ $$
 \boxed{(A\otimes I_n)(I_m\otimes B)=A\otimes B=(I_m\otimes B)(A\otimes I_n)}
 $$
 
-これを(III-1)だけから導きます。
+これを(III-1)とPart III §2-cの成分の定義から導きます。
 
 *準備（基底ベクトルに作用させると列が出てくる）*：複合系の基底ベクトル$|k\rangle\otimes|l\rangle$の成分は、Part III §2-cの定義から$(|k\rangle\otimes|l\rangle)_{(k',l')}=\delta_{kk'}\delta_{ll'}$で、第$(k,l)$成分だけが$1$、他は$0$です。行列$M$にこのベクトルを掛けると、行列とベクトルの積の定義から$M$の第$(k,l)$列だけが取り出されます。したがって、2つの$mn\times mn$行列が、すべての基底ベクトル$|k\rangle\otimes|l\rangle$に対して同じ結果を返せば、すべての列が一致するので、行列として等しくなります。
 
@@ -611,7 +632,17 @@ $$
 (A\otimes I_n)\big(|k\rangle\otimes B|l\rangle\big)=A|k\rangle\otimes B|l\rangle
 $$
 
-*右の式*：$(I_m\otimes B)(A\otimes I_n)$も同様に、まず$A\otimes I_n$で$A|k\rangle\otimes|l\rangle$、次に$I_m\otimes B$で$A|k\rangle\otimes B|l\rangle$です。
+*右の式*：$(I_m\otimes B)(A\otimes I_n)$を$|k\rangle\otimes|l\rangle$に作用させます。まず$A\otimes I_n$を作用させ、(III-1)と$I_n|l\rangle=|l\rangle$を使うと：
+
+$$
+(A\otimes I_n)\big(|k\rangle\otimes|l\rangle\big)=A|k\rangle\otimes|l\rangle
+$$
+
+次に$I_m\otimes B$を作用させ、(III-1)と$I_m\big(A|k\rangle\big)=A|k\rangle$を使うと：
+
+$$
+(I_m\otimes B)\big(A|k\rangle\otimes|l\rangle\big)=A|k\rangle\otimes B|l\rangle
+$$
 
 *$A\otimes B$*：(III-1)から、$(A\otimes B)\big(|k\rangle\otimes|l\rangle\big)=A|k\rangle\otimes B|l\rangle$です。
 
@@ -625,7 +656,19 @@ $A$と$B$自身が可換かどうか（そもそも大きさが違えば$AB$も�
 
 **括弧の位置は変えてよい**：一方、Part III §2-f-4で見た通り、成分で$(u_kv_l)w_r=u_k(v_lw_r)$なので、括弧の位置は変えてよく（結合法則にあたる）、$\bigotimes$は括弧なしで書けます。テンソル積は「順序は変えられないが、括弧は自由」という点で、行列の積と同じ性質を持っています。
 
-**テンソル積どうしの積** $(U_1\otimes U_2)(V_1\otimes V_2)=U_1V_1\otimes U_2V_2$ は、同じ方法で示せます（付録A-1 の (A-1)）。
+**テンソル積どうしの積**：$U_1,V_1$ を $m\times m$ 行列、$U_2,V_2$ を $n\times n$ 行列とします。基底ベクトル $|k\rangle\otimes|l\rangle$ に、右から順に作用させると、(III-1) を2回使って
+
+$$
+(U_1\otimes U_2)(V_1\otimes V_2)\big(|k\rangle\otimes|l\rangle\big)=(U_1\otimes U_2)\big(V_1|k\rangle\otimes V_2|l\rangle\big)=U_1V_1|k\rangle\otimes U_2V_2|l\rangle
+$$
+
+です。右辺は (III-1) から $(U_1V_1\otimes U_2V_2)\big(|k\rangle\otimes|l\rangle\big)$ に等しいので、すべての基底ベクトルで一致し、準備から行列として等しくなります。
+
+$$
+(U_1\otimes U_2)(V_1\otimes V_2)=U_1V_1\otimes U_2V_2
+$$
+
+これを付録A-1 では (A-1) として、一般の大きさで扱います。
 
 <a id="p3-2g"></a>
 
@@ -641,11 +684,17 @@ $$
 (A\otimes B)\big(|u\rangle\otimes|v\rangle\otimes|w\rangle\big)=A|u\rangle\otimes B_1|v\rangle\otimes B_2|w\rangle
 $$
 
-- **書けない場合**：$B\big(|v\rangle\otimes|w\rangle\big)$を4次元のベクトルとしてそのまま計算します。計算はできますが、(III-1)を使って$B_1|v\rangle\otimes B_2|w\rangle$と演算子ごとに分けることはできません。ただし、特定の入力に対する出力が積状態になる可能性まで否定するものではありません。例えば$(I_2\otimes\mathrm{CNOT})\big(|u\rangle\otimes|v\rangle\otimes|w\rangle\big)=|u\rangle\otimes\mathrm{CNOT}\big(|v\rangle\otimes|w\rangle\big)$です。
+- **書けない場合**：$B\big(|v\rangle\otimes|w\rangle\big)$を4次元のベクトルとしてそのまま計算します。計算はできますが、(III-1)を使って$B_1|v\rangle\otimes B_2|w\rangle$と演算子ごとに分けることはできません。ただし、特定の入力に対する出力が積状態になる可能性まで否定するものではありません。たとえば、**CNOT（制御NOT）**は、第1量子ビットが $|1\rangle$ のときだけ第2量子ビットを反転する2量子ビットのゲートで、基底の行き先は
+
+$$
+|00\rangle\mapsto|00\rangle,\qquad|01\rangle\mapsto|01\rangle,\qquad|10\rangle\mapsto|11\rangle,\qquad|11\rangle\mapsto|10\rangle
+$$
+
+です。入力が $|v\rangle\otimes|w\rangle=|0\rangle\otimes|0\rangle$ なら、出力は $|00\rangle=|0\rangle\otimes|0\rangle$ で、積状態です（第1量子ビットが $|0\rangle$ なので、何も起きません）。一方、入力が $\frac1{\sqrt2}(|0\rangle+|1\rangle)\otimes|0\rangle$ なら、出力は $\frac1{\sqrt2}(|00\rangle+|11\rangle)$ で、積状態ではありません。
 
 #### 2-g-2. CNOTは$B_1\otimes B_2$の形に書けない
 
-CNOTは$2\times2$のブロックで$\begin{pmatrix}I_2&0\\0&X\end{pmatrix}$（$X=\begin{pmatrix}0&1\\1&0\end{pmatrix}$）です。仮に$\mathrm{CNOT}=B_1\otimes B_2$と書けたとすると、Part III §2-dのブロック表示から
+CNOT（§2-g-1 で定義）の行列は、基底の行き先を列に並べると、$2\times2$のブロックで$\begin{pmatrix}I_2&0\\0&X\end{pmatrix}$（$X=\begin{pmatrix}0&1\\1&0\end{pmatrix}$）です。仮に$\mathrm{CNOT}=B_1\otimes B_2$と書けたとすると、Part III §2-dのブロック表示から
 
 $$
 \begin{pmatrix}(B_1)_{00}B_2&(B_1)_{01}B_2\\(B_1)_{10}B_2&(B_1)_{11}B_2\end{pmatrix}=\begin{pmatrix}I_2&0\\0&X\end{pmatrix}
@@ -797,6 +846,20 @@ $$
 
 （$k$と$l$の和が独立に分かれます。）
 
+**数値例**：$|a\rangle=(1,i)^T$、$|b\rangle=(1,1)^T$、$|c\rangle=(1,1)^T$、$|d\rangle=(2,1)^T$ で、複素共役を取る位置を確かめます。右辺は
+
+$$
+\langle a|c\rangle=1^\ast\cdot1+i^\ast\cdot1=1-i,\qquad\langle b|d\rangle=1\cdot2+1\cdot1=3,\qquad\langle a|c\rangle\langle b|d\rangle=3-3i
+$$
+
+です。左辺は、$|a\rangle|b\rangle=(1,1,i,i)^T$（成分は $a_kb_l$）なので、ブラは各成分を複素共役にした行ベクトル $(1,1,-i,-i)$ で、$|c\rangle|d\rangle=(2,1,2,1)^T$ との内積は
+
+$$
+1\cdot2+1\cdot1+(-i)\cdot2+(-i)\cdot1=3-3i
+$$
+
+で、一致します。
+
 <a id="p4-6"></a>
 
 ## 6. ノルムの2乗を計算する
@@ -831,13 +894,19 @@ $$
 
 **取り出した成分のノルムの2乗が、入力レジスタの測定確率です。** 物理の仮定はボルン則（Part IV §2）だけで、それ以外は線形代数から導かれています。
 
-（なお、Part IIの$P_x^\dagger=P_x$、$P_x^2=P_x$と、$I^\dagger=I$、$I^2=I$に、共役転置の性質$(A\otimes B)^\dagger=A^\dagger\otimes B^\dagger$と混合積の公式(A-1)（どちらも付録A-1で証明）を使うと
+（**補足**（以降の議論では使いません）：Part IIの$P_x^\dagger=P_x$、$P_x^2=P_x$と、$I^\dagger=I$、$I^2=I$に、共役転置の性質$(A\otimes B)^\dagger=A^\dagger\otimes B^\dagger$（付録A-1の補題3）と混合積の公式(A-1)（付録A-1）を使うと
 
 $$
 (P_x\otimes I)^\dagger(P_x\otimes I)=(P_x^\dagger\otimes I^\dagger)(P_x\otimes I)=P_x^\dagger P_x\otimes I^\dagger I=P_x^2\otimes I=P_x\otimes I
 $$
 
-となるので、$\|(P_x\otimes I)|\Phi\rangle\|^2=\langle\Phi|(P_x\otimes I)^\dagger(P_x\otimes I)|\Phi\rangle=\langle\Phi|(P_x\otimes I)|\Phi\rangle$とも書けます。）この形から、全部の$x$について確率を足すと$1$になること、測定した後の状態がどうなるかは、付録A（A-2、A-3）で扱います。
+となります。また、ケット$M|\Phi\rangle$のブラは$\langle\Phi|M^\dagger$（積の共役転置は順序が逆）なので、$M=P_x\otimes I$とすると
+
+$$
+\|M|\Phi\rangle\|^2=\langle\Phi|M^\dagger M|\Phi\rangle=\langle\Phi|(P_x\otimes I)|\Phi\rangle
+$$
+
+とも書けます。）この形から、全部の$x$について確率を足すと$1$になること、測定した後の状態がどうなるかは、付録Aの A-2 節・A-3 節で扱います。
 
 ---
 
@@ -925,7 +994,7 @@ $$
 
 これは、$U_f$をかける前に入力レジスタを測定した場合の確率と同じです。**$U_f$は各候補に$|f(x_i)\rangle$というラベルを付けるだけで、入力の振幅$\alpha_i$を変えない**ので、関数を計算しても正解の確率は増えません。均等な重ね合わせでは$\alpha_{x^\ast}=\frac1{\sqrt N}$なので$\frac1N$です。正解の確率を大きくするには、振幅$\alpha_i$そのものを動かす別の操作（グローバー探索の位相オラクルと拡散演算子）が必要です。
 
-なお、入力レジスタを**単独で**測る確率は変わりませんが、結果レジスタとの間には相関が生まれます（均等な重ね合わせでは、$f$ が定数でなければ、$U_f$ は入力と結果をエンタングルさせる。一般の振幅では、振幅がゼロでない入力の上で $f$ が**複数の値を取る場合に限って**相関が生まれます。たとえば入力が $|0\rangle$ だけなら、非定数の $f$ でも出力は $|0\rangle|f(0)\rangle$ の積状態です。付録B-3）。結果レジスタを測ると入力レジスタの状態が変わることは、付録B（B-2、B-3）で扱います。
+なお、入力レジスタを**単独で**測る確率は変わりませんが、結果レジスタとの間には相関が生まれます（均等な重ね合わせでは、$f$ が定数でなければ、$U_f$ は入力と結果をエンタングルさせる。一般の振幅では、振幅がゼロでない入力の上で $f$ が**複数の値を取る場合に限って**相関が生まれます。たとえば入力が $|0\rangle$ だけなら、非定数の $f$ でも出力は $|0\rangle|f(0)\rangle$ の積状態です。付録B-3）。結果レジスタを測ると入力レジスタの状態が変わることは、付録Bの B-2 節・B-3 節で扱います。
 
 ---
 
@@ -1003,6 +1072,8 @@ $$
 <a id="p8-3"></a>
 
 ## 3. 射影演算子を行列で書く
+
+（この節では、行列の行と列を **1 から**数えます。Part III §2 の組の番号 $(k,l)$ は 0 から数えました。）
 
 **$P_{11}$**：Part IIの定義から、$P_{11}=|11\rangle\langle11|$は、ケット（縦ベクトル）とブラ（横ベクトル）の積です。$|11\rangle=(0,0,0,1)^T$ のブラは、成分が実数なので、そのまま横にした$\langle11|=(0,0,0,1)$です。
 
@@ -1127,7 +1198,7 @@ $M_x|\Psi\rangle$も、同じペアだけを残したベクトルです。
 
 *左：$|\Psi\rangle$ の8成分（橙は入力が $11$ の基底）。中：$M_{11}|\Psi\rangle=\frac12|111\rangle$（入力が $11$ の成分だけが残る）。右：入力 $x$ の確率はどれも $\frac14=\frac1N$。図を描くときに、成分と確率を本文の式で確かめています。*
 
-**この先**：入力レジスタを測った**後**の状態は付録A（A-3）、結果レジスタを測るとどうなるか、$|\Psi\rangle$ がどれだけエンタングルしているかは付録B、教科書の式と Qiskit の並び順の違いは付録Cで扱います。
+**この先**：入力レジスタを測った**後**の状態は付録Aの A-3 節、結果レジスタを測るとどうなるか、$|\Psi\rangle$ がどれだけエンタングルしているかは付録B、教科書の式と Qiskit の並び順の違いは付録Cで扱います。
 
 ---
 
@@ -1259,6 +1330,32 @@ $$
 
 です。これは $AA'\otimes BB'$ の第 $(k,l),(k',l')$ 成分そのものです（和が $k''$ と $l''$ に分かれて、因子ごとにまとまる）。$\square$
 
+**補題2（和に対する線形性、単位行列）**：$(A+A')\otimes B=A\otimes B+A'\otimes B$、$A\otimes(B+B')=A\otimes B+A\otimes B'$、$I_m\otimes I_n=I_{mn}$。
+
+**証明**：定義の成分で、和の第 $(k,l),(k',l')$ 成分を計算します。
+
+$$
+\big((A+A')\otimes B\big)_{(k,l),(k',l')}=(A+A')_{kk'}\,B_{ll'}=(A_{kk'}+A'_{kk'})\,B_{ll'}=A_{kk'}B_{ll'}+A'_{kk'}B_{ll'}=\big(A\otimes B+A'\otimes B\big)_{(k,l),(k',l')}
+$$
+
+$$
+\big(A\otimes(B+B')\big)_{(k,l),(k',l')}=A_{kk'}\,(B_{ll'}+B'_{ll'})=A_{kk'}B_{ll'}+A_{kk'}B'_{ll'}=\big(A\otimes B+A\otimes B'\big)_{(k,l),(k',l')}
+$$
+
+すべての成分が等しいので、行列として等しくなります。定数倍 $(cA)\otimes B=c\,(A\otimes B)$ も、成分で確かめます。
+
+$$
+\big((cA)\otimes B\big)_{(k,l),(k',l')}=(cA_{kk'})\,B_{ll'}=c\,(A_{kk'}B_{ll'})=\big(c\,(A\otimes B)\big)_{(k,l),(k',l')}
+$$
+
+すべての成分が等しいので、行列として等しくなります。単位行列は、成分が
+
+$$
+(I_m\otimes I_n)_{(k,l),(k',l')}=\delta_{kk'}\,\delta_{ll'}=\delta_{(k,l),(k',l')}
+$$
+
+なので、$mn\times mn$ の単位行列です。$\square$
+
 **帰結**：
 
 - $A'=I_m$、$B=I_n$ とすると、$(A\otimes I_n)(I_m\otimes B')=AI_m\otimes I_nB'=A\otimes B'$ になります（Part III §2-f-7 の式）。
@@ -1339,26 +1436,6 @@ $$
 で、(3) と一致します。右下のブロックが $X^2$ で、$X^2=I_2$ だから単位行列になる点が肝心です。$X^2\ne I_2$ の行列なら、右下は $X^2$ のまま残り、単位行列にはなりません。
 
 *まとめ*：CNOT は $B_1\otimes B_2$ の形に書けません（Part III §2-g-2）が、CNOT どうしの積は $I_2\otimes I_2$ というテンソル積の形になります。「行列の積で書かれているか」ではなく、「結果が積の形か」で判断する、ということの例です。
-
-**補題2（和に対する線形性、単位行列）**：$(A+A')\otimes B=A\otimes B+A'\otimes B$、$A\otimes(B+B')=A\otimes B+A\otimes B'$、$I_m\otimes I_n=I_{mn}$。
-
-**証明**：定義の成分で、和の第 $(k,l),(k',l')$ 成分を計算します。
-
-$$
-\big((A+A')\otimes B\big)_{(k,l),(k',l')}=(A+A')_{kk'}\,B_{ll'}=(A_{kk'}+A'_{kk'})\,B_{ll'}=A_{kk'}B_{ll'}+A'_{kk'}B_{ll'}=\big(A\otimes B+A'\otimes B\big)_{(k,l),(k',l')}
-$$
-
-$$
-\big(A\otimes(B+B')\big)_{(k,l),(k',l')}=A_{kk'}\,(B_{ll'}+B'_{ll'})=A_{kk'}B_{ll'}+A_{kk'}B'_{ll'}=\big(A\otimes B+A\otimes B'\big)_{(k,l),(k',l')}
-$$
-
-すべての成分が等しいので、行列として等しくなります。定数倍 $(cA)\otimes B=c\,(A\otimes B)$ も、同様に $cA_{kk'}B_{ll'}$ で確かめられます。単位行列は、成分が
-
-$$
-(I_m\otimes I_n)_{(k,l),(k',l')}=\delta_{kk'}\,\delta_{ll'}=\delta_{(k,l),(k',l')}
-$$
-
-なので、$mn\times mn$ の単位行列です。$\square$
 
 **補題3（転置・共役転置）**：
 
@@ -1476,7 +1553,15 @@ $$
 
 *(6) $u\otimes v\neq0$ を確かめる*（固有ベクトルはゼロベクトルでないことが必要）：$u\neq0$ なので $u_{k_0}\neq0$ となる $k_0$ があり、$v\neq0$ なので $v_{l_0}\neq0$ となる $l_0$ があります。すると $u\otimes v$ の第 $(k_0,l_0)$ 成分は $u_{k_0}v_{l_0}$ で、ゼロでない2つの複素数の積はゼロでないので、$u\otimes v\neq0$ です。$\square$
 
-**3個以上の場合**：$C\in\mathbb C^{r\times r}$ とその固有ベクトル $w\in\mathbb C^r$（$Cw=\varphi w$、$w\neq0$、$\varphi\in\mathbb C$）を加えると
+**数値例**：$A=X$、$|u\rangle=(1,-1)^T$（$X|u\rangle=-|u\rangle$、$\lambda=-1$）、$B=Z$、$|v\rangle=(0,1)^T$（$Z|v\rangle=-|v\rangle$、$\mu=-1$）とします。$|u\rangle\otimes|v\rangle=(0,1,0,-1)^T$ で、Part III §2-e の数値例と同じ行列 $X\otimes Z$ を掛けると
+
+$$
+(X\otimes Z)\,(0,1,0,-1)^T=(0,\ 1,\ 0,\ -1)^T=(+1)\cdot(0,1,0,-1)^T
+$$
+
+で、固有値は $\lambda\mu=(-1)(-1)=+1$ です（符号の積になります）。
+
+**3個以上の場合**：$C\in\mathbb C^{s\times s}$ とその固有ベクトル $w\in\mathbb C^s$（$Cw=\varphi w$、$w\neq0$、$\varphi\in\mathbb C$）を加えると
 
 $$
 \boxed{(A\otimes B\otimes C)(u\otimes v\otimes w)=\lambda\mu\varphi\,(u\otimes v\otimes w)}
@@ -1484,29 +1569,35 @@ $$
 
 が成り立ちます。
 
-**証明**：Part III §2-f の定義（成分で書いたもの）を使います。$u\otimes v\otimes w$ の第 $(k,l,s)$ 成分は $u_kv_lw_s$、$A\otimes B\otimes C$ の第 $(k,l,s),(k',l',s')$ 成分は $A_{kk'}B_{ll'}C_{ss'}$ です。左辺の第 $(k,l,s)$ 成分を、行列とベクトルの積の定義で計算します。
+**証明**：Part III §2-f の定義（成分で書いたもの。3つ目の因子の次元は $s$、成分の添字は $r$）を使います。$u\otimes v\otimes w$ の第 $(k,l,r)$ 成分は $u_kv_lw_r$、$A\otimes B\otimes C$ の第 $(k,l,r),(k',l',r')$ 成分は $A_{kk'}B_{ll'}C_{rr'}$ です。左辺の第 $(k,l,r)$ 成分を、行列とベクトルの積の定義で計算します。
 
-*(1) 積の定義*：すべての列の番号 $(k',l',s')$ について足して
-
-$$
-\big[(A\otimes B\otimes C)(u\otimes v\otimes w)\big]_{(k,l,s)}=\sum_{k',l',s'}A_{kk'}B_{ll'}C_{ss'}\;u_{k'}v_{l'}w_{s'}
-$$
-
-*(2) 和を因子ごとに分ける*：複素数の積の順序を入れ替えて $A_{kk'}u_{k'}$、$B_{ll'}v_{l'}$、$C_{ss'}w_{s'}$ をまとめ、分配法則を右から左に使うと
+*(1) 積の定義*：すべての列の番号 $(k',l',r')$ について足して
 
 $$
-\sum_{k',l',s'}\big(A_{kk'}u_{k'}\big)\big(B_{ll'}v_{l'}\big)\big(C_{ss'}w_{s'}\big)=\Big(\sum_{k'}A_{kk'}u_{k'}\Big)\Big(\sum_{l'}B_{ll'}v_{l'}\Big)\Big(\sum_{s'}C_{ss'}w_{s'}\Big)=(Au)_k\,(Bv)_l\,(Cw)_s
+\big[(A\otimes B\otimes C)(u\otimes v\otimes w)\big]_{(k,l,r)}=\sum_{k',l',r'}A_{kk'}B_{ll'}C_{rr'}\;u_{k'}v_{l'}w_{r'}
 $$
 
-*(3) 固有値の式を代入する*：$Au=\lambda u$ なので $(Au)_k=\lambda u_k$、同様に $(Bv)_l=\mu v_l$、$(Cw)_s=\varphi w_s$ です。複素数の積の順序を入れ替えて
+*(2) 和を因子ごとに分ける*：複素数の積の順序を入れ替えて $A_{kk'}u_{k'}$、$B_{ll'}v_{l'}$、$C_{rr'}w_{r'}$ をまとめ、分配法則を右から左に使うと
 
 $$
-(Au)_k(Bv)_l(Cw)_s=(\lambda u_k)(\mu v_l)(\varphi w_s)=\lambda\mu\varphi\,(u_kv_lw_s)
+\sum_{k',l',r'}\big(A_{kk'}u_{k'}\big)\big(B_{ll'}v_{l'}\big)\big(C_{rr'}w_{r'}\big)=\Big(\sum_{k'}A_{kk'}u_{k'}\Big)\Big(\sum_{l'}B_{ll'}v_{l'}\Big)\Big(\sum_{r'}C_{rr'}w_{r'}\Big)=(Au)_k\,(Bv)_l\,(Cw)_r
 $$
 
-*(4) 右辺と比べる*：右辺 $\lambda\mu\varphi\,(u\otimes v\otimes w)$ の第 $(k,l,s)$ 成分は $\lambda\mu\varphi\,(u_kv_lw_s)$ で、(3) と一致します。すべての成分で一致するので、等式が成り立ちます。$\square$
+*(3) 固有値の式を代入する*：$Au=\lambda u$ なので $(Au)_k=\lambda u_k$、$Bv=\mu v$ なので $(Bv)_l=\mu v_l$、$Cw=\varphi w$ なので $(Cw)_r=\varphi w_r$ です。複素数の積の順序を入れ替えて
 
-固有値 $\lambda,\mu,\varphi$ は、どれも複素数（スカラー）で、成分の積の中から順序を気にせず外に出せるので、**何個でも**外に出せます。行列そのもの（$A,B,C$）は、順序を入れ替えられないので、同じようには外に出せません。$u\otimes v\otimes w\neq0$ も、$2$ 個の場合と同様に、ゼロでない成分 $u_{k_0},v_{l_0},w_{s_0}$ の積が第 $(k_0,l_0,s_0)$ 成分になることから分かります。
+$$
+(Au)_k(Bv)_l(Cw)_r=(\lambda u_k)(\mu v_l)(\varphi w_r)=\lambda\mu\varphi\,(u_kv_lw_r)
+$$
+
+*(4) 右辺と比べる*：右辺 $\lambda\mu\varphi\,(u\otimes v\otimes w)$ の第 $(k,l,r)$ 成分は $\lambda\mu\varphi\,(u_kv_lw_r)$ で、(3) と一致します。すべての成分で一致するので、等式が成り立ちます。$\square$
+
+固有値 $\lambda,\mu,\varphi$ は、どれも複素数（スカラー）で、成分の積の中から順序を気にせず外に出せるので、**何個でも**外に出せます。行列そのもの（$A,B,C$）は、順序を入れ替えられないので、同じようには外に出せません。$u\otimes v\otimes w\neq0$ は、次のようにして分かります。$u,v,w$ はどれも零でないので、$u_{k_0}\neq0$、$v_{l_0}\neq0$、$w_{r_0}\neq0$ となる成分があります。第 $(k_0,l_0,r_0)$ 成分は
+
+$$
+(u\otimes v\otimes w)_{(k_0,l_0,r_0)}=u_{k_0}v_{l_0}w_{r_0}
+$$
+
+で、零でない複素数3つの積は零でないので、$u\otimes v\otimes w$ は零ベクトルではありません。
 
 **系（対角化できるとき、すべての固有値が出る）**：$A=S\Lambda S^{-1}$、$B=T\Theta T^{-1}$（$S\in\mathbb C^{m\times m}$、$T\in\mathbb C^{n\times n}$ は正則、$\Lambda=\mathrm{diag}(\lambda_1,\dots,\lambda_m)$、$\Theta=\mathrm{diag}(\mu_1,\dots,\mu_n)$）と対角化できるなら、$A\otimes B$ の固有値は、$\lambda_k\mu_l$（$k=1,\dots,m$、$l=1,\dots,n$）の $mn$ 個すべてです。
 
@@ -1544,7 +1635,13 @@ $$
 (S\otimes T)(S^{-1}\otimes T^{-1})=SS^{-1}\otimes TT^{-1}=I_m\otimes I_n=I_{mn}
 $$
 
-で、順序を入れ替えた積 $(S^{-1}\otimes T^{-1})(S\otimes T)$ も同様に $I_{mn}$ です。したがって $(S\otimes T)^{-1}=S^{-1}\otimes T^{-1}$ で、(2) は $A\otimes B=P(\Lambda\otimes\Theta)P^{-1}$（$P:=S\otimes T$）の形、つまり相似です。
+です。順序を入れ替えた積も、(A-1) と補題2から、次のようになります。
+
+$$
+(S^{-1}\otimes T^{-1})(S\otimes T)=S^{-1}S\otimes T^{-1}T=I_m\otimes I_n=I_{mn}
+$$
+
+したがって $(S\otimes T)^{-1}=S^{-1}\otimes T^{-1}$ で、(2) は $A\otimes B=P(\Lambda\otimes\Theta)P^{-1}$（$P:=S\otimes T$）の形、つまり相似です。
 
 *(4) $\Lambda\otimes\Theta$ は対角行列*：成分は
 
@@ -1618,13 +1715,19 @@ $$
 \det(I_m\otimes B)=(\det B)^m
 $$
 
-です。この「ブロック対角行列の行列式は積」を、ブロックが2個の場合で確かめます。
+です。この「ブロック対角行列の行列式は積」を、ブロックの個数 $m$ についての帰納法で確かめます。$m=1$ では $I_1\otimes B=B$ なので、$\det B=(\det B)^1$ です。$m-1$ 個の場合の行列を $D$ とおいて、$\det D=(\det B)^{m-1}$ を仮定します。$m$ 個の行列は、次のように2つの行列の積に分けられます。
 
 $$
-\begin{pmatrix}B&0\\0&B\end{pmatrix}=\begin{pmatrix}B&0\\0&I_n\end{pmatrix}\begin{pmatrix}I_n&0\\0&B\end{pmatrix}
+\begin{pmatrix}B&0\\0&D\end{pmatrix}=\begin{pmatrix}B&0\\0&I\end{pmatrix}\begin{pmatrix}I&0\\0&D\end{pmatrix}
 $$
 
-右辺の各行列は、片方のブロックが単位行列です。単位行列の部分の行について余因子展開を繰り返すと、行列式は残りのブロックの行列式、つまり $\det B$ になります。積の公式から全体は $(\det B)^2$ です。ブロックの個数が増えても同じです。
+（右辺を実際に掛けると、$B\cdot I+0\cdot0=B$、$B\cdot0+0\cdot D=0$、$0\cdot I+I\cdot0=0$、$0\cdot0+I\cdot D=D$ で、左辺になります。）右辺の第1因子の行列式は、単位行列の部分の行について余因子展開して求めます。その行には、対角成分の $1$ のほかにゼロしかないので、展開の項は $1$ と、その行・列を取り除いた小さい行列の行列式の積の1つだけです。対角成分なので符号も $+1$ です。この「行と列を1つ取り除く」ことを、単位行列の部分がなくなるまで繰り返すと、$B$ だけが残り、第1因子の行列式は $\det B$ です。第2因子も同じで、$D$ だけが残り、$\det D$ です。積の公式から
+
+$$
+\det\begin{pmatrix}B&0\\0&D\end{pmatrix}=\det B\cdot\det D=\det B\cdot(\det B)^{m-1}=(\det B)^m
+$$
+
+です。
 
 **手順2：$\det(A\otimes I_n)$**。成分は $A_{kk'}\delta_{ll'}$ です。同じ $l$ の行と列だけが $A$ でつながりますが、番号の並び $(k,l)$ では、$A$ の成分が離れて並んでいます。そこで、基底の並びを入れ替える置換行列 $\Pi$ を使って、$A\otimes I_n$ を $I_n\otimes A$（$A$ が $n$ 個並んだ形）に直します。手順2 は、次の3つの段階で進めます。
 
@@ -1710,6 +1813,14 @@ $$
 
 $\square$
 
+**数値例**：$A=\mathrm{diag}(1,2)$（$m=2$）、$B=\mathrm{diag}(1,2,3)$（$n=3$）とします。$A\otimes B$ は、$A$ の各成分に $B$ を掛けて並べた対角行列で、対角成分は $(1,2,3,\ 2,4,6)$ です。行列式は、対角成分の積
+
+$$
+\det(A\otimes B)=1\cdot2\cdot3\cdot2\cdot4\cdot6=288
+$$
+
+で、公式の右辺は $(\det A)^n(\det B)^m=2^3\cdot6^2=8\cdot36=288$ です。
+
 **数値による確認**：(A-1)、補題3〜7 と $\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ は、ランダムな複素行列（$2\times2$ と $3\times3$ の組合せ）でも数値で確かめました（付録D）。
 
 **この準備を使う場所**：
@@ -1720,7 +1831,7 @@ $\square$
 | 補題2（線形性、単位行列） | A-2（$\sum_xM_x=I$） |
 | 補題3（共役転置） | Part IV §7（$M_x^\dagger=M_x$） |
 | 補題4（ユニタリ性） | 回路の1層（別々のレジスタへのゲート）がユニタリであること |
-| 補題5（トレース） | 例：$\operatorname{tr}M_x=\operatorname{tr}P_x\cdot\operatorname{tr}I_M=M$ |
+| 補題5（トレース） | 例：$\operatorname{tr}M_x=\operatorname{tr}P_x\cdot\operatorname{tr}I_n=n$ |
 | 補題6、7 | 参考（固有値と行列式） |
 
 
@@ -1734,7 +1845,7 @@ $$
 \mathcal H_A=\mathbb C^m,\qquad\mathcal H_B=\mathbb C^n,\qquad|x\rangle\in\mathcal H_A,\qquad P_x:=|x\rangle\langle x|\in\mathbb C^{m\times m},\qquad M_x:=P_x\otimes I_n\in\mathbb C^{mn\times mn}
 $$
 
-$|x\rangle$ は入力レジスタの計算基底（$x=0,\dots,m-1$）、$I_n$ は結果レジスタ上の恒等演算子（$n\times n$）です。次元の文字 $m,n$ は **A-1 と同じ**（$\mathcal H_A=\mathbb C^m$、$\mathcal H_B=\mathbb C^n$）です。基底の添字は、入力の $x$ が A-1 の $k$ に、結果の $y$ が A-1 の $l$ にあたります（本編で値の意味を持つ文字なので、$x,y$ を使います）。本編の候補の個数 $N$ は、すべての基底が候補なら $m$ と一致します。
+$|x\rangle$ は入力レジスタの計算基底（$x=0,\dots,m-1$）、$I_n$ は結果レジスタ上の恒等演算子（$n\times n$）です。次元の文字 $m,n$ は **A-1 節と同じ**（$\mathcal H_A=\mathbb C^m$、$\mathcal H_B=\mathbb C^n$）です。基底の添字は、入力の $x$ が A-1 節の $k$ に、結果の $y$ が A-1 節の $l$ にあたります（本編で値の意味を持つ文字なので、$x,y$ を使います）。本編の候補の個数 $N$ は、すべての基底が候補なら $m$ と一致します。
 
 | 対象 | 属する空間・写像 | 次元・大きさ |
 |---|---|---|
@@ -1793,13 +1904,13 @@ $$
 
 本編で使った物理の仮定は、ボルン則（Part IV §2）だけでした。測定した**後**の状態を決めるには、もう1つ仮定が要ります。
 
-**記法と次元の宣言**：A-2 と同じく、$\mathcal H_A=\mathbb C^m$（入力レジスタ）、$\mathcal H_B=\mathbb C^n$（結果レジスタ）で、測定前の状態は規格化されたベクトル
+**記法と次元の宣言**：A-2 節と同じく、$\mathcal H_A=\mathbb C^m$（入力レジスタ）、$\mathcal H_B=\mathbb C^n$（結果レジスタ）で、測定前の状態は規格化されたベクトル
 
 $$
 |\Phi\rangle\in\mathcal H_A\otimes\mathcal H_B=\mathbb C^{mn},\qquad\langle\Phi|\Phi\rangle=1
 $$
 
-です。入力が $x$ になる確率は $P(x)=\|M_x\Phi\|^2=\langle\Phi|M_x|\Phi\rangle$ で、$M_x\in\mathbb C^{mn\times mn}$ は A-2 の射影演算子です（$M_x^\dagger=M_x$、$M_x^2=M_x$）。
+です。入力が $x$ になる確率は $P(x)=\|M_x\Phi\|^2=\langle\Phi|M_x|\Phi\rangle$ で、$M_x\in\mathbb C^{mn\times mn}$ は A-2 節の射影演算子です（$M_x^\dagger=M_x$、$M_x^2=M_x$）。
 
 **仮定（射影仮説）**：入力レジスタの測定で $x$ が得られたとき、測定直後の状態は
 
@@ -1841,7 +1952,7 @@ $$
 
 ![測定後の状態と、誤差のある測定](figures/mp04_post_measurement.png)
 
-*図 A-1。左上：測定前の $|c|^2$（$|\alpha_i|^2=0.1,0.2,0.3,0.4$、$f$ は Part VIII と同じ）。右上：入力を測って $10$ が出たとき（確率 $0.3$）、状態は $|10\rangle|0\rangle$ になる。左下：結果レジスタを測って $0$ が出たとき（確率 $0.6$、付録B-2）、入力は $|00\rangle,|01\rangle,|10\rangle$ の重ね合わせ（$|c|^2$ は $0.1:0.2:0.3$ の比）に残る。右下：誤差 $\epsilon$ のある $Z$ 測定（A-5）で、結果 $0$ の確率が $0<\epsilon<1$ では $1$ にも $0$ にも届かない。図を描くときに、これらの確率と状態を本文の式で確かめています。*
+*図 A-1。左上：測定前の $|c|^2$（$|\alpha_i|^2=0.1,0.2,0.3,0.4$、$f$ は Part VIII と同じ）。右上：入力を測って $10$ が出たとき（確率 $0.3$）、状態は $|10\rangle|0\rangle$ になる。左下：結果レジスタを測って $0$ が出たとき（確率 $0.6$、付録B-2）、入力は $|00\rangle,|01\rangle,|10\rangle$ の重ね合わせ（$|c|^2$ は $0.1:0.2:0.3$ の比）に残る。右下：誤差 $\epsilon$ のある $Z$ 測定（A-5 節）で、結果 $0$ の確率が $0<\epsilon<1$ では $1$ にも $0$ にも届かない。図を描くときに、これらの確率と状態を本文の式で確かめています。*
 
 <a id="A-4"></a>
 
@@ -1871,7 +1982,7 @@ $$
 
 ## A-5. 一般の測定と POVM
 
-**記法と次元の宣言**：測定される系の状態空間を $\mathcal H=\mathbb C^d$ とし、$|\Phi\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=1$）、$K_m\in\mathbb C^{d\times d}$（結果の添字 $m$ ごとに1つ）とします。入力レジスタの射影測定なら、系は全体 $\mathcal H_A\otimes\mathcal H_B$ で $d=d_Ad_B$（A-1 の $mn$。ここでは $m$ を結果の添字に使うので、次元は $d_A,d_B$ と書きます）、$K_m=M_x$ です。下の例では1量子ビットで $d=2$ です。
+**記法と次元の宣言**：測定される系の状態空間を $\mathcal H=\mathbb C^d$ とし、$|\Phi\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=1$）、$K_m\in\mathbb C^{d\times d}$（結果の添字 $m$ ごとに1つ）とします。入力レジスタの射影測定なら、系は全体 $\mathcal H_A\otimes\mathcal H_B$ で $d=d_Ad_B$（A-1 節の $mn$。ここでは $m$ を結果の添字に使うので、次元は $d_A,d_B$ と書きます）、$K_m=M_x$ です。下の例では1量子ビットで $d=2$ です。
 
 <a id="A-5-1"></a>
 
@@ -1889,7 +2000,7 @@ $$
 P(m)=\|K_m\Phi\|^2=\langle\Phi|K_m^\dagger K_m|\Phi\rangle,\qquad|\Phi_m\rangle=\frac{K_m|\Phi\rangle}{\sqrt{P(m)}}\tag{A-7}
 $$
 
-です。(A-6) は、すべての結果の確率の和を $1$ にするための条件です：
+です（$P(m)>0$ の結果についてです。$P(m)=0$ の結果は起こらないので、測定後の状態は定めません）。(A-6) は、すべての結果の確率の和を $1$ にするための条件です：
 
 $$
 \sum_mP(m)=\sum_m\langle\Phi|K_m^\dagger K_m|\Phi\rangle=\Big\langle\Phi\Big|\Big(\sum_mK_m^\dagger K_m\Big)\Big|\Phi\Big\rangle=\langle\Phi|\Phi\rangle=1
@@ -1935,19 +2046,115 @@ $$
 
 です。
 
-**積を作る理由**：確率だけを求めるなら、次の**数**で足ります。
+**積を作る理由**：測定の結果が分かっている場合と、**測定はしたが、どの結果が出たかは記録しない**場合を比べます。
+
+結果が分かっていて、$K_m$ が1つなら、測定後の状態は、(A-7) の状態ベクトル $|\Phi_m\rangle$ で記述できます。結果 $m$ が出る確率は、(A-7) の第1式から、次の式で与えられます。
 
 $$
-\langle\Phi|K_m^\dagger K_m|\Phi\rangle
+P(m)=\langle\Phi|K_m^\dagger K_m|\Phi\rangle
 $$
 
-しかし、測定のあとの状態を追うには、状態を数ではなく**行列**として持つ必要があります。たとえば、次の測定に使う場合や、結果を区別せずに平均した次の状態を考える場合です。
+結果を記録しない場合は、起こりうる各結果と、それぞれが出る確率を、**合わせて**扱う必要があります（実験では、記録せずに次の操作に使うことがあります）。この混合を表すために、状態を行列で表します。先に示した等式 $K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle$ から、結果を記録しない場合の観測量 $A$ の期待値を計算します。これは、各結果 $m$ の状態 $|\Phi_m\rangle$ での期待値の、確率 $P(m)$ による平均です。
+
+$$
+\langle A\rangle=\sum_mP(m)\,\langle\Phi_m|A|\Phi_m\rangle
+$$
+
+先に示した等式の両辺を $\sqrt{P(m)}$ で割ると、$|\Phi_m\rangle$ は次のように書けます（$P(m)>0$ は (A-7) の条件です）。
+
+$$
+|\Phi_m\rangle=\frac{1}{\sqrt{P(m)}}\,K_m|\Phi\rangle
+$$
+
+$\sqrt{P(m)}$ は実数なので、そのブラは、先に示した $\big(K_m|\Phi\rangle\big)^\dagger=\langle\Phi|K_m^\dagger$ を用いて、次のようになります。
+
+$$
+\langle\Phi_m|=\frac{1}{\sqrt{P(m)}}\,\langle\Phi|K_m^\dagger
+$$
+
+この2つを期待値の式に代入すると、$\frac{1}{\sqrt{P(m)}}$ が2つ掛かって $\frac{1}{P(m)}$ になり、掛けてあった $P(m)$ と打ち消し合います。
+
+$$
+P(m)\,\langle\Phi_m|A|\Phi_m\rangle=\langle\Phi|K_m^\dagger\,A\,K_m|\Phi\rangle
+$$
+
+右辺は、状態ベクトル $|\Phi\rangle$ を、ケットとブラの両方に含んでいます。ここから $A$ を外に出すために、次の完全性関係を挿入します。
+
+$$
+\sum_j|j\rangle\langle j|=I
+$$
+
+一般に、状態ベクトル $|\varphi\rangle$ と行列 $B$ について、次のように変形できます。
+
+$$
+\langle\varphi|B|\varphi\rangle=\sum_j\langle\varphi|B|j\rangle\langle j|\varphi\rangle=\sum_j\langle j|\varphi\rangle\langle\varphi|B|j\rangle=\operatorname{tr}\big(|\varphi\rangle\langle\varphi|\,B\big)
+$$
+
+2番目の等号は、$\langle j|\varphi\rangle$ と $\langle\varphi|B|j\rangle$ がどちらも数なので、順序を入れ替えたものです。3番目の等号は、$\sum_j\langle j|M|j\rangle$ が、行列 $M$ の対角成分の和、つまりトレース $\operatorname{tr}M$ であることから、$M=|\varphi\rangle\langle\varphi|B$ とおいたものです。ここで、$|\varphi\rangle\langle\varphi|$ というケットとブラの積が現れます。$\varphi$ がケットとブラの両方に含まれるので、$B$ を外に出すと、$\varphi$ の部分はこの積にまとまります。
+
+これを $B=K_m^\dagger AK_m$、$|\varphi\rangle=|\Phi\rangle$ に適用し、トレースの巡回性から $K_m$ を前に動かすと
+
+$$
+\langle\Phi|K_m^\dagger AK_m|\Phi\rangle=\operatorname{tr}\big(|\Phi\rangle\langle\Phi|\,K_m^\dagger AK_m\big)=\operatorname{tr}\big(K_m|\Phi\rangle\langle\Phi|K_m^\dagger\,A\big)
+$$
+
+です。測定前の密度行列 $\rho=|\Phi\rangle\langle\Phi|$ を用いると、$K_m|\Phi\rangle\langle\Phi|K_m^\dagger=K_m\rho K_m^\dagger$ なので、結果を記録しない場合の期待値は、次の形になります。
+
+$$
+\langle A\rangle=\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\,A\big)=\operatorname{tr}\Big(\Big[\sum_mK_m\rho K_m^\dagger\Big]A\Big)
+$$
+
+最後の等号は、トレースの線形性です。この式で、$A$ に依存しない部分は、次の行列です。
 
 $$
 \sum_mK_m\rho K_m^\dagger
 $$
 
-後者は、1つのケットで書けるとは限りません。次の2つの前提を復習してから、具体例で確かめます。
+任意の観測量の期待値が、この行列と $A$ のトレースで決まるので、結果を記録しない場合の状態は、この行列で表せます。各項は、$K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle$ により、結果 $m$ の状態 $|\Phi_m\rangle$ に確率 $P(m)$ を掛けたものです。
+
+$$
+K_m\rho K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger=P(m)\,|\Phi_m\rangle\langle\Phi_m|
+$$
+
+したがって、次の等式が成り立ちます。
+
+$$
+\sum_mP(m)\,|\Phi_m\rangle\langle\Phi_m|=\sum_mK_m\rho K_m^\dagger
+$$
+
+この状態が、次のどちらになるかを調べます。
+
+**純粋状態**は、測定前の $|\Phi\rangle$ のように、状態ベクトル $|\psi\rangle$ で記述できる状態です。密度行列は、次の形になります。
+
+$$
+|\psi\rangle\langle\psi|
+$$
+
+**混合状態**は、状態ベクトルでは記述できない状態です。
+
+結果を記録しない場合の状態は、純粋状態でしょうか、混合状態でしょうか。答えは場合によります。
+
+状態ベクトルで記述できる例を挙げます。測定前の状態と測定演算子を、次のようにします。
+
+$$
+|\Phi\rangle=|0\rangle,\qquad K_0=|0\rangle\langle0|,\qquad K_1=|1\rangle\langle1|
+$$
+
+このとき $K_1|0\rangle=0$ なので
+
+$$
+\sum_mK_m\rho K_m^\dagger=K_0\rho K_0^\dagger=|0\rangle\langle0|
+$$
+
+で、状態ベクトル $|0\rangle$ の純粋状態です。
+
+記述できない例は、次の状態です。
+
+$$
+|\Phi\rangle=|+\rangle
+$$
+
+これを次に確かめます。そのために、次の2つの道具を復習します。**$\pm$ 基底**は、測定確率の違いを見る道具、**階数**は、状態ベクトルで記述できるかを調べる道具です。
 
 **$\pm$ 基底の復習**：
 
@@ -1955,15 +2162,43 @@ $$
 |\pm\rangle=\frac1{\sqrt2}\big(|0\rangle\pm|1\rangle\big)
 $$
 
-は、$|0\rangle$ と $|1\rangle$ の**重ね合わせ**で、アダマールゲート $H$ で $H|0\rangle=|+\rangle$、$H|1\rangle=|-\rangle$ となるので、**アダマール基底**と同じものです（パウリ行列 $X$ の固有状態なので、$X$ 基底とも呼びます）。正規直交で、
+は、$|0\rangle$ と $|1\rangle$ の**重ね合わせ**です。アダマールゲート
+
+$$
+H=\frac1{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatrix}
+$$
+
+は、$|0\rangle,|1\rangle$ を
+
+$$
+H|0\rangle=|+\rangle,\qquad H|1\rangle=|-\rangle
+$$
+
+に移すので、$\{|+\rangle,|-\rangle\}$ は**アダマール基底**と同じものです（パウリ行列 $X$ の固有状態なので、$X$ 基底とも呼びます）。正規直交で、
 
 $$
 \langle+|+\rangle=\frac12(1+1)=1,\qquad\langle+|-\rangle=\frac12(1-1)=0
 $$
 
-です。「$\pm$ 基底で測る」とは、測定演算子を $|+\rangle\langle+|$、$|-\rangle\langle-|$ にすることで、状態 $\rho$ のとき、結果 $\pm$ の確率は $\langle\pm|\rho|\pm\rangle$ です。
+です。「$\pm$ 基底で測る」とは、測定演算子を次のようにすることです。
 
-**階数（ランク）の復習**：行列の階数は、一次独立な列の最大個数です。零でないケット $|\psi\rangle=(a,b)^T$（成分が $a,b$ の列ベクトルで、$(a,b)\neq(0,0)$）のブラは、転置を取って成分を複素共役にした行ベクトル
+$$
+|+\rangle\langle+|,\qquad|-\rangle\langle-|
+$$
+
+状態 $\rho$ のとき、結果 $\pm$ の確率は、次の式で与えられます。
+
+$$
+\langle\pm|\rho|\pm\rangle
+$$
+
+**階数（ランク）の復習**：行列の階数は、一次独立な列の最大個数です。零でない状態ベクトルを、成分が $a,b$ の列ベクトルとして、次のように書きます。
+
+$$
+|\psi\rangle=\begin{pmatrix}a\\b\end{pmatrix},\qquad(a,b)\neq(0,0)
+$$
+
+そのブラは、転置を取って成分を複素共役にした行ベクトル
 
 $$
 \langle\psi|=|\psi\rangle^\dagger=\begin{pmatrix}a^\ast&b^\ast\end{pmatrix}
@@ -1975,13 +2210,21 @@ $$
 |\psi\rangle\langle\psi|=\begin{pmatrix}a\\b\end{pmatrix}\begin{pmatrix}a^\ast&b^\ast\end{pmatrix}=\begin{pmatrix}aa^\ast&ab^\ast\\ba^\ast&bb^\ast\end{pmatrix}=\begin{pmatrix}|a|^2&ab^\ast\\ba^\ast&|b|^2\end{pmatrix}
 $$
 
-で、第1列は $a^\ast|\psi\rangle$、第2列は $b^\ast|\psi\rangle$、どちらも $|\psi\rangle$ の定数倍で、$|\psi\rangle\neq0$ なので、階数は $1$ です（$|\psi\rangle=0$ なら零行列で、階数は $0$ です）。零でない $2\times2$ 行列では、階数 $1$ は行列式が $0$ のことで、実際
+で、第1列と第2列は、次のように、どちらも $|\psi\rangle$ の定数倍です。
+
+$$
+\text{第1列}=a^\ast|\psi\rangle,\qquad\text{第2列}=b^\ast|\psi\rangle
+$$
+
+$|\psi\rangle\neq0$ なので、階数は $1$ です。$|\psi\rangle=0$ なら零行列で、階数は $0$ です。
+
+零でない $2\times2$ 行列では、階数 $1$ は、行列式が $0$ であることと同じです。実際、
 
 $$
 |a|^2|b|^2-(ab^\ast)(ba^\ast)=0
 $$
 
-です。したがって、**零でないケットの $|\psi\rangle\langle\psi|$ は、階数 $1$（行列式 $0$）の行列**です。
+です。したがって、**零でない状態ベクトルの $|\psi\rangle\langle\psi|$ は、階数 $1$（行列式 $0$）の行列**です。
 
 **具体例**：状態と測定演算子を、次のようにします。
 
@@ -2009,19 +2252,37 @@ $$
 
 です。
 
-**説明**：この $\frac12I$ は、第1列 $(\frac12,0)^T$ と第2列 $(0,\frac12)^T$ が定数倍にならないので、階数は $2$（行列式 $\frac14$）です。零でないケットの $|\psi\rangle\langle\psi|$ は階数 $1$ なので、階数が違い、$\frac12I$ は**どんなケット $|\psi\rangle$ の $|\psi\rangle\langle\psi|$ にもなりません**。
+**説明**：結果を記録しない場合の状態は、次の行列でした。
 
-**重ね合わせと混ぜ物の違い**：$\pm$ 基底で測ると、次のように違いが出ます。
+$$
+\frac12I=\frac12\begin{pmatrix}1&0\\0&1\end{pmatrix}
+$$
+
+この行列の第1列と第2列は、次の通りで、定数倍にならないので、階数は $2$（行列式 $\frac14$）です。
+
+$$
+\text{第1列}=\begin{pmatrix}\frac12\\0\end{pmatrix},\qquad\text{第2列}=\begin{pmatrix}0\\\frac12\end{pmatrix}
+$$
+
+零でない状態ベクトルの外積は、階数が $1$ です。$\frac12I$ の階数は $2$ なので、階数が違います。したがって、どんな状態ベクトル $|\psi\rangle$ についても、次が成り立ちます。
+
+$$
+\frac12I\neq|\psi\rangle\langle\psi|
+$$
+
+つまり $\frac12I$ は、状態ベクトルでは記述できない**混合状態**です。確率 $p_j$ で状態 $|\psi_j\rangle$ にある、という古典的な混ぜ合わせにあたります。
+
+**重ね合わせと混合状態の違い**：$\pm$ 基底で測ると、次のように違いが出ます。
 
 | 状態 | $+$ の確率 | $-$ の確率 |
 |---|---|---|
 | 重ね合わせ $\lvert+\rangle$（$\rho=\lvert+\rangle\langle+\rvert$） | $\lvert\langle+\vert+\rangle\rvert^2=1$ | $\lvert\langle-\vert+\rangle\rvert^2=0$ |
-| 混ぜ物 $\frac12I$ | $\langle+\vert\frac12I\vert+\rangle=\frac12$ | $\langle-\vert\frac12I\vert-\rangle=\frac12$ |
+| 混合状態 $\frac12I$ | $\langle+\vert\frac12I\vert+\rangle=\frac12$ | $\langle-\vert\frac12I\vert-\rangle=\frac12$ |
 
 **なぜ密度行列とクラウス表現が必要か**：
 
-- 結果を記録しない（忘れる）と、状態は混ぜ物になります。1つのケットでは書けず、密度行列なら書けます。
-- 現実の測定には、読み出し誤差があります。[付録A-5-3](#A-5-3) の例では、結果 $0$ に**複数の演算子**が対応し、結果 $0$ の後の状態が階数 $2$ の混合状態になって、1つの $K_0|\Phi\rangle$ では表せません。演算子の組 $\{K_{m\alpha}\}$ と、クラウス表現が要ります。
+- 結果を記録しない（忘れる）と、状態は混合状態になります。状態ベクトルでは記述できず、密度行列なら記述できます。
+- 現実の測定には、読み出し誤差があります。後の [付録A-5-3](#A-5-3) の例（ラベル取り違えの模型）では、結果 $0$ に**複数の演算子**が対応し、結果 $0$ の後の状態が階数 $2$ の混合状態になって、1つの $K_0|\Phi\rangle$ では表せません。演算子の組 $\{K_{m\alpha}\}$ と、クラウス表現が要ります。
 - 環境との相互作用（ノイズ）も、系だけを見ると、同じ形 $\sum_mK_m\rho K_m^\dagger$ になります（[部分トレースのノート](partial_trace_reduced_density_matrix.md#p6) Part VI）。
 
 純粋状態を行列で表す形が、ケットとブラの積（密度行列と同じ形）です。そこで、規格化前のケットとそのブラの積を作ると
@@ -2138,7 +2399,7 @@ $$
 
 （行列の指数関数との関係 $\det(e^A)=e^{\operatorname{tr}A}$ という別の等式がありますが、ここでは使いません。ここで使うのは、外積のトレースが内積になること (1) と、トレースの巡回性 (4) だけです。）
 
-(4) に現れた $K_m^\dagger K_m$ は、確率と、完全性の条件 (A-6) の両方に現れる組み合わせです。次の A-5-2 で、この組み合わせに名前を付けます。
+(4) に現れた $K_m^\dagger K_m$ は、確率と、完全性の条件 (A-6) の両方に現れる組み合わせです。次の A-5-2 節で、この組み合わせに名前を付けます。
 
 <a id="A-5-2"></a>
 
@@ -2161,7 +2422,7 @@ $$
 \langle v|E_m|v\rangle=\langle v|K_m^\dagger K_m|v\rangle=\|K_mv\|^2\ge0
 $$
 
-だからです。性質2 は、(A-6) そのものです。
+だからです。特に、$E_m$ の固有ベクトル $v$（$E_mv=\lambda v$、$v\neq0$）では $\langle v|E_m|v\rangle=\lambda\|v\|^2\ge0$ なので、固有値 $\lambda\ge0$ です。性質2 は、(A-6) そのものです。
 
 **なぜ POVM を考えるか**：(A-7) の確率は $P(m)=\langle\Phi|K_m^\dagger K_m|\Phi\rangle=\langle\Phi|E_m|\Phi\rangle$ で、$K_m$ は $K_m^\dagger K_m=E_m$ という組み合わせでしか現れません。したがって、「結果 $m$ がどの確率で出るか」は $E_m$ だけで決まり、$K_m$ そのものは要りません。一方、測定後の状態 $K_m|\Phi\rangle/\sqrt{P(m)}$ は、$K_m$ そのものが決めます。つまり、**確率は $E_m$ が決め、測定後の状態は $K_m$ が決める**、という分担があります。POVM は、このうち確率を決める部分を取り出したものです。
 
@@ -2313,13 +2574,13 @@ $$
 
 本編では入力レジスタだけを測りました。ここでは、**結果レジスタ**を測ったとき入力レジスタに何が残るか、そして $|\Psi\rangle$ がどれだけエンタングルしているかを、係数行列で調べます。
 
-**記法と次元の宣言**（付録A-1・A-2 と同じ流儀）：入力レジスタの空間を $\mathcal H_A=\mathbb C^m$、結果レジスタの空間を $\mathcal H_B=\mathbb C^n$ とし、計算基底を $|x\rangle$（$x=0,\dots,m-1$）、$|y\rangle$（$y=0,\dots,n-1$）とします。状態は
+**記法と次元の宣言**（付録A-1 節・A-2 節と同じ流儀）：入力レジスタの空間を $\mathcal H_A=\mathbb C^m$、結果レジスタの空間を $\mathcal H_B=\mathbb C^n$ とし、計算基底を $|x\rangle$（$x=0,\dots,m-1$）、$|y\rangle$（$y=0,\dots,n-1$）とします。状態は
 
 $$
 |\Phi\rangle=\sum_{x=0}^{m-1}\sum_{y=0}^{n-1}c_{x,y}\,|x\rangle\otimes|y\rangle\in\mathcal H_A\otimes\mathcal H_B,\qquad\langle\Phi|\Phi\rangle=1
 $$
 
-です。この付録で使う対象の大きさは次の通りです（次元の文字 $m,n$ と、基底の添字 $x,y$（A-1 の $k,l$ にあたる）は、A-1・A-2 と同じです）。
+です。この付録で使う対象の大きさは次の通りです（次元の文字 $m,n$ と、基底の添字 $x,y$（A-1 節の $k,l$ にあたる）は、A-1 節・A-2 節と同じです）。
 
 | 対象 | 属する空間・写像 | 次元・大きさ |
 |---|---|---|
@@ -2348,7 +2609,7 @@ $$
 
 - 規格化：$\sum_{x,y}|c_{x,y}|^2=1$。
 - 入力の確率（Part IV §3 の (IV-1)）：$P(x)=\sum_y|c_{x,y}|^2$、つまり**第 $x$ 行の成分の絶対値の2乗の和**。
-- 結果の確率：$P(y)=\sum_x|c_{x,y}|^2$、つまり**第 $y$ 列の成分の絶対値の2乗の和**（B-2）。
+- 結果の確率：$P(y)=\sum_x|c_{x,y}|^2$、つまり**第 $y$ 列の成分の絶対値の2乗の和**（B-2 節）。
 
 <a id="B-2"></a>
 
@@ -2360,7 +2621,13 @@ $$
 M'_y:=I_m\otimes P_y\in\mathbb C^{mn\times mn},\qquad P_y:=|y\rangle\langle y|\in\mathbb C^{n\times n}
 $$
 
-とします。A-2 の $M_x$ と同じ計算（(A-1) と、入力・結果の役割を入れ替えたもの）で、$M'_yM'_{y'}=\delta_{yy'}M'_y$、$\sum_yM'_y=I_{mn}$、$M'^\dagger_y=M'_y$ が成り立ちます。Part III §3 と同じ計算（(III-1) と線形性）で、基底 $|x\rangle|y'\rangle$ に作用させると
+とします。A-2 節の $M_x$ と同じ計算（(A-1) と、入力・結果の役割を入れ替えたもの）で、$M'_yM'_{y'}=\delta_{yy'}M'_y$、$\sum_yM'_y=I_{mn}$、$M'^\dagger_y=M'_y$ が成り立ちます。たとえば最初の式は、(A-1) から
+
+$$
+M'_yM'_{y'}=(I_m\otimes P_y)(I_m\otimes P_{y'})=I_m\otimes P_yP_{y'}=\delta_{yy'}\,I_m\otimes P_y=\delta_{yy'}M'_y
+$$
+
+です。Part III §3 と同じ計算（(III-1) と線形性）で、基底 $|x\rangle|y'\rangle$ に作用させると
 
 $$
 M'_y\big(|x\rangle|y'\rangle\big)=|x\rangle\otimes|y\rangle\langle y|y'\rangle=\delta_{y,y'}\,|x\rangle|y\rangle
@@ -2384,7 +2651,7 @@ $$
 |\Phi_y\rangle=\frac{1}{\sqrt{P(y)}}\Big(\sum_xc_{x,y}|x\rangle\Big)\otimes|y\rangle\tag{B-2}
 $$
 
-と、**積状態**になります。$|\Psi\rangle$ では $c_{x,y}=\alpha_x\delta_{y,f(x)}$ なので、
+と、**積状態**になります（$P(y)>0$ の $y$ についてです。$P(y)=0$ の結果は起こりません）。$|\Psi\rangle$ では $c_{x,y}=\alpha_x\delta_{y,f(x)}$ なので、（$y$ は $f$ の取る値、つまり $P(y)>0$ のものとして）
 
 $$
 P(y)=\sum_{x:\,f(x)=y}|\alpha_x|^2,\qquad|\Psi_y\rangle=\frac{1}{\sqrt{P(y)}}\Big(\sum_{x:\,f(x)=y}\alpha_x|x\rangle\Big)\otimes|y\rangle\tag{B-3}
@@ -2420,9 +2687,9 @@ $$
 
 **主張**：$|\Phi\rangle$ が入力レジスタの状態と結果レジスタの状態のテンソル積 $|u\rangle\otimes|v\rangle$ の形に書けることと、係数行列 $C$ の階数が $1$ であることは同値です。
 
-**証明**：$|u\rangle=\sum_xu_x|x\rangle$、$|v\rangle=\sum_yv_y|y\rangle$ なら、$|u\rangle\otimes|v\rangle=\sum_{x,y}u_xv_y|x\rangle|y\rangle$（Part III §2-c）なので、$c_{x,y}=u_xv_y$、つまり $C=uv^T$（列ベクトル $u$ と行ベクトル $v^T$ の積）で、階数は $1$ です。逆に、階数 $1$ の行列は $C=uv^T$ の形に書けるので、$|\Phi\rangle=\sum_{x,y}u_xv_y|x\rangle|y\rangle=|u\rangle\otimes|v\rangle$ です（零行列は規格化に反するので除く）。$\square$
+**証明**：$|u\rangle=\sum_xu_x|x\rangle$、$|v\rangle=\sum_yv_y|y\rangle$ なら、$|u\rangle\otimes|v\rangle=\sum_{x,y}u_xv_y|x\rangle|y\rangle$（Part III §2-c）なので、$c_{x,y}=u_xv_y$、つまり $C=uv^T$（列ベクトル $u$ と行ベクトル $v^T$ の積）で、階数は $1$ です。逆に、階数 $1$ の行列は、すべての列が1本の列ベクトル $u$ の定数倍 $v_yu$ なので $c_{x,y}=u_xv_y$、つまり $C=uv^T$ の形に書けるので、$|\Phi\rangle=\sum_{x,y}u_xv_y|x\rangle|y\rangle=|u\rangle\otimes|v\rangle$ です（零行列は規格化に反するので除く）。$\square$
 
-Part III §2-f-5 の積状態の判定（$2\times2$ では $w_{00}w_{11}=w_{01}w_{10}$、つまり $\det C=0$）は、この主張の $m=n=2$ の場合です。
+$m=n=2$ では、$C=\begin{pmatrix}c_{00}&c_{01}\\c_{10}&c_{11}\end{pmatrix}$ の階数が $1$ であることは、$c_{00}c_{11}-c_{01}c_{10}=0$（$\det C=0$）と同値です。Part III §2-f-5 の $|\Phi^+\rangle=\frac1{\sqrt2}(|00\rangle+|11\rangle)$ は、$C=\frac1{\sqrt2}I_2$ で $\det C=\frac12\neq0$ なので、積状態ではありません。
 
 **$|\Psi\rangle$ の場合**（振幅 $\alpha_x$ がすべて $0$ でないとき。下の例は均等な重ね合わせ）：
 
@@ -2430,21 +2697,9 @@ Part III §2-f-5 の積状態の判定（$2\times2$ では $w_{00}w_{11}=w_{01}w
 |---|---|---|---|
 | 定数 $f(x)=0$ | 第0列だけがゼロでない | $1$ | 積状態：$\big(\sum_x\alpha_x\lvert x\rangle\big)\otimes\lvert0\rangle$ |
 | Part VIII の例 | 列が2つとも使われる | $2$ | エンタングルしている |
-| 1対1（$f(x)=x$） | 各行・各列に1つずつ | $m$ | エンタングルしている（均等なら、エントロピーが最大 $\log_2m$） |
+| 1対1（$f(x)=x$、$m\ge2$） | 各行・各列に1つずつ | $m$ | エンタングルしている（均等なら、エントロピーが最大 $\log_2m$）。$m=1$ なら階数 $1$ で積状態 |
 
-階数が積状態かどうかの判定であって、エンタングルメントの**量**を表すわけではない点に注意してください。次の4つの例で、階数とエントロピー（$-\sum_kp_k\log_2p_k$）を比べます。
-
-| 例 | シュミット確率 $p_k$ | 階数 | エントロピー |
-|---|---|---|---|
-| 1対1、$\alpha=(\sqrt{0.9},\sqrt{0.1},0,0)$ | $(0.9,\ 0.1)$ | $2$ | 約 $0.469$ bit |
-| 1対1、$\alpha=(\sqrt{0.4},\sqrt{0.3},\sqrt{0.2},\sqrt{0.1})$ | $(0.4,\ 0.3,\ 0.2,\ 0.1)$ | $4$ | 約 $1.846$ bit（$\log_24=2$ bit より小さい） |
-| ある状態 | $(0.999,\ 0.0005,\ 0.0005)$ | $3$ | 約 $0.012$ bit |
-| ある状態 | $(0.5,\ 0.5)$ | $2$ | $1$ bit |
-
-- **1行目と2行目**：1対1の関数では、階数は**振幅がゼロでない入力の個数**で決まります。1行目は、振幅がゼロでない入力が $00$ と $01$ の2つなので階数 $2$、2行目は、すべて $0$ でないので階数 $4$ のままです。どちらも、振幅が偏っている分、エントロピーが最大（階数 $r$ なら $\log_2r$）より小さくなります。
-- **3行目と4行目**：階数が大きくても、シュミット確率が偏っていればエントロピーは小さくなります。3行目は階数 $3$ ですが、4行目の階数 $2$ より、エントロピーが小さいです。
-
-量の比較には、次のエンタングルメントエントロピーを使います。
+一般に、すべての $\alpha_x$ が $0$ でないとき、$C$ の各行にはゼロでない成分がちょうど1つあります。したがって、ゼロでない列は、互いに別の行に成分を持つので、一次独立です。つまり、**階数は $f$ が取る値の個数**で、$f$ が定数でない限り、階数は $2$ 以上（積状態でない）です。
 
 **シュミット分解**：$C\in\mathbb C^{m\times n}$ の特異値分解を
 
@@ -2452,7 +2707,7 @@ $$
 C=USV^\dagger,\qquad U\in\mathbb C^{m\times m},\quad V\in\mathbb C^{n\times n}\ (\text{ユニタリ}),\qquad S\in\mathbb R^{m\times n}\ (\text{対角成分が特異値 }s_1\ge s_2\ge\cdots\ge0)
 $$
 
-とします。$S$ の非対角成分は $0$ なので、行列の積の成分は
+とします。特異値分解は、任意の複素行列に存在することが知られている線形代数の定理です（ここでは証明せず、引用します）。$s_k\ge0$ を**特異値**と呼びます。$S$ の非対角成分は $0$ なので、行列の積の成分は
 
 $$
 c_{x,y}=(USV^\dagger)_{xy}=\sum_{k,k'}U_{xk}\,S_{kk'}\,(V^\dagger)_{k'y}=\sum_kU_{xk}\,s_k\,V_{yk}^\ast
@@ -2467,20 +2722,46 @@ $$
 です。$U,V$ はユニタリで、列が正規直交なので、$|u_k\rangle=\sum_xU_{xk}|x\rangle$、$|v_k\rangle=\sum_yV_{yk}^\ast|y\rangle$ も正規直交です：
 
 $$
-\langle u_k|u_{k'}\rangle=\sum_xU_{xk}^\ast\,U_{xk'}=(U^\dagger U)_{kk'}=\delta_{kk'},\qquad\langle v_k|v_{k'}\rangle=\sum_yV_{yk}\,V_{yk'}^\ast=\big((V^\dagger V)_{k'k}\big)^\ast=\delta_{kk'}
+\langle u_k|u_{k'}\rangle=\sum_xU_{xk}^\ast\,U_{xk'}=(U^\dagger U)_{kk'}=\delta_{kk'},\qquad\langle v_k|v_{k'}\rangle=\sum_yV_{yk}\,V_{yk'}^\ast=(V^\dagger V)_{k'k}=\delta_{kk'}
 $$
 
-また、$\sum_ks_k^2=\sum_{x,y}|c_{x,y}|^2=1$ です（ユニタリ変換で係数行列のフロベニウスノルムが変わらない）。ゼロでない特異値の個数が $C$ の階数で、**階数 $1$ のときだけ積状態**です。
+特異値と $C$ の関係を、3つ確かめます。
 
-**エンタングルメントエントロピー**：$p_k:=s_k^2$ を確率と見て、$S:=-\sum_kp_k\log_2p_k$ を、エンタングルメントの大きさの指標とします（積状態で $0$）。
+*(1) $s_k^2$ は $C^\dagger C$ の固有値*：$S$ は実行列で $S^\dagger=S^T$、$U^\dagger U=I$ なので
 
-| 関数 | $p_k$ | $S$ |
+$$
+C^\dagger C=VS^T\,U^\dagger U\,SV^\dagger=V\big(S^TS\big)V^\dagger
+$$
+
+です。$S^TS$ は対角行列で、対角成分は $s_k^2$ です。$V$ はユニタリなので、これは $C^\dagger C$ の対角化で、固有値は $s_k^2$ です。
+
+*(2) $\sum_ks_k^2=1$*：$\operatorname{tr}(C^\dagger C)=\sum_{x,y}c_{x,y}^\ast c_{x,y}=\sum_{x,y}|c_{x,y}|^2=1$（規格化）で、一方 (1) とトレースの巡回性から $\operatorname{tr}(C^\dagger C)=\operatorname{tr}\big(V(S^TS)V^\dagger\big)=\operatorname{tr}(S^TS)=\sum_ks_k^2$ です。
+
+*(3) 階数*：$U,V$ は可逆なので、$C=USV^\dagger$ の階数は $S$ の階数に等しく、それは**ゼロでない特異値の個数**です。したがって、**階数 $1$ のときだけ積状態**です（上の主張）。
+
+**エンタングルメントエントロピー**：$p_k:=s_k^2$ を確率と見て、$S_{\mathrm{ent}}:=-\sum_kp_k\log_2p_k$ を、エンタングルメントの大きさの指標とします（積状態で $0$）。
+
+| 関数 | $p_k$ | $S_{\mathrm{ent}}$ |
 |---|---|---|
 | 定数 | $(1)$ | $0$ bit |
-| Part VIII の例 | $(\tfrac34,\tfrac14)$ | $-\tfrac34\log_2\tfrac34-\tfrac14\log_2\tfrac14\approx0.811$ bit |
+| Part VIII の例 | $(\tfrac34,\tfrac14)$ | $-\tfrac34\log_2\tfrac34-\tfrac14\log_2\tfrac14\approx0.311+0.5=0.811$ bit |
 | 1対1（$m=4$、均等） | $(\tfrac14,\tfrac14,\tfrac14,\tfrac14)$ | $\log_24=2$ bit |
 
-Part VIII の例の $p_k=(\tfrac34,\tfrac14)$ は、$C^TC=\tfrac14\begin{pmatrix}3&0\\0&1\end{pmatrix}$ の固有値です（$C^TC$ の $(y,y')$ 成分は $\sum_xc_{x,y}c_{x,y'}$ なので、第0列同士は $\frac14(1+1+1)=\frac34$、第1列同士は $\frac14$、第0列と第1列は、どの行でも片方が $0$ なので $0$。特異値は $s_k=\sqrt{p_k}$ です）。この例では $C^TC$ が対角なので、その対角成分が、結果レジスタの確率 $P(y)=(\tfrac34,\tfrac14)$（B-2）と一致しています（図 B-1）。
+階数が積状態かどうかの判定であって、エンタングルメントの**量**を表すわけではない点に注意してください。上の $p_k$ とエントロピー $S_{\mathrm{ent}}$ で、階数とエントロピーを、次の4つの例で比べます（$p_k$ は $C$ の特異値の2乗です）。
+
+| 例 | シュミット確率 $p_k$ | 階数 | エントロピー |
+|---|---|---|---|
+| 1対1、$\alpha=(\sqrt{0.9},\sqrt{0.1},0,0)$ | $(0.9,\ 0.1)$ | $2$ | 約 $0.469$ bit |
+| 1対1、$\alpha=(\sqrt{0.4},\sqrt{0.3},\sqrt{0.2},\sqrt{0.1})$ | $(0.4,\ 0.3,\ 0.2,\ 0.1)$ | $4$ | 約 $1.846$ bit（$\log_24=2$ bit より小さい） |
+| $C=\mathrm{diag}\big(\sqrt{0.999},\sqrt{0.0005},\sqrt{0.0005}\big)$ | $(0.999,\ 0.0005,\ 0.0005)$ | $3$ | 約 $0.012$ bit |
+| $C=\frac1{\sqrt2}I_2$（ベル状態） | $(0.5,\ 0.5)$ | $2$ | $1$ bit |
+
+- **1行目と2行目**：1対1の関数では、階数は**振幅がゼロでない入力の個数**で決まります。1行目は、振幅がゼロでない入力が $00$ と $01$ の2つなので階数 $2$、2行目は、すべて $0$ でないので階数 $4$ のままです。どちらも、振幅が偏っている分、エントロピーが最大（階数 $r$ なら $\log_2r$）より小さくなります。
+- **3行目と4行目**：階数が大きくても、シュミット確率が偏っていればエントロピーは小さくなります。3行目は階数 $3$ ですが、4行目の階数 $2$ より、エントロピーが小さいです。
+
+
+
+Part VIII の例の $p_k=(\tfrac34,\tfrac14)$ は、$C^\dagger C=C^TC=\tfrac14\begin{pmatrix}3&0\\0&1\end{pmatrix}$ の固有値です（$C$ は実数なので $C^\dagger=C^T$。$C^TC$ の $(y,y')$ 成分は $\sum_xc_{x,y}c_{x,y'}$ なので、第0列同士は $\frac14(1+1+1)=\frac34$、第1列同士は $\frac14$、第0列と第1列は、どの行でも片方が $0$ なので $0$。特異値は $s_k=\sqrt{p_k}$ です）。この例では $C^TC$ が対角なので、その対角成分が、結果レジスタの確率 $P(y)=(\tfrac34,\tfrac14)$（B-2 節）と一致しています（図 B-1）。
 
 ![係数行列と階数](figures/mp05_coefficient_matrices.png)
 
@@ -2605,7 +2886,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 
 # 付録D：検算の一覧
 
-このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（50件）、図のスクリプトの `assert` で確かめています。
+このノートの式と数値は、[experiments/measurement_projection/](../../experiments/measurement_projection/README.md) のスクリプトとテスト（52件）、図のスクリプトの `assert` で確かめています。
 
 | ノートの箇所 | 確かめたこと | テスト |
 |---|---|---|
@@ -2626,6 +2907,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 | 付録A-5 | $\sum K^\dagger K=I$、$P(0)=(1-\epsilon)\cos^2+\epsilon\sin^2$、$\epsilon=0$ で射影測定、$K_0$ は射影でない | `test_general_measurement_kraus_completeness` |
 | 付録A-5 | $\sum K^\dagger K=I$ だが $(\sum K^\dagger)(\sum K)=I+2\sqrt{p(1-p)}X$。振幅減衰の $K_1^\dagger K_1=\gamma\lvert1\rangle\langle1\rvert$ | `test_sum_of_kraus_then_product_is_not_identity` |
 | 付録A-5 | 弱い測定 $K_0$ と、ラベル取り違えの読み出し誤差は、確率が同じで測定後の状態が違う（非対角成分 $\sqrt{\epsilon(1-\epsilon)}$ と $0$） | `test_unsharp_measurement_differs_from_readout_error_after_the_measurement` |
+| Part III §2-e、Part IV §5、付録A-1 の補題6・7、付録B-3 | (III-1) と (IV-2) の数値例（複素ベクトル）、補題6（固有値の符号の積）・補題7（$\det=288$）の例、CNOT が積状態のままになる入力とベル状態になる入力、$s_k^2$ が $C^\dagger C$ の固有値であること・$\sum s_k^2=1$・階数 $=$ ゼロでない特異値の個数、零ベクトルの外積の階数 $0$、エントロピーの表の数値 | `test_numeric_examples_added_to_the_main_note` |
 | 付録B-3 | 階数はエンタングルメントの量でない（偏った振幅の1対1は階数2・約 $0.469$ bit。階数3でも $p=(0.999,\ldots)$ は階数2の $p=(0.5,0.5)$ よりエントロピーが小さい） | `test_rank_is_not_a_measure_of_entanglement` |
 | 付録A-5 | ラベル取り違えの読み出し誤差は、結果 $0$ に2つの演算子が要る（条件付き状態 $\mathrm{diag}(1-\epsilon,\epsilon)$ は階数 $2$、$E_0=(1-\epsilon)P_0+\epsilon P_1$） | `test_readout_error_needs_several_operators_per_outcome` |
 | 付録B-3 | 1対1では階数 $=$ 振幅がゼロでない入力の個数（$\alpha=(\sqrt{0.4},\ldots)$ は階数 $4$ でエントロピーは $2$ bit 未満）。入力が $\lvert0\rangle$ だけなら、非定数の $f$ でも積状態 | `test_injective_function_rank_counts_nonzero_amplitudes` |
@@ -2634,8 +2916,8 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 | 付録B-2 | 結果レジスタを測ったときの確率と状態、逆像の重ね合わせ | `test_result_register_collapse_for_example`、`test_result_register_collapse_is_uniform_on_preimage` |
 | 付録B-3 | 係数行列の階数（定数 $1$、例 $2$、1対1 $4$）、階数 $1$ ⇔ 積状態、シュミット係数とエントロピー | `test_rank_of_coefficient_matrix_decides_product_form`、`test_schmidt_numbers_of_example_and_entropy` |
 | 付録B | $CC^\dagger$ の対角成分が $P(x)$ | `test_reduced_state_diagonal_is_input_probability` |
-| 付録A-1 | トレース、転置、共役転置、固有値、行列式、ユニタリ性、$\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$ | `test_tensor_product_invariants` |
-| 付録A-1 | 大きさの違う組での混合積、$\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$、$\det(A\otimes I_n)=(\det A)^n$、$A\otimes B$ の対角化 | `test_swap_permutation_turns_a_kron_i_into_i_kron_a` |
+| 付録A-1 | トレース、転置、共役転置、固有値、行列式、ユニタリ性 | `test_tensor_product_invariants` |
+| 付録A-1 | 大きさの違う組での混合積、$\Pi(A\otimes I_n)\Pi^{-1}=I_n\otimes A$、$\det(A\otimes I_n)=(\det A)^n$、$A\otimes B$ の対角化、3個の固有ベクトルのテンソル積 | `test_swap_permutation_turns_a_kron_i_into_i_kron_a` |
 | 付録B-2、B-3 | $M'_y$ の直交・完全性、$M_xM'_y=P_x\otimes P_y=M'_yM_x$、$M_xM'_y\Phi=c_{x,y}\lvert x\rangle\lvert y\rangle$、特異値分解の成分式とシュミット基底の正規直交性 | `test_result_projectors_and_schmidt_expansion_components` |
 | 付録C-1 | Qiskit の並び順、cx(1, 0) の行列、Part VIII の回路の状態ベクトルと確率。$q_0$ に $X$ は $I\otimes X$、$q_1$ に $X$ は $X\otimes I$ | `test_qiskit_ordering_matches_the_note`、`test_qiskit_single_qubit_gate_positions` |
 | 図 | 各図の値を本文の式と `assert` で照合 | `figures/make_measurement_projection_figures.py` |
