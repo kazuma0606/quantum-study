@@ -2066,7 +2066,7 @@ $$
 \langle X\rangle=\sum_ip_i\,x_i
 $$
 
-量子力学でも、観測量 $A$ の測定結果は、値 $a_j$ を、ある確率 $P(a_j)$ でとる確率変数なので、期待値は同じ定義で、$\sum_ja_j\,P(a_j)$ です。この式が、状態ベクトルを使った $\langle\varphi|A|\varphi\rangle$ と一致することを、まず確かめます。
+量子力学でも、観測量 $A$ の測定では、固有ベクトル $|a_j\rangle$ に対応する結果 $j$ が、ある確率 $p_j$ で得られ、そのとき値 $a_j$ をとります。固有値が重なる場合は、複数の $j$ が同じ値になります。期待値は同じ定義で、$\sum_ja_j\,p_j$ です。この式が、状態ベクトルを使った $\langle\varphi|A|\varphi\rangle$ と一致することを、まず確かめます。
 
 状態ベクトル $|\varphi\rangle$ での、観測量 $A$ の期待値を確かめます。$A$ はエルミート行列で、実数の固有値 $a_j$ と、正規直交な固有ベクトル $|a_j\rangle$ をもつ（スペクトル分解）ことを、既知として使います。
 
@@ -2074,41 +2074,41 @@ $$
 A=\sum_ja_j\,|a_j\rangle\langle a_j|
 $$
 
-観測量 $A$ を測るとは、$A$ の固有ベクトルの基底で測ることです。Part IV §2 のボルン則は計算基底で述べましたが、同じ規則を、この正規直交基底 $\{|a_j\rangle\}$ に当てはめます。状態 $|\varphi\rangle$ で $A$ を測ると、結果 $a_j$ の確率は、次の式で与えられます。
+観測量 $A$ を測るとは、$A$ の固有ベクトルの基底で測ることです。Part IV §2 のボルン則は計算基底で述べましたが、同じ規則を、この正規直交基底 $\{|a_j\rangle\}$ に当てはめます。状態 $|\varphi\rangle$ で $A$ を測ると、結果 $j$ の確率 $p_j$ は、次の式で与えられます。
 
 $$
-P(a_j)=\big|\langle a_j|\varphi\rangle\big|^2=\langle\varphi|a_j\rangle\langle a_j|\varphi\rangle
+p_j=\big|\langle a_j|\varphi\rangle\big|^2=\langle\varphi|a_j\rangle\langle a_j|\varphi\rangle
 $$
 
 確率変数の期待値は、値と確率の積の和なので、$A$ の期待値は、次のように計算できます。
 
 $$
-\sum_ja_j\,P(a_j)=\sum_ja_j\,\langle\varphi|a_j\rangle\langle a_j|\varphi\rangle=\langle\varphi|\Big(\sum_ja_j\,|a_j\rangle\langle a_j|\Big)|\varphi\rangle=\langle\varphi|A|\varphi\rangle
+\sum_ja_j\,p_j=\sum_ja_j\,\langle\varphi|a_j\rangle\langle a_j|\varphi\rangle=\langle\varphi|\Big(\sum_ja_j\,|a_j\rangle\langle a_j|\Big)|\varphi\rangle=\langle\varphi|A|\varphi\rangle
 $$
 
 したがって、$\langle\varphi|A|\varphi\rangle$ は、状態 $|\varphi\rangle$ での $A$ の期待値です。
 
-次に、結果を記録しない場合を考えます。結果 $m$ が確率 $P(m)$ で出て、そのときの状態が $|\Phi_m\rangle$ のとき、$A$ を測った結果が $a_j$ になる確率は、結果 $m$ の場合の確率を、$P(m)$ で重みづけて足したものです。
+次に、結果を記録しない場合を考えます。結果 $m$ が確率 $P(m)$ で出て、そのときの状態が $|\Phi_m\rangle$ のとき、$A$ を測った結果が $j$ になる確率 $p_j$ は、結果 $m$ の場合の確率を、$P(m)$ で重みづけて足したものです。
 
 $$
-P(a_j)=\sum_mP(m)\,\big|\langle a_j|\Phi_m\rangle\big|^2
+p_j=\sum_mP(m)\,\big|\langle a_j|\Phi_m\rangle\big|^2
 $$
 
 これから $A$ の期待値を計算します。和の順序を入れ替え、各 $m$ について、$\sum_ja_j\,|\langle a_j|\Phi_m\rangle|^2$ が、前段の変形（$A$ のスペクトル分解を挿入する）で $\langle\Phi_m|A|\Phi_m\rangle$ になることを使うと、次のようになります。
 
 $$
-\sum_ja_j\,P(a_j)=\sum_mP(m)\sum_ja_j\,\big|\langle a_j|\Phi_m\rangle\big|^2=\sum_mP(m)\,\langle\Phi_m|A|\Phi_m\rangle
+\sum_ja_j\,p_j=\sum_mP(m)\sum_ja_j\,\big|\langle a_j|\Phi_m\rangle\big|^2=\sum_mP(m)\,\langle\Phi_m|A|\Phi_m\rangle
 $$
 
 これが、上の期待値の式です。まとめると、次の2つの式は、どちらも、定義 $\sum_ip_ix_i$ を当てはめたものです。
 
-状態ベクトル $|\varphi\rangle$ の場合は、値が $a_j$、確率が $|\langle a_j|\varphi\rangle|^2$ で、結果は次の式です。
+状態ベクトル $|\varphi\rangle$ の場合は、結果 $j$ の値が $a_j$、確率が $|\langle a_j|\varphi\rangle|^2$ で、結果は次の式です。
 
 $$
 \sum_ja_j\,\big|\langle a_j|\varphi\rangle\big|^2=\langle\varphi|A|\varphi\rangle
 $$
 
-結果を記録しない場合は、値が $a_j$、確率が $\sum_mP(m)\,|\langle a_j|\Phi_m\rangle|^2$ で、結果は次の式です。
+結果を記録しない場合は、結果 $j$ の値が $a_j$、確率が $\sum_mP(m)\,|\langle a_j|\Phi_m\rangle|^2$ で、結果は次の式です。
 
 $$
 \sum_ja_j\sum_mP(m)\,\big|\langle a_j|\Phi_m\rangle\big|^2=\sum_mP(m)\,\langle\Phi_m|A|\Phi_m\rangle
