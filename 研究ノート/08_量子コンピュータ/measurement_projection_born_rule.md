@@ -2066,7 +2066,7 @@ $$
 \langle X\rangle=\sum_ip_i\,x_i
 $$
 
-量子力学でも、観測量 $A$ の測定では、固有ベクトル $|a_j\rangle$ に対応する結果 $j$ が、ある確率 $p_j$ で得られ、そのとき値 $a_j$ をとります。固有値が重なる場合は、複数の $j$ が同じ値になります。期待値は同じ定義で、$\sum_ja_j\,p_j$ です。この式が、状態ベクトルを使った $\langle\varphi|A|\varphi\rangle$ と一致することを、まず確かめます。
+量子力学でも、観測量 $A$ の期待値は、同じ定義で計算できます。$A$ の固有ベクトルの基底 $\{|a_j\rangle\}$ を1つ選び、この基底で測って、結果 $j$ が確率 $p_j$ で得られたとします。この結果 $j$ には、値 $a_j$ を対応させます。固有値が重なる場合は、複数の $j$ が同じ値になり、$p_j$ は、$A$ の測定値の確率ではなく、選んだ基底での結果 $j$ の確率です。値と確率の積の和は、$\sum_ja_j\,p_j$ です。この式が、状態ベクトルを使った $\langle\varphi|A|\varphi\rangle$ と一致することを、まず確かめます。
 
 状態ベクトル $|\varphi\rangle$ での、観測量 $A$ の期待値を確かめます。$A$ はエルミート行列で、実数の固有値 $a_j$ と、正規直交な固有ベクトル $|a_j\rangle$ をもつ（スペクトル分解）ことを、既知として使います。
 
@@ -2074,7 +2074,7 @@ $$
 A=\sum_ja_j\,|a_j\rangle\langle a_j|
 $$
 
-観測量 $A$ を測るとは、$A$ の固有ベクトルの基底で測ることです。Part IV §2 のボルン則は計算基底で述べましたが、同じ規則を、この正規直交基底 $\{|a_j\rangle\}$ に当てはめます。状態 $|\varphi\rangle$ で $A$ を測ると、結果 $j$ の確率 $p_j$ は、次の式で与えられます。
+Part IV §2 のボルン則は計算基底で述べましたが、同じ規則を、選んだ正規直交基底 $\{|a_j\rangle\}$ に当てはめます。状態 $|\varphi\rangle$ をこの基底で測ると、結果 $j$ の確率 $p_j$ は、次の式で与えられます。
 
 $$
 p_j=\big|\langle a_j|\varphi\rangle\big|^2=\langle\varphi|a_j\rangle\langle a_j|\varphi\rangle
@@ -2086,7 +2086,7 @@ $$
 \sum_ja_j\,p_j=\sum_ja_j\,\langle\varphi|a_j\rangle\langle a_j|\varphi\rangle=\langle\varphi|\Big(\sum_ja_j\,|a_j\rangle\langle a_j|\Big)|\varphi\rangle=\langle\varphi|A|\varphi\rangle
 $$
 
-したがって、$\langle\varphi|A|\varphi\rangle$ は、状態 $|\varphi\rangle$ での $A$ の期待値です。
+したがって、$\langle\varphi|A|\varphi\rangle$ は、状態 $|\varphi\rangle$ での $A$ の期待値です。右辺 $\langle\varphi|A|\varphi\rangle$ は、固有ベクトルの基底の選び方を含まないので、固有値が重なる場合でも、期待値は、選んだ基底によらず同じ値になります。
 
 次に、結果を記録しない場合を考えます。結果 $m$ が確率 $P(m)$ で出て、そのときの状態が $|\Phi_m\rangle$ のとき、$A$ を測った結果が $j$ になる確率 $p_j$ は、結果 $m$ の場合の確率を、$P(m)$ で重みづけて足したものです。
 
