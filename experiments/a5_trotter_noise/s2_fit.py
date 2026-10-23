@@ -71,6 +71,14 @@ def _nonneg_int(v: str) -> int:
     return k
 
 
+def _pos_float(v: str) -> float:
+    """引数用：正の実数だけを受け付ける（--split-shrink 0 が「指定なし」と同じ幅広い事前分布に切り替わるため。10/23 の監査）。"""
+    x = float(v)
+    if not x > 0:
+        raise argparse.ArgumentTypeError(f"正の数にする：{v}")
+    return x
+
+
 def add_common_args(ap) -> None:
     """s2_fit.py と s2_map.py で共通の引数（同じモデル・同じデータ・同じ名前にするため）。"""
     ap.add_argument("--data", choices=["real", "synthetic"], default="synthetic")
@@ -100,7 +108,7 @@ def add_common_args(ap) -> None:
     ap.add_argument("--truth-no-t1", action="store_true", help="--truth-from の当てはめに T1 があっても、正解の T1 を 0 にする")
     ap.add_argument("--truth-new-c1z", type=float,
                     help="--mixed-job のジョブだけ、22–23 の制御 |1> の Z 回転をこの値にする（「時期で回転が変わった」世界）")
-    ap.add_argument("--split-shrink", type=float,
+    ap.add_argument("--split-shrink", type=_pos_float,
                     help="--split-hw で、来月の回転を「昔の回転＋変化 Δ」と置き、Δ ～ N(0, この値) で縮める")
     ap.add_argument("--split-hw", action="store_true",
                     help="--with-c1-hw のジョブだけ、22–23 の制御 |1> の Z 回転を別のパラメータにする（時期で分けるモデル）")

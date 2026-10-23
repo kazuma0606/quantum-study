@@ -152,6 +152,10 @@ def main() -> None:
     args = ap.parse_args()
     KS = tuple(args.ks)
     if args.gammas:
+        # 学習の事前分布の範囲の外は受け付けない（負の γ は生成で 0 に切り詰められ、表示の正解とデータが食い違うため。10/23 の監査）
+        bad = [g for g in args.gammas if not LOW[0] <= g <= HIGH[0]]
+        if bad:
+            ap.error(f"--gammas は {LOW[0]:g}〜{HIGH[0]:g} の範囲にする：{bad}")
         # 世界の名前は γ の値そのもの。表の「γ=0.00179 の区間の幅」は、その γ が並びにあるときだけ出す
         WORLDS = {f"γ={g:g}": g for g in args.gammas}
     if args.true_ro:
@@ -161,17 +165,21 @@ def main() -> None:
         rot_mean, rlo, rhi = rotation_prior(args.pair)
         NAMES = NAMES + ROT_NAMES
         LOW, HIGH = np.r_[LOW, rlo], np.r_[HIGH, rhi]
-    import torch
-    from sbi.inference import NPE
-    from sbi.utils import BoxUniform
-    dev = "cuda" if torch.cuda.is_available() else "cpu"
-    OUT.mkdir(parents=True, exist_ok=True)
     # 保存名に組を入れる（同じ --tag で組だけ変えると上書きされるため。10/17 の監査）。10/16 までの結果は、入れる前の名前のまま
     pair_name = ["22-23", "142-143"][args.pair]
     # k の並びと、回転を推定するかどうかも保存名に入れる（10/17 の監査：条件だけ変えると上書きされる）。
     # 10/17 までの結果は、入れる前の名前のまま
     stem = (f"{args.tag}_pair{pair_name}_k{'-'.join(map(str, args.ks))}" + ("_freerot" if args.free_rot else "")
             + ("_gcurve" if args.gammas else "") + (f"_ro{args.true_ro[0]:g}-{args.true_ro[1]:g}" if args.true_ro else ""))
+    # 保存名には --gammas の値や --shots などが入らないので、同じ名前の結果があれば上書きせずに止める（10/23 の監査）
+    if (OUT / f"{stem}.json").exists():
+        raise SystemExit(f"{OUT / (stem + '.json')} がすでにある。条件を変えたなら --tag を変える")
+    # torch と sbi の読み込みは重いので、上の確かめのあとにする
+    import torch
+    from sbi.inference import NPE
+    from sbi.utils import BoxUniform
+    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    OUT.mkdir(parents=True, exist_ok=True)
     expect = make_expect(fixed_theta(args.pair), args.free_rot)
     TRUE_REST["p"] = TRUE_P[args.pair]
     log(f"組の条件：{pair_name}（回転は{'推定する（6個）' if args.free_rot else '当てはめの事後平均に固定'}、"
