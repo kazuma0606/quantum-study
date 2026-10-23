@@ -2066,13 +2066,147 @@ $$
 \langle X\rangle=\sum_ip_i\,x_i
 $$
 
-量子力学でも、観測量 $A$ の期待値は、同じ定義で計算できます。$A$ の固有ベクトルの基底 $\{|a_j\rangle\}$ を1つ選び、この基底で測って、結果 $j$ が確率 $p_j$ で得られたとします。この結果 $j$ には、値 $a_j$ を対応させます。固有値が重なる場合は、複数の $j$ が同じ値になり、$p_j$ は、$A$ の測定値の確率ではなく、選んだ基底での結果 $j$ の確率です。値と確率の積の和は、$\sum_ja_j\,p_j$ です。この式が、状態ベクトルを使った $\langle\varphi|A|\varphi\rangle$ と一致することを、まず確かめます。
+量子力学でも、観測量 $A$ の期待値は、同じ定義で計算できます。$A$ の固有ベクトルの基底 $\{|a_j\rangle\}$ を1つ選び、この基底で測って、結果 $j$ が確率 $p_j$ で得られたとします。この結果 $j$ には、値 $a_j$ を対応させます。固有値が重なる場合は、複数の $j$ が同じ値になり、$p_j$ は、$A$ の測定値の確率ではなく、選んだ基底での結果 $j$ の確率です。値と確率の積の和は、$\sum_ja_j\,p_j$ です。
 
-状態ベクトル $|\varphi\rangle$ での、観測量 $A$ の期待値を確かめます。$A$ はエルミート行列で、実数の固有値 $a_j$ と、正規直交な固有ベクトル $|a_j\rangle$ をもつ（スペクトル分解）ことを、既知として使います。
+**① 観測量 $A$ を、ケットとブラの積の和で書く（スペクトル分解）**
+
+この項目では、$A$ を、ケットとブラの積の和で書けることを示します。$A$ はエルミート行列で、実数の固有値 $a_j$ と、正規直交な固有ベクトル $|a_j\rangle$ をもち、$\{|a_j\rangle\}$ は全体の基底になることを、既知として使います。具体例から確かめます。
+
+**例1（固有ベクトルが標準基底）**：2次元で、次の場合を考えます。
+
+$$
+A=\begin{pmatrix}2&0\\0&3\end{pmatrix},\qquad|a_1\rangle=\begin{pmatrix}1\\0\end{pmatrix},\quad|a_2\rangle=\begin{pmatrix}0\\1\end{pmatrix}
+$$
+
+固有値は $a_1=2$、$a_2=3$ です。$A$ を、$|\varphi\rangle=\begin{pmatrix}\alpha\\\beta\end{pmatrix}$ に作用させると、次のようになります。
+
+$$
+A|\varphi\rangle=\begin{pmatrix}2\alpha\\3\beta\end{pmatrix}=2\begin{pmatrix}\alpha\\0\end{pmatrix}+3\begin{pmatrix}0\\\beta\end{pmatrix}
+$$
+
+つまり $A$ は、第1成分 $\alpha$ を取り出して $2$ 倍し、第2成分 $\beta$ を取り出して $3$ 倍して、元の位置に戻して足す、という働きをします。この「取り出して戻す」を、行列で表します。第1成分を取り出すのは、ブラ $\langle a_1|=\begin{pmatrix}1&0\end{pmatrix}$ を左から掛けることです。
+
+$$
+\langle a_1|\varphi\rangle=\begin{pmatrix}1&0\end{pmatrix}\begin{pmatrix}\alpha\\\beta\end{pmatrix}=\alpha
+$$
+
+ただし、これはスカラーで、2次元空間のどの向きに戻すかの情報がありません。第1成分の向きは $|a_1\rangle$ なので、ケット $|a_1\rangle$ を掛けて戻します。
+
+$$
+|a_1\rangle\langle a_1|\varphi\rangle=\begin{pmatrix}1\\0\end{pmatrix}\alpha=\begin{pmatrix}\alpha\\0\end{pmatrix}
+$$
+
+つまり、「ブラで取り出し、ケットで戻す」という操作が、ケットとブラの積 $|a_1\rangle\langle a_1|$ を左から掛けることです。この積は、行列として、次のようになります。
+
+$$
+|a_1\rangle\langle a_1|=\begin{pmatrix}1\\0\end{pmatrix}\begin{pmatrix}1&0\end{pmatrix}=\begin{pmatrix}1&0\\0&0\end{pmatrix},\qquad|a_2\rangle\langle a_2|=\begin{pmatrix}0&0\\0&1\end{pmatrix}
+$$
+
+これを使うと、$A$ が、固有値倍と、ケットとブラの積の和で書けることが、次のように確かめられます。
+
+$$
+2\,|a_1\rangle\langle a_1|+3\,|a_2\rangle\langle a_2|=2\begin{pmatrix}1&0\\0&0\end{pmatrix}+3\begin{pmatrix}0&0\\0&1\end{pmatrix}=\begin{pmatrix}2&0\\0&3\end{pmatrix}=A
+$$
+
+**例2（固有ベクトルが斜めを向く）**：次の場合を考えます。
+
+$$
+A=\begin{pmatrix}2&1\\1&2\end{pmatrix}
+$$
+
+固有ベクトルは、次の $|+\rangle,|-\rangle$ で、$A|+\rangle=3|+\rangle$、$A|-\rangle=1\cdot|-\rangle$ です。
+
+$$
+|a_1\rangle=|+\rangle=\frac{1}{\sqrt2}\begin{pmatrix}1\\1\end{pmatrix},\qquad|a_2\rangle=|-\rangle=\frac{1}{\sqrt2}\begin{pmatrix}1\\-1\end{pmatrix}
+$$
+
+実際に、次のように確かめられます。
+
+$$
+A|+\rangle=\frac{1}{\sqrt2}\begin{pmatrix}2+1\\1+2\end{pmatrix}=3|+\rangle,\qquad A|-\rangle=\frac{1}{\sqrt2}\begin{pmatrix}2-1\\1-2\end{pmatrix}=1\cdot|-\rangle
+$$
+
+ケットとブラの積は、次のようになります。
+
+$$
+|+\rangle\langle+|=\frac12\begin{pmatrix}1\\1\end{pmatrix}\begin{pmatrix}1&1\end{pmatrix}=\frac12\begin{pmatrix}1&1\\1&1\end{pmatrix},\qquad|-\rangle\langle-|=\frac12\begin{pmatrix}1&-1\\-1&1\end{pmatrix}
+$$
+
+$|\varphi\rangle=\begin{pmatrix}\alpha\\\beta\end{pmatrix}$ に左から掛けると、$|+\rangle$ の成分 $\langle+|\varphi\rangle=\frac{\alpha+\beta}{\sqrt2}$ を取り出して、$|+\rangle$ の向きに戻した結果が得られます。
+
+$$
+|+\rangle\langle+|\varphi\rangle=\frac12\begin{pmatrix}1&1\\1&1\end{pmatrix}\begin{pmatrix}\alpha\\\beta\end{pmatrix}=\frac{\alpha+\beta}{2}\begin{pmatrix}1\\1\end{pmatrix}
+$$
+
+固有値倍と、ケットとブラの積の和は、$A$ に一致します。
+
+$$
+3\,|+\rangle\langle+|+1\cdot|-\rangle\langle-|=\frac32\begin{pmatrix}1&1\\1&1\end{pmatrix}+\frac12\begin{pmatrix}1&-1\\-1&1\end{pmatrix}=\frac12\begin{pmatrix}4&2\\2&4\end{pmatrix}=A
+$$
+
+固有ベクトルが斜めでも、正規直交基底であれば同じ仕組みで成り立ちます。これを、一般の場合に示します。
+
+**一般の場合**：任意の状態ベクトル $|\varphi\rangle$ は、基底 $\{|a_j\rangle\}$ で展開できます。係数を $c_j$ とします。
+
+$$
+|\varphi\rangle=\sum_jc_j\,|a_j\rangle
+$$
+
+係数 $c_j$ を求めます。両辺に、左から $\langle a_k|\,$ を掛けます。内積はケットについて線形（和は項ごとに、定数倍は係数として、内積の外に括り出せる）なので、次のようになります。
+
+$$
+\langle a_k|\varphi\rangle=\sum_jc_j\,\langle a_k|a_j\rangle
+$$
+
+$\{|a_j\rangle\}$ は正規直交なので、$\langle a_k|a_j\rangle=\delta_{kj}$（$k=j$ のとき $1$、$k\neq j$ のとき $0$）です。右辺の和は、クロネッカーのデルタの性質から、$j=k$ の項だけが残り（それ以外は $0$）、次のようになります。
+
+$$
+\langle a_k|\varphi\rangle=c_k
+$$
+
+ダミー添字（和の中の名前）を $k$ から $j$ に書き換えると、$c_j=\langle a_j|\varphi\rangle$ です。これを、展開の式の $c_j$ に代入します。
+
+$$
+|\varphi\rangle=\sum_j\langle a_j|\varphi\rangle\,|a_j\rangle
+$$
+
+$\langle a_j|\varphi\rangle$ は複素数（スカラー）で、スカラー倍は、ベクトルの前後どちらに書いても等しい（可換）ので（スカラー $c$ は、任意の行列 $B$ と可換で、$[cI,B]=0$ です）、次のように書き換えます。
+
+$$
+|\varphi\rangle=\sum_j|a_j\rangle\,\langle a_j|\varphi\rangle
+$$
+
+各項は、成分 $\langle a_j|\varphi\rangle$ を取り出して、$|a_j\rangle$ の向きに戻したもので、例1・例2の「取り出して戻す」と同じ形です。
+
+この両辺に、$A$ を左から作用させます。$A$ は線形作用素なので、和は項ごとの作用に、スカラーは $A$ の前に、分配できます。
+
+$$
+A|\varphi\rangle=\sum_j\langle a_j|\varphi\rangle\,A|a_j\rangle
+$$
+
+$|a_j\rangle$ は固有ベクトルで、$A|a_j\rangle=a_j|a_j\rangle$ なので、次のようになります。
+
+$$
+A|\varphi\rangle=\sum_j\langle a_j|\varphi\rangle\,a_j\,|a_j\rangle=\sum_ja_j\,|a_j\rangle\,\langle a_j|\varphi\rangle
+$$
+
+2番目の等号は、スカラー $\langle a_j|\varphi\rangle$ と $a_j$ の順序を入れ替えたものです（スカラーは可換）。さらに、和の各項に共通する $|\varphi\rangle$ を、右から括り出します（分配法則の逆）。
+
+$$
+A|\varphi\rangle=\Big(\sum_ja_j\,|a_j\rangle\langle a_j|\Big)|\varphi\rangle
+$$
+
+これがすべての $|\varphi\rangle$ について成り立つので、行列として、次の式が成り立ちます。
 
 $$
 A=\sum_ja_j\,|a_j\rangle\langle a_j|
 $$
+
+固有ベクトルの成分を取り出して、固有値倍して戻す、という $A$ の働きが、ケットとブラの積の和で表されます。これが、ケットとブラの積が現れる理由です。
+
+**② 状態ベクトルでの期待値は、$\langle\varphi|A|\varphi\rangle$ に等しい**
+
+この項目では、定義から出た $\sum_ja_j\,p_j$ が、$\langle\varphi|A|\varphi\rangle$ に等しいことを示します。
 
 Part IV §2 のボルン則は計算基底で述べましたが、同じ規則を、選んだ正規直交基底 $\{|a_j\rangle\}$ に当てはめます。状態 $|\varphi\rangle$ をこの基底で測ると、結果 $j$ の確率 $p_j$ は、次の式で与えられます。
 
@@ -2086,9 +2220,11 @@ $$
 \sum_ja_j\,p_j=\sum_ja_j\,\langle\varphi|a_j\rangle\langle a_j|\varphi\rangle=\langle\varphi|\Big(\sum_ja_j\,|a_j\rangle\langle a_j|\Big)|\varphi\rangle=\langle\varphi|A|\varphi\rangle
 $$
 
-したがって、$\langle\varphi|A|\varphi\rangle$ は、状態 $|\varphi\rangle$ での $A$ の期待値です。右辺 $\langle\varphi|A|\varphi\rangle$ は、固有ベクトルの基底の選び方を含まないので、固有値が重なる場合でも、期待値は、選んだ基底によらず同じ値になります。
+したがって、定義から出た $\sum_ja_j\,p_j$ は、$\langle\varphi|A|\varphi\rangle$ に等しく、$\langle\varphi|A|\varphi\rangle$ は、状態 $|\varphi\rangle$ での $A$ の期待値です。右辺 $\langle\varphi|A|\varphi\rangle$ は、固有ベクトルの基底の選び方を含まないので、固有値が重なる場合でも、期待値は、選んだ基底によらず同じ値になります。
 
-次に、結果を記録しない場合を考えます。結果 $m$ が確率 $P(m)$ で出て、そのときの状態が $|\Phi_m\rangle$ のとき、$A$ を測った結果が $j$ になる確率 $p_j$ は、結果 $m$ の場合の確率を、$P(m)$ で重みづけて足したものです。
+**③ 結果を記録しない場合の期待値**
+
+この項目では、結果を記録しない場合の $A$ の期待値が、最初に示した、各結果の期待値の平均の式になることを示します。結果を記録しない場合を考えます。結果 $m$ が確率 $P(m)$ で出て、そのときの状態が $|\Phi_m\rangle$ のとき、$A$ を測った結果が $j$ になる確率 $p_j$ は、結果 $m$ の場合の確率を、$P(m)$ で重みづけて足したものです。
 
 $$
 p_j=\sum_mP(m)\,\big|\langle a_j|\Phi_m\rangle\big|^2
@@ -2116,7 +2252,9 @@ $$
 
 右辺は、各 $m$ の期待値 $\langle\Phi_m|A|\Phi_m\rangle$ を値、$P(m)$ を確率とみなした平均にもなっています（全期待値の法則）。
 
-先に示した等式の両辺を $\sqrt{P(m)}$ で割ると、$|\Phi_m\rangle$ は次のように書けます（$P(m)>0$ は (A-7) の条件です）。
+**④ $K_m$ で書き直し、状態を表す行列を得る**
+
+この項目では、期待値を $K_m$ と $\rho$ で書き直し、結果を記録しない場合の状態を表す行列を得ます。先に示した等式の両辺を $\sqrt{P(m)}$ で割ると、$|\Phi_m\rangle$ は次のように書けます（$P(m)>0$ は (A-7) の条件です）。
 
 $$
 |\Phi_m\rangle=\frac{1}{\sqrt{P(m)}}\,K_m|\Phi\rangle
