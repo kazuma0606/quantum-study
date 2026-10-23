@@ -176,6 +176,17 @@ def main() -> None:
     # （ショット数ごとに乱数を引き継ぐので、途中から再開すると通しで回したときと乱数が変わる）
     if (OUT / f"{stem}.md").exists():
         raise SystemExit(f"{OUT / (stem + '.md')} がすでにある。条件を変えたなら --tag を変える")
+    # 同じ名前の実行が進行中なら止める（2本が同じ .pkl・.json を上書きしないように。10/23 の監査）。
+    # 実行中の印 .lock は、終わったとき（失敗も含む）に消す。強制終了で残ったときは、進行中でないことを確かめて手で消す
+    import atexit
+    import os
+    OUT.mkdir(parents=True, exist_ok=True)
+    lock = OUT / f"{stem}.lock"
+    try:
+        os.close(os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+    except FileExistsError:
+        raise SystemExit(f"{lock} がある（同じ名前の実行が進行中）。進行中でなければ、このファイルを消してから回す")
+    atexit.register(lambda: lock.unlink(missing_ok=True))
     if (OUT / f"{stem}.json").exists():
         log(f"{stem}.json は途中で止まった実行の結果とみなし、最初からやり直して上書きする")
     # torch と sbi の読み込みは重いので、上の確かめのあとにする
