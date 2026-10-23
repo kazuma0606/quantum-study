@@ -72,9 +72,10 @@ def _nonneg_int(v: str) -> int:
 
 
 def _pos_float(v: str) -> float:
-    """引数用：正の実数だけを受け付ける（--split-shrink 0 が「指定なし」と同じ幅広い事前分布に切り替わるため。10/23 の監査）。"""
+    """引数用：有限の正の実数だけを受け付ける（--split-shrink 0 が「指定なし」と同じ幅広い事前分布に切り替わり、
+    inf は正規分布の幅にならないため。10/23 の監査）。"""
     x = float(v)
-    if not x > 0:
+    if not (np.isfinite(x) and x > 0):
         raise argparse.ArgumentTypeError(f"正の数にする：{v}")
     return x
 

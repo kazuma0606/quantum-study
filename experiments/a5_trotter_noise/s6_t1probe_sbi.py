@@ -171,9 +171,13 @@ def main() -> None:
     # 10/17 までの結果は、入れる前の名前のまま
     stem = (f"{args.tag}_pair{pair_name}_k{'-'.join(map(str, args.ks))}" + ("_freerot" if args.free_rot else "")
             + ("_gcurve" if args.gammas else "") + (f"_ro{args.true_ro[0]:g}-{args.true_ro[1]:g}" if args.true_ro else ""))
-    # 保存名には --gammas の値や --shots などが入らないので、同じ名前の結果があれば上書きせずに止める（10/23 の監査）
+    # 保存名には --gammas の値や --shots などが入らないので、同じ名前の結果があれば上書きせずに止める（10/23 の監査）。
+    # 完了の印は最後にだけ書く .md。.json だけあるのは途中で止まった実行なので、最初からやり直す
+    # （ショット数ごとに乱数を引き継ぐので、途中から再開すると通しで回したときと乱数が変わる）
+    if (OUT / f"{stem}.md").exists():
+        raise SystemExit(f"{OUT / (stem + '.md')} がすでにある。条件を変えたなら --tag を変える")
     if (OUT / f"{stem}.json").exists():
-        raise SystemExit(f"{OUT / (stem + '.json')} がすでにある。条件を変えたなら --tag を変える")
+        log(f"{stem}.json は途中で止まった実行の結果とみなし、最初からやり直して上書きする")
     # torch と sbi の読み込みは重いので、上の確かめのあとにする
     import torch
     from sbi.inference import NPE
