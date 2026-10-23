@@ -100,6 +100,8 @@ def add_common_args(ap) -> None:
     ap.add_argument("--truth-no-t1", action="store_true", help="--truth-from の当てはめに T1 があっても、正解の T1 を 0 にする")
     ap.add_argument("--truth-new-c1z", type=float,
                     help="--mixed-job のジョブだけ、22–23 の制御 |1> の Z 回転をこの値にする（「時期で回転が変わった」世界）")
+    ap.add_argument("--split-shrink", type=float,
+                    help="--split-hw で、来月の回転を「昔の回転＋変化 Δ」と置き、Δ ～ N(0, この値) で縮める")
     ap.add_argument("--split-hw", action="store_true",
                     help="--with-c1-hw のジョブだけ、22–23 の制御 |1> の Z 回転を別のパラメータにする（時期で分けるモデル）")
     ap.add_argument("--robust", action="store_true", help="観測の誤差を t 分布（自由度 4）にする（外れ値に強い尤度）")
@@ -136,6 +138,8 @@ def make_tag(args) -> str:
         tag += "_hw1"
     if getattr(args, "split_hw", False):
         tag += "_split"
+        if getattr(args, "split_shrink", None):
+            tag += f"shr{args.split_shrink:g}"
     if getattr(args, "mixed_job", False):
         tag += "_mix"
     if getattr(args, "t1_probe", False):
@@ -164,6 +168,7 @@ def model_opts(args) -> dict:
             "obs_scale": getattr(args, "obs_scale", False), "obs_scale_pair": getattr(args, "obs_scale_pair", False),
             "robust": getattr(args, "robust", False), "split_hw": getattr(args, "split_hw", False),
             "ro_model": getattr(args, "ro_model", False), "zcorr": getattr(args, "zcorr", False),
+            "split_shrink": getattr(args, "split_shrink", None),
             "hw_jobs": split_jobs(args)}
 
 
@@ -398,7 +403,13 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         # 時期で分けるモデル：10/12 の実機のジョブ（制御 |1> の Z の測定）だけ、22–23 の制御 |1> の Z 回転を別のパラメータにする
         # （「1週間で回転が変わった」という仮説。そのジョブが測るのはこの方向だけなので、ほかの成分は共通のまま）
         hw = [i for i, (pair, job) in enumerate(prep["jobs"]) if job in opts["hw_jobs"]]
-        r1z_hw = numpyro.sample("rot_c1z_hw", dist.Normal(0.0, w * np.sqrt(2)))
+        if opts.get("split_shrink"):
+            # 縮める事前分布：来月の回転 = 昔の回転 ＋ 変化 Δ、Δ ～ N(0, split_shrink)。「変わっていない」寄りに縮め、
+            # 自由すぎる昔の回転が偶然のばらつきを拾って予測の良さで得をする（偽の陽性）のを防ぐ（10/19 の結果を受けて）
+            dz = numpyro.sample("rot_c1z_change", dist.Normal(0.0, opts["split_shrink"]))
+            r1z_hw = numpyro.deterministic("rot_c1z_hw", r1[0, 2] + dz)
+        else:
+            r1z_hw = numpyro.sample("rot_c1z_hw", dist.Normal(0.0, w * np.sqrt(2)))
         iz, zz = nm.LABELS15.index("IZ"), nm.LABELS15.index("ZZ")
         for i in hw:
             theta_job = theta_job.at[i, iz].set((r0[0, 2] + r1z_hw) / 2).at[i, zz].set((r0[0, 2] - r1z_hw) / 2)

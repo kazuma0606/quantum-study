@@ -131,7 +131,7 @@ def simulate(expect, pars: np.ndarray, shots: int, rng: np.random.Generator, bat
 
 
 def main() -> None:
-    global KS, NAMES, LOW, HIGH
+    global KS, NAMES, LOW, HIGH, WORLDS
     ap = argparse.ArgumentParser()
     ap.add_argument("--shots", type=int, nargs="+", default=[500, 1000, 2000, 3000])
     ap.add_argument("--sims", type=int, default=200000)
@@ -141,12 +141,21 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--tag", default="t1probe_sbi")
     ap.add_argument("--ks", type=int, nargs="+", default=list(KS), help="CX の組の回数の並び（既定 2 4 8 16 24）")
+    ap.add_argument("--gammas", type=float, nargs="+",
+                    help="評価する世界の γ の並び（既定は 0・0.00086・0.00179 の3つ）。検出率の曲線を出すときに使う")
+    ap.add_argument("--true-ro", type=float, nargs=2, metavar=("E01", "E10"),
+                    help="評価する世界の読み出しの誤り（既定 0.01 0.03）。学習の事前分布の範囲は 0〜0.08 のまま")
     ap.add_argument("--free-rot", action="store_true",
                     help="回転（制御 |0>・|1> の X・Y・Z の6個）も推定する。事前分布は当てはめの平均 ± 4 標準偏差の箱")
     ap.add_argument("--pair", type=int, choices=[0, 1], default=0,
                     help="回転と脱分極の条件をどちらの組にするか（0 = 22–23、1 = 142–143）")
     args = ap.parse_args()
     KS = tuple(args.ks)
+    if args.gammas:
+        # 世界の名前は γ の値そのもの。表の「γ=0.00179 の区間の幅」は、その γ が並びにあるときだけ出す
+        WORLDS = {f"γ={g:g}": g for g in args.gammas}
+    if args.true_ro:
+        TRUE_REST["e01"], TRUE_REST["e10"] = args.true_ro
     rot_mean = None
     if args.free_rot:
         rot_mean, rlo, rhi = rotation_prior(args.pair)
@@ -161,7 +170,8 @@ def main() -> None:
     pair_name = ["22-23", "142-143"][args.pair]
     # k の並びと、回転を推定するかどうかも保存名に入れる（10/17 の監査：条件だけ変えると上書きされる）。
     # 10/17 までの結果は、入れる前の名前のまま
-    stem = f"{args.tag}_pair{pair_name}_k{'-'.join(map(str, args.ks))}" + ("_freerot" if args.free_rot else "")
+    stem = (f"{args.tag}_pair{pair_name}_k{'-'.join(map(str, args.ks))}" + ("_freerot" if args.free_rot else "")
+            + ("_gcurve" if args.gammas else "") + (f"_ro{args.true_ro[0]:g}-{args.true_ro[1]:g}" if args.true_ro else ""))
     expect = make_expect(fixed_theta(args.pair), args.free_rot)
     TRUE_REST["p"] = TRUE_P[args.pair]
     log(f"組の条件：{pair_name}（回転は{'推定する（6個）' if args.free_rot else '当てはめの事後平均に固定'}、"
@@ -235,11 +245,12 @@ def main() -> None:
              f"判定率は「中央値 > {THRESH}」／「90% 区間の下の端 > {LO_THRESH}」の2通り。",  "",
              "| ショット | QPU 秒 | " + " | ".join(f"{w}：判定率" for w in WORLDS) + " | γ=0.00179 の 90% 区間の幅 | SBC γ（68%・90%） |",
              "|---|---|" + "---|" * len(WORLDS) + "---|---|"]
+    WIDTH_KEY = next((n for n, g in WORLDS.items() if abs(g - 0.00179) < 1e-9), "")
     for sh, r in results["by_shots"].items():
         w = r["worlds"]
         lines.append(f"| {sh} | {r['qpu_s_estimate']:.0f} | "
                      + " | ".join(f"{w[n]['detect_rate']:.3f}／{w[n]['detect_rate_lo']:.3f}" for n in WORLDS)
-                     + f" | {w['T1 あり（γ=0.00179）']['width90_median']:.5f} | {r['sbc'][68]['gamma']:.2f}・{r['sbc'][90]['gamma']:.2f} |")
+                     + f" | {w[WIDTH_KEY]['width90_median'] if WIDTH_KEY in w else float('nan'):.5f} | {r['sbc'][68]['gamma']:.2f}・{r['sbc'][90]['gamma']:.2f} |")
     (OUT / f"{stem}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     log("\n".join(lines))
 
