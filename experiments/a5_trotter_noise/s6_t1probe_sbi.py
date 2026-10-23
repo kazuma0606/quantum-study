@@ -174,8 +174,6 @@ def main() -> None:
     # 保存名には --gammas の値や --shots などが入らないので、同じ名前の結果があれば上書きせずに止める（10/23 の監査）。
     # 完了の印は最後にだけ書く .md。.json だけあるのは途中で止まった実行なので、最初からやり直す
     # （ショット数ごとに乱数を引き継ぐので、途中から再開すると通しで回したときと乱数が変わる）
-    if (OUT / f"{stem}.md").exists():
-        raise SystemExit(f"{OUT / (stem + '.md')} がすでにある。条件を変えたなら --tag を変える")
     # 同じ名前の実行が進行中なら止める（2本が同じ .pkl・.json を上書きしないように。10/23 の監査）。
     # 実行中の印 .lock は、終わったとき（失敗も含む）に消す。強制終了で残ったときは、進行中でないことを確かめて手で消す
     import atexit
@@ -187,6 +185,9 @@ def main() -> None:
     except FileExistsError:
         raise SystemExit(f"{lock} がある（同じ名前の実行が進行中）。進行中でなければ、このファイルを消してから回す")
     atexit.register(lambda: lock.unlink(missing_ok=True))
+    # 完了の確かめは、ロックを取ったあとに行う（確かめてからロックを取るまでの間に、別の実行が完了しうるため。10/23 の監査）
+    if (OUT / f"{stem}.md").exists():
+        raise SystemExit(f"{OUT / (stem + '.md')} がすでにある。条件を変えたなら --tag を変える")
     if (OUT / f"{stem}.json").exists():
         log(f"{stem}.json は途中で止まった実行の結果とみなし、最初からやり直して上書きする")
     # torch と sbi の読み込みは重いので、上の確かめのあとにする
