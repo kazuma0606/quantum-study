@@ -2192,13 +2192,13 @@ $$
 
 これは $|v\rangle\neq0$ に反します。したがって、零でない $|v\rangle$ が存在するには、$A-\lambda I$ が逆行列を持たない必要があります。正方行列が逆行列を持たないことは、行列式が $0$ であることと同じです。
 
-逆に、$\det(A-\lambda I)=0$ なら、行列 $A-\lambda I$ の列ベクトル $c_1,\dots,c_d$ は一次従属なので、すべては $0$ でない係数 $v_1,\dots,v_d$ で、次が成り立ちます。
+逆に、$\det(A-\lambda I)=0$ なら、行列 $A-\lambda I$ の列ベクトル $b_1,\dots,b_d$ は一次従属なので、すべては $0$ でない係数 $v_1,\dots,v_d$ で、次が成り立ちます。
 
 $$
-\sum_kv_k\,c_k=0
+\sum_kv_k\,b_k=0
 $$
 
-行列とベクトルの積 $(A-\lambda I)|v\rangle$ は、列ベクトルを、成分 $v_k$ で足し合わせたもの $\sum_kv_kc_k$ なので、この係数を成分とするベクトル $|v\rangle$ が、零でない解です。
+行列とベクトルの積 $(A-\lambda I)|v\rangle$ は、列ベクトルを、成分 $v_k$ で足し合わせたもの $\sum_kv_kb_k$ なので、この係数を成分とするベクトル $|v\rangle$ が、零でない解です。
 
 以上は、線形代数の標準的な事実として、証明せずに使います。固有値と固有ベクトルの定義と求め方は、[matrix_exponential_commutator_bch_trotter.md の Part II §1](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md#p2-1) にも書いてあります。
 
