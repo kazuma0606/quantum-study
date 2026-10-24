@@ -9,6 +9,12 @@ import sys
 import audit_db
 
 
+def like_pattern(query: str) -> str:
+    """A LIKE pattern that matches the query literally (the escape character is a backslash)."""
+    escaped = query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return "%" + escaped + "%"
+
+
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
@@ -40,7 +46,7 @@ def main() -> int:
                 GROUP BY a.id ORDER BY a.id DESC LIMIT 20
             """).fetchall()
         elif args.command == "search":
-            pattern = "%" + args.query.replace("%", "\\%").replace("_", "\\_") + "%"
+            pattern = like_pattern(args.query)
             rows = db.execute("""
                 SELECT 'finding' AS kind,id,path,line,category AS type,problem AS text,evidence
                 FROM findings WHERE (problem LIKE ? ESCAPE '\\' OR evidence LIKE ? ESCAPE '\\'

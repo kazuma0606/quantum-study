@@ -15,6 +15,7 @@ from unittest.mock import patch
 import codex_pre_push as hook
 import audit_db
 import audit_eval
+import audit_workflow
 
 
 class PendingAuditTest(unittest.TestCase):
@@ -524,6 +525,48 @@ class PendingAuditTest(unittest.TestCase):
             audit_eval.choose_expected_finding([unrelated], "端点の誤り", judge)
         with self.assertRaises(RuntimeError):
             audit_eval.choose_expected_finding([], "端点の誤り", judge)
+
+
+    def test_same_head_pass_is_not_overridden_by_an_older_other_head(self) -> None:
+        def finding(line: int) -> dict:
+            return {"path": "研究ノート/note.md", "line": line, "category": "端点",
+                    "problem": f"問題{line}", "evidence": "根拠", "correction": "修正"}
+
+        empty = {"claims": [], "resolutions": [], "checked": ["端点"], "unverified": []}
+        with tempfile.TemporaryDirectory() as directory:
+            db = audit_db.connect(Path(directory) / "audit.sqlite3")
+            try:
+                audit_db.save_audit(db, "other", "branch", "a" * 40, "b" * 40, None, "findings", None,
+                                    {**empty, "findings": [finding(1)]})
+                audit_db.save_audit(db, "same", "branch", "a" * 40, "c" * 40, None, "pass", None,
+                                    {**empty, "findings": []})
+                self.assertEqual(audit_db.previous_findings(db, "branch", "a" * 40, "c" * 40,
+                                                            include_same_head=True), (None, []))
+                audit_db.save_audit(db, "same2", "branch", "a" * 40, "d" * 40, None, "findings", None,
+                                    {**empty, "findings": [finding(2)]})
+                _, rows = audit_db.previous_findings(db, "branch", "a" * 40, "d" * 40, include_same_head=True)
+                self.assertEqual([row["line"] for row in rows], [2])
+            finally:
+                db.close()
+
+    def test_search_pattern_matches_backslashes_literally(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            db = audit_db.connect(Path(directory) / "audit.sqlite3")
+            try:
+                db.execute("CREATE TABLE t (text TEXT)")
+                for text in ("\\sin\\theta", "100%", "a_b", "plain"):
+                    db.execute("INSERT INTO t VALUES (?)", (text,))
+
+                def found(query: str) -> list[str]:
+                    return [row[0] for row in db.execute(
+                        "SELECT text FROM t WHERE text LIKE ? ESCAPE '\\'", (audit_workflow.like_pattern(query),))]
+
+                self.assertEqual(found("\\"), ["\\sin\\theta"])
+                self.assertEqual(found("\\sin"), ["\\sin\\theta"])
+                self.assertEqual(found("%"), ["100%"])
+                self.assertEqual(found("_"), ["a_b"])
+            finally:
+                db.close()
 
 
 if __name__ == "__main__":

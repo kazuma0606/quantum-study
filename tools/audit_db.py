@@ -136,12 +136,12 @@ def previous_findings(db: sqlite3.Connection, scope: str, base: str | None, head
     to those inherited from the latest audit of another head, and all of them need an answer.
     """
     priors = []
-    if include_same_head:
-        same = _latest_completed(db, scope, base, head, True)
-        if same is not None and same["status"] == "findings":
-            priors.append(same)
+    same = _latest_completed(db, scope, base, head, True) if include_same_head else None
+    if same is not None and same["status"] == "findings":
+        priors.append(same)
     other = _latest_completed(db, scope, base, head, False)
-    if other is not None and other["status"] == "findings":
+    # An audit of this head that came after the other head's audit has already answered it.
+    if other is not None and other["status"] == "findings" and (same is None or other["id"] > same["id"]):
         priors.append(other)
     if not priors:
         return None, []
