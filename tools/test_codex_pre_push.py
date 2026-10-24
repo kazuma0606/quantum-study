@@ -466,5 +466,28 @@ class PendingAuditTest(unittest.TestCase):
                 db.close()
 
 
+    def test_same_head_reaudit_also_inherits_findings_from_another_head(self) -> None:
+        def finding(line: int) -> dict:
+            return {"path": "研究ノート/note.md", "line": line, "category": "端点",
+                    "problem": f"問題{line}", "evidence": "根拠", "correction": "修正"}
+
+        empty = {"claims": [], "resolutions": [], "checked": ["端点"], "unverified": []}
+        with tempfile.TemporaryDirectory() as directory:
+            db = audit_db.connect(Path(directory) / "audit.sqlite3")
+            try:
+                audit_db.save_audit(db, "a", "branch", "a" * 40, "b" * 40, None, "findings", None,
+                                    {**empty, "findings": [finding(1)]})
+                second = audit_db.save_audit(db, "b", "branch", "a" * 40, "c" * 40, None, "findings", None,
+                                             {**empty, "findings": [finding(2)]})
+                prior_id, rows = audit_db.previous_findings(db, "branch", "a" * 40, "b" * 40,
+                                                            include_same_head=True)
+                self.assertEqual(prior_id, second)
+                self.assertEqual(sorted(row["line"] for row in rows), [1, 2])
+                _, chain = audit_db.previous_findings(db, "branch", "a" * 40, "b" * 40)
+                self.assertEqual([row["line"] for row in chain], [2])
+            finally:
+                db.close()
+
+
 if __name__ == "__main__":
     unittest.main()

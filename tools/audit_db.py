@@ -113,23 +113,8 @@ def _latest_completed(db: sqlite3.Connection, scope: str, base: str | None, head
     ).fetchone()
 
 
-def previous_findings(db: sqlite3.Connection, scope: str, base: str | None, head: str,
-                      include_same_head: bool = False) -> tuple[int | None, list[dict]]:
-    """Unresolved findings the next audit must answer one by one.
-
-    By default only audits of other heads count. A re-audit of the same head (its saved report was
-    lost) passes include_same_head=True, so findings already recorded for that head are not forgotten.
-    """
-    prior = None
-    if include_same_head:
-        same = _latest_completed(db, scope, base, head, True)
-        if same is not None and same["status"] == "findings":
-            prior = same
-    if prior is None:
-        other = _latest_completed(db, scope, base, head, False)
-        if other is None or other["status"] != "findings":
-            return None, []
-        prior = other
+def _open_findings(db: sqlite3.Connection, audit_id: int) -> list[dict]:
+    """Findings of one audit, plus earlier findings it found to persist."""
     rows = db.execute("""
         SELECT f.*, r.decision, r.rationale, r.evidence_ref,
                (SELECT COUNT(*) FROM resolutions WHERE prior_finding_id=f.id) AS review_rounds
@@ -138,8 +123,33 @@ def previous_findings(db: sqlite3.Connection, scope: str, base: str | None, head
         WHERE f.audit_id=? OR f.id IN (
             SELECT prior_finding_id FROM resolutions WHERE audit_id=? AND status='persists'
         ) ORDER BY f.id
-    """, (prior["id"], prior["id"])).fetchall()
-    return prior["id"], [dict(row) for row in rows]
+    """, (audit_id, audit_id)).fetchall()
+    return [dict(row) for row in rows]
+
+
+def previous_findings(db: sqlite3.Connection, scope: str, base: str | None, head: str,
+                      include_same_head: bool = False) -> tuple[int | None, list[dict]]:
+    """Unresolved findings the next audit must answer one by one.
+
+    By default only audits of other heads count. A re-audit of the same head (its saved report was
+    lost) passes include_same_head=True. Then the findings already recorded for that head are added
+    to those inherited from the latest audit of another head, and all of them need an answer.
+    """
+    priors = []
+    if include_same_head:
+        same = _latest_completed(db, scope, base, head, True)
+        if same is not None and same["status"] == "findings":
+            priors.append(same)
+    other = _latest_completed(db, scope, base, head, False)
+    if other is not None and other["status"] == "findings":
+        priors.append(other)
+    if not priors:
+        return None, []
+    merged: dict[int, dict] = {}
+    for prior in priors:
+        for row in _open_findings(db, prior["id"]):
+            merged[row["id"]] = row
+    return priors[-1]["id"], [merged[key] for key in sorted(merged)]
 
 
 def _delete_children(db: sqlite3.Connection, audit_id: int) -> None:
