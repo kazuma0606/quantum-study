@@ -2158,7 +2158,7 @@ $$
 
 ここで、$\langle a_k|A|a_j\rangle$ を計算するために、$A|a_j\rangle$ が何になるかを、固有値と固有ベクトルの定義から、成分で確かめます。
 
-固有ベクトル $|v\rangle$ と固有値 $\lambda$ の定義は、次の式です（① の冒頭の $A|a_j\rangle=a_j|a_j\rangle$ は、$|v\rangle=|a_j\rangle$、$\lambda=a_j$ の場合です）。
+固有ベクトル $|v\rangle$（零ベクトルでないもの）と固有値 $\lambda$ の定義は、次の式です（$|v\rangle$ が零ベクトルなら、どんな $\lambda$ でも成り立ってしまうので、$|v\rangle\neq0$ を条件にします。① の冒頭の $A|a_j\rangle=a_j|a_j\rangle$ は、$|v\rangle=|a_j\rangle$、$\lambda=a_j$ の場合です）。
 
 $$
 A|v\rangle=\lambda\,|v\rangle
@@ -2184,13 +2184,13 @@ $$
 \big(A-\lambda I\big)|v\rangle=0
 $$
 
-零ベクトルでない $|v\rangle$ が、この式を満たすのは、行列 $A-\lambda I$ の行列式が $0$ のときです（線形代数の標準的な事実として、証明せずに使います）。
+もし行列 $A-\lambda I$ に逆行列があれば、$(A-\lambda I)|v\rangle=0$ の両辺に、左から逆行列を掛けて、$|v\rangle=0$ となり、$|v\rangle\neq0$ に反します。したがって、零でない $|v\rangle$ が存在するには、$A-\lambda I$ が逆行列を持たない必要があります。正方行列が逆行列を持たないことは、行列式が $0$ であることと同じです（線形代数の標準的な事実として、証明せずに使います。固有値と固有ベクトルの定義と求め方は、[matrix_exponential_commutator_bch_trotter.md の Part II §1](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md#p2-1) にも書いてあります）。
 
 $$
 \det\big(A-\lambda I\big)=0
 $$
 
-この式の解 $\lambda$ が固有値 $a_j$ で、各 $a_j$ について、$(A-a_jI)|v\rangle=0$ を解いたものが、固有ベクトル $|a_j\rangle$ です。したがって、この $a_j$ と $|a_j\rangle$ について、$A|a_j\rangle=a_j|a_j\rangle$ が成り立ちます（成分で書いた最初の式を、$\lambda=a_j$、$|v\rangle=|a_j\rangle$ として、そのまま読み替えたものです）。
+この式の解 $\lambda$ が固有値 $a_j$ で、各 $a_j$ について、$(A-a_jI)|v\rangle=0$ の零でない解を選んだものが、固有ベクトル $|a_j\rangle$ です。したがって、この $a_j$ と $|a_j\rangle$ について、$A|a_j\rangle=a_j|a_j\rangle$ が成り立ちます（成分で書いた最初の式を、$\lambda=a_j$、$|v\rangle=|a_j\rangle$ として、そのまま読み替えたものです）。
 
 係数 $c_k^\ast$ と $c_j$ は数なので、$\langle a_k|A|a_j\rangle$ の外に出せます。そこで、固有ベクトルの定義 $A|a_j\rangle=a_j|a_j\rangle$ から、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。$a_j$ は数なので、内積のケットについての線形性から、前に出せます。次のようになります。
 
