@@ -2158,7 +2158,7 @@ $$
 
 ここで、$\langle a_k|A|a_j\rangle$ を計算するために、$A|a_j\rangle$ が何になるかを、固有値と固有ベクトルの定義から、成分で確かめます。
 
-固有ベクトル $|v\rangle$（零ベクトルでないもの）と固有値 $\lambda$ の定義は、次の式です（$|v\rangle$ が零ベクトルなら、どんな $\lambda$ でも成り立ってしまうので、$|v\rangle\neq0$ を条件にします。① の冒頭の $A|a_j\rangle=a_j|a_j\rangle$ は、$|v\rangle=|a_j\rangle$、$\lambda=a_j$ の場合です）。
+固有ベクトル $|v\rangle$（零ベクトルでないもの）と固有値 $\lambda$ の定義は、次の式です（$|v\rangle$ が零ベクトルなら、どんな $\lambda$ でも成り立ってしまうので、$|v\rangle\neq0$ を条件にします。
 
 $$
 A|v\rangle=\lambda\,|v\rangle
@@ -2169,13 +2169,13 @@ $$
 行列 $A$ の成分を $A_{ik}$、ベクトル $|v\rangle$ の成分を $v_k$ とします（$i,k=1,\dots,d$）。行列とベクトルの積の定義から、$A|v\rangle$ の第 $i$ 成分は $\sum_kA_{ik}v_k$ で、$\lambda|v\rangle$ の第 $i$ 成分は $\lambda v_i$ です。したがって、定義の式は、各 $i$ について、次のように書けます。
 
 $$
-\sum_kA_{ik}\,v_k=\lambda\,v_i
+\sum_kA_{ik}\,v_k=\lambda\,v_i\tag{A-9}
 $$
 
 右辺を、クロネッカーのデルタ $\delta_{ik}$（$i=k$ のとき $1$、$i\neq k$ のとき $0$）を使って、$\lambda v_i=\sum_k\lambda\,\delta_{ik}\,v_k$ と書き、左辺に移項すると、次のようになります。
 
 $$
-\sum_k\big(A_{ik}-\lambda\,\delta_{ik}\big)\,v_k=0
+\sum_k\big(A_{ik}-\lambda\,\delta_{ik}\big)\,v_k=0\tag{A-10}
 $$
 
 $A_{ik}-\lambda\delta_{ik}$ は、行列 $A-\lambda I$ の成分（$I$ は単位行列で、成分が $\delta_{ik}$）なので、これは、次の式と同じです。
@@ -2192,15 +2192,75 @@ $$
 
 これは $|v\rangle\neq0$ に反します。したがって、零でない $|v\rangle$ が存在するには、$A-\lambda I$ が逆行列を持たない必要があります。正方行列が逆行列を持たないことは、行列式が $0$ であることと同じです。
 
-逆に、$\det(A-\lambda I)=0$ なら、行列 $A-\lambda I$ の列ベクトル $b_1,\dots,b_d$ は一次従属なので、すべては $0$ でない係数 $v_1,\dots,v_d$ で、次が成り立ちます。
+逆に、$\det(A-\lambda I)=0$ のとき、零でない解 $|v\rangle$ が存在することを示します。
+
+(A-10) は、$i=1,\dots,d$ の $d$ 個の式です。
+
+この $d$ 個の式を、1つのベクトルの式にまとめるため、同じ成分を、行ごとではなく、列ごとにまとめ直します。行列 $A-\lambda I$ の第 $k$ 列を、縦に並べたベクトルを、$b_k$ と書きます（列ベクトル）。第 $k$ 列の第 $i$ 成分が、行列の $(i,k)$ 成分 $(A-\lambda I)_{ik}$ なので、次のようになります。
 
 $$
-\sum_kv_k\,b_k=0
+b_k=\begin{pmatrix}(A-\lambda I)_{1k}\\\vdots\\(A-\lambda I)_{dk}\end{pmatrix}\qquad(k=1,\dots,d)
 $$
 
-行列とベクトルの積 $(A-\lambda I)|v\rangle$ は、列ベクトルを、成分 $v_k$ で足し合わせたもの $\sum_kv_kb_k$ なので、この係数を成分とするベクトル $|v\rangle$ が、零でない解です。
+$b_k$ を $v_k$ 倍して足し合わせたベクトルの、第 $i$ 成分は、$b_k$ の第 $i$ 成分が $(A-\lambda I)_{ik}$ なので、次のようになります。
 
-以上は、線形代数の標準的な事実として、証明せずに使います。固有値と固有ベクトルの定義と求め方は、[matrix_exponential_commutator_bch_trotter.md の Part II §1](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md#p2-1) にも書いてあります。
+$$
+\Big(\sum_kv_k\,b_k\Big)_i=\sum_kv_k\,(A-\lambda I)_{ik}
+$$
+
+これは、(A-10) の左辺と同じです。したがって、(A-10) の $d$ 個の式は、次の1つのベクトルの式にまとまります（行列にベクトルを掛けることは、行列の列ベクトルを、ベクトルの成分を係数にして足し合わせることです）。
+
+$$
+\sum_kv_k\,b_k=0\tag{A-11}
+$$
+
+係数 $v_1,\dots,v_d$ の少なくとも1つが $0$ でないとき、列ベクトル $b_1,\dots,b_d$ は**一次従属**であると言います。意味は、「どれか1つの $b_k$ が、ほかの列ベクトルの足し合わせで書ける」ことです。たとえば $d=2$ なら、2つの列ベクトルが同じ向き（一方が他方の定数倍）で、$d=3$ なら、3つの列ベクトルが、1つの平面の上に載っている、という状態です。逆に、どの係数も $0$ にしないと足して零にならないとき、**一次独立**で、$d$ 個の列ベクトルが、$d$ 次元の空間を、すべて張ります。
+
+正方行列の行列式は、列ベクトルが張る平行四辺形（平行六面体など）の、符号つきの体積です。列ベクトルが一次従属なら、体積は $0$ です。逆に、体積が $0$ なら、列ベクトルは一次従属です。つまり、$\det(A-\lambda I)=0$ と、$b_1,\dots,b_d$ が一次従属であることは、同じです（一般の次元では、線形代数の定理です。次の例で、$2\times2$ の場合を確かめます）。
+
+次の2つの $2\times2$ 行列 $M$ で、行列式と一次従属の関係を、計算で確かめます（一般の証明ではなく、確認です）。
+
+**例1（行列式が $0$ のとき）**：次の行列を考えます。
+
+$$
+M=\begin{pmatrix}1&2\\2&4\end{pmatrix},\qquad\det M=1\cdot4-2\cdot2=0
+$$
+
+列ベクトルは、$b_2$ が $b_1$ の2倍で、同じ向きなので、一次従属です。
+
+$$
+b_1=\begin{pmatrix}1\\2\end{pmatrix},\qquad b_2=\begin{pmatrix}2\\4\end{pmatrix}=2\,b_1
+$$
+
+係数を $v_1=2$、$v_2=-1$ にすると、(A-11) が成り立ちます。
+
+$$
+2\,b_1-b_2=\begin{pmatrix}2\\4\end{pmatrix}-\begin{pmatrix}2\\4\end{pmatrix}=\begin{pmatrix}0\\0\end{pmatrix}
+$$
+
+成分ごとの行列とベクトルの積でも、同じ結果です。零でない解 $|v\rangle=\begin{pmatrix}2\\-1\end{pmatrix}$ が存在します。
+
+$$
+M|v\rangle=\begin{pmatrix}1\cdot2+2\cdot(-1)\\2\cdot2+4\cdot(-1)\end{pmatrix}=\begin{pmatrix}0\\0\end{pmatrix}
+$$
+
+**例2（行列式が $0$ でないとき）**：次の行列を考えます。
+
+$$
+M=\begin{pmatrix}1&2\\3&4\end{pmatrix},\qquad\det M=1\cdot4-2\cdot3=-2
+$$
+
+列ベクトルは $b_1=\begin{pmatrix}1\\3\end{pmatrix}$、$b_2=\begin{pmatrix}2\\4\end{pmatrix}$ です。$v_1b_1+v_2b_2=0$ を、成分で書くと、次の2つの式です。
+
+$$
+v_1+2v_2=0,\qquad3v_1+4v_2=0
+$$
+
+第1式から $v_1=-2v_2$ で、第2式に代入すると、$-6v_2+4v_2=-2v_2=0$ なので、$v_2=0$、$v_1=0$ です。零の解しかないので、列ベクトルは一次独立で、零でない解は存在しません。
+
+以上から、$\det(A-\lambda I)=0$ のとき、少なくとも1つは $0$ でない係数 $v_k$ で (A-11) を満たし、この係数を成分とするベクトル $|v\rangle$ が、$(A-\lambda I)|v\rangle=0$ の零でない解です。固有値と固有ベクトルの定義と求め方は、[matrix_exponential_commutator_bch_trotter.md の Part II §1](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md#p2-1) にも書いてあります。
+
+零でない解が存在するための条件は、次の式です。
 
 $$
 \det\big(A-\lambda I\big)=0
@@ -2208,15 +2268,15 @@ $$
 
 この式の解 $\lambda$ が固有値 $a_j$ で、各 $a_j$ について、$(A-a_jI)|v\rangle=0$ の零でない解のうち、長さを $1$ に揃え、固有値が重なる場合は、互いに直交するように選んだものが、正規直交な固有ベクトルの基底 $\{|a_j\rangle\}$ です（そのような選び方ができることが、① の冒頭で使うスペクトル定理です）。
 
-したがって、成分で書いた最初の式を、$\lambda=a_j$、$|v\rangle=|a_j\rangle$ として読み替えると、次の式が成り立ちます。
+したがって、成分で書いた定義 (A-9) を、$\lambda=a_j$、$|v\rangle=|a_j\rangle$ として読み替えると、次の式が成り立ちます。
 
 $$
-\boxed{A|a_j\rangle=a_j\,|a_j\rangle}
+\boxed{A|a_j\rangle=a_j\,|a_j\rangle}\tag{A-12}
 $$
 
-以上で、行列式の条件から求めた $a_j$ と $|a_j\rangle$ が、定義の式を満たすことが示せました。次の計算では、この式を使って、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。
+以上で、行列式の条件から求めた $a_j$ と $|a_j\rangle$ が、定義の式を満たすことが示せました。次の計算では、(A-12) を使って、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。
 
-係数 $c_k^\ast$ と $c_j$ は数なので、$\langle a_k|A|a_j\rangle$ の外に出せます。そこで、固有ベクトルの定義 $A|a_j\rangle=a_j|a_j\rangle$ から、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。$a_j$ は数なので、内積のケットについての線形性から、前に出せます。次のようになります。
+係数 $c_k^\ast$ と $c_j$ は数なので、$\langle a_k|A|a_j\rangle$ の外に出せます。そこで、(A-12) から、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。$a_j$ は数なので、内積のケットについての線形性から、前に出せます。次のようになります。
 
 $$
 \langle a_k|A|a_j\rangle=a_j\,\langle a_k|a_j\rangle=a_j\,\delta_{kj}
@@ -2895,7 +2955,7 @@ $$
 **1結果1演算子で書けない測定**：結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当て、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすものを、一般の測定とします（(A-7) は各 $m$ に $\alpha$ が1つの場合です）。状態を密度行列 $\rho\in\mathbb C^{d\times d}$ で書くと、結果 $m$ の確率と、測定後の状態は
 
 $$
-P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-9}
+P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-13}
 $$
 
 です。
@@ -2916,7 +2976,7 @@ $$
 
 で、純粋状態です。非対角成分は $\sqrt{\epsilon(1-\epsilon)}=0.3$ 残ります。
 
-*ラベル取り違えの模型*：結果 $0$ の経路が2つあります（実際に $|0\rangle$ で取り違えなし、実際に $|1\rangle$ で取り違えあり）。(A-9) の演算子は
+*ラベル取り違えの模型*：結果 $0$ の経路が2つあります（実際に $|0\rangle$ で取り違えなし、実際に $|1\rangle$ で取り違えあり）。(A-13) の演算子は
 
 $$
 K_{0,1}=\sqrt{1-\epsilon}\,P_0,\qquad K_{0,2}=\sqrt\epsilon\,P_1,\qquad K_{1,1}=\sqrt{1-\epsilon}\,P_1,\qquad K_{1,2}=\sqrt\epsilon\,P_0
