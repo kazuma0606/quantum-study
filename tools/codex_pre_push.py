@@ -280,7 +280,8 @@ def load_cached(key: str, verdict: Path, files: list[str], db_path: Path | None 
     data = json.loads(verdict.read_text(encoding="utf-8"))
     db = audit_db.connect(db_path)
     try:
-        record = db.execute("SELECT id, status FROM audits WHERE audit_key=?", (key,)).fetchone()
+        completed = [row for row in audit_db.attempts(db, key) if row["status"] != "error"]
+        record = completed[-1] if completed else None
         stored_ids = set() if record is None else {
             row[0] for row in db.execute(
                 "SELECT prior_finding_id FROM resolutions WHERE audit_id=?", (record["id"],))}

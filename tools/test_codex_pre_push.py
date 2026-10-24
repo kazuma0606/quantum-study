@@ -258,11 +258,15 @@ class PendingAuditTest(unittest.TestCase):
                 audit_db.mark_error(db, audit_id, "disk full")
                 self.assertEqual(db.execute("SELECT status FROM audits WHERE id=?",
                                             (audit_id,)).fetchone()[0], "error")
+                self.assertEqual(db.execute("SELECT COUNT(*) FROM findings WHERE audit_id=?",
+                                            (audit_id,)).fetchone()[0], 0)
                 again = audit_db.save_audit(db, "key", "branch", "a" * 40, "b" * 40,
                                             None, "findings", None, answer)
-                self.assertEqual(again, audit_id)
+                self.assertNotEqual(again, audit_id)
                 self.assertEqual(db.execute("SELECT COUNT(*) FROM findings WHERE audit_id=?",
-                                            (audit_id,)).fetchone()[0], 1)
+                                            (again,)).fetchone()[0], 1)
+                self.assertEqual(db.execute("SELECT status FROM audits WHERE id=?",
+                                            (audit_id,)).fetchone()[0], "error")
             finally:
                 db.close()
 
@@ -317,21 +321,30 @@ class PendingAuditTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 hook.load_cached("missing", verdict, [finding["path"]], path)
 
-    def test_retry_updates_prior_audit_reference(self) -> None:
+    def test_retry_is_a_new_record_in_completion_order(self) -> None:
         finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",
                    "problem": "端点で不成立", "evidence": "0で不成立", "correction": "範囲を狭める"}
         empty = {"findings": [], "claims": [], "resolutions": [], "checked": ["端点"], "unverified": []}
         with tempfile.TemporaryDirectory() as directory:
             db = audit_db.connect(Path(directory) / "audit.sqlite3")
             try:
-                first = audit_db.save_audit(db, "first", "branch", "a" * 40, "b" * 40, None, "findings", None,
-                                            {**empty, "findings": [finding]})
-                failed = audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, first, "error",
+                failed = audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, None, "error",
                                              None, error="timeout")
-                newer = audit_db.save_audit(db, "newer", "branch", "a" * 40, "d" * 40, first, "pass", None, empty)
-                audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, newer, "pass", None, empty)
+                again = audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, None, "error",
+                                            None, error="timeout again")
+                self.assertEqual(again, failed)
+                self.assertEqual(db.execute("SELECT COUNT(*) FROM audits").fetchone()[0], 1)
+                newer = audit_db.save_audit(db, "newer", "branch", "a" * 40, "d" * 40, None, "pass", None, empty)
+                retried = audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, newer, "findings",
+                                              None, {**empty, "findings": [finding]})
+                self.assertGreater(retried, newer)
+                prior_id, rows = audit_db.previous_findings(db, "branch", "a" * 40, "e" * 40)
+                self.assertEqual(prior_id, retried)
+                self.assertEqual(len(rows), 1)
                 self.assertEqual(db.execute("SELECT prior_audit_id FROM audits WHERE id=?",
-                                            (failed,)).fetchone()[0], newer)
+                                            (retried,)).fetchone()[0], newer)
+                with self.assertRaises(ValueError):
+                    audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, newer, "pass", None, empty)
             finally:
                 db.close()
 
