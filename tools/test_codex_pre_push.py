@@ -227,6 +227,50 @@ class PendingAuditTest(unittest.TestCase):
             finally:
                 db.close()
 
+    def test_resolved_findings_are_not_inherited_again(self) -> None:
+        finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",
+                   "problem": "端点で不成立", "evidence": "0で不成立", "correction": "範囲を狭める"}
+        with tempfile.TemporaryDirectory() as directory:
+            db = audit_db.connect(Path(directory) / "audit.sqlite3")
+            try:
+                first = audit_db.save_audit(db, "first", "branch", "a" * 40, "b" * 40,
+                    None, "findings", None, {"findings": [finding], "claims": [],
+                    "resolutions": [], "checked": ["端点"], "unverified": []})
+                finding_id = audit_db.previous_findings(db, "branch", "a" * 40, "c" * 40)[1][0]["id"]
+                audit_db.save_audit(db, "second", "branch", "a" * 40, "c" * 40, first, "pass", None,
+                    {"findings": [], "claims": [], "checked": ["端点"], "unverified": [],
+                     "resolutions": [{"prior_finding_id": finding_id, "status": "resolved",
+                                      "evidence": "修正後は端点を除外"}]})
+                self.assertEqual(audit_db.previous_findings(db, "branch", "a" * 40, "d" * 40), (None, []))
+            finally:
+                db.close()
+
+    def test_audit_can_be_retried_after_report_write_failure(self) -> None:
+        finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",
+                   "problem": "端点で不成立", "evidence": "0で不成立", "correction": "範囲を狭める"}
+        answer = {"findings": [finding], "claims": [], "resolutions": [],
+                  "checked": ["端点"], "unverified": []}
+        with tempfile.TemporaryDirectory() as directory:
+            db = audit_db.connect(Path(directory) / "audit.sqlite3")
+            try:
+                audit_id = audit_db.save_audit(db, "key", "branch", "a" * 40, "b" * 40,
+                                               None, "findings", None, answer)
+                audit_db.mark_error(db, audit_id, "disk full")
+                self.assertEqual(db.execute("SELECT status FROM audits WHERE id=?",
+                                            (audit_id,)).fetchone()[0], "error")
+                again = audit_db.save_audit(db, "key", "branch", "a" * 40, "b" * 40,
+                                            None, "findings", None, answer)
+                self.assertEqual(again, audit_id)
+                self.assertEqual(db.execute("SELECT COUNT(*) FROM findings WHERE audit_id=?",
+                                            (audit_id,)).fetchone()[0], 1)
+            finally:
+                db.close()
+
+    def test_eval_scoring_counts_each_unrelated_finding(self) -> None:
+        mixed = [{"problem": "端点で不成立", "evidence": "0"}, {"problem": "別件", "evidence": "関係なし"}]
+        self.assertEqual(audit_eval.score(mixed, ["端点"]), {"tp": 1, "fn": 0, "fp": 1, "tn": 0})
+        self.assertEqual(audit_eval.score(mixed, []), {"tp": 0, "fn": 0, "fp": 2, "tn": 0})
+
     def test_eval_scoring_rejects_unrelated_finding(self) -> None:
         self.assertEqual(audit_eval.score([{"problem": "別件", "evidence": "関係なし"}], ["端点"]),
                          {"tp": 0, "fn": 1, "fp": 1, "tn": 0})

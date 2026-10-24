@@ -92,10 +92,10 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
 
 def previous_findings(db: sqlite3.Connection, scope: str, base: str | None, head: str) -> tuple[int | None, list[dict]]:
     prior = db.execute(
-        "SELECT id FROM audits WHERE scope=? AND base_sha IS ? AND head_sha<>? "
-        "AND status='findings' ORDER BY id DESC LIMIT 1", (scope, base, head)
+        "SELECT id, status FROM audits WHERE scope=? AND base_sha IS ? AND head_sha<>? "
+        "AND status IN ('pass', 'findings') ORDER BY id DESC LIMIT 1", (scope, base, head)
     ).fetchone()
-    if prior is None:
+    if prior is None or prior["status"] != "findings":
         return None, []
     rows = db.execute("""
         SELECT f.*, r.decision, r.rationale, r.evidence_ref,
@@ -109,6 +109,13 @@ def previous_findings(db: sqlite3.Connection, scope: str, base: str | None, head
     return prior["id"], [dict(row) for row in rows]
 
 
+def mark_error(db: sqlite3.Connection, audit_id: int, message: str) -> None:
+    """Return a saved audit to the retryable state when its report files could not be written."""
+    with db:
+        db.execute("UPDATE audits SET status='error', report_path=NULL, error=? WHERE id=?",
+                   (message, audit_id))
+
+
 def save_audit(db: sqlite3.Connection, key: str, scope: str, base: str | None, head: str,
                prior_id: int | None, status: str, report: Path | None,
                answer: dict | None = None, error: str | None = None) -> int:
@@ -117,6 +124,12 @@ def save_audit(db: sqlite3.Connection, key: str, scope: str, base: str | None, h
         existing = db.execute("SELECT status FROM audits WHERE audit_key=?", (key,)).fetchone()
         if existing is not None and existing["status"] != "error":
             raise ValueError("Completed audit records are immutable; use a new audit version")
+        if existing is not None:
+            old_id = db.execute("SELECT id FROM audits WHERE audit_key=?", (key,)).fetchone()["id"]
+            db.execute("DELETE FROM responses WHERE finding_id IN (SELECT id FROM findings WHERE audit_id=?)", (old_id,))
+            db.execute("DELETE FROM resolutions WHERE audit_id=?", (old_id,))
+            db.execute("DELETE FROM claims WHERE audit_id=?", (old_id,))
+            db.execute("DELETE FROM findings WHERE audit_id=?", (old_id,))
         db.execute("""
             INSERT INTO audits(audit_key,scope,base_sha,head_sha,prior_audit_id,status,report_path,
                                checked_json,unverified_json,error)

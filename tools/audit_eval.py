@@ -20,14 +20,14 @@ CASES = Path(__file__).with_name("audit_eval_cases.json")
 
 def score(findings: list[dict], keywords: list[str]) -> dict[str, int]:
     if not keywords:
-        return {"tp": 0, "fn": 0, "fp": int(bool(findings)), "tn": int(not findings)}
-    matched = any(
+        return {"tp": 0, "fn": 0, "fp": len(findings), "tn": int(not findings)}
+    hits = [
         any(word.casefold() in (item["problem"] + " " + item["evidence"]).casefold()
             for word in keywords)
         for item in findings
-    )
-    return {"tp": int(matched), "fn": int(not matched),
-            "fp": int(bool(findings) and not matched), "tn": 0}
+    ]
+    return {"tp": int(any(hits)), "fn": int(not any(hits)),
+            "fp": hits.count(False), "tn": 0}
 
 
 def git(repo: Path, *args: str) -> str:

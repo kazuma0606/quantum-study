@@ -384,9 +384,17 @@ def audit(base: str | None, head: str, dry_run: bool, scope: str = "manual") -> 
                                           "findings" if blocking(parsed) else "pass", report, parsed)
         finally:
             db.close()
-        report.write_text(render_report(label, base, head, files, parsed)
-                          + f"\nSQLite audit ID: #{audit_id}\n", encoding="utf-8")
-        verdict.write_text(json.dumps(parsed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        try:
+            report.write_text(render_report(label, base, head, files, parsed)
+                              + f"\nSQLite audit ID: #{audit_id}\n", encoding="utf-8")
+            verdict.write_text(json.dumps(parsed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        except OSError as error:
+            db = audit_db.connect()
+            try:
+                audit_db.mark_error(db, audit_id, str(error))
+            finally:
+                db.close()
+            return pending(f"could not write the audit report: {error}")
         print(f"Codex audit report: {report}")
         print(f"Codex audit record: #{audit_id}")
         if blocking(parsed):
