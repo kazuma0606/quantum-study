@@ -286,11 +286,12 @@ def load_cached(key: str, verdict: Path, files: list[str], expected_prior_ids: s
         stored_ids = set() if record is None else {
             row[0] for row in db.execute(
                 "SELECT prior_finding_id FROM resolutions WHERE audit_id=?", (record["id"],))}
+        same_head_ids = set() if record is None else audit_db.same_head_prior_ids(db, record)
     finally:
         db.close()
     if record is None:
         raise ValueError("SQLite audit record is missing")
-    if stored_ids != expected_prior_ids:
+    if stored_ids != expected_prior_ids | same_head_ids:
         raise ValueError("Prior findings changed since this audit; re-audit")
     cached = validate_answer(data, files, stored_ids)
     if record["status"] != ("findings" if blocking(cached) else "pass"):

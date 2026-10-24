@@ -489,5 +489,28 @@ class PendingAuditTest(unittest.TestCase):
                 db.close()
 
 
+    def test_reaudit_record_is_cached_with_its_same_head_findings(self) -> None:
+        finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",
+                   "problem": "端点で不成立", "evidence": "0で不成立", "correction": "範囲を狭める"}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "audit.sqlite3"
+            db = audit_db.connect(path)
+            try:
+                audit_db.save_audit(db, "k", "branch", "a" * 40, "b" * 40, None, "findings", None,
+                    {"findings": [finding], "claims": [], "resolutions": [],
+                     "checked": ["端点"], "unverified": []})
+                _, same = audit_db.previous_findings(db, "branch", "a" * 40, "b" * 40, include_same_head=True)
+                finding_id = same[0]["id"]
+                answer = {"findings": [finding], "claims": [], "checked": ["端点"], "unverified": [],
+                          "resolutions": [{"prior_finding_id": finding_id, "status": "persists",
+                                           "evidence": "同じ指摘が残る"}]}
+                audit_db.save_audit(db, "k", "branch", "a" * 40, "b" * 40, None, "findings", None, answer)
+            finally:
+                db.close()
+            verdict = Path(directory) / "k.json"
+            verdict.write_text(json.dumps(answer, ensure_ascii=False), encoding="utf-8")
+            self.assertEqual(hook.load_cached("k", verdict, [finding["path"]], set(), path), answer)
+
+
 if __name__ == "__main__":
     unittest.main()

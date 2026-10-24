@@ -152,6 +152,20 @@ def previous_findings(db: sqlite3.Connection, scope: str, base: str | None, head
     return priors[-1]["id"], [merged[key] for key in sorted(merged)]
 
 
+def same_head_prior_ids(db: sqlite3.Connection, record: sqlite3.Row) -> set[int]:
+    """Finding IDs a re-audit had to answer because the same head already had unresolved findings.
+
+    These come from the latest completed record of the same head that was saved before this one.
+    """
+    earlier = db.execute(
+        "SELECT id, status FROM audits WHERE scope=? AND base_sha IS ? AND head_sha=? AND id<? "
+        "AND status IN ('pass', 'findings') ORDER BY id DESC LIMIT 1",
+        (record["scope"], record["base_sha"], record["head_sha"], record["id"])).fetchone()
+    if earlier is None or earlier["status"] != "findings":
+        return set()
+    return {row["id"] for row in _open_findings(db, earlier["id"])}
+
+
 def _delete_children(db: sqlite3.Connection, audit_id: int) -> None:
     db.execute("DELETE FROM responses WHERE finding_id IN (SELECT id FROM findings WHERE audit_id=?)", (audit_id,))
     db.execute("DELETE FROM resolutions WHERE audit_id=?", (audit_id,))
@@ -169,8 +183,8 @@ def mark_error(db: sqlite3.Connection, audit_id: int, message: str) -> None:
 
 def attempts(db: sqlite3.Connection, key: str) -> list[sqlite3.Row]:
     """Every record of one audit key, oldest first. A completed retry is stored as '<key>#<n>'."""
-    return db.execute("SELECT id, audit_key, status FROM audits WHERE audit_key=? OR audit_key LIKE ? "
-                      "ORDER BY id", (key, key + "#%")).fetchall()
+    return db.execute("SELECT id, audit_key, status, scope, base_sha, head_sha FROM audits "
+                      "WHERE audit_key=? OR audit_key LIKE ? ORDER BY id", (key, key + "#%")).fetchall()
 
 
 def save_audit(db: sqlite3.Connection, key: str, scope: str, base: str | None, head: str,
