@@ -403,6 +403,8 @@ class PendingAuditTest(unittest.TestCase):
                 self.assertEqual(wrapped(item, "欠陥"), (True, "一致"))
                 self.assertEqual(wrapped(item, "欠陥"), (True, "一致"))
                 self.assertEqual(calls, [finding_id])
+                self.assertEqual(wrapped(item, "書き直した欠陥"), (True, "一致"))
+                self.assertEqual(calls, [finding_id, finding_id])
 
                 def failing(item: dict, defect: str) -> tuple[bool, str]:
                     raise RuntimeError("Codex judge exited 1")
@@ -411,6 +413,23 @@ class PendingAuditTest(unittest.TestCase):
                     audit_eval.cached_judge(db, "other", failing)(item, "欠陥")
                 self.assertEqual(db.execute("SELECT COUNT(*) FROM eval_matches WHERE case_name='other'"
                                             ).fetchone()[0], 0)
+            finally:
+                db.close()
+
+
+    def test_old_eval_matches_table_is_rebuilt_with_defect_hash(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "audit.sqlite3"
+            import sqlite3
+            old = sqlite3.connect(path)
+            old.execute("CREATE TABLE eval_matches (id INTEGER PRIMARY KEY, finding_id INTEGER NOT NULL, "
+                        "case_name TEXT NOT NULL, matched INTEGER NOT NULL, reason TEXT NOT NULL)")
+            old.commit()
+            old.close()
+            db = audit_db.connect(path)
+            try:
+                columns = {row["name"] for row in db.execute("PRAGMA table_info(eval_matches)")}
+                self.assertIn("defect_hash", columns)
             finally:
                 db.close()
 

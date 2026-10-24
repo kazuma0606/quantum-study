@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -63,14 +64,16 @@ def codex_judge(finding: dict, expected_defect: str) -> tuple[bool, str]:
 def cached_judge(db: sqlite3.Connection, case_name: str, judge) -> "callable":
     """Wrap a judge so each (finding, case) pair is asked once and then read from SQLite."""
     def judged(finding: dict, expected_defect: str) -> tuple[bool, str]:
-        row = db.execute("SELECT matched, reason FROM eval_matches WHERE finding_id=? AND case_name=?",
-                         (finding["id"], case_name)).fetchone()
+        defect_hash = hashlib.sha256(expected_defect.encode("utf-8")).hexdigest()[:16]
+        row = db.execute("SELECT matched, reason FROM eval_matches "
+                         "WHERE finding_id=? AND case_name=? AND defect_hash=?",
+                         (finding["id"], case_name, defect_hash)).fetchone()
         if row is not None:
             return bool(row["matched"]), row["reason"]
         matched, reason = judge(finding, expected_defect)
         with db:
-            db.execute("INSERT INTO eval_matches(finding_id,case_name,matched,reason) VALUES(?,?,?,?)",
-                       (finding["id"], case_name, int(matched), reason))
+            db.execute("INSERT INTO eval_matches(finding_id,case_name,defect_hash,matched,reason) "
+                       "VALUES(?,?,?,?,?)", (finding["id"], case_name, defect_hash, int(matched), reason))
         return matched, reason
     return judged
 

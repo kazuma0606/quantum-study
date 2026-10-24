@@ -16,6 +16,10 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
     db = sqlite3.connect(path)
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA foreign_keys = ON")
+    # An early eval_matches table had no defect_hash. It held no judgments, so it is rebuilt.
+    if "defect_hash" not in {row["name"] for row in db.execute("PRAGMA table_info(eval_matches)")} and \
+            db.execute("PRAGMA table_info(eval_matches)").fetchall():
+        db.execute("DROP TABLE eval_matches")
     db.executescript("""
         CREATE TABLE IF NOT EXISTS audits (
             id INTEGER PRIMARY KEY,
@@ -82,10 +86,11 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
             id INTEGER PRIMARY KEY,
             finding_id INTEGER NOT NULL REFERENCES findings(id),
             case_name TEXT NOT NULL,
+            defect_hash TEXT NOT NULL,
             matched INTEGER NOT NULL CHECK(matched IN (0, 1)),
             reason TEXT NOT NULL,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(finding_id, case_name)
+            UNIQUE(finding_id, case_name, defect_hash)
         );
         CREATE INDEX IF NOT EXISTS idx_audits_chain ON audits(scope, base_sha, id);
         CREATE INDEX IF NOT EXISTS idx_findings_audit ON findings(audit_id);
