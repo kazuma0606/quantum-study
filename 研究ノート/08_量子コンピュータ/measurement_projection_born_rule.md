@@ -2184,7 +2184,23 @@ $$
 \big(A-\lambda I\big)|v\rangle=0
 $$
 
-もし行列 $A-\lambda I$ に逆行列があれば、$(A-\lambda I)|v\rangle=0$ の両辺に、左から逆行列を掛けて、$|v\rangle=0$ となり、$|v\rangle\neq0$ に反します。したがって、零でない $|v\rangle$ が存在するには、$A-\lambda I$ が逆行列を持たない必要があります。正方行列が逆行列を持たないことは、行列式が $0$ であることと同じです。逆に、$\det(A-\lambda I)=0$ なら、行列 $A-\lambda I$ の列ベクトルは一次従属なので、すべては $0$ でない係数 $v_1,\dots,v_d$ で、列ベクトルの一次結合が零ベクトルになります。この係数を成分とするベクトルが、零でない解 $|v\rangle$ です（線形代数の標準的な事実として、証明せずに使います。固有値と固有ベクトルの定義と求め方は、[matrix_exponential_commutator_bch_trotter.md の Part II §1](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md#p2-1) にも書いてあります）。
+もし行列 $A-\lambda I$ に逆行列があれば、$(A-\lambda I)|v\rangle=0$ の両辺に、左から逆行列を掛けます。
+
+$$
+|v\rangle=(A-\lambda I)^{-1}(A-\lambda I)|v\rangle=(A-\lambda I)^{-1}\,0=0
+$$
+
+これは $|v\rangle\neq0$ に反します。したがって、零でない $|v\rangle$ が存在するには、$A-\lambda I$ が逆行列を持たない必要があります。正方行列が逆行列を持たないことは、行列式が $0$ であることと同じです。
+
+逆に、$\det(A-\lambda I)=0$ なら、行列 $A-\lambda I$ の列ベクトル $c_1,\dots,c_d$ は一次従属なので、すべては $0$ でない係数 $v_1,\dots,v_d$ で、次が成り立ちます。
+
+$$
+\sum_kv_k\,c_k=0
+$$
+
+行列とベクトルの積 $(A-\lambda I)|v\rangle$ は、列ベクトルを、成分 $v_k$ で足し合わせたもの $\sum_kv_kc_k$ なので、この係数を成分とするベクトル $|v\rangle$ が、零でない解です。
+
+以上は、線形代数の標準的な事実として、証明せずに使います。固有値と固有ベクトルの定義と求め方は、[matrix_exponential_commutator_bch_trotter.md の Part II §1](../04_群論・代数/matrix_exponential_commutator_bch_trotter.md#p2-1) にも書いてあります。
 
 $$
 \det\big(A-\lambda I\big)=0
@@ -2470,7 +2486,27 @@ $$
 
 任意の観測量の期待値が、この行列と $A$ のトレースで決まるので、結果を記録しない場合の状態は、この行列で表せます。
 
-逆に、2つの行列 $X,Y$ が、すべてのエルミート行列 $A$ で $\operatorname{tr}(XA)=\operatorname{tr}(YA)$ を満たすなら、$X=Y$ です。実際、任意の行列 $M$ は、2つのエルミート行列 $H_1=\frac{M+M^\dagger}{2}$、$H_2=\frac{M-M^\dagger}{2i}$ で、$M=H_1+iH_2$ と書けるので、すべての行列 $M$ で $\operatorname{tr}(XM)=\operatorname{tr}(YM)$ が成り立ちます。$M=|j\rangle\langle k|$ とすると、外積のトレースが内積になること（$\operatorname{tr}\big(|a\rangle\langle b|\big)=\langle b|a\rangle$）から、$\operatorname{tr}\big(X|j\rangle\langle k|\big)=\langle k|X|j\rangle=X_{kj}$ なので、すべての成分が等しくなります。したがって、期待値を再現する行列は、1つに決まります。
+逆に、2つの行列 $X,Y$ が、すべてのエルミート行列 $A$ で $\operatorname{tr}(XA)=\operatorname{tr}(YA)$ を満たすなら、$X=Y$ です。次の3段階で示します。
+
+**(1) 任意の行列は、2つのエルミート行列で書ける。** 任意の行列 $M$ について、次の $H_1,H_2$ はエルミート行列で、$M=H_1+iH_2$ です。
+
+$$
+H_1=\frac{M+M^\dagger}{2},\qquad H_2=\frac{M-M^\dagger}{2i}
+$$
+
+**(2) 条件が、すべての行列 $M$ に広がる。** トレースの線形性から、次のようになります。
+
+$$
+\operatorname{tr}(XM)=\operatorname{tr}(XH_1)+i\operatorname{tr}(XH_2)=\operatorname{tr}(YH_1)+i\operatorname{tr}(YH_2)=\operatorname{tr}(YM)
+$$
+
+**(3) 成分が等しくなる。** $M=|j\rangle\langle k|$ とします。基底 $\{|i\rangle\}$ で、トレースを成分で書き、完全性関係 $\sum_i|i\rangle\langle i|=I$ を使うと、次のようになります。
+
+$$
+\operatorname{tr}\big(X|j\rangle\langle k|\big)=\sum_i\langle i|X|j\rangle\langle k|i\rangle=\langle k|\Big(\sum_i|i\rangle\langle i|\Big)X|j\rangle=\langle k|X|j\rangle=X_{kj}
+$$
+
+$Y$ についても、同じ計算で $\operatorname{tr}\big(Y|j\rangle\langle k|\big)=Y_{kj}$ なので、(2) から、すべての $j,k$ で $X_{kj}=Y_{kj}$ です。したがって $X=Y$ で、期待値を再現する行列は、1つに決まります。
 
 この行列の各項は、$K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle$ により、結果 $m$ の状態 $|\Phi_m\rangle$ に確率 $P(m)$ を掛けたものです。
 
