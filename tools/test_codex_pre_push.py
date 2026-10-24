@@ -266,6 +266,57 @@ class PendingAuditTest(unittest.TestCase):
             finally:
                 db.close()
 
+    def test_range_refs_resolve_to_commit_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+
+            def run(*args: str) -> None:
+                subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)
+
+            run("init", "-q")
+            run("config", "user.email", "test@example.com")
+            run("config", "user.name", "test")
+            (repo / "a.txt").write_text("1", encoding="utf-8")
+            run("add", "a.txt")
+            run("commit", "-q", "-m", "one")
+            with patch.object(hook, "ROOT", repo):
+                first = hook.resolve_commit("HEAD")
+                (repo / "a.txt").write_text("2", encoding="utf-8")
+                run("commit", "-q", "-am", "two")
+                second = hook.resolve_commit("HEAD")
+                self.assertEqual(hook.resolve_commit("HEAD~1"), first)
+                with self.assertRaises(subprocess.CalledProcessError):
+                    hook.resolve_commit("no-such-ref")
+            self.assertEqual((len(first), len(second)), (40, 40))
+            self.assertNotEqual(first, second)
+
+    def test_cached_verdict_uses_prior_ids_stored_with_its_audit(self) -> None:
+        finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",
+                   "problem": "端点で不成立", "evidence": "0で不成立", "correction": "範囲を狭める"}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "audit.sqlite3"
+            db = audit_db.connect(path)
+            try:
+                first = audit_db.save_audit(db, "first", "branch", "a" * 40, "b" * 40, None, "findings", None,
+                    {"findings": [finding], "claims": [], "resolutions": [],
+                     "checked": ["端点"], "unverified": []})
+                finding_id = db.execute("SELECT id FROM findings WHERE audit_id=?", (first,)).fetchone()[0]
+                resolved = {"findings": [], "claims": [], "checked": ["端点"], "unverified": [],
+                            "resolutions": [{"prior_finding_id": finding_id, "status": "resolved",
+                                             "evidence": "修正後は端点を除外"}]}
+                audit_db.save_audit(db, "second", "branch", "a" * 40, "c" * 40, first, "pass", None, resolved)
+                audit_db.save_audit(db, "third", "branch", "a" * 40, "d" * 40, first, "findings", None,
+                    {"findings": [finding], "claims": [], "resolutions": [
+                        {"prior_finding_id": finding_id, "status": "resolved", "evidence": "解消"}],
+                     "checked": ["端点"], "unverified": []})
+            finally:
+                db.close()
+            verdict = Path(directory) / "second.json"
+            verdict.write_text(json.dumps(resolved, ensure_ascii=False), encoding="utf-8")
+            self.assertEqual(hook.load_cached("second", verdict, [finding["path"]], path), resolved)
+            with self.assertRaises(ValueError):
+                hook.load_cached("missing", verdict, [finding["path"]], path)
+
     def test_eval_scoring_counts_each_unrelated_finding(self) -> None:
         mixed = [{"problem": "端点で不成立", "evidence": "0"}, {"problem": "別件", "evidence": "関係なし"}]
         self.assertEqual(audit_eval.score(mixed, ["端点"]), {"tp": 1, "fn": 0, "fp": 1, "tn": 0})

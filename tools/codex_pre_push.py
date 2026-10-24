@@ -160,6 +160,11 @@ def commit_exists(sha: str) -> bool:
     return git("cat-file", "-e", f"{sha}^{{commit}}", check=False).returncode == 0
 
 
+def resolve_commit(ref: str) -> str:
+    """Resolve a ref such as HEAD~1 to a commit ID, so audit keys never depend on a moving name."""
+    return git("rev-parse", "--verify", f"{ref}^{{commit}}").stdout.decode().strip()
+
+
 def write_pending(path: Path, base: str | None) -> None:
     if base is None:
         # A root commit has no base; use ZERO as the persistent sentinel.
@@ -270,6 +275,25 @@ def render_report(label: str, base: str | None, head: str, files: list[str], ans
     return "\n".join(lines) + "\n"
 
 
+def load_cached(key: str, verdict: Path, files: list[str], db_path: Path | None = None) -> dict:
+    """Validate a saved verdict against the prior findings stored with that audit record."""
+    data = json.loads(verdict.read_text(encoding="utf-8"))
+    db = audit_db.connect(db_path)
+    try:
+        record = db.execute("SELECT id, status FROM audits WHERE audit_key=?", (key,)).fetchone()
+        stored_ids = set() if record is None else {
+            row[0] for row in db.execute(
+                "SELECT prior_finding_id FROM resolutions WHERE audit_id=?", (record["id"],))}
+    finally:
+        db.close()
+    if record is None:
+        raise ValueError("SQLite audit record is missing")
+    cached = validate_answer(data, files, stored_ids)
+    if record["status"] != ("findings" if blocking(cached) else "pass"):
+        raise ValueError("SQLite audit record is inconsistent")
+    return cached
+
+
 def audit(base: str | None, head: str, dry_run: bool, scope: str = "manual") -> bool:
     files, patch = changes(base, head)
     label = f"{(base or 'root')[:12]}..{head[:12]}"
@@ -300,14 +324,7 @@ def audit(base: str | None, head: str, dry_run: bool, scope: str = "manual") -> 
 
     if report.exists() and verdict.exists():
         try:
-            cached = validate_answer(json.loads(verdict.read_text(encoding="utf-8")), files, prior_ids)
-            db = audit_db.connect()
-            try:
-                record = db.execute("SELECT status FROM audits WHERE audit_key=?", (key,)).fetchone()
-            finally:
-                db.close()
-            if record is None or record["status"] != ("findings" if blocking(cached) else "pass"):
-                raise ValueError("SQLite audit record is missing or inconsistent")
+            cached = load_cached(key, verdict, files)
         except (ValueError, json.JSONDecodeError):
             print(f"Codex audit cache invalid; rerunning: {report}", file=sys.stderr)
         else:
@@ -416,7 +433,11 @@ def main() -> int:
     args = parser.parse_args()
     pairs: list[tuple[str | None, str, Path | None]] = []
     if args.range:
-        pairs.append((args.range[0], args.range[1], None))
+        try:
+            pairs.append((resolve_commit(args.range[0]), resolve_commit(args.range[1]), None))
+        except subprocess.CalledProcessError:
+            print(f"Codex audit: cannot resolve --range {args.range[0]} {args.range[1]}", file=sys.stderr)
+            return 1
     else:
         for line in sys.stdin:
             parts = line.split()
