@@ -512,5 +512,19 @@ class PendingAuditTest(unittest.TestCase):
             self.assertEqual(hook.load_cached("k", verdict, [finding["path"]], set(), path), answer)
 
 
+    def test_regression_requires_the_expected_finding(self) -> None:
+        unrelated = {"id": 1, "problem": "別件", "evidence": "関係なし", "line": 1}
+        related = {"id": 2, "problem": "端点で不成立", "evidence": "θ=0", "line": 7}
+
+        def judge(finding: dict, defect: str) -> tuple[bool, str]:
+            return finding["id"] == 2, "判定"
+
+        self.assertEqual(audit_eval.choose_expected_finding([unrelated, related], "端点の誤り", judge), related)
+        with self.assertRaises(RuntimeError):
+            audit_eval.choose_expected_finding([unrelated], "端点の誤り", judge)
+        with self.assertRaises(RuntimeError):
+            audit_eval.choose_expected_finding([], "端点の誤り", judge)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -132,6 +132,14 @@ def run_case(case: dict) -> dict:
             db.close()
 
 
+def choose_expected_finding(findings: list[dict], expected_defect: str, judge) -> dict:
+    """The first finding that addresses the expected defect; an unrelated finding must not count."""
+    for item in findings:
+        if judge(item, expected_defect)[0]:
+            return item
+    raise RuntimeError("Initial regression case did not report the expected defect")
+
+
 def run_regression() -> dict:
     """Exercise the full bad claim -> response -> fixed claim review chain."""
     case = next(item for item in json.loads(CASES.read_text(encoding="utf-8"))
@@ -159,14 +167,14 @@ def run_regression() -> dict:
             hook.audit(base, bad_head, False, scope)
         db = audit_db.connect()
         try:
-            first = db.execute("SELECT id,status FROM audits WHERE scope=? AND head_sha=?",
-                               (scope, bad_head)).fetchone()
+            first = db.execute("SELECT id,status FROM audits WHERE scope=? AND head_sha=? "
+                               "AND status<>'error' ORDER BY id DESC LIMIT 1", (scope, bad_head)).fetchone()
             if first is None or first["status"] != "findings":
                 raise RuntimeError("Initial regression case did not produce a finding")
-            finding = db.execute("SELECT id FROM findings WHERE audit_id=? ORDER BY id LIMIT 1",
-                                 (first["id"],)).fetchone()
-            if finding is None:
-                raise RuntimeError("Initial regression case did not record a finding")
+            findings = [dict(row) for row in db.execute(
+                "SELECT id,problem,evidence,line FROM findings WHERE audit_id=? ORDER BY id", (first["id"],))]
+            finding = choose_expected_finding(findings, case["expected_defect"],
+                                              cached_judge(db, "regression", codex_judge))
             with db:
                 db.execute("""
                     INSERT INTO responses(finding_id,decision,rationale,evidence_ref,actor)
