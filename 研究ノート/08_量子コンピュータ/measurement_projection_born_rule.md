@@ -2206,7 +2206,15 @@ $$
 \det\big(A-\lambda I\big)=0
 $$
 
-この式の解 $\lambda$ が固有値 $a_j$ で、各 $a_j$ について、$(A-a_jI)|v\rangle=0$ の零でない解のうち、長さを $1$ に揃え、固有値が重なる場合は、互いに直交するように選んだものが、正規直交な固有ベクトルの基底 $\{|a_j\rangle\}$ です（そのような選び方ができることが、① の冒頭で使うスペクトル定理です）。したがって、この $a_j$ と $|a_j\rangle$ について、$A|a_j\rangle=a_j|a_j\rangle$ が成り立ちます（成分で書いた最初の式を、$\lambda=a_j$、$|v\rangle=|a_j\rangle$ として、そのまま読み替えたものです）。
+この式の解 $\lambda$ が固有値 $a_j$ で、各 $a_j$ について、$(A-a_jI)|v\rangle=0$ の零でない解のうち、長さを $1$ に揃え、固有値が重なる場合は、互いに直交するように選んだものが、正規直交な固有ベクトルの基底 $\{|a_j\rangle\}$ です（そのような選び方ができることが、① の冒頭で使うスペクトル定理です）。
+
+したがって、成分で書いた最初の式を、$\lambda=a_j$、$|v\rangle=|a_j\rangle$ として読み替えると、次の式が成り立ちます。
+
+$$
+\boxed{A|a_j\rangle=a_j\,|a_j\rangle}
+$$
+
+これが、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を、$a_j|a_j\rangle$ に置き換えてよい理由です。
 
 係数 $c_k^\ast$ と $c_j$ は数なので、$\langle a_k|A|a_j\rangle$ の外に出せます。そこで、固有ベクトルの定義 $A|a_j\rangle=a_j|a_j\rangle$ から、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。$a_j$ は数なので、内積のケットについての線形性から、前に出せます。次のようになります。
 
