@@ -2074,7 +2074,16 @@ $$
 
 ここでは、結果を記録しない場合の状態を表す行列が、$\sum_mK_m\rho K_m^\dagger$ になることを、期待値から導きます。
 
-このブロックでは、$\mathcal H=\mathbb C^d$（$d$ は系の次元。複素数の範囲で考える）、$|\Phi\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=1$）、$K_m\in\mathbb C^{d\times d}$（$m$ は結果の添字）、$P(m)>0$ の結果 $m$ について、$|\Phi_m\rangle\in\mathcal H$（$\langle\Phi_m|\Phi_m\rangle=1$。(A-7) のとおり、$P(m)=0$ の結果では定めない）、観測量 $A=A^\dagger\in\mathbb C^{d\times d}$、$\rho=|\Phi\rangle\langle\Phi|\in\mathbb C^{d\times d}$、$|\varphi\rangle\in\mathcal H$ とします。$A=A^\dagger$ なので、固有値は実数 $a_j\in\mathbb R$ です。$P(m)=0$ の結果は起こらないので、$|\Phi_m\rangle$ と $P(j\mid m)$ は、定めません。$m$ にわたる和では、$P(m)=0$ の項は $0$ とみなします（$P(m)$ が掛かっているため）。
+このブロックでは、次の記号を使います。
+
+- 空間：$\mathcal H=\mathbb C^d$（$d$ は系の次元。複素数の範囲で考える）。
+- 状態ベクトル：$|\Phi\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=1$）、$|\varphi\rangle\in\mathcal H$。
+- 測定演算子：$K_m\in\mathbb C^{d\times d}$（$m$ は結果の添字）。
+- 測定後の状態：$P(m)>0$ の結果 $m$ について、$|\Phi_m\rangle\in\mathcal H$（$\langle\Phi_m|\Phi_m\rangle=1$。(A-7) のとおり、$P(m)=0$ の結果では定めない）。
+- 観測量：$A=A^\dagger\in\mathbb C^{d\times d}$。$A=A^\dagger$ なので、固有値は実数 $a_j\in\mathbb R$。
+- 密度行列：$\rho=|\Phi\rangle\langle\Phi|\in\mathbb C^{d\times d}$。
+
+$P(m)=0$ の結果は起こらないので、$|\Phi_m\rangle$ と $P(j\mid m)$ は、定めません。$m$ にわたる和では、$P(m)=0$ の項は $0$ とみなします（$P(m)$ が掛かっているため）。
 
 これまでは、結果が分かっている場合に、測定後の状態を、状態ベクトル $|\Phi_m\rangle$ で表してきました。結果を記録しない場合は、どの $|\Phi_m\rangle$ になったかが分からないので、状態の表し方を決める必要があります。
 
@@ -2216,7 +2225,14 @@ $$
 \sum_kv_k\,b_k=0\tag{A-11}
 $$
 
-係数 $v_1,\dots,v_d\in\mathbb C$ の少なくとも1つが $0$ でなく、$\sum_kv_kb_k=0$ となるとき、$b_1,\dots,b_d$ は**一次従属**です。同じことを、「どれか1つの $b_k$ が、ほかの $b_l$（$l\neq k$）の線形結合で書ける」とも言います。$b_1,\dots,b_d\in\mathbb R^d\setminus\{0\}$ の場合、$d=2$ なら $b_2=c\,b_1$（$c\in\mathbb R$、向きが逆でもよい。つまり平行）、$d=3$ なら、$b_1,b_2,b_3$ が、原点を通る1つの平面に含まれる、という状態です。逆に、$\sum_kv_kb_k=0$ ならすべての $v_k=0$ となるとき、**一次独立**で、$b_1,\dots,b_d$ は $\mathbb C^d$ を張ります。
+係数 $v_1,\dots,v_d\in\mathbb C$ の少なくとも1つが $0$ でなく、$\sum_kv_kb_k=0$ となるとき、$b_1,\dots,b_d$ は**一次従属**です。同じことを、「どれか1つの $b_k$ が、ほかの $b_l$（$l\neq k$）の線形結合で書ける」とも言います。
+
+ここで、$S\setminus\{0\}$ は、集合 $S$ から零ベクトル $0$ を除いた集合です。$b_1,\dots,b_d\in\mathbb R^d\setminus\{0\}$ の場合、次の状態です。
+
+- $d=2$ なら、$b_2=c\,b_1$（$c\in\mathbb R$、向きが逆でもよい。つまり平行）。
+- $d=3$ なら、$b_1,b_2,b_3$ が、原点を通る1つの平面に含まれる。
+
+逆に、$\sum_kv_kb_k=0$ ならすべての $v_k=0$ となるとき、**一次独立**で、$b_1,\dots,b_d$ は $\mathbb C^d$ を張ります。
 
 $M\in\mathbb R^{d\times d}$ の場合、$\det M$ は、列ベクトルが張る平行多面体（$d=2$ なら平行四辺形、$d=3$ なら平行六面体）の、符号つきの体積です。$M\in\mathbb C^{d\times d}$ でも、$\det M=0$ と、列ベクトルが一次従属であることは、同じです。つまり、$\det(A-\lambda I)=0$ と、$b_1,\dots,b_d$ が一次従属であることは、同じです（一般の次元では、線形代数の定理です。次の例で、$2\times2$ の場合を確かめます）。
 
