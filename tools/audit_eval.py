@@ -22,7 +22,6 @@ ROOT = Path(__file__).resolve().parents[1]
 CASES = Path(__file__).with_name("audit_eval_cases.json")
 
 
-MAX_JUDGED = 5
 JUDGE_SCHEMA = {
     "type": "object",
     "properties": {"matches": {"type": "boolean"}, "reason": {"type": "string"}},
@@ -82,11 +81,9 @@ def score(findings: list[dict], expected_defect: str | None, judge) -> dict[str,
     """Judge each finding against the expected defect. A safe case counts every finding as false."""
     if not expected_defect:
         return {"tp": 0, "fn": 0, "fp": len(findings), "tn": int(not findings)}
-    judged = findings[:MAX_JUDGED]
-    hits = [judge(item, expected_defect)[0] for item in judged]
-    unjudged = len(findings) - len(judged)
+    hits = [judge(item, expected_defect)[0] for item in findings]
     return {"tp": int(any(hits)), "fn": int(not any(hits)),
-            "fp": hits.count(False) + unjudged, "tn": 0}
+            "fp": hits.count(False), "tn": 0}
 
 
 def git(repo: Path, *args: str) -> str:

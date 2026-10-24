@@ -343,8 +343,15 @@ class PendingAuditTest(unittest.TestCase):
                 self.assertEqual(len(rows), 1)
                 self.assertEqual(db.execute("SELECT prior_audit_id FROM audits WHERE id=?",
                                             (retried,)).fetchone()[0], newer)
-                with self.assertRaises(ValueError):
-                    audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, newer, "pass", None, empty)
+                again = audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, newer, "pass", None, empty)
+                self.assertGreater(again, retried)
+                failed_after = audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, newer, "error",
+                                                   None, error="boom")
+                self.assertGreater(failed_after, again)
+                self.assertEqual(db.execute("SELECT status FROM audits WHERE id=?", (retried,)).fetchone()[0],
+                                 "findings")
+                self.assertEqual(db.execute("SELECT status FROM audits WHERE id=?", (again,)).fetchone()[0],
+                                 "pass")
             finally:
                 db.close()
 
@@ -370,18 +377,18 @@ class PendingAuditTest(unittest.TestCase):
         self.assertEqual(audit_eval.score(findings, None, judge), {"tp": 0, "fn": 0, "fp": 2, "tn": 0})
         self.assertEqual(audit_eval.score([], None, judge), {"tp": 0, "fn": 0, "fp": 0, "tn": 1})
 
-    def test_eval_scoring_caps_judged_findings(self) -> None:
+    def test_eval_scoring_judges_every_finding(self) -> None:
         calls: list[int] = []
 
         def judge(finding: dict, defect: str) -> tuple[bool, str]:
             calls.append(finding["id"])
-            return False, "判定"
+            return finding["id"] == 6, "判定"
 
         findings = [{"id": number, "problem": "別件", "evidence": "関係なし", "line": 1}
-                    for number in range(1, audit_eval.MAX_JUDGED + 3)]
+                    for number in range(1, 8)]
         result = audit_eval.score(findings, "期待する欠陥", judge)
-        self.assertEqual(len(calls), audit_eval.MAX_JUDGED)
-        self.assertEqual(result["fp"], len(findings))
+        self.assertEqual(calls, list(range(1, 8)))
+        self.assertEqual(result, {"tp": 1, "fn": 0, "fp": 6, "tn": 0})
 
     def test_judge_answers_are_cached_and_failures_are_not_guessed(self) -> None:
         finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",

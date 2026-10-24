@@ -149,15 +149,15 @@ def save_audit(db: sqlite3.Connection, key: str, scope: str, base: str | None, h
                answer: dict | None = None, error: str | None = None) -> int:
     """Completed records are written once and never changed.
 
-    A failed attempt (status 'error') is updated in place. A later completed attempt for the same
-    key becomes a new record, so record ids follow the order in which audits completed.
+    A failed attempt (status 'error') updates the latest record only when that record is also a
+    failure. Every other save, including a repeated audit of the same key, becomes a new record
+    '<key>#<n>', so record ids follow the order in which audits finished and no completed record
+    is ever overwritten.
     """
     answer = answer or {"findings": [], "claims": [], "resolutions": [], "checked": [], "unverified": []}
     with db:
         records = attempts(db, key)
-        if any(row["status"] != "error" for row in records):
-            raise ValueError("Completed audit records are immutable; use a new audit version")
-        if status == "error" and records:
+        if status == "error" and records and records[-1]["status"] == "error":
             db.execute("""
                 UPDATE audits SET prior_audit_id=?, status='error', report_path=NULL,
                     checked_json='[]', unverified_json='[]', error=? WHERE id=?
