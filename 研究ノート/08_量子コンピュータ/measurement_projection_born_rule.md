@@ -2156,6 +2156,42 @@ $$
 \langle\varphi|A|\varphi\rangle=\sum_k\sum_jc_k^\ast c_j\,\langle a_k|A|a_j\rangle
 $$
 
+ここで、$\langle a_k|A|a_j\rangle$ を計算するために、$A|a_j\rangle$ が何になるかを、固有値と固有ベクトルの定義から、成分で確かめます。
+
+固有ベクトル $|v\rangle$ と固有値 $\lambda$ の定義は、次の式です（① の冒頭の $A|a_j\rangle=a_j|a_j\rangle$ は、$|v\rangle=|a_j\rangle$、$\lambda=a_j$ の場合です）。
+
+$$
+A|v\rangle=\lambda\,|v\rangle
+$$
+
+ここで、$A|v\rangle$ は行列とベクトルの積（成分ごとの計算）、$\lambda|v\rangle$ は数 $\lambda$ をベクトルに掛けるスカラー倍で、どちらもテンソル積（クロネッカー積）$\otimes$ ではありません。内積は、$\langle a|b\rangle$ の形で、別に使います。
+
+行列 $A$ の成分を $A_{ik}$、ベクトル $|v\rangle$ の成分を $v_k$ とします（$i,k=1,\dots,d$）。行列とベクトルの積の定義から、$A|v\rangle$ の第 $i$ 成分は $\sum_kA_{ik}v_k$ で、$\lambda|v\rangle$ の第 $i$ 成分は $\lambda v_i$ です。したがって、定義の式は、各 $i$ について、次のように書けます。
+
+$$
+\sum_kA_{ik}\,v_k=\lambda\,v_i
+$$
+
+右辺を、クロネッカーのデルタ $\delta_{ik}$（$i=k$ のとき $1$、$i\neq k$ のとき $0$）を使って、$\lambda v_i=\sum_k\lambda\,\delta_{ik}\,v_k$ と書き、左辺に移項すると、次のようになります。
+
+$$
+\sum_k\big(A_{ik}-\lambda\,\delta_{ik}\big)\,v_k=0
+$$
+
+$A_{ik}-\lambda\delta_{ik}$ は、行列 $A-\lambda I$ の成分（$I$ は単位行列で、成分が $\delta_{ik}$）なので、これは、次の式と同じです。
+
+$$
+\big(A-\lambda I\big)|v\rangle=0
+$$
+
+零ベクトルでない $|v\rangle$ が、この式を満たすのは、行列 $A-\lambda I$ の行列式が $0$ のときです（線形代数の標準的な事実として、証明せずに使います）。
+
+$$
+\det\big(A-\lambda I\big)=0
+$$
+
+この式の解 $\lambda$ が固有値 $a_j$ で、各 $a_j$ について、$(A-a_jI)|v\rangle=0$ を解いたものが、固有ベクトル $|a_j\rangle$ です。したがって、この $a_j$ と $|a_j\rangle$ について、$A|a_j\rangle=a_j|a_j\rangle$ が成り立ちます（成分で書いた最初の式を、$\lambda=a_j$、$|v\rangle=|a_j\rangle$ として、そのまま読み替えたものです）。
+
 係数 $c_k^\ast$ と $c_j$ は数なので、$\langle a_k|A|a_j\rangle$ の外に出せます。そこで、固有ベクトルの定義 $A|a_j\rangle=a_j|a_j\rangle$ から、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。$a_j$ は数なので、内積のケットについての線形性から、前に出せます。次のようになります。
 
 $$
