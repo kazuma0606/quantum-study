@@ -294,7 +294,7 @@ class PendingAuditTest(unittest.TestCase):
             self.assertEqual((len(first), len(second)), (40, 40))
             self.assertNotEqual(first, second)
 
-    def test_cached_verdict_uses_prior_ids_stored_with_its_audit(self) -> None:
+    def test_cached_verdict_is_reused_only_when_prior_findings_still_match(self) -> None:
         finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",
                    "problem": "端点で不成立", "evidence": "0で不成立", "correction": "範囲を狭める"}
         with tempfile.TemporaryDirectory() as directory:
@@ -309,17 +309,42 @@ class PendingAuditTest(unittest.TestCase):
                             "resolutions": [{"prior_finding_id": finding_id, "status": "resolved",
                                              "evidence": "修正後は端点を除外"}]}
                 audit_db.save_audit(db, "second", "branch", "a" * 40, "c" * 40, first, "pass", None, resolved)
+                _, chain = audit_db.previous_findings(db, "branch", "a" * 40, "c" * 40)
+                expected = {item["id"] for item in chain}
+                verdict = Path(directory) / "second.json"
+                verdict.write_text(json.dumps(resolved, ensure_ascii=False), encoding="utf-8")
+                self.assertEqual(hook.load_cached("second", verdict, [finding["path"]], expected, path), resolved)
+                with self.assertRaises(ValueError):
+                    hook.load_cached("missing", verdict, [finding["path"]], expected, path)
+
                 audit_db.save_audit(db, "third", "branch", "a" * 40, "d" * 40, first, "findings", None,
                     {"findings": [finding], "claims": [], "resolutions": [
                         {"prior_finding_id": finding_id, "status": "resolved", "evidence": "解消"}],
                      "checked": ["端点"], "unverified": []})
+                _, chain = audit_db.previous_findings(db, "branch", "a" * 40, "c" * 40)
+                changed = {item["id"] for item in chain}
+                self.assertNotEqual(changed, expected)
+                with self.assertRaises(ValueError):
+                    hook.load_cached("second", verdict, [finding["path"]], changed, path)
             finally:
                 db.close()
-            verdict = Path(directory) / "second.json"
-            verdict.write_text(json.dumps(resolved, ensure_ascii=False), encoding="utf-8")
-            self.assertEqual(hook.load_cached("second", verdict, [finding["path"]], path), resolved)
-            with self.assertRaises(ValueError):
-                hook.load_cached("missing", verdict, [finding["path"]], path)
+
+    def test_same_head_reaudit_keeps_its_recorded_findings(self) -> None:
+        finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",
+                   "problem": "端点で不成立", "evidence": "0で不成立", "correction": "範囲を狭める"}
+        with tempfile.TemporaryDirectory() as directory:
+            db = audit_db.connect(Path(directory) / "audit.sqlite3")
+            try:
+                first = audit_db.save_audit(db, "first", "branch", "a" * 40, "b" * 40, None, "findings", None,
+                    {"findings": [finding], "claims": [], "resolutions": [],
+                     "checked": ["端点"], "unverified": []})
+                self.assertEqual(audit_db.previous_findings(db, "branch", "a" * 40, "b" * 40), (None, []))
+                prior_id, rows = audit_db.previous_findings(db, "branch", "a" * 40, "b" * 40,
+                                                            include_same_head=True)
+                self.assertEqual(prior_id, first)
+                self.assertEqual(len(rows), 1)
+            finally:
+                db.close()
 
     def test_retry_is_a_new_record_in_completion_order(self) -> None:
         finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",

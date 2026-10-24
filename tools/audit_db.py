@@ -104,13 +104,32 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
     return db
 
 
-def previous_findings(db: sqlite3.Connection, scope: str, base: str | None, head: str) -> tuple[int | None, list[dict]]:
-    prior = db.execute(
-        "SELECT id, status FROM audits WHERE scope=? AND base_sha IS ? AND head_sha<>? "
+def _latest_completed(db: sqlite3.Connection, scope: str, base: str | None, head: str,
+                      same_head: bool) -> sqlite3.Row | None:
+    operator = "=" if same_head else "<>"
+    return db.execute(
+        f"SELECT id, status FROM audits WHERE scope=? AND base_sha IS ? AND head_sha{operator}? "
         "AND status IN ('pass', 'findings') ORDER BY id DESC LIMIT 1", (scope, base, head)
     ).fetchone()
-    if prior is None or prior["status"] != "findings":
-        return None, []
+
+
+def previous_findings(db: sqlite3.Connection, scope: str, base: str | None, head: str,
+                      include_same_head: bool = False) -> tuple[int | None, list[dict]]:
+    """Unresolved findings the next audit must answer one by one.
+
+    By default only audits of other heads count. A re-audit of the same head (its saved report was
+    lost) passes include_same_head=True, so findings already recorded for that head are not forgotten.
+    """
+    prior = None
+    if include_same_head:
+        same = _latest_completed(db, scope, base, head, True)
+        if same is not None and same["status"] == "findings":
+            prior = same
+    if prior is None:
+        other = _latest_completed(db, scope, base, head, False)
+        if other is None or other["status"] != "findings":
+            return None, []
+        prior = other
     rows = db.execute("""
         SELECT f.*, r.decision, r.rationale, r.evidence_ref,
                (SELECT COUNT(*) FROM resolutions WHERE prior_finding_id=f.id) AS review_rounds

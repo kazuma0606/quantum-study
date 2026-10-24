@@ -275,8 +275,9 @@ def render_report(label: str, base: str | None, head: str, files: list[str], ans
     return "\n".join(lines) + "\n"
 
 
-def load_cached(key: str, verdict: Path, files: list[str], db_path: Path | None = None) -> dict:
-    """Validate a saved verdict against the prior findings stored with that audit record."""
+def load_cached(key: str, verdict: Path, files: list[str], expected_prior_ids: set[int],
+                db_path: Path | None = None) -> dict:
+    """Reuse a saved verdict only if it answered exactly the prior findings that apply now."""
     data = json.loads(verdict.read_text(encoding="utf-8"))
     db = audit_db.connect(db_path)
     try:
@@ -289,6 +290,8 @@ def load_cached(key: str, verdict: Path, files: list[str], db_path: Path | None 
         db.close()
     if record is None:
         raise ValueError("SQLite audit record is missing")
+    if stored_ids != expected_prior_ids:
+        raise ValueError("Prior findings changed since this audit; re-audit")
     cached = validate_answer(data, files, stored_ids)
     if record["status"] != ("findings" if blocking(cached) else "pass"):
         raise ValueError("SQLite audit record is inconsistent")
@@ -309,9 +312,11 @@ def audit(base: str | None, head: str, dry_run: bool, scope: str = "manual") -> 
         return True
     db = audit_db.connect()
     try:
-        prior_id, prior_findings = audit_db.previous_findings(db, scope, base, head)
+        _, chain_findings = audit_db.previous_findings(db, scope, base, head)
+        prior_id, prior_findings = audit_db.previous_findings(db, scope, base, head, include_same_head=True)
     finally:
         db.close()
+    chain_ids = {item["id"] for item in chain_findings}
     prior_ids = {item["id"] for item in prior_findings}
 
     def pending(reason: str) -> bool:
@@ -325,7 +330,7 @@ def audit(base: str | None, head: str, dry_run: bool, scope: str = "manual") -> 
 
     if report.exists() and verdict.exists():
         try:
-            cached = load_cached(key, verdict, files)
+            cached = load_cached(key, verdict, files, chain_ids)
         except (ValueError, json.JSONDecodeError):
             print(f"Codex audit cache invalid; rerunning: {report}", file=sys.stderr)
         else:
