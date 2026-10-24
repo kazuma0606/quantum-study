@@ -1,6 +1,6 @@
 # tools ― ノート・図・ノートブックを作るための補助スクリプト
 
-> **作成** 2026-10-04　**更新** 2026-10-10
+> **作成** 2026-10-04　**更新** 2026-10-11
 > 研究ノートとノートブックを作るための補助スクリプトの一覧。リンクや記法の点検、図の書き出し、ノートブックの生成、見出しの日付の更新。
 
 研究ノートとノートブックを作るときに、くり返し使うスクリプトです。どれもリポジトリのルートから実行します。手順の約束事は `.claude/skills/` の Skill（`research-note`、`note-figures`、`notebook-gen`、`quantum-experiment`）にまとめてあります。
@@ -22,7 +22,29 @@
 
 `.githooks/pre-push` は `tools/codex_pre_push.py` を呼び、push 対象のコミット差分を読み取り専用で確認します。CSV、ログ、バイナリ、`results/` 以下の生成物は差分レビューの対象から外します。未コミットの作業ファイルを誤って読むことを防ぐため、対象コミットから一時的なスナップショットを作って Codex に渡します。スナップショットには、文脈確認用にコミット済みの他のファイルも含まれます（CSV と `results/` 以下を除く）。機密情報をコミットした場合は Codex に渡る可能性があります。
 
-結果は `.codex/audit-reports/` に Markdown で保存され、Git には追加されません。Claude Code に修正を頼むときは、このレポートを指定して、各指摘を先に検討してもらってください。指摘があっても push は止めません。Codex が使えない場合や監査に失敗した場合は、元の差分起点を `.codex/audit-reports/pending/` に保存し、次回の同じリモート・ブランチへの push で新しいコミットも含めて再試行します。履歴の書き換えなどで保存した起点がローカルから消えた場合は警告を出し、今回の push 範囲のみを監査します。次の push がなければ再試行は始まりません。同じコミット差分の成功済みレポートは再利用します。hook は監査の完了まで待ち、開始時に最大15分と表示します。Markdown の空白・空行だけの差分は自動でスキップします。コードや設定ファイルの空白変更は意味を変え得るため監査します。文体だけの変更など、内容を確認して監査不要と判断した Markdown コミットには `Audit-Skip: style` というコミット本文の行を付けられます。push 範囲のすべてのコミットにこの行がある場合だけスキップします。
+研究ノートの変更では、`docs/note_style.md` と `docs/concepts.md` を参照し、数式・科学的内容に加えて、前提と記号を使う前に説明しているか、導出の順序、等号の根拠、初出概念の動機と具体例、結論の根拠を点検します。他の文章でも、論旨と理解を妨げる不明瞭さを点検します。指摘は変更されたファイルの、差分に関係する箇所だけに絞ります。好みだけの文体指摘は対象にしません。
+
+結果は `.codex/audit-reports/` に Markdown・JSON・SQLite（`audit.sqlite3`）で保存され、Git には追加されません。**指摘がある場合、前回の指摘が残る場合、根拠のない主張がある場合、または監査を完了できない場合は push を中断します。** コミットや作業ファイルは巻き戻しません。修正をコミットして再度 push すると、前回の指摘を一件ずつ再監査します。指摘がなくなれば push が続行します。同じ差分の判定は再利用します。監査に失敗した場合は元の差分起点を `.codex/audit-reports/pending/` に保存し、次回の同じリモート・ブランチへの push で再試行します。履歴の書き換えで起点が消えた場合は警告し、今回の push 範囲のみを監査します。hook は監査の完了まで最大15分待ちます。Markdown の空白・空行だけの差分も監査します。`Audit-Skip: style` による省略は行いません。
+
+SQLite には、監査の範囲と判定、指摘、Claude Code の応答、主要な主張と根拠の分類、次回監査での解消判定、評価ケースの成績を保存します。指摘への応答は証拠とともに登録します。`fix` は修正、`dispute` は根拠つき反論、`human` は人の判断待ちです。応答だけでは push の停止は解除されず、次のコミットの監査で Codex が再判定します。意見が二往復しても解決しない場合は人が判定し、必要ならその push に限り `git push --no-verify` を使います。
+
+```bash
+uv run --no-sync python tools/audit_workflow.py recent
+uv run --no-sync python tools/audit_workflow.py findings <audit_id>
+uv run --no-sync python tools/audit_workflow.py claims <audit_id>
+uv run --no-sync python tools/audit_workflow.py respond <finding_id> fix --rationale "修正内容" --evidence "研究ノート/example.md:42"
+uv run --no-sync python tools/audit_workflow.py responses <finding_id>
+uv run --no-sync python tools/audit_workflow.py search "端点"
+```
+
+レビューの検出率と誤検出を測るには、`tools/audit_eval_cases.json` の既知の問題例と安全な例を使います。評価は **明示的に実行したときだけ** Codex を各ケースに呼び、結果を SQLite の `eval_runs` に保存します。ケースごとに最大15分かかります。
+
+```bash
+uv run --no-sync python tools/audit_eval.py --case endpoint_counterexample
+uv run --no-sync python tools/audit_eval.py
+uv run --no-sync python tools/audit_eval.py --summary
+uv run --no-sync python tools/audit_eval.py --regression
+```
 
 ローカルで hook を有効にするには `git config core.hooksPath .githooks` を実行します。コミットを指定したドライランは次のとおりです。
 

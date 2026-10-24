@@ -1,0 +1,26 @@
+[
+  {
+    "name": "undefined_symbol",
+    "expected_keywords": ["Q", "未定義", "定義"],
+    "base": "# 確率の例\n\n確率 $p$ は 0 以上 1 以下の実数とする。\n",
+    "changed": "# 確率の例\n\n確率 $p$ は 0 以上 1 以下の実数とする。\n\n$$Q=p(1-p)$$\n\nこの量で測定のばらつきを表す。\n"
+  },
+  {
+    "name": "endpoint_counterexample",
+    "expected_keywords": ["端点", "sin", "\\sin", "0", "π"],
+    "base": "# 角度の例\n\n角度 $\\theta$ は $0$ 以上 $\\pi$ 以下とする。\n",
+    "changed": "# 角度の例\n\n角度 $\\theta$ は $0$ 以上 $\\pi$ 以下とする。\n\nこの範囲のすべての角度で次が成り立つ。\n\n$$\\sin\\theta>0$$\n"
+  },
+  {
+    "name": "safe_numeric_example",
+    "expected_keywords": [],
+    "base": "# 確率の例\n\n確率 $p$ は 0 以上 1 以下の実数とする。\n",
+    "changed": "# 確率の例\n\n確率 $p$ は 0 以上 1 以下の実数とする。\n\n$p=1/2$ の場合、$1-p=1/2$ である。二つを足すと $1$ になる。\n"
+  },
+  {
+    "name": "safe_wording_change",
+    "expected_keywords": [],
+    "base": "# 確率の例\n\n確率 $p$ は 0 以上 1 以下の実数とする。\n",
+    "changed": "# 確率の例\n\n確率 $p$ は 0 以上 1 以下の実数とする。測定結果の例では $p$ を 1 回の測定で結果 1 が出る確率と読む。\n"
+  }
+]

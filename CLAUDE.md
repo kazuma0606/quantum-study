@@ -83,6 +83,10 @@ Pkg.add("Yao")  # 量子回路フレームワーク
 
 補助スクリプトは `tools/`（リンク検査、縦棒の検査、スライダーのチェック、図の書き出しとスクリーンショット、ノートブックの生成スクリプト、ノートの粒度の機械的な点検 `lint_notes.py`）。詳細は `tools/README.md`（`lint_notes.py` の使い方は、スクリプトの先頭の説明を参照）。
 
+### Codex の push 前監査への応答
+
+push が Codex の指摘で止まったら、`uv run --no-sync python tools/audit_workflow.py recent` と `findings <audit_id>` で指摘を確認する。各指摘を、具体的な根拠を確かめて `fix`（修正）、`dispute`（反論）、`human`（人の判断待ち）のいずれかで `respond <finding_id> ... --rationale ... --evidence ...` に記録する。反論では反例・式の導出・テスト結果などを示し、単なる同意や否定を根拠としない。修正をコミットして再度 push すると、Codex が前回の指摘の解消を一件ずつ判定する。二往復しても合意できなければ人に判断を委ねる。研究ノート本文の修正には `docs/note_style.md` の事前承認手順を守る。詳細は `tools/README.md`。
+
 ## 関連プロジェクト
 
 ### Favnir (`C:\Users\yoshi\favnir`)
