@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
+import shutil
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -18,19 +21,69 @@ ROOT = Path(__file__).resolve().parents[1]
 CASES = Path(__file__).with_name("audit_eval_cases.json")
 
 
-def score(findings: list[dict], keywords: list[str],
-          lines: list[int] | None = None) -> dict[str, int]:
-    if not keywords:
+MAX_JUDGED = 5
+JUDGE_SCHEMA = {
+    "type": "object",
+    "properties": {"matches": {"type": "boolean"}, "reason": {"type": "string"}},
+    "required": ["matches", "reason"],
+    "additionalProperties": False,
+}
+
+
+def codex_judge(finding: dict, expected_defect: str) -> tuple[bool, str]:
+    """Ask Codex whether one finding addresses the expected defect. Never guesses on failure."""
+    executable = shutil.which("codex.cmd" if os.name == "nt" else "codex")
+    if executable is None:
+        raise RuntimeError("Codex CLI is unavailable for judging")
+    prompt = (
+        "次の「指摘」が、「期待する欠陥」を扱っているかを判定してください。指摘が、期待する欠陥と同じ問題を"
+        "具体的に述べていれば true、別の問題を述べている、または語が似ているだけなら false です。"
+        "reason に理由を1文で書いてください。\n\n"
+        f"期待する欠陥：{expected_defect}\n\n"
+        f"指摘：{finding['problem']}\n根拠：{finding['evidence']}\n"
+    )
+    with tempfile.TemporaryDirectory(prefix="codex-eval-judge-") as directory:
+        schema = Path(directory) / "schema.json"
+        answer = Path(directory) / "answer.json"
+        schema.write_text(json.dumps(JUDGE_SCHEMA), encoding="utf-8")
+        result = subprocess.run(
+            [executable, "exec", "--skip-git-repo-check", "--sandbox", "read-only",
+             "--output-schema", str(schema), "--output-last-message", str(answer), "-"],
+            cwd=directory, input=prompt, text=True, encoding="utf-8", errors="replace",
+            capture_output=True, timeout=300, check=False,
+        )
+        if result.returncode != 0 or not answer.exists():
+            raise RuntimeError(f"Codex judge exited {result.returncode}")
+        value = json.loads(answer.read_text(encoding="utf-8"))
+    if not isinstance(value.get("matches"), bool) or not isinstance(value.get("reason"), str):
+        raise RuntimeError("Codex judge returned an invalid answer")
+    return value["matches"], value["reason"]
+
+
+def cached_judge(db: sqlite3.Connection, case_name: str, judge) -> "callable":
+    """Wrap a judge so each (finding, case) pair is asked once and then read from SQLite."""
+    def judged(finding: dict, expected_defect: str) -> tuple[bool, str]:
+        row = db.execute("SELECT matched, reason FROM eval_matches WHERE finding_id=? AND case_name=?",
+                         (finding["id"], case_name)).fetchone()
+        if row is not None:
+            return bool(row["matched"]), row["reason"]
+        matched, reason = judge(finding, expected_defect)
+        with db:
+            db.execute("INSERT INTO eval_matches(finding_id,case_name,matched,reason) VALUES(?,?,?,?)",
+                       (finding["id"], case_name, int(matched), reason))
+        return matched, reason
+    return judged
+
+
+def score(findings: list[dict], expected_defect: str | None, judge) -> dict[str, int]:
+    """Judge each finding against the expected defect. A safe case counts every finding as false."""
+    if not expected_defect:
         return {"tp": 0, "fn": 0, "fp": len(findings), "tn": int(not findings)}
-
-    def hit(item: dict) -> bool:
-        text = (item["problem"] + " " + item["evidence"]).casefold()
-        in_range = lines is None or lines[0] <= item["line"] <= lines[1]
-        return in_range and any(word.casefold() in text for word in keywords)
-
-    hits = [hit(item) for item in findings]
+    judged = findings[:MAX_JUDGED]
+    hits = [judge(item, expected_defect)[0] for item in judged]
+    unjudged = len(findings) - len(judged)
     return {"tp": int(any(hits)), "fn": int(not any(hits)),
-            "fp": hits.count(False), "tn": 0}
+            "fp": hits.count(False) + unjudged, "tn": 0}
 
 
 def git(repo: Path, *args: str) -> str:
@@ -70,10 +123,11 @@ def run_case(case: dict) -> dict:
             if audit is None or audit["status"] == "error":
                 raise RuntimeError(f"Codex evaluation failed for {case['name']}")
             findings = [dict(row) for row in db.execute(
-                "SELECT problem,evidence,line FROM findings WHERE audit_id=?", (audit["id"],))]
+                "SELECT id,problem,evidence,line FROM findings WHERE audit_id=? ORDER BY id", (audit["id"],))]
             return {"case": case["name"], "audit_id": audit["id"],
                     "report": audit["report_path"], "findings": len(findings),
-                    **score(findings, case["expected_keywords"], case.get("expected_lines"))}
+                    **score(findings, case.get("expected_defect"),
+                           cached_judge(db, case["name"], codex_judge))}
         finally:
             db.close()
 

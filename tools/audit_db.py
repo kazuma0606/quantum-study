@@ -78,6 +78,15 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
             false_positive INTEGER NOT NULL,
             true_negative INTEGER NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS eval_matches (
+            id INTEGER PRIMARY KEY,
+            finding_id INTEGER NOT NULL REFERENCES findings(id),
+            case_name TEXT NOT NULL,
+            matched INTEGER NOT NULL CHECK(matched IN (0, 1)),
+            reason TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(finding_id, case_name)
+        );
         CREATE INDEX IF NOT EXISTS idx_audits_chain ON audits(scope, base_sha, id);
         CREATE INDEX IF NOT EXISTS idx_findings_audit ON findings(audit_id);
         CREATE INDEX IF NOT EXISTS idx_responses_finding ON responses(finding_id, id);

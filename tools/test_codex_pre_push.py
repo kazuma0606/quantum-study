@@ -348,23 +348,71 @@ class PendingAuditTest(unittest.TestCase):
             finally:
                 db.close()
 
-    def test_eval_scoring_requires_the_expected_line_range(self) -> None:
-        inside = {"problem": "端点で不成立", "evidence": "0", "line": 6}
-        outside = {"problem": "端点の別件", "evidence": "0", "line": 2}
-        self.assertEqual(audit_eval.score([outside], ["端点"], [5, 7]),
-                         {"tp": 0, "fn": 1, "fp": 1, "tn": 0})
-        self.assertEqual(audit_eval.score([inside, outside], ["端点"], [5, 7]),
+    def test_eval_scoring_uses_the_judge_for_each_finding(self) -> None:
+        related = {"id": 1, "problem": "端点で不成立", "evidence": "θ=0 で sin=0", "line": 6}
+        keyword_only = {"id": 2, "problem": "端点は定義済みだが別件", "evidence": "端点", "line": 6}
+
+        def judge(finding: dict, defect: str) -> tuple[bool, str]:
+            return finding["id"] == 1, "判定"
+
+        self.assertEqual(audit_eval.score([related, keyword_only], "端点の誤り", judge),
                          {"tp": 1, "fn": 0, "fp": 1, "tn": 0})
-
-    def test_eval_scoring_counts_each_unrelated_finding(self) -> None:
-        mixed = [{"problem": "端点で不成立", "evidence": "0"}, {"problem": "別件", "evidence": "関係なし"}]
-        self.assertEqual(audit_eval.score(mixed, ["端点"]), {"tp": 1, "fn": 0, "fp": 1, "tn": 0})
-        self.assertEqual(audit_eval.score(mixed, []), {"tp": 0, "fn": 0, "fp": 2, "tn": 0})
-
-    def test_eval_scoring_rejects_unrelated_finding(self) -> None:
-        self.assertEqual(audit_eval.score([{"problem": "別件", "evidence": "関係なし"}], ["端点"]),
+        self.assertEqual(audit_eval.score([keyword_only], "端点の誤り", judge),
                          {"tp": 0, "fn": 1, "fp": 1, "tn": 0})
-        self.assertEqual(audit_eval.score([], []), {"tp": 0, "fn": 0, "fp": 0, "tn": 1})
+        self.assertEqual(audit_eval.score([], "端点の誤り", judge), {"tp": 0, "fn": 1, "fp": 0, "tn": 0})
+
+    def test_eval_scoring_of_safe_case_counts_every_finding_as_false(self) -> None:
+        def judge(finding: dict, defect: str) -> tuple[bool, str]:
+            raise AssertionError("a safe case must not call the judge")
+
+        findings = [{"id": 1, "problem": "別件", "evidence": "関係なし", "line": 2},
+                    {"id": 2, "problem": "別件2", "evidence": "関係なし", "line": 3}]
+        self.assertEqual(audit_eval.score(findings, None, judge), {"tp": 0, "fn": 0, "fp": 2, "tn": 0})
+        self.assertEqual(audit_eval.score([], None, judge), {"tp": 0, "fn": 0, "fp": 0, "tn": 1})
+
+    def test_eval_scoring_caps_judged_findings(self) -> None:
+        calls: list[int] = []
+
+        def judge(finding: dict, defect: str) -> tuple[bool, str]:
+            calls.append(finding["id"])
+            return False, "判定"
+
+        findings = [{"id": number, "problem": "別件", "evidence": "関係なし", "line": 1}
+                    for number in range(1, audit_eval.MAX_JUDGED + 3)]
+        result = audit_eval.score(findings, "期待する欠陥", judge)
+        self.assertEqual(len(calls), audit_eval.MAX_JUDGED)
+        self.assertEqual(result["fp"], len(findings))
+
+    def test_judge_answers_are_cached_and_failures_are_not_guessed(self) -> None:
+        finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",
+                   "problem": "端点で不成立", "evidence": "0で不成立", "correction": "範囲を狭める"}
+        empty = {"findings": [finding], "claims": [], "resolutions": [], "checked": ["端点"], "unverified": []}
+        with tempfile.TemporaryDirectory() as directory:
+            db = audit_db.connect(Path(directory) / "audit.sqlite3")
+            try:
+                audit_id = audit_db.save_audit(db, "k", "branch", "a" * 40, "b" * 40, None, "findings", None, empty)
+                finding_id = db.execute("SELECT id FROM findings WHERE audit_id=?", (audit_id,)).fetchone()[0]
+                calls: list[int] = []
+
+                def judge(item: dict, defect: str) -> tuple[bool, str]:
+                    calls.append(item["id"])
+                    return True, "一致"
+
+                wrapped = audit_eval.cached_judge(db, "case", judge)
+                item = {"id": finding_id}
+                self.assertEqual(wrapped(item, "欠陥"), (True, "一致"))
+                self.assertEqual(wrapped(item, "欠陥"), (True, "一致"))
+                self.assertEqual(calls, [finding_id])
+
+                def failing(item: dict, defect: str) -> tuple[bool, str]:
+                    raise RuntimeError("Codex judge exited 1")
+
+                with self.assertRaises(RuntimeError):
+                    audit_eval.cached_judge(db, "other", failing)(item, "欠陥")
+                self.assertEqual(db.execute("SELECT COUNT(*) FROM eval_matches WHERE case_name='other'"
+                                            ).fetchone()[0], 0)
+            finally:
+                db.close()
 
 
 if __name__ == "__main__":

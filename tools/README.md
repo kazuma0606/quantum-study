@@ -37,7 +37,7 @@ uv run --no-sync python tools/audit_workflow.py responses <finding_id>
 uv run --no-sync python tools/audit_workflow.py search "端点"
 ```
 
-レビューの検出率と誤検出を測るには、`tools/audit_eval_cases.json` の既知の問題例と安全な例を使います。判定は、キーワードと、欠陥のある行の範囲（`expected_lines`）による簡易な照合で、意味の一致までは見ません。評価は **明示的に実行したときだけ** Codex を各ケースに呼び、結果を SQLite の `eval_runs` に保存します。ケースごとに最大15分かかります。
+レビューの検出率と誤検出を測るには、`tools/audit_eval_cases.json` の既知の問題例と安全な例を使います。各ケースには、期待する欠陥を文章で書きます（`expected_defect`。安全な例は `null`）。採点は、監査の指摘ごとに、Codex に「この指摘は期待する欠陥を扱っているか」を尋ねて判定します（1ケースで判定するのは最大5件。超えた分は誤検出として数えます。判定に失敗したときは、偽にせず評価をエラーにします）。判定結果は SQLite の `eval_matches` に保存し、同じ指摘は再判定しません。評価は **明示的に実行したときだけ** Codex を各ケースに呼び、結果を `eval_runs` に保存します。ケースごとに最大15分かかります。
 
 ```bash
 uv run --no-sync python tools/audit_eval.py --case endpoint_counterexample
