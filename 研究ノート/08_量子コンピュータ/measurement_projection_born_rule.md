@@ -2074,9 +2074,11 @@ $$
 
 ここでは、結果を記録しない場合の状態を表す行列が、$\sum_mK_m\rho K_m^\dagger$ になることを、期待値から導きます。
 
+このブロックでは、$\mathcal H=\mathbb C^d$（$d$ は系の次元。複素数の範囲で考える）、$|\Phi\rangle,|\Phi_m\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=\langle\Phi_m|\Phi_m\rangle=1$）、$K_m\in\mathbb C^{d\times d}$（$m$ は結果の添字）、観測量 $A=A^\dagger\in\mathbb C^{d\times d}$、$\rho=|\Phi\rangle\langle\Phi|\in\mathbb C^{d\times d}$、$|\varphi\rangle\in\mathcal H$ とします。$A=A^\dagger$ なので、固有値は実数 $a_j\in\mathbb R$ です。
+
 これまでは、結果が分かっている場合に、測定後の状態を、状態ベクトル $|\Phi_m\rangle$ で表してきました。結果を記録しない場合は、どの $|\Phi_m\rangle$ になったかが分からないので、状態の表し方を決める必要があります。
 
-例として、$|\Phi\rangle=|+\rangle$ を、$|0\rangle,|1\rangle$ の基底で測り、結果を記録しない場合を考えます。ここで、$|\pm\rangle$ は、次の状態です。
+例として、$d=2$、$|\Phi\rangle=|+\rangle\in\mathbb C^2$ を、基底 $\{|0\rangle,|1\rangle\}$ で測り、結果を記録しない場合を考えます。ここで、$|\pm\rangle\in\mathbb C^2$ は、次の状態です。
 
 $$
 |\pm\rangle=\frac{1}{\sqrt2}\big(|0\rangle\pm|1\rangle\big)
@@ -2110,7 +2112,7 @@ $$
 
 **① 状態ベクトルでの期待値は、$\langle\varphi|A|\varphi\rangle$ に等しい**
 
-この項目では、定義から出た $\sum_ja_j\,p_j$ が、$\langle\varphi|A|\varphi\rangle$ に等しいことを示します。$A$ はエルミート行列とし、エルミート行列のスペクトル定理（固有値は実数で、正規直交な固有ベクトルの基底がとれる。固有値が重なる場合も、その固有空間の中で正規直交基底をとる）を、証明なしで使います。固有値 $a_j$ と固有ベクトル $|a_j\rangle$ は、次の式で定義されます。
+この項目では、定義から出た $\sum_ja_j\,p_j$ が、$\langle\varphi|A|\varphi\rangle$ に等しいことを示します。$A=A^\dagger\in\mathbb C^{d\times d}$ に、スペクトル定理（証明なしで使う）を使います。$a_j\in\mathbb R$（$j=1,\dots,d$。重なってもよい）と、$\langle a_k|a_j\rangle=\delta_{kj}$ を満たす $|a_j\rangle\in\mathbb C^d$ からなる基底 $\{|a_j\rangle\}$ がとれます（固有値が重なる場合も、その固有空間の中で正規直交基底をとる）。固有値 $a_j$ と固有ベクトル $|a_j\rangle$ は、次の式で定義されます。
 
 $$
 A|a_j\rangle=a_j\,|a_j\rangle
@@ -2118,19 +2120,19 @@ $$
 
 $A$ を作用させても、ベクトルの向きが変わらず、$a_j$ 倍になる、という意味です。たとえば、$A=\begin{pmatrix}2&0\\0&3\end{pmatrix}$、$|a_1\rangle=\begin{pmatrix}1\\0\end{pmatrix}$ なら、$A|a_1\rangle=\begin{pmatrix}2\\0\end{pmatrix}=2\,|a_1\rangle$ で、固有値は $a_1=2$ です。
 
-$|\varphi\rangle$ を、$d$ 次元の任意の規格化された状態ベクトル（$\langle\varphi|\varphi\rangle=1$）とし、添字 $j$ は $1,\dots,d$ とします。$|\varphi\rangle$ を、この基底で展開し、複素数の係数を $c_j$ とします。
+$|\varphi\rangle\in\mathbb C^d$（$\langle\varphi|\varphi\rangle=1$）を、この基底で展開し、係数を $c_j\in\mathbb C$ とします。
 
 $$
 |\varphi\rangle=\sum_jc_j\,|a_j\rangle
 $$
 
-係数 $c_j$ を求めます。両辺に、左から $\langle a_k|$ を掛けます。内積はケットについて線形（和は項ごとに、定数倍は係数として、内積の外に括り出せる）なので、次のようになります。
+係数 $c_j$ を求めます。両辺に、左から $\langle a_k|$ を掛けます。内積は、ケットについて線形（$\langle a|\sum_jc_j|b_j\rangle=\sum_jc_j\langle a|b_j\rangle$）なので、次のようになります。
 
 $$
 \langle a_k|\varphi\rangle=\sum_jc_j\,\langle a_k|a_j\rangle
 $$
 
-$\{|a_j\rangle\}$ は正規直交なので、$\langle a_k|a_j\rangle=\delta_{kj}$（$k=j$ のとき $1$、$k\neq j$ のとき $0$）です。右辺の和は、クロネッカーのデルタの性質から、$j=k$ の項だけが残り（それ以外は $0$）、次のようになります。
+$\{|a_j\rangle\}$ は正規直交なので、$\langle a_k|a_j\rangle=\delta_{kj}$（クロネッカーのデルタ）です。右辺の和は、$j=k$ の項だけが残り、次のようになります。
 
 $$
 \langle a_k|\varphi\rangle=c_k
@@ -2144,7 +2146,7 @@ $$
 p_j=\big|c_j\big|^2=\big|\langle a_j|\varphi\rangle\big|^2
 $$
 
-次に、$\langle\varphi|A|\varphi\rangle$ を計算します。展開の式の共役転置は、和を項ごとに、係数を複素共役にしたもの（$c^\ast$ は $c$ の複素共役で、$c=x+iy$ なら $c^\ast=x-iy$）で、ブラは次のようになります。
+次に、$\langle\varphi|A|\varphi\rangle$ を計算します。展開の式の共役転置は、和を項ごとに、係数を複素共役にしたもの（$c^\ast$ は複素共役）で、ブラは次のようになります。
 
 $$
 \langle\varphi|=\sum_kc_k^\ast\,\langle a_k|
@@ -2158,7 +2160,7 @@ $$
 
 ここで、$\langle a_k|A|a_j\rangle$ を計算するために、$A|a_j\rangle$ が何になるかを、固有値と固有ベクトルの定義から、成分で確かめます。
 
-固有ベクトル $|v\rangle$（零ベクトルでないもの）と固有値 $\lambda$ の定義は、次の式です（$|v\rangle$ が零ベクトルなら、どんな $\lambda$ でも成り立ってしまうので、$|v\rangle\neq0$ を条件にします）。
+$S\setminus\{0\}$ は、集合 $S$ から $0$（零ベクトル）を除いた集合です。$|v\rangle\in\mathbb C^d\setminus\{0\}$ と $\lambda\in\mathbb C$ が、次の式を満たすとき、$|v\rangle$ を固有ベクトル、$\lambda$ を固有値と呼びます（$|v\rangle$ が零ベクトルなら、どんな $\lambda$ でも成り立ってしまうので、$|v\rangle\neq0$ を条件にします）。
 
 $$
 A|v\rangle=\lambda\,|v\rangle
@@ -2166,7 +2168,7 @@ $$
 
 ここで、$A|v\rangle$ は行列とベクトルの積（成分ごとの計算）、$\lambda|v\rangle$ は数 $\lambda$ をベクトルに掛けるスカラー倍で、どちらもテンソル積（クロネッカー積）$\otimes$ ではありません。内積は、$\langle a|b\rangle$ の形で、別に使います。
 
-行列 $A$ の成分を $A_{ik}$、ベクトル $|v\rangle$ の成分を $v_k$ とします（$i,k=1,\dots,d$）。行列とベクトルの積の定義から、$A|v\rangle$ の第 $i$ 成分は $\sum_kA_{ik}v_k$ で、$\lambda|v\rangle$ の第 $i$ 成分は $\lambda v_i$ です。したがって、定義の式は、各 $i$ について、次のように書けます。
+$A\in\mathbb C^{d\times d}$ の成分を $A_{ik}$、$|v\rangle\in\mathbb C^d$ の成分を $v_k$ とします（$i,k=1,\dots,d$）。行列とベクトルの積の定義から、$A|v\rangle$ の第 $i$ 成分は $\sum_kA_{ik}v_k$ で、$\lambda|v\rangle$ の第 $i$ 成分は $\lambda v_i$ です。したがって、定義の式は、各 $i$ について、次のように書けます。
 
 $$
 \sum_kA_{ik}\,v_k=\lambda\,v_i\tag{A-9}
@@ -2196,7 +2198,7 @@ $$
 
 (A-10) は、$i=1,\dots,d$ の $d$ 個の式です。
 
-この $d$ 個の式を、1つのベクトルの式にまとめるため、同じ成分を、行ごとではなく、列ごとにまとめ直します。行列 $A-\lambda I$ の第 $k$ 列を、縦に並べたベクトルを、$b_k$ と書きます（列ベクトル）。第 $k$ 列の第 $i$ 成分が、行列の $(i,k)$ 成分 $(A-\lambda I)_{ik}$ なので、次のようになります。
+この $d$ 個の式を、1つのベクトルの式にまとめるため、同じ成分を、行ごとではなく、列ごとにまとめ直します。行列 $A-\lambda I\in\mathbb C^{d\times d}$ の第 $k$ 列を、$b_k\in\mathbb C^d$ と書きます。
 
 $$
 b_k=\begin{pmatrix}(A-\lambda I)_{1k}\\\vdots\\(A-\lambda I)_{dk}\end{pmatrix}\qquad(k=1,\dots,d)
@@ -2214,11 +2216,11 @@ $$
 \sum_kv_k\,b_k=0\tag{A-11}
 $$
 
-係数 $v_1,\dots,v_d$ の少なくとも1つが $0$ でないとき、列ベクトル $b_1,\dots,b_d$ は**一次従属**であると言います。意味は、「どれか1つの $b_k$ が、ほかの列ベクトルに係数を掛けて足し合わせたもの（線形結合）で書ける」ことです。たとえば、零でない実ベクトルの場合、$d=2$ なら、2つの列ベクトルが平行（一方が他方の定数倍で、向きが逆でもよい）で、$d=3$ なら、3つの列ベクトルが、原点を通る1つの平面の中に収まっている、という状態です。逆に、どの係数も $0$ にしないと足して零にならないとき、**一次独立**で、$d$ 個の列ベクトルが、$d$ 次元の空間を、すべて張ります。
+係数 $v_1,\dots,v_d\in\mathbb C$ の少なくとも1つが $0$ でなく、$\sum_kv_kb_k=0$ となるとき、$b_1,\dots,b_d$ は**一次従属**です。同じことを、「どれか1つの $b_k$ が、ほかの $b_l$（$l\neq k$）の線形結合で書ける」とも言います。$b_1,\dots,b_d\in\mathbb R^d\setminus\{0\}$ の場合、$d=2$ なら $b_2=c\,b_1$（$c\in\mathbb R$、向きが逆でもよい。つまり平行）、$d=3$ なら、$b_1,b_2,b_3$ が、原点を通る1つの平面に含まれる、という状態です。逆に、$\sum_kv_kb_k=0$ ならすべての $v_k=0$ となるとき、**一次独立**で、$b_1,\dots,b_d$ は $\mathbb C^d$ を張ります。
 
-実行列の場合、正方行列の行列式は、列ベクトルが張る平行四辺形（平行六面体など）の、符号つきの体積です。列ベクトルが一次従属なら、体積は $0$ で、逆も成り立ちます。複素行列でも、行列式が $0$ であることと、列ベクトルが一次従属であることは、同じです。つまり、$\det(A-\lambda I)=0$ と、$b_1,\dots,b_d$ が一次従属であることは、同じです（一般の次元では、線形代数の定理です。次の例で、$2\times2$ の場合を確かめます）。
+$M\in\mathbb R^{d\times d}$ の場合、$\det M$ は、列ベクトルが張る平行多面体（$d=2$ なら平行四辺形、$d=3$ なら平行六面体）の、符号つきの体積です。$M\in\mathbb C^{d\times d}$ でも、$\det M=0$ と、列ベクトルが一次従属であることは、同じです。つまり、$\det(A-\lambda I)=0$ と、$b_1,\dots,b_d$ が一次従属であることは、同じです（一般の次元では、線形代数の定理です。次の例で、$2\times2$ の場合を確かめます）。
 
-次の2つの $2\times2$ 行列 $M$ で、行列式と一次従属の関係を、計算で確かめます（一般の証明ではなく、確認です）。
+次の2つの $M\in\mathbb R^{2\times2}$（実数の例。複素行列でも、同じ関係が成り立つ）で、行列式と一次従属の関係を、計算で確かめます（一般の証明ではなく、確認です）。
 
 **例1（行列式が $0$ のとき）**：次の行列を考えます。
 
@@ -2226,7 +2228,7 @@ $$
 M=\begin{pmatrix}1&2\\2&4\end{pmatrix},\qquad\det M=1\cdot4-2\cdot2=0
 $$
 
-列ベクトルは、$b_2$ が $b_1$ の2倍で、同じ向きなので、一次従属です。
+$b_1,b_2\in\mathbb R^2\setminus\{0\}$ で、$b_2=2b_1$（平行）なので、一次従属です。
 
 $$
 b_1=\begin{pmatrix}1\\2\end{pmatrix},\qquad b_2=\begin{pmatrix}2\\4\end{pmatrix}=2\,b_1
@@ -2306,7 +2308,7 @@ $$
 
 ① の導出では、$A$ を固有ベクトルの基底での展開だけで扱い、ケットとブラの積は使いませんでした。ここでは、$A$ をケットとブラの積の和で書く形（スペクトル分解）と、① の関係を見ます。確率 $p_j$ は、成分 $\langle a_j|\varphi\rangle$ の絶対値の2乗です。$A|\varphi\rangle$ は、各成分を $a_j$ 倍して、足し戻したものです。どちらにも、成分 $\langle a_j|\varphi\rangle$ を取り出す操作が現れます。この操作を行列で表すと、ケットとブラの積が現れます。この補足は、② ③ では使いません。
 
-**例1（固有ベクトルが標準基底）**：2次元で、次の場合を考えます。
+**例1（固有ベクトルが標準基底）**：$d=2$、$A\in\mathbb R^{2\times2}$（実数の例）で、次の場合を考えます。
 
 $$
 A=\begin{pmatrix}2&0\\0&3\end{pmatrix},\qquad|a_1\rangle=\begin{pmatrix}1\\0\end{pmatrix},\quad|a_2\rangle=\begin{pmatrix}0\\1\end{pmatrix}
@@ -2342,7 +2344,7 @@ $$
 2\,|a_1\rangle\langle a_1|+3\,|a_2\rangle\langle a_2|=2\begin{pmatrix}1&0\\0&0\end{pmatrix}+3\begin{pmatrix}0&0\\0&1\end{pmatrix}=\begin{pmatrix}2&0\\0&3\end{pmatrix}=A
 $$
 
-**例2（固有ベクトルが斜めを向く）**：次の場合を考えます。
+**例2（固有ベクトルが斜めを向く）**：$d=2$、$A\in\mathbb R^{2\times2}$（実数の例）で、次の場合を考えます。
 
 $$
 A=\begin{pmatrix}2&1\\1&2\end{pmatrix}
@@ -2386,13 +2388,13 @@ $$
 
 固有ベクトルが斜めでも、正規直交基底であれば同じ仕組みで成り立ちます。これを、一般の場合に示します。
 
-**一般の場合**：任意の状態ベクトル $|\varphi\rangle$ は、① で示した展開と、係数 $c_j=\langle a_j|\varphi\rangle$ から、次のように書けます。
+**一般の場合**：任意の $|\varphi\rangle\in\mathbb C^d$ は、① で示した展開と、係数 $c_j=\langle a_j|\varphi\rangle$ から、次のように書けます。
 
 $$
 |\varphi\rangle=\sum_j\langle a_j|\varphi\rangle\,|a_j\rangle
 $$
 
-$\langle a_j|\varphi\rangle$ は複素数（スカラー）で、スカラー倍は、ベクトルの前後どちらに書いても等しい（可換）ので（スカラー $c$ は、任意の行列 $B$ と可換で、$[cI,B]=0$ です）、次のように書き換えます。
+$\langle a_j|\varphi\rangle\in\mathbb C$ は数なので、$|a_j\rangle$ の前後どちらに書いても等しい（$c\in\mathbb C$ は、任意の行列 $B$ と可換で、$[cI,B]=0$）。次のように書き換えます。
 
 $$
 |\varphi\rangle=\sum_j|a_j\rangle\,\langle a_j|\varphi\rangle
@@ -2400,7 +2402,7 @@ $$
 
 各項は、成分 $\langle a_j|\varphi\rangle$ を取り出して、$|a_j\rangle$ の向きに戻したもので、例1・例2の「取り出して戻す」と同じ形です。
 
-この両辺に、$A$ を左から作用させます。$A$ は線形作用素なので、和は項ごとの作用に、スカラーは $A$ の前に、分配できます。
+この両辺に、$A$ を左から作用させます。$A$ は線形（$A\sum_jc_j|u_j\rangle=\sum_jc_jA|u_j\rangle$）なので、次のようになります。
 
 $$
 A|\varphi\rangle=\sum_j\langle a_j|\varphi\rangle\,A|a_j\rangle
@@ -2418,7 +2420,7 @@ $$
 A|\varphi\rangle=\Big(\sum_ja_j\,|a_j\rangle\langle a_j|\Big)|\varphi\rangle
 $$
 
-これがすべての $|\varphi\rangle$ について成り立ちます。2つの行列 $M,N$ で、$M|\varphi\rangle=N|\varphi\rangle$ がすべての $|\varphi\rangle$ で成り立てば、$|\varphi\rangle$ を基底ベクトルにとることで、$M$ と $N$ の各列が等しいので、$M=N$ です。したがって、行列として、次の式が成り立ちます。
+これがすべての $|\varphi\rangle$ について成り立ちます。$M,N\in\mathbb C^{d\times d}$ で、すべての $|\varphi\rangle\in\mathbb C^d$ について $M|\varphi\rangle=N|\varphi\rangle$ なら、$|\varphi\rangle$ を基底ベクトルにとることで、$M$ と $N$ の各列が等しいので、$M=N$ です。したがって、行列として、次の式が成り立ちます。
 
 $$
 A=\sum_ja_j\,|a_j\rangle\langle a_j|
@@ -2442,7 +2444,7 @@ $$
 
 **② 結果を記録しない場合の期待値**
 
-この項目では、結果を記録しない場合の $A$ の期待値が、(A-8) になることを示します。結果 $m$ が確率 $P(m)$ で出て、そのときの状態が $|\Phi_m\rangle$ になります。このとき、基底 $\{|a_j\rangle\}$ での結果 $j$ が出る確率 $q_j$ は、全確率の法則（場合に分けて、各場合の確率を、その場合が起こる確率で重みづけて足す）から、次のようになります。
+この項目では、結果を記録しない場合の $A$ の期待値が、(A-8) になることを示します。結果 $m$ が確率 $P(m)$ で出て、そのときの状態が $|\Phi_m\rangle$ になります。このとき、基底 $\{|a_j\rangle\}$ での結果 $j$ が出る確率 $q_j$ は、全確率の法則（$q_j=\sum_mP(m)\,P(j\mid m)$。ここで $P(j\mid m)=|\langle a_j|\Phi_m\rangle|^2$ は、結果 $m$ のときの、結果 $j$ の確率）から、次のようになります。
 
 $$
 q_j=\sum_mP(m)\,\big|\langle a_j|\Phi_m\rangle\big|^2
@@ -2512,13 +2514,13 @@ $$
 P(m)\,\langle\Phi_m|A|\Phi_m\rangle=\langle\Phi|K_m^\dagger\,A\,K_m|\Phi\rangle
 $$
 
-右辺は、状態ベクトル $|\Phi\rangle$ を、ケットとブラの両方に含んでいます。ここから $A$ を外に出すために、完全性関係を使います。$\{|j\rangle\}$ を、$d$ 次元空間の任意の正規直交基底（$j=1,\dots,d$）とします。① で示した展開と同じように、任意のベクトル $|v\rangle$ は、$|v\rangle=\sum_j|j\rangle\langle j|v\rangle$ と書けます。これが任意の $|v\rangle$ で成り立つので、次が成り立ちます（完全性関係）。
+右辺は、状態ベクトル $|\Phi\rangle$ を、ケットとブラの両方に含んでいます。ここから $A$ を外に出すために、完全性関係を使います。$\{|j\rangle\}_{j=1}^d$ を、$\mathbb C^d$ の任意の正規直交基底とします。① で示した展開と同じように、任意の $|v\rangle\in\mathbb C^d$ は、$|v\rangle=\sum_j|j\rangle\langle j|v\rangle$ と書けます。これが任意の $|v\rangle$ で成り立つので、次が成り立ちます（完全性関係）。
 
 $$
 \sum_j|j\rangle\langle j|=I
 $$
 
-これを、$\langle\varphi|B|\varphi\rangle$ の $B$ と $|\varphi\rangle$ の間に挿入します。一般に、状態ベクトル $|\varphi\rangle$ と行列 $B$ について、次のように変形できます。
+これを、$\langle\varphi|B|\varphi\rangle$ の $B$ と $|\varphi\rangle$ の間に挿入します。一般に、$|\varphi\rangle\in\mathbb C^d$ と $B\in\mathbb C^{d\times d}$ について、次のように変形できます。
 
 $$
 \langle\varphi|B|\varphi\rangle=\sum_j\langle\varphi|B|j\rangle\langle j|\varphi\rangle=\sum_j\langle j|\varphi\rangle\langle\varphi|B|j\rangle=\operatorname{tr}\big(|\varphi\rangle\langle\varphi|\,B\big)
@@ -2554,9 +2556,9 @@ $$
 
 任意の観測量の期待値が、この行列と $A$ のトレースで決まるので、結果を記録しない場合の状態は、この行列で表せます。
 
-逆に、2つの行列 $X,Y$ が、すべてのエルミート行列 $A$ で $\operatorname{tr}(XA)=\operatorname{tr}(YA)$ を満たすなら、$X=Y$ です。次の3段階で示します。
+逆に、$X,Y\in\mathbb C^{d\times d}$ が、すべての $A=A^\dagger\in\mathbb C^{d\times d}$ で $\operatorname{tr}(XA)=\operatorname{tr}(YA)$ を満たすなら、$X=Y$ です。次の3段階で示します。
 
-**(1) 任意の行列は、2つのエルミート行列で書ける。** 任意の行列 $M$ について、次の $H_1,H_2$ はエルミート行列で、$M=H_1+iH_2$ です。
+**(1) 任意の行列は、2つのエルミート行列で書ける。** 任意の $M\in\mathbb C^{d\times d}$ について、次の $H_1,H_2\in\mathbb C^{d\times d}$ は $H_i=H_i^\dagger$ を満たし、$M=H_1+iH_2$ です。
 
 $$
 H_1=\frac{M+M^\dagger}{2},\qquad H_2=\frac{M-M^\dagger}{2i}
