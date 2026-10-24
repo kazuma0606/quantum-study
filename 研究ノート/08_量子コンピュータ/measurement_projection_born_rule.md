@@ -2214,7 +2214,7 @@ $$
 \boxed{A|a_j\rangle=a_j\,|a_j\rangle}
 $$
 
-これが、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を、$a_j|a_j\rangle$ に置き換えてよい理由です。
+以上で、行列式の条件から求めた $a_j$ と $|a_j\rangle$ が、定義の式を満たすことが示せました。次の計算では、この式を使って、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。
 
 係数 $c_k^\ast$ と $c_j$ は数なので、$\langle a_k|A|a_j\rangle$ の外に出せます。そこで、固有ベクトルの定義 $A|a_j\rangle=a_j|a_j\rangle$ から、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。$a_j$ は数なので、内積のケットについての線形性から、前に出せます。次のようになります。
 
