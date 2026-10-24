@@ -18,14 +18,17 @@ ROOT = Path(__file__).resolve().parents[1]
 CASES = Path(__file__).with_name("audit_eval_cases.json")
 
 
-def score(findings: list[dict], keywords: list[str]) -> dict[str, int]:
+def score(findings: list[dict], keywords: list[str],
+          lines: list[int] | None = None) -> dict[str, int]:
     if not keywords:
         return {"tp": 0, "fn": 0, "fp": len(findings), "tn": int(not findings)}
-    hits = [
-        any(word.casefold() in (item["problem"] + " " + item["evidence"]).casefold()
-            for word in keywords)
-        for item in findings
-    ]
+
+    def hit(item: dict) -> bool:
+        text = (item["problem"] + " " + item["evidence"]).casefold()
+        in_range = lines is None or lines[0] <= item["line"] <= lines[1]
+        return in_range and any(word.casefold() in text for word in keywords)
+
+    hits = [hit(item) for item in findings]
     return {"tp": int(any(hits)), "fn": int(not any(hits)),
             "fp": hits.count(False), "tn": 0}
 
@@ -67,10 +70,10 @@ def run_case(case: dict) -> dict:
             if audit is None or audit["status"] == "error":
                 raise RuntimeError(f"Codex evaluation failed for {case['name']}")
             findings = [dict(row) for row in db.execute(
-                "SELECT problem,evidence FROM findings WHERE audit_id=?", (audit["id"],))]
+                "SELECT problem,evidence,line FROM findings WHERE audit_id=?", (audit["id"],))]
             return {"case": case["name"], "audit_id": audit["id"],
                     "report": audit["report_path"], "findings": len(findings),
-                    **score(findings, case["expected_keywords"])}
+                    **score(findings, case["expected_keywords"], case.get("expected_lines"))}
         finally:
             db.close()
 

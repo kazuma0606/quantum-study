@@ -135,6 +135,7 @@ def save_audit(db: sqlite3.Connection, key: str, scope: str, base: str | None, h
                                checked_json,unverified_json,error)
             VALUES(?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(audit_key) DO UPDATE SET status=excluded.status,
+                prior_audit_id=excluded.prior_audit_id,
                 report_path=excluded.report_path, checked_json=excluded.checked_json,
                 unverified_json=excluded.unverified_json, error=excluded.error
         """, (key, scope, base, head, prior_id, status, str(report) if report else None,

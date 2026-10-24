@@ -317,6 +317,32 @@ class PendingAuditTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 hook.load_cached("missing", verdict, [finding["path"]], path)
 
+    def test_retry_updates_prior_audit_reference(self) -> None:
+        finding = {"path": "研究ノート/note.md", "line": 3, "category": "端点",
+                   "problem": "端点で不成立", "evidence": "0で不成立", "correction": "範囲を狭める"}
+        empty = {"findings": [], "claims": [], "resolutions": [], "checked": ["端点"], "unverified": []}
+        with tempfile.TemporaryDirectory() as directory:
+            db = audit_db.connect(Path(directory) / "audit.sqlite3")
+            try:
+                first = audit_db.save_audit(db, "first", "branch", "a" * 40, "b" * 40, None, "findings", None,
+                                            {**empty, "findings": [finding]})
+                failed = audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, first, "error",
+                                             None, error="timeout")
+                newer = audit_db.save_audit(db, "newer", "branch", "a" * 40, "d" * 40, first, "pass", None, empty)
+                audit_db.save_audit(db, "retry", "branch", "a" * 40, "c" * 40, newer, "pass", None, empty)
+                self.assertEqual(db.execute("SELECT prior_audit_id FROM audits WHERE id=?",
+                                            (failed,)).fetchone()[0], newer)
+            finally:
+                db.close()
+
+    def test_eval_scoring_requires_the_expected_line_range(self) -> None:
+        inside = {"problem": "端点で不成立", "evidence": "0", "line": 6}
+        outside = {"problem": "端点の別件", "evidence": "0", "line": 2}
+        self.assertEqual(audit_eval.score([outside], ["端点"], [5, 7]),
+                         {"tp": 0, "fn": 1, "fp": 1, "tn": 0})
+        self.assertEqual(audit_eval.score([inside, outside], ["端点"], [5, 7]),
+                         {"tp": 1, "fn": 0, "fp": 1, "tn": 0})
+
     def test_eval_scoring_counts_each_unrelated_finding(self) -> None:
         mixed = [{"problem": "端点で不成立", "evidence": "0"}, {"problem": "別件", "evidence": "関係なし"}]
         self.assertEqual(audit_eval.score(mixed, ["端点"]), {"tp": 1, "fn": 0, "fp": 1, "tn": 0})
