@@ -145,6 +145,8 @@ def main() -> None:
                     help="評価する世界の γ の並び（既定は 0・0.00086・0.00179 の3つ）。検出率の曲線を出すときに使う")
     ap.add_argument("--true-ro", type=float, nargs=2, metavar=("E01", "E10"),
                     help="評価する世界の読み出しの誤り（既定 0.01 0.03）。学習の事前分布の範囲は 0〜0.08 のまま")
+    ap.add_argument("--fix-ro", type=float, metavar="H",
+                    help="読み出しの誤り4つの事前分布を、正解 ± H の狭い箱にする（読み出しがほぼ既知の場合）")
     ap.add_argument("--free-rot", action="store_true",
                     help="回転（制御 |0>・|1> の X・Y・Z の6個）も推定する。事前分布は当てはめの平均 ± 4 標準偏差の箱")
     ap.add_argument("--pair", type=int, choices=[0, 1], default=0,
@@ -160,6 +162,15 @@ def main() -> None:
         WORLDS = {f"γ={g:g}": g for g in args.gammas}
     if args.true_ro:
         TRUE_REST["e01"], TRUE_REST["e10"] = args.true_ro
+    if args.fix_ro is not None:
+        # 読み出しの誤り4つの事前分布を、正解 ± fix_ro の狭い箱にする（「小さい k は読み出しの偏りを決めるのに役立つ」
+        # という解釈を確かめるため。読み出しがほぼ既知なら、小さい k の有利さは消えるはず）
+        h = args.fix_ro
+        if not (np.isfinite(h) and 0 < h <= min(TRUE_REST["e01"], TRUE_REST["e10"])):
+            ap.error(f"--fix-ro は 0 より大きく、読み出しの誤りの正解以下にする：{h}")
+        LOW, HIGH = LOW.copy(), HIGH.copy()
+        for i, key in zip(range(2, 6), ["e01", "e10", "e01", "e10"]):
+            LOW[i], HIGH[i] = TRUE_REST[key] - h, TRUE_REST[key] + h
     rot_mean = None
     if args.free_rot:
         rot_mean, rlo, rhi = rotation_prior(args.pair)
@@ -170,7 +181,8 @@ def main() -> None:
     # k の並びと、回転を推定するかどうかも保存名に入れる（10/17 の監査：条件だけ変えると上書きされる）。
     # 10/17 までの結果は、入れる前の名前のまま
     stem = (f"{args.tag}_pair{pair_name}_k{'-'.join(map(str, args.ks))}" + ("_freerot" if args.free_rot else "")
-            + ("_gcurve" if args.gammas else "") + (f"_ro{args.true_ro[0]:g}-{args.true_ro[1]:g}" if args.true_ro else ""))
+            + ("_gcurve" if args.gammas else "") + (f"_ro{args.true_ro[0]:g}-{args.true_ro[1]:g}" if args.true_ro else "")
+            + (f"_fixro{args.fix_ro:g}" if args.fix_ro is not None else ""))
     # 保存名には --gammas の値や --shots などが入らないので、同じ名前の結果があれば上書きせずに止める（10/23 の監査）。
     # 完了の印は最後にだけ書く .md。.json だけあるのは途中で止まった実行なので、最初からやり直す
     # （ショット数ごとに乱数を引き継ぐので、途中から再開すると通しで回したときと乱数が変わる）
