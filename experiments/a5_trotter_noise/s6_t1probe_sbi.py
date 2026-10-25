@@ -161,13 +161,20 @@ def main() -> None:
         # 世界の名前は γ の値そのもの。表の「γ=0.00179 の区間の幅」は、その γ が並びにあるときだけ出す
         WORLDS = {f"γ={g:g}": g for g in args.gammas}
     if args.true_ro:
+        # 読み出しの誤りの正解は、学習の事前分布の範囲（LOW〜HIGH）に収める（範囲の外だと、確率が 0〜1 を外れたり、
+        # 学習していない値で評価したりするため。10/25 の監査）
+        bad = [e for e in args.true_ro if not (np.isfinite(e) and LOW[2] <= e <= HIGH[2])]
+        if bad:
+            ap.error(f"--true-ro は {LOW[2]:g}〜{HIGH[2]:g} の範囲にする：{bad}")
         TRUE_REST["e01"], TRUE_REST["e10"] = args.true_ro
     if args.fix_ro is not None:
         # 読み出しの誤り4つの事前分布を、正解 ± fix_ro の狭い箱にする（「小さい k は読み出しの偏りを決めるのに役立つ」
         # という解釈を確かめるため。読み出しがほぼ既知なら、小さい k の有利さは消えるはず）
         h = args.fix_ro
-        if not (np.isfinite(h) and 0 < h <= min(TRUE_REST["e01"], TRUE_REST["e10"])):
-            ap.error(f"--fix-ro は 0 より大きく、読み出しの誤りの正解以下にする：{h}")
+        # 狭めた箱（正解 ± h）が、元の事前分布の範囲（LOW〜HIGH、確率として 0〜1 の内側）に収まることも確かめる（10/25 の監査）
+        e_lo, e_hi = min(TRUE_REST["e01"], TRUE_REST["e10"]), max(TRUE_REST["e01"], TRUE_REST["e10"])
+        if not (np.isfinite(h) and h > 0 and e_lo - h >= LOW[2] and e_hi + h <= HIGH[2]):
+            ap.error(f"--fix-ro は 0 より大きく、正解 ± この値が {LOW[2]:g}〜{HIGH[2]:g} に収まるようにする：{h}")
         LOW, HIGH = LOW.copy(), HIGH.copy()
         for i, key in zip(range(2, 6), ["e01", "e10", "e01", "e10"]):
             LOW[i], HIGH[i] = TRUE_REST[key] - h, TRUE_REST[key] + h
