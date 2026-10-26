@@ -160,3 +160,17 @@ def test_table_inside_code_fence_is_not_a_real_table():
 
 def test_real_table_after_a_fenced_example_passes():
     assert cp.check_text("```\n## 検証表\n```\n\n" + GOOD) == []
+
+
+def test_all_verification_sections_are_checked():
+    ok = GOOD.replace("## 検証表", "## 検証表の例")
+    bad = "\n## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | b | 未確認 |\n"
+    assert cp.check_text(ok + bad)
+    assert cp.check_text(bad + ok)
+    assert cp.check_text(ok + "\n## 検証表（2）\n\n本文だけ\n")
+
+
+def test_longer_fence_is_not_closed_by_shorter_fence():
+    inner = "````\n```\n" + GOOD + "````\n"
+    assert cp.check_text(inner)
+    assert cp.check_text("# 案\n\n" + inner + "\n" + GOOD) == []

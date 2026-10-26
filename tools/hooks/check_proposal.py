@@ -85,33 +85,29 @@ def _cells(row: str) -> list[str]:
 
 
 def _outside_fences(text: str) -> list[str]:
-    """コードフェンス（``` または ~~~）の中の行を空行にして返す（フェンス内の見出しや表を、本物と数えない）。"""
-    out, fence = [], None
+    """コードフェンスの中の行を空行にして返す（フェンス内の見出しや表を、本物と数えない）。
+
+    フェンスは、``` または ~~~ の3個以上の行で始まり、同じ文字で、開いたときと同じかそれ以上の個数だけの行で閉じる。
+    """
+    out, fence = [], None  # fence = (文字, 個数)
     for s in text.splitlines():
-        m = re.match(r"\s*(`{3,}|~{3,})", s)
-        if fence is None and m:
-            fence = m.group(1)[0] * 3
-            out.append("")
-        elif fence is not None and re.match(r"\s*" + re.escape(fence) + r"[`~]*\s*$", s):
-            fence = None
-            out.append("")
+        if fence is None:
+            m = re.match(r"\s*(`{3,}|~{3,})", s)
+            if m:
+                fence = (m.group(1)[0], len(m.group(1)))
+                out.append("")
+            else:
+                out.append(s)
         else:
-            out.append("" if fence else s)
+            m = re.match(r"\s*(`+|~+)\s*$", s)
+            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1]:
+                fence = None
+            out.append("")
     return out
 
 
-def check_text(text: str) -> list[str]:
-    """案のファイルの本文を調べて、問題の説明を返す（空なら問題なし）。"""
-    lines = _outside_fences(text)
-    sections = [i for i, s in enumerate(lines) if re.match(r"#{1,6}\s", s) and "検証表" in s]
-    if not sections:
-        return ["「検証表」の見出しがありません（例：`## 検証表`）"]
-    start = sections[0] + 1
-    end = len(lines)
-    for j in range(start, len(lines)):
-        if re.match(r"#{1,6}\s", lines[j]):
-            end = j
-            break
+def _check_section(lines: list[str], start: int, end: int) -> list[str]:
+    """「検証表」の節（lines[start:end]）の表を調べる。"""
     table = [s for s in lines[start:end] if s.strip().startswith("|") and s.strip().endswith("|")]
     # 区切り行（|---|---|）は行に数えない
     rows = [s for s in table if not re.fullmatch(r"[\s|:\-]+", s.strip())]
@@ -130,6 +126,20 @@ def check_text(text: str) -> list[str]:
             problems.append("結果が「一致」ではありません（「一致」だけ）：" + s.strip()[:80])
         elif any(w in c for c in cells for w in BAD_WORDS):
             problems.append("結果以外の欄に、未確認・不一致が残っています：" + s.strip()[:80])
+    return problems
+
+
+def check_text(text: str) -> list[str]:
+    """案のファイルの本文を調べて、問題の説明を返す（空なら問題なし）。「検証表」を含む節は、すべて検査する。"""
+    lines = _outside_fences(text)
+    heads = [i for i, s in enumerate(lines) if re.match(r"#{1,6}\s", s)]
+    sections = [i for i in heads if "検証表" in lines[i]]
+    if not sections:
+        return ["「検証表」の見出しがありません（例：`## 検証表`）"]
+    problems: list[str] = []
+    for i in sections:
+        end = next((j for j in heads if j > i), len(lines))
+        problems += _check_section(lines, i + 1, end)
     return problems
 
 
