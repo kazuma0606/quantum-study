@@ -128,3 +128,18 @@ def test_not_matching_words_blocked():
     for w in ("一致しない", "不一致", "一致せず"):
         t = f"## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | b | {w} |\n"
         assert cp.check_text(t), w
+
+
+def test_proposal_still_checked_after_stop_hook_feedback(tmp_path):
+    f = tmp_path / "proposal_x.md"
+    f.write_text("# 案\n", encoding="utf-8")
+    rows = [
+        {"type": "user", "message": {"content": "案を出して"}},
+        {"type": "assistant", "message": {"content": [
+            {"type": "tool_use", "name": "Write", "input": {"file_path": str(f), "content": "x"}}]}},
+        {"type": "user", "isMeta": True, "message": {"content": "Stop hook feedback: blocked"}},
+        {"type": "assistant", "message": {"content": [{"type": "text", "text": "直しました"}]}},
+    ]
+    tp = tmp_path / "t.jsonl"
+    tp.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows), encoding="utf-8")
+    assert json.loads(_run(tp))["decision"] == "block"

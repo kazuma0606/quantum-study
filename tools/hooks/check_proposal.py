@@ -58,7 +58,9 @@ def proposal_files(rows: list[dict]) -> list[str]:
         if r.get("type") != "user":
             continue
         text = user_text(r)
-        if text and (not r.get("isMeta") or text.lstrip().startswith("Stop hook feedback")):
+        # ターンの開始は、ユーザー本人のメッセージだけ。フックの差し戻し（isMeta）では更新しない
+        # （差し戻したあとも、このターンに書いた案を、もう一度検査するため）
+        if text and not r.get("isMeta"):
             start = i + 1
     found: list[str] = []
     for r in rows[start:]:
