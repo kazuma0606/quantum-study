@@ -361,3 +361,22 @@ def test_move_plus_duplicate_equals_adjacent_insertion_is_indistinguishable(note
     inserted_only = base.replace("A\n\nB", "tail\n\nA\n\nB", 1)
     assert after == inserted_only
     assert not fr.check_edit(base, inserted_only, st)
+
+
+def test_move_across_duplicated_run_detected(note):
+    base = "# 題\n\nhead\n\nA\n\nB\n\ntail\n\nA\n\nB\n"
+    note.write_text(base, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")  # 最初の A、B（同じ列が2つあるので count=2）
+    st = fr.load_state(note)
+    assert st["segments"][0]["count"] == 2
+    moved = "# 題\n\nhead\n\ntail\n\nA\n\nB\n\nA\n\nB\n"
+    assert fr.check_edit(base, moved, st)
+
+
+def test_duplicated_run_unchanged_and_adjacent_insertion_ok(note):
+    base = "# 題\n\nhead\n\nA\n\nB\n\ntail\n\nA\n\nB\n"
+    note.write_text(base, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")
+    st = fr.load_state(note)
+    assert not fr.check_edit(base, base, st)
+    assert not fr.check_edit(base, base.replace("head\n\n", "head\n\n新しい段落\n\n", 1), st)

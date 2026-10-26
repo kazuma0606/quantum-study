@@ -130,25 +130,29 @@ def _in_place(hashes: list[str], seg: dict) -> bool:
     範囲が動いたか、段落が範囲をまたいで動いたとみなす。
     範囲の前後に新しい段落を、いくつ挿入しても、前後関係は変わらない。書き換えて消えた段落、挿入で総数が増えた段落
     （「---」など、同じ内容が複数ある段落を含む）は、数えない。
-    記録がない古い形式、同じ内容が複数ある範囲（どの出現か区別できない）は、この検査をしない。
+    同じ内容の段落列が複数ある場合は、どの出現が確定したものか区別できないので、どれか 1 つの出現で、前後関係が
+    保たれていれば、元の位置とみなす。記録がない古い形式は、この検査をしない。
     """
     before, after = seg.get("before"), seg.get("after")
     run = seg["hashes"]
-    if before is None or after is None or seg.get("count", 1) > 1:
+    if before is None or after is None:
         return True
     pos = _positions(hashes, run)
-    if len(pos) != 1:
+    if not pos:
         return True  # 個数の検査が報告する
-    i = pos[0]
-    j = i + len(run)
     orig_b, orig_a = Counter(before), Counter(after)
-    now_b, now_a = Counter(hashes[:i]), Counter(hashes[j:])
-    for h in set(orig_b) | set(orig_a):  # 範囲の内容と同じ段落が範囲の外にあっても、範囲の外の個数だけを数える
-        if orig_b[h] + orig_a[h] != now_b[h] + now_a[h]:
-            continue  # 総数が変わった（挿入・削除・書き換え）。動いたとは言えない
-        if now_b[h] > orig_b[h] or now_a[h] > orig_a[h]:
-            return False
-    return True
+    names = set(orig_b) | set(orig_a)
+
+    def ok_at(i: int) -> bool:
+        now_b, now_a = Counter(hashes[:i]), Counter(hashes[i + len(run):])
+        for h in names:  # 範囲の内容と同じ段落が範囲の外にあっても、範囲の外の個数だけを数える
+            if orig_b[h] + orig_a[h] != now_b[h] + now_a[h]:
+                continue  # 総数が変わった（挿入・削除・書き換え）。動いたとは言えない
+            if now_b[h] > orig_b[h] or now_a[h] > orig_a[h]:
+                return False
+        return True
+
+    return any(ok_at(i) for i in pos)
 
 
 def describe(seg: dict) -> str:
