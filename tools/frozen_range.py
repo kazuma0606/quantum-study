@@ -203,15 +203,25 @@ def _build(paras: list[Para], idx: list[int], today: str) -> list[dict]:
     return segs
 
 
+def _check_lines(text: str, from_line: int, to_line: int) -> None:
+    last = len(normalize(text).split("\n"))
+    if not (1 <= from_line <= to_line <= last):
+        raise SystemExit(f"行の範囲が正しくありません：{from_line}〜{to_line}（1 ≤ 開始 ≤ 終了 ≤ 最終行 {last}）")
+
+
 def freeze(note: Path, from_line: int, to_line: int, today: str | None = None) -> dict:
     today = today or dt.date.today().isoformat()
+    _check_lines(note.read_text(encoding="utf-8"), from_line, to_line)
     paras = paragraphs(note.read_text(encoding="utf-8"))
     st = load_state(note) or {"note": rel(note), "segments": [], "log": []}
     bad = broken_segments(note.read_text(encoding="utf-8"), st)
     if bad:
         raise SystemExit("壊れた確定範囲があります。freeze すると、その記録が消えます。先に元に戻すか、release してください：\n"
                          + "\n".join(describe(s) for s in bad))
-    idx = frozen_indices(paras, st) + [i for i, p in enumerate(paras) if p.end >= from_line and p.start <= to_line]
+    new = [i for i, p in enumerate(paras) if p.end >= from_line and p.start <= to_line]
+    if not new:
+        raise SystemExit(f"行 {from_line}〜{to_line} に、段落がありません（空行だけの範囲です）")
+    idx = frozen_indices(paras, st) + new
     st["segments"] = _build(paras, idx, today)
     st["log"].append({"action": "freeze", "at": today, "lines": [from_line, to_line]})
     save_state(note, st)
@@ -225,6 +235,8 @@ def release(note: Path, from_line: int | None, to_line: int | None, quote: str, 
     st = load_state(note)
     if st is None:
         raise SystemExit("このノートに確定範囲の記録はありません")
+    if from_line is not None:
+        _check_lines(note.read_text(encoding="utf-8"), from_line, to_line)
     paras = paragraphs(note.read_text(encoding="utf-8"))
     bad = broken_segments(note.read_text(encoding="utf-8"), st)
     if bad and from_line is not None:
@@ -281,6 +293,13 @@ def main() -> int:
         notes = [Path(a.note)] if a.note else [ROOT / json.loads(p.read_text(encoding="utf-8"))["note"] for p in FROZEN_DIR.glob("*.json")]
         bad = 0
         for n in notes:
+            if not n.exists():
+                if any(json.loads(p.read_text(encoding="utf-8")).get("segments")
+                       for p in FROZEN_DIR.glob("*.json")
+                       if json.loads(p.read_text(encoding="utf-8")).get("note") == rel(n)):
+                    print(f"{rel(n)}：ノートが見つかりません（削除または移動された）")
+                    bad += 1
+                continue
             st = load_state(n)
             if not st:
                 continue

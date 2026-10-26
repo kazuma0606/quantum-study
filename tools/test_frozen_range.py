@@ -380,3 +380,31 @@ def test_duplicated_run_unchanged_and_adjacent_insertion_ok(note):
     st = fr.load_state(note)
     assert not fr.check_edit(base, base, st)
     assert not fr.check_edit(base, base.replace("head\n\n", "head\n\n新しい段落\n\n", 1), st)
+
+
+def test_freeze_rejects_bad_line_ranges(note):
+    for a, b in ((7, 3), (0, 3), (1, 999), (-1, 2)):
+        with pytest.raises(SystemExit):
+            fr.freeze(note, a, b, today="2026-10-26")
+    assert fr.load_state(note) is None
+
+
+def test_freeze_rejects_blank_only_range(note):
+    note.write_text("# 題\n\n\n\n段落\n", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        fr.freeze(note, 3, 4, today="2026-10-26")
+    assert fr.load_state(note) is None
+
+
+def test_release_rejects_reversed_range(note):
+    freeze_ab(note)
+    with pytest.raises(SystemExit):
+        fr.release(note, 9, 3, "x", today="2026-10-26")
+
+
+def test_verify_reports_deleted_note(real):
+    root, p = real
+    p.unlink()
+    r = subprocess.run([sys.executable, str(Path(fr.__file__)), "verify"], capture_output=True,
+                       env={**__import__("os").environ, "FROZEN_ROOT": str(root)})
+    assert r.returncode == 1
