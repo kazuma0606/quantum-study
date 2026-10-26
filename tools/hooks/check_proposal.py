@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 STATE = Path(__file__).with_name(".check_proposal_state")
-RESULT_OK = re.compile(r"一致(（.*）)?")  # 「一致」または「一致（補足）」。「一致しない」などは通さない
+RESULT_OK = re.compile(r"一致")  # 結果の欄は「一致」だけ（補足は、操作の欄に書く）。「一致しない」「一致（未確認）」なども通さない
 PROPOSAL = re.compile(r"(?:^|[\\/])proposal_[^\\/]*\.md$")
 
 
@@ -108,7 +108,7 @@ def check_text(text: str) -> list[str]:
         if len(cells) != len(head):
             problems.append("列の数が見出し行と合いません（セル内の `|` は `\\vert` に）：" + s.strip()[:80])
         elif not RESULT_OK.fullmatch(cells[idx]):
-            problems.append("結果が「一致」ではありません（「一致」または「一致（補足）」）：" + s.strip()[:80])
+            problems.append("結果が「一致」ではありません（「一致」だけ）：" + s.strip()[:80])
     return problems
 
 

@@ -308,3 +308,27 @@ def test_moving_other_paragraph_across_range_detected(note):
     fr.freeze(note, 5, 7, today="2026-10-26")
     st = fr.load_state(note)
     assert fr.check_edit(MOVE, "# 題\n\nA\n\nB\n\nhead\n\ntail\n", st)
+
+
+def test_move_with_duplicate_tail_detected(note):
+    base = "# 題\n\nhead\n\nA\n\nB\n\ntail\n\ntail\n"
+    note.write_text(base, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")
+    st = fr.load_state(note)
+    moved = "# 題\n\nhead\n\ntail\n\nA\n\nB\n\ntail\n"
+    assert fr.check_edit(base, moved, st)
+
+
+def test_inserting_duplicate_separator_before_range_ok(note):
+    base = "# 題\n\nhead\n\n---\n\nA\n\nB\n\n---\n\ntail\n"
+    note.write_text(base, encoding="utf-8")
+    fr.freeze(note, 7, 9, today="2026-10-26")
+    st = fr.load_state(note)
+    inserted = "# 題\n\nhead\n\n---\n\n---\n\nA\n\nB\n\n---\n\ntail\n"
+    assert not fr.check_edit(base, inserted, st)
+
+
+def test_stop_blocks_when_note_deleted(real):
+    root, p = real
+    p.unlink()
+    assert json.loads(run_hook(root, "", {}, ["--stop"]))["decision"] == "block"

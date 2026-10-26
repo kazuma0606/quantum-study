@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import datetime as dt
 import hashlib
 import json
@@ -116,9 +117,11 @@ def _in_place(hashes: list[str], seg: dict) -> bool:
     """確定範囲が、元の前後関係の位置にあるか（段落列ごとの移動を検出する）。
 
     確定したときに、範囲の前にあった段落（before）と、後にあった段落（after）を、すべて記録してある。
-    いまの文書にそれらが残っていて（ちょうど 1 つずつ）、前にあった段落が範囲より後ろに、または、
-    後にあった段落が範囲より前にあれば、範囲が動いたか、段落が範囲をまたいで動いたとみなす。
-    範囲の前後に新しい段落を、いくつ挿入しても、前後関係は変わらない。書き換えて消えた段落は、数えない。
+    段落の内容ごとに、いまの文書で、範囲より前にある個数と、後にある個数を、確定時と比べる。
+    総数が変わっていない（挿入や削除でなく、動いただけの）段落が、範囲の前に増えた、または、後ろに増えたなら、
+    範囲が動いたか、段落が範囲をまたいで動いたとみなす。
+    範囲の前後に新しい段落を、いくつ挿入しても、前後関係は変わらない。書き換えて消えた段落、挿入で総数が増えた段落
+    （「---」など、同じ内容が複数ある段落を含む）は、数えない。
     記録がない古い形式、同じ内容が複数ある範囲（どの出現か区別できない）は、この検査をしない。
     """
     before, after = seg.get("before"), seg.get("after")
@@ -130,17 +133,12 @@ def _in_place(hashes: list[str], seg: dict) -> bool:
         return True  # 個数の検査が報告する
     i = pos[0]
     j = i + len(run)
-    where: dict[str, list[int]] = {}
-    for k, h in enumerate(hashes):
-        where.setdefault(h, []).append(k)
-    ambiguous = set(before) & set(after) | set(run)
-    for h in set(before) - ambiguous:
-        ks = where.get(h, [])
-        if len(ks) == 1 and ks[0] >= j:
-            return False
-    for h in set(after) - ambiguous:
-        ks = where.get(h, [])
-        if len(ks) == 1 and ks[0] < i:
+    orig_b, orig_a = Counter(before), Counter(after)
+    now_b, now_a = Counter(hashes[:i]), Counter(hashes[j:])
+    for h in (set(orig_b) | set(orig_a)) - set(run):
+        if orig_b[h] + orig_a[h] != now_b[h] + now_a[h]:
+            continue  # 総数が変わった（挿入・削除・書き換え）。動いたとは言えない
+        if now_b[h] > orig_b[h] or now_a[h] > orig_a[h]:
             return False
     return True
 

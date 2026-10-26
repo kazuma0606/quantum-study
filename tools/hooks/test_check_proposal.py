@@ -113,9 +113,10 @@ def test_result_column_not_last():
     assert cp.check_text(t) == []
 
 
-def test_matching_with_note_passes():
-    t = "## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | b | 一致（文面の照合） |\n"
-    assert cp.check_text(t) == []
+def test_result_with_parenthesis_blocked():
+    for w in ("一致（文面の照合）", "一致（未確認）"):
+        t = f"## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | b | {w} |\n"
+        assert cp.check_text(t), w
 
 
 def test_row_with_wrong_cell_count_blocked():

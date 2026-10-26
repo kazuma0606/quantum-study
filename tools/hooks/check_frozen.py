@@ -71,8 +71,10 @@ def stop(data: dict) -> None:
     for p in fr.FROZEN_DIR.glob("*.json"):
         st = json.loads(p.read_text(encoding="utf-8"))
         note = fr.ROOT / st["note"]
-        if note.exists():
-            bad += [f"{st['note']}：{fr.describe(s)}" for s in fr.broken_segments(note.read_text(encoding="utf-8"), st)]
+        if not note.exists():
+            bad.append(f"{st['note']}：ノートが見つかりません（削除または移動された）")
+            continue
+        bad += [f"{st['note']}：{fr.describe(s)}" for s in fr.broken_segments(note.read_text(encoding="utf-8"), st)]
     count = int(STATE.read_text()) if data.get("stop_hook_active") and STATE.exists() else 0
     if not bad or count >= 1:
         STATE.unlink(missing_ok=True)
