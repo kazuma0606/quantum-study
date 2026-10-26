@@ -1,6 +1,6 @@
 """検証済みの範囲（確定範囲）の記録と検査。
 
-ユーザーが「ここまで検証済み」と言った範囲を、段落ごとの内容のハッシュで、`.claude/frozen/<ノート名>.json` に記録する。
+ユーザーが「ここまで検証済み」と言った範囲を、段落ごとの内容のハッシュで、`.claude/frozen/<ノート名>-<パスのハッシュ>.json` に記録する。
 行番号ではなく内容で持つので、範囲の外で行が増減しても、範囲は動かない。
 
 段落＝空行で区切られた塊。別行の数式（$$ … $$）も 1 つの段落。
@@ -67,11 +67,11 @@ def paragraphs(text: str) -> list[Para]:
 
 
 def state_path(note: Path) -> Path:
-    """保存先。リポジトリ相対パスから作る（別のフォルダの同名のノートと衝突しない）。"""
+    """保存先。ノート名に、リポジトリ相対パスのハッシュを付ける（別のフォルダの同名のノートや、
+    区切りの置き換えで同じ名前になるパスと衝突しない）。"""
     key = rel(note)
-    if key.endswith(".md"):
-        key = key[:-3]
-    return FROZEN_DIR / (key.replace("/", "__") + ".json")
+    h = hashlib.sha1(key.encode("utf-8")).hexdigest()[:8]
+    return FROZEN_DIR / f"{note.stem}-{h}.json"
 
 
 def rel(note: Path) -> str:

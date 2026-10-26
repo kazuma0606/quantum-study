@@ -236,3 +236,13 @@ def test_partial_release_refused_with_duplicates(note):
         fr.release(note, 3, 3, "x", today="2026-10-26")
     st = fr.release(note, None, None, "全部解除", today="2026-10-26")
     assert st["segments"] == []
+
+
+def test_separator_replacement_does_not_collide(note, tmp_path):
+    a = tmp_path / "dir" / "a__b.md"
+    b = tmp_path / "dir__a" / "b.md"
+    a.parent.mkdir()
+    b.parent.mkdir()
+    a.write_text("x\n", encoding="utf-8")
+    b.write_text("x\n", encoding="utf-8")
+    assert fr.state_path(a) != fr.state_path(b)

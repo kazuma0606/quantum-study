@@ -39,3 +39,7 @@ experiments/a5_trotter_noise/results/s6/*_posterior.pkl
 
 # 手元だけの Claude Code のフック（Stop フックの日本語の点検）
 .claude/hooks/
+
+# フックの実行時の状態ファイル
+tools/hooks/.check_*_state
+tools/hooks/__pycache__/

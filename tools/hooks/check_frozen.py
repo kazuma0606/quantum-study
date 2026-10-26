@@ -1,6 +1,6 @@
 """PreToolUse フック：検証済みの範囲（確定範囲）を壊す Edit / Write を止める。Stop フックとしても使う（--stop）。
 
-記録は `.claude/frozen/<ノート名>.json`（tools/frozen_range.py が作る）。
+記録は `.claude/frozen/` 以下（tools/frozen_range.py が作る。確認は `tools/frozen_range.py show <ノート>`）。
 - PreToolUse（Edit / Write）：編集を、メモリ上で実行した結果を調べ、この編集で新たに壊れる確定範囲があれば、拒否する。
 - Stop（--stop）：Bash などで、フックをすり抜けた変更があれば、一度だけ差し戻す。
 
