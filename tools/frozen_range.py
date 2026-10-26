@@ -31,6 +31,7 @@ from pathlib import Path
 
 ROOT = Path(os.environ.get("FROZEN_ROOT") or Path(__file__).resolve().parents[1])  # FROZEN_ROOT はテスト用
 FROZEN_DIR = ROOT / ".claude" / "frozen"
+W = 8  # 確定範囲の前後に、位置の手がかりとして記録する段落の個数
 
 
 @dataclass
@@ -108,7 +109,38 @@ def broken_segments(text: str, st: dict) -> list[dict]:
     # 同じ段落列が複数あるときは、確定したときの個数（count）より減っていれば、壊れとみなす
     # （どれが確定した方か区別できないので、1 つ消えたら必ず報告する）
     return [seg for seg in st.get("segments", [])
-            if len(_positions(hashes, seg["hashes"])) < seg.get("count", 1)]
+            if len(_positions(hashes, seg["hashes"])) < seg.get("count", 1)
+            or not _in_place(hashes, seg)]
+
+
+def _in_place(hashes: list[str], seg: dict) -> bool:
+    """確定範囲が、元の前後関係の位置にあるか（段落列ごとの移動を検出する）。
+
+    範囲の前（または後）に向かって、新しい段落（記録した前後の段落にない段落）を読み飛ばし、最初に見つかる
+    記録済みの段落が、前の側（before）の段落なら、元の位置とみなす。範囲の直前・直後への挿入は、読み飛ばされる。
+    記録がない古い形式、同じ内容が複数ある範囲（どの出現か区別できない）は、この検査をしない。
+    """
+    before, after = seg.get("before"), seg.get("after")
+    run = seg["hashes"]
+    if before is None or after is None or seg.get("count", 1) > 1:
+        return True
+    pos = _positions(hashes, run)
+    if not pos:
+        return True  # 個数の検査が報告する
+    known_b, known_a = set(before), set(after)
+
+    def side_ok(i: int, step: int, own: set, other: set) -> bool:
+        j, steps = i, 0
+        while 0 <= j < len(hashes) and steps < 3 * W:
+            h = hashes[j]
+            if h in own or h in other:
+                return h in own
+            j += step
+            steps += 1
+        return (not own) and not (0 <= j < len(hashes))  # 端まで来て、この側の記録が空なら、元の位置
+
+    n = len(run)
+    return any(side_ok(i - 1, -1, known_b, known_a) or side_ok(i + n, 1, known_a, known_b) for i in pos)
 
 
 def describe(seg: dict) -> str:
@@ -130,6 +162,8 @@ def _segment(paras: list[Para], idx: list[int], today: str) -> dict:
     return {
         "hashes": hashes,
         "count": len(_positions([p.digest for p in paras], hashes)),
+        "before": [paras[k].digest for k in range(max(0, idx[0] - W), idx[0])],
+        "after": [paras[k].digest for k in range(idx[-1] + 1, min(len(paras), idx[-1] + 1 + W))],
         "preview": [paras[idx[0]].text.strip()[:30], paras[idx[-1]].text.strip()[:30]],
         "frozen_at": today,
     }

@@ -101,3 +101,23 @@ def test_hook_ignores_previous_turn(tmp_path):
     tp = tmp_path / "t.jsonl"
     tp.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows), encoding="utf-8")
     assert _run(tp) == ""
+
+
+def test_other_result_words_blocked():
+    t = "## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | skipped | pending |\n"
+    assert cp.check_text(t)
+
+
+def test_result_column_not_last():
+    t = "## 検証表\n\n| 結果 | 対象の文 |\n|---|---|\n| 一致 | a |\n"
+    assert cp.check_text(t) == []
+
+
+def test_matching_with_note_passes():
+    t = "## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | b | 一致（文面の照合） |\n"
+    assert cp.check_text(t) == []
+
+
+def test_row_with_wrong_cell_count_blocked():
+    t = "## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | b | c | 一致 |\n"
+    assert cp.check_text(t)

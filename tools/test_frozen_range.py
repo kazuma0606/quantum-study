@@ -246,3 +246,39 @@ def test_separator_replacement_does_not_collide(note, tmp_path):
     a.write_text("x\n", encoding="utf-8")
     b.write_text("x\n", encoding="utf-8")
     assert fr.state_path(a) != fr.state_path(b)
+
+
+MOVE = "# 題\n\nhead\n\nA\n\nB\n\ntail\n"
+
+
+def test_whole_run_move_detected(note):
+    note.write_text(MOVE, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")  # A、B
+    st = fr.load_state(note)
+    moved = "# 題\n\nhead\n\ntail\n\nA\n\nB\n"
+    assert fr.check_edit(MOVE, moved, st)
+
+
+def test_adjacent_insertions_on_both_sides_ok(note):
+    note.write_text(MOVE, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")
+    st = fr.load_state(note)
+    ok = "# 題\n\nhead\n\n前の新しい段落\n\nA\n\nB\n\n後の新しい段落\n\ntail\n"
+    assert not fr.check_edit(MOVE, ok, st)
+
+
+def test_rewriting_neighbor_ok(note):
+    note.write_text(MOVE, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")
+    st = fr.load_state(note)
+    assert not fr.check_edit(MOVE, MOVE.replace("head", "head（書き換え）").replace("tail", "tail（書き換え）"), st)
+
+
+def test_old_state_without_neighbors_is_not_checked(note):
+    note.write_text(MOVE, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")
+    st = fr.load_state(note)
+    for s in st["segments"]:
+        s.pop("before"), s.pop("after")
+    moved = "# 題\n\nhead\n\ntail\n\nA\n\nB\n"
+    assert not fr.check_edit(MOVE, moved, st)

@@ -23,7 +23,6 @@ from pathlib import Path
 
 STATE = Path(__file__).with_name(".check_proposal_state")
 PROPOSAL = re.compile(r"(?:^|[\\/])proposal_[^\\/]*\.md$")
-BAD_WORDS = ("未確認", "不一致")
 
 
 def load_rows(transcript: Path) -> list[dict]:
@@ -75,6 +74,12 @@ def proposal_files(rows: list[dict]) -> list[str]:
     return found
 
 
+def _cells(row: str) -> list[str]:
+    """表の1行を、セルに分ける（`\\|` は、セルの区切りにしない）。"""
+    body = row.strip().strip("|").replace("\\|", "\x00")
+    return [c.replace("\x00", "\\|").strip() for c in body.split("|")]
+
+
 def check_text(text: str) -> list[str]:
     """案のファイルの本文を調べて、問題の説明を返す（空なら問題なし）。"""
     lines = text.splitlines()
@@ -92,12 +97,17 @@ def check_text(text: str) -> list[str]:
     rows = [s for s in table if not re.fullmatch(r"[\s|:\-]+", s.strip())]
     if len(rows) < 2:
         return ["検証表に、見出し行とデータ行がありません（列：対象の文 / 確かめた操作 / 結果）"]
-    if "結果" not in rows[0]:
+    head = _cells(rows[0])
+    idx = next((k for k, c in enumerate(head) if "結果" in c), None)
+    if idx is None:
         return ["検証表の見出し行に「結果」の列がありません"]
     problems = []
     for s in rows[1:]:
-        if any(w in s for w in BAD_WORDS):
-            problems.append("未確認・不一致が残っています：" + s.strip()[:80])
+        cells = _cells(s)
+        if len(cells) != len(head):
+            problems.append("列の数が見出し行と合いません（セル内の `|` は `\\vert` に）：" + s.strip()[:80])
+        elif not cells[idx].startswith("一致"):
+            problems.append("結果が「一致」ではありません：" + s.strip()[:80])
     return problems
 
 
