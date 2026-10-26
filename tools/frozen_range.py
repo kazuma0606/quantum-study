@@ -67,7 +67,11 @@ def paragraphs(text: str) -> list[Para]:
 
 
 def state_path(note: Path) -> Path:
-    return FROZEN_DIR / (note.stem + ".json")
+    """保存先。リポジトリ相対パスから作る（別のフォルダの同名のノートと衝突しない）。"""
+    key = rel(note)
+    if key.endswith(".md"):
+        key = key[:-3]
+    return FROZEN_DIR / (key.replace("/", "__") + ".json")
 
 
 def rel(note: Path) -> str:
@@ -81,7 +85,10 @@ def load_state(note: Path) -> dict | None:
     p = state_path(note)
     if not p.exists():
         return None
-    return json.loads(p.read_text(encoding="utf-8"))
+    st = json.loads(p.read_text(encoding="utf-8"))
+    if st.get("note") != rel(note):
+        raise SystemExit(f"確定範囲の記録 {p.name} は、別のノート（{st.get('note')}）のものです。{rel(note)} には使えません")
+    return st
 
 
 def save_state(note: Path, st: dict) -> None:
@@ -177,6 +184,10 @@ def release(note: Path, from_line: int | None, to_line: int | None, quote: str, 
     if bad and from_line is not None:
         raise SystemExit("壊れた確定範囲があります。一部の解除は、その記録を消すので、できません。元に戻すか、--all で解除してください：\n"
                          + "\n".join(describe(s) for s in bad))
+    dup = [s for s in st.get("segments", []) if s.get("count", 1) > 1]
+    if dup and from_line is not None:
+        raise SystemExit("同じ内容の段落列が複数あるため、どれを解除するか決められません。--all で解除して、必要な範囲を freeze し直してください：\n"
+                         + "\n".join(describe(s) for s in dup))
     cur = frozen_indices(paras, st)
     if from_line is None:
         keep: list[int] = []

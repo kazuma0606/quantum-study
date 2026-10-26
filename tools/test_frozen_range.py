@@ -207,3 +207,32 @@ def test_partial_release_refused_when_broken(note):
     with pytest.raises(SystemExit):
         fr.release(note, 1, 1, "x", today="2026-10-26")
     fr.release(note, None, None, "全部解除", today="2026-10-26")  # --all は可能
+
+
+def test_same_stem_in_different_folders_do_not_collide(note, tmp_path):
+    other_dir = tmp_path / "sub"
+    other_dir.mkdir()
+    other = other_dir / "n.md"
+    other.write_text("# 別\n\nX\n", encoding="utf-8")
+    freeze_ab(note)
+    assert fr.state_path(note) != fr.state_path(other)
+    assert fr.load_state(other) is None
+
+
+def test_state_with_other_note_name_is_refused(note, tmp_path):
+    freeze_ab(note)
+    p = fr.state_path(note)
+    st = json.loads(p.read_text(encoding="utf-8"))
+    st["note"] = "別のノート.md"
+    p.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(SystemExit):
+        fr.load_state(note)
+
+
+def test_partial_release_refused_with_duplicates(note):
+    note.write_text(DUP, encoding="utf-8")
+    fr.freeze(note, 3, 5, today="2026-10-26")
+    with pytest.raises(SystemExit):
+        fr.release(note, 3, 3, "x", today="2026-10-26")
+    st = fr.release(note, None, None, "全部解除", today="2026-10-26")
+    assert st["segments"] == []

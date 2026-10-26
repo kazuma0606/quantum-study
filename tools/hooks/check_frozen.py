@@ -43,7 +43,11 @@ def pre_tool(data: dict) -> None:
     note = Path(path)
     if not note.is_absolute():
         note = Path(data.get("cwd") or ROOT) / note
-    st = fr.load_state(note)
+    try:
+        st = fr.load_state(note)
+    except SystemExit as e:  # 記録が別のノートのものなど。安全側で止める
+        deny(f"確定範囲の記録を読めません：{e}")
+        return
     if not st or not st.get("segments"):
         return
     before = note.read_text(encoding="utf-8", errors="replace") if note.exists() else ""
