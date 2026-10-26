@@ -3479,13 +3479,19 @@ $$
 V|\Phi\rangle:=\sum_{m,\alpha}\big(K_{m\alpha}|\Phi\rangle\big)\otimes|m\alpha\rangle_E
 $$
 
-$V$ は、すべての $|\Phi\rangle\in\mathcal H$ で、ノルムを保ちます。$\langle u\otimes e|u'\otimes e'\rangle=\langle u|u'\rangle\langle e|e'\rangle$ と $\langle m\alpha|m'\alpha'\rangle_E=\delta_{mm'}\delta_{\alpha\alpha'}$ で、(2) と同じ展開をすると、次のようになります。
+$V$ は、すべての $|\Phi\rangle,|\Psi\rangle\in\mathcal H$ で、内積を保ちます。$\langle u\otimes e|u'\otimes e'\rangle=\langle u|u'\rangle\langle e|e'\rangle$ で、$V|\Phi\rangle$ と $V|\Psi\rangle$ の和を展開すると、次のようになります。
 
 $$
-\|V\Phi\|^2=\sum_{m,\alpha}\|K_{m\alpha}\Phi\|^2=\Big\langle\Phi\Big|\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}\Big|\Phi\Big\rangle=\langle\Phi|\Phi\rangle=\|\Phi\|^2
+\langle V\Phi|V\Psi\rangle=\sum_{m,\alpha}\sum_{m',\alpha'}\big\langle K_{m\alpha}\Phi\big|K_{m'\alpha'}\Psi\big\rangle\,\langle m\alpha|m'\alpha'\rangle_E
 $$
 
-規格化された $|\Phi\rangle$ では、この値は $1$ です。
+$\langle m\alpha|m'\alpha'\rangle_E=\delta_{mm'}\delta_{\alpha\alpha'}$ なので、$(m,\alpha)=(m',\alpha')$ の項だけが残ります。$\langle K_{m\alpha}\Phi|K_{m\alpha}\Psi\rangle=\langle\Phi|K_{m\alpha}^\dagger K_{m\alpha}|\Psi\rangle$ を使うと、次のようになります。
+
+$$
+\langle V\Phi|V\Psi\rangle=\sum_{m,\alpha}\big\langle K_{m\alpha}\Phi\big|K_{m\alpha}\Psi\big\rangle=\Big\langle\Phi\Big|\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}\Big|\Psi\Big\rangle=\langle\Phi|\Psi\rangle
+$$
+
+特に $|\Psi\rangle=|\Phi\rangle$ のとき、$\|V\Phi\|^2=\|\Phi\|^2$ で、$V$ はノルムも保ちます。規格化された $|\Phi\rangle$ では、この値は $1$ です。
 
 次に、次の対応を、全体の空間 $\mathcal H\otimes\mathcal H_E$（次元 $dr$）のユニタリ演算子 $U$ に広げます。
 
@@ -3493,7 +3499,7 @@ $$
 |\Phi\rangle\otimes|0_E\rangle\ \longmapsto\ V|\Phi\rangle
 $$
 
-この対応は、部分空間 $\mathcal H\otimes|0_E\rangle$（次元 $d$）から、$\mathcal H\otimes\mathcal H_E$ への、ノルムを保つ写像です。$\mathcal H\otimes|0_E\rangle$ の直交補空間と、$V$ の像の直交補空間は、どちらも次元が $dr-d$ です。一方の正規直交基底を他方の正規直交基底に移す写像を、補空間に定めれば、全体として、正規直交基底を正規直交基底に移す写像になり、$U$ はユニタリ演算子です。このとき、次の式が成り立ちます。
+この対応は、部分空間 $\mathcal H\otimes|0_E\rangle$（次元 $d$）から、$\mathcal H\otimes\mathcal H_E$ への写像で、内積を保ちます。$\langle\Phi\otimes0_E|\Psi\otimes0_E\rangle=\langle\Phi|\Psi\rangle=\langle V\Phi|V\Psi\rangle$ だからです。したがって、$\mathcal H\otimes|0_E\rangle$ の正規直交基底は、$V$ の像の正規直交基底に移ります。$\mathcal H\otimes|0_E\rangle$ の直交補空間と、$V$ の像の直交補空間は、どちらも次元が $dr-d$ です。一方の正規直交基底を他方の正規直交基底に移す写像を、補空間に定めれば、全体として、正規直交基底を正規直交基底に移す写像になり、$U$ はユニタリ演算子です。このとき、次の式が成り立ちます。
 
 $$
 U\big(|\Phi\rangle\otimes|0_E\rangle\big)=V|\Phi\rangle
