@@ -3479,11 +3479,13 @@ $$
 V|\Phi\rangle:=\sum_{m,\alpha}\big(K_{m\alpha}|\Phi\rangle\big)\otimes|m\alpha\rangle_E
 $$
 
-$V$ はノルムを保ちます。$\langle u\otimes e|u'\otimes e'\rangle=\langle u|u'\rangle\langle e|e'\rangle$ と $\langle m\alpha|m'\alpha'\rangle_E=\delta_{mm'}\delta_{\alpha\alpha'}$ で、(2) と同じ展開をすると、次のようになります。
+$V$ は、すべての $|\Phi\rangle\in\mathcal H$ で、ノルムを保ちます。$\langle u\otimes e|u'\otimes e'\rangle=\langle u|u'\rangle\langle e|e'\rangle$ と $\langle m\alpha|m'\alpha'\rangle_E=\delta_{mm'}\delta_{\alpha\alpha'}$ で、(2) と同じ展開をすると、次のようになります。
 
 $$
-\|V\Phi\|^2=\sum_{m,\alpha}\|K_{m\alpha}\Phi\|^2=\Big\langle\Phi\Big|\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}\Big|\Phi\Big\rangle=\langle\Phi|\Phi\rangle=1
+\|V\Phi\|^2=\sum_{m,\alpha}\|K_{m\alpha}\Phi\|^2=\Big\langle\Phi\Big|\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}\Big|\Phi\Big\rangle=\langle\Phi|\Phi\rangle=\|\Phi\|^2
 $$
+
+規格化された $|\Phi\rangle$ では、この値は $1$ です。
 
 次に、次の対応を、全体の空間 $\mathcal H\otimes\mathcal H_E$（次元 $dr$）のユニタリ演算子 $U$ に広げます。
 

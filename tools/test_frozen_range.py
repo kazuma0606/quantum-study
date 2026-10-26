@@ -348,3 +348,16 @@ def test_stop_ignores_fully_released_record_with_deleted_note(real):
     fr.release(p, None, None, "全部解除", today="2026-10-26")
     p.unlink()
     assert run_hook(root, "", {}, ["--stop"]) == ""
+
+
+def test_move_plus_duplicate_equals_adjacent_insertion_is_indistinguishable(note):
+    """「head/A/B/tail」で A/B を確定し、「head/tail/A/B/tail」にした文書は、A の直前に「tail」を挿入した文書と
+    同じ。結果の文書が同じなので、移動と挿入は区別できない（挿入は許される編集）。"""
+    base = "# 題\n\nhead\n\nA\n\nB\n\ntail\n"
+    note.write_text(base, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")
+    st = fr.load_state(note)
+    after = "# 題\n\nhead\n\ntail\n\nA\n\nB\n\ntail\n"
+    inserted_only = base.replace("A\n\nB", "tail\n\nA\n\nB", 1)
+    assert after == inserted_only
+    assert not fr.check_edit(base, inserted_only, st)
