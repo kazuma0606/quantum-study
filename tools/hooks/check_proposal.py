@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 STATE = Path(__file__).with_name(".check_proposal_state")
+BAD_WORDS = ("未確認", "不一致")  # 検証表の、どの欄にも残してはいけない語
 RESULT_OK = re.compile(r"一致")  # 結果の欄は「一致」だけ（補足は、操作の欄に書く）。「一致しない」「一致（未確認）」なども通さない
 PROPOSAL = re.compile(r"(?:^|[\\/])proposal_[^\\/]*\.md$")
 
@@ -111,6 +112,8 @@ def check_text(text: str) -> list[str]:
             problems.append("列の数が見出し行と合いません（セル内の `|` は `\\vert` に）：" + s.strip()[:80])
         elif not RESULT_OK.fullmatch(cells[idx]):
             problems.append("結果が「一致」ではありません（「一致」だけ）：" + s.strip()[:80])
+        elif any(w in c for c in cells for w in BAD_WORDS):
+            problems.append("結果以外の欄に、未確認・不一致が残っています：" + s.strip()[:80])
     return problems
 
 

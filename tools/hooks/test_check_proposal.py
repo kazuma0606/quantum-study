@@ -143,3 +143,10 @@ def test_proposal_still_checked_after_stop_hook_feedback(tmp_path):
     tp = tmp_path / "t.jsonl"
     tp.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows), encoding="utf-8")
     assert json.loads(_run(tp))["decision"] == "block"
+
+
+def test_bad_word_in_other_column_blocked():
+    t = "## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | 未確認 | 一致 |\n"
+    assert cp.check_text(t)
+    t2 = "## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| 不一致の例 | b | 一致 |\n"
+    assert cp.check_text(t2)
