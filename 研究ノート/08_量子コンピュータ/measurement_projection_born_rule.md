@@ -3471,7 +3471,39 @@ $$
 \sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=\big(I\otimes\langle0_E|\big)U^\dagger\Big(I\otimes\sum_{m,\alpha}|m\alpha\rangle\langle m\alpha|\Big)U\big(I\otimes|0_E\rangle\big)=\big(I\otimes\langle0_E|\big)U^\dagger U\big(I\otimes|0_E\rangle\big)=I
 $$
 
-これが、一般の測定の条件 $\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ です。逆に、この条件を満たす任意の組 $\{K_{m\alpha}\}$ は、ある環境とユニタリ演算子 $U$ から作れることが知られています（ナイマルクの拡張定理。ここでは証明せず、事実として引用します）。
+これが、一般の測定の条件 $\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ です。
+
+逆に、この条件を満たす任意の組 $\{K_{m\alpha}\}$ が、ある環境とユニタリ演算子 $U$ から作れることを示します。$K_{m\alpha}\in\mathbb C^{d\times d}$ が、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすとし、環境の次元 $r$ を、組 $(m,\alpha)$ の個数とします。(1) の展開の右辺で、線形写像 $V:\mathcal H\to\mathcal H\otimes\mathcal H_E$ を、次のように定めます。
+
+$$
+V|\Phi\rangle:=\sum_{m,\alpha}\big(K_{m\alpha}|\Phi\rangle\big)\otimes|m\alpha\rangle_E
+$$
+
+$V$ はノルムを保ちます。$\langle u\otimes e|u'\otimes e'\rangle=\langle u|u'\rangle\langle e|e'\rangle$ と $\langle m\alpha|m'\alpha'\rangle_E=\delta_{mm'}\delta_{\alpha\alpha'}$ で、(2) と同じ展開をすると、次のようになります。
+
+$$
+\|V\Phi\|^2=\sum_{m,\alpha}\|K_{m\alpha}\Phi\|^2=\Big\langle\Phi\Big|\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}\Big|\Phi\Big\rangle=\langle\Phi|\Phi\rangle=1
+$$
+
+次に、次の対応を、全体の空間 $\mathcal H\otimes\mathcal H_E$（次元 $dr$）のユニタリ演算子 $U$ に広げます。
+
+$$
+|\Phi\rangle\otimes|0_E\rangle\ \longmapsto\ V|\Phi\rangle
+$$
+
+この対応は、部分空間 $\mathcal H\otimes|0_E\rangle$（次元 $d$）から、$\mathcal H\otimes\mathcal H_E$ への、ノルムを保つ写像です。$\mathcal H\otimes|0_E\rangle$ の直交補空間と、$V$ の像の直交補空間は、どちらも次元が $dr-d$ です。一方の正規直交基底を他方の正規直交基底に移す写像を、補空間に定めれば、全体として、正規直交基底を正規直交基底に移す写像になり、$U$ はユニタリ演算子です。このとき、次の式が成り立ちます。
+
+$$
+U\big(|\Phi\rangle\otimes|0_E\rangle\big)=V|\Phi\rangle
+$$
+
+両辺に $I\otimes\langle m\alpha|_E$ を作用させます。右辺は、$V$ の定義と、$\langle m\alpha|m'\alpha'\rangle_E=\delta_{mm'}\delta_{\alpha\alpha'}$ から、$K_{m\alpha}|\Phi\rangle$ になります（(1) の展開と同じ計算です）。左辺は、$|\Phi\rangle\otimes|0_E\rangle=\big(I\otimes|0_E\rangle\big)|\Phi\rangle$ なので、次のようになります。
+
+$$
+\big(I\otimes\langle m\alpha|\big)\,U\,\big(I\otimes|0_E\rangle\big)|\Phi\rangle=K_{m\alpha}|\Phi\rangle
+$$
+
+これがすべての $|\Phi\rangle$ で成り立つので、$K_{m\alpha}=\big(I\otimes\langle m\alpha|\big)U\big(I\otimes|0_E\rangle\big)$ です。
 
 *(6) 混合状態*：状態が $\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$、$|\psi_j\rangle$ は規格化された状態ベクトル）のときを考えます。各 $|\psi_j\rangle$ に (2)、(3) を使うと、結果 $m$ の確率 $P_j(m)$ と、結果 $m$ のときの（規格化前の）系の状態 $N_j(m)$ は、次の式です。
 
