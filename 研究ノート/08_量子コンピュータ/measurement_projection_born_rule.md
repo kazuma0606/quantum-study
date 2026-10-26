@@ -2601,7 +2601,7 @@ $$
 > | 式 | $p_j=\lvert\langle a_j\vert\varphi\rangle\rvert^2$ | $P(m)=\lVert K_m\Phi\rVert^2$ |
 > | 式の形 | 内積（数）の絶対値の2乗 | ベクトル $K_m\lvert\Phi\rangle$ のノルムの2乗 |
 >
-> **関係**：$K_j=\lvert a_j\rangle\langle a_j\rvert$ とすると、$K_j\lvert\Phi\rangle=\lvert a_j\rangle\langle a_j\vert\Phi\rangle$ で、$\lVert a_j\rVert=1$ なので、$\lVert K_j\Phi\rVert^2=\lvert\langle a_j\vert\Phi\rangle\rvert^2$ となります。つまり、$p_j$ は、$P(m)$ の、$K_m=\lvert a_j\rangle\langle a_j\rvert$ の場合です。
+> **関係**：$K_j=\lvert a_j\rangle\langle a_j\rvert$ とすると、$K_j\lvert\Phi\rangle=\lvert a_j\rangle\langle a_j\vert\Phi\rangle$ で、$\lVert a_j\rVert=1$ なので、$\lVert K_j\Phi\rVert^2=\lvert\langle a_j\vert\Phi\rangle\rvert^2$ となります。つまり、状態を同じ（$|\varphi\rangle=|\Phi\rangle$）にすると、$p_j$ は、$P(m)$ の、$K_m=\lvert a_j\rangle\langle a_j\rvert$ の場合です。
 >
 > この項目では、まず $K_m$ で測り（結果 $m$、確率 $P(m)$）、結果を記録せずに、そのあと基底 $\{\lvert a_j\rangle\}$ で測る（結果 $j$）、という2回の測定を考えます。
 
