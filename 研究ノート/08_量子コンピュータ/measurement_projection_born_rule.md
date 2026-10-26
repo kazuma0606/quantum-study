@@ -1,6 +1,6 @@
 # 射影演算子による測定確率の計算 ―$P(x^\ast)=\big\|(|x^\ast\rangle\langle x^\ast|\otimes I)|\Psi\rangle\big\|^2=\tfrac1N$の導出―
 
-> **作成** 2026-10-17　**更新** 2026-10-24
+> **作成** 2026-10-17　**更新** 2026-10-26
 > 入力レジスタを測ると正解の確率が $\frac1N$ になることを、射影演算子 $P_{x^\ast}\otimes I$ とボルン則から導出する。テンソル積の作用の証明、4候補の数値例、付録（完全な射影測定とPOVM、結果レジスタの測定とエンタングルメント、クロネッカー積の性質とQiskitの並び順、検算の一覧）。
 
 関数を計算する量子回路に、すべての候補の均等な重ね合わせを入力したあと、入力レジスタを測定して正解$x^\ast$が得られる確率が$\tfrac1N$であることを、射影演算子を使って導出します。物理の仮定（ボルン則）を使う箇所と、線形代数だけで導ける箇所を区別しながら進めます。最後に4候補の数値例で確認します。
@@ -2284,13 +2284,129 @@ $$
 \det\big(A-\lambda I\big)=0
 $$
 
-この式の解 $\lambda$ が固有値 $a_j$ で、各 $a_j$ について、$(A-a_jI)|v\rangle=0$ の零でない解のうち、長さを $1$ に揃え、固有値が重なる場合は、互いに直交するように選んだものが、正規直交な固有ベクトルの基底 $\{|a_j\rangle\}$ です（そのような選び方ができることが、① の冒頭で使うスペクトル定理です）。
+この式の解 $\lambda$ が固有値 $a_j$ で、各 $a_j$ について、$(A-a_jI)|v\rangle=0$ の零でない解のうち、ノルムを $1$ に規格化し（$\|v\|=1$）、固有値が重なる場合は、互いに直交するように選んだものが、正規直交な固有ベクトルの基底 $\{|a_j\rangle\}$ です（そのような選び方ができることが、① の冒頭で使うスペクトル定理です）。
 
-したがって、成分で書いた定義 (A-9) を、$\lambda=a_j$、$|v\rangle=|a_j\rangle$ として読み替えると、次の式が成り立ちます。
+**(0) 記号の対応**
+
+- $A\in\mathbb C^{d\times d}$：最初から与えられている行列。
+- $\lambda\in\mathbb C$：固有値を求めるための、未知の数。
+- $|v\rangle\in\mathbb C^d\setminus\{0\}$：固有ベクトルを求めるための、未知のベクトル。
+- $a_j\in\mathbb R$：$\det(A-\lambda I)=0$ を解いて得られた、$j$ 番目の固有値（数）。
+- $|a_j\rangle\in\mathbb C^d$：固有値 $a_j$ に対応する、選んだ固有ベクトル（ベクトル。ノルムが $1$ で、互いに直交するように選ぶ）。
+
+$a_j$ は数、$|a_j\rangle$ はベクトルで、別の対象です。同じ添字 $j$ は、固有値 $a_j$ を求めたあとで、方程式 $(A-a_jI)|v\rangle=0$ を解いて、対応するベクトルを選んだ、という対応を表します。
+
+**(1) 具体例で、手順を、はじめから確かめる**
+
+**例1（対角行列）**：この例の間だけ、$A$ を、次の $2\times2$ 行列とします（一般の $A$ ではなく、具体例です）。
+
+$$
+A=\begin{pmatrix}2&0\\0&3\end{pmatrix}
+$$
+
+任意のベクトル $|v\rangle=\begin{pmatrix}x\\y\end{pmatrix}$ に、$A$ を作用させると、次のようになります。
+
+$$
+A|v\rangle=\begin{pmatrix}2x\\3y\end{pmatrix}
+$$
+
+一般には、これは $|v\rangle$ の定数倍ではありません。たとえば $|v\rangle=\begin{pmatrix}1\\1\end{pmatrix}$ なら、$A|v\rangle=\begin{pmatrix}2\\3\end{pmatrix}$ で、$|v\rangle$ の定数倍ではありません。そこで、$A|v\rangle=\lambda|v\rangle$、つまり $(A-\lambda I)|v\rangle=0$ を満たす、零でない $|v\rangle$ と $\lambda$ を探します。零でない解があるには、$\det(A-\lambda I)=0$ が必要です。
+
+$$
+\det(A-\lambda I)=\det\begin{pmatrix}2-\lambda&0\\0&3-\lambda\end{pmatrix}=(2-\lambda)(3-\lambda)=0
+$$
+
+解は、$\lambda=2$ と $\lambda=3$ で、これを、$a_1=2$、$a_2=3$ とします。
+
+$a_1=2$ のとき、$(A-a_1I)|v\rangle=0$ を、成分で書くと、次のようになります。
+
+$$
+\begin{pmatrix}0&0\\0&1\end{pmatrix}\begin{pmatrix}x\\y\end{pmatrix}=\begin{pmatrix}0\\y\end{pmatrix}=\begin{pmatrix}0\\0\end{pmatrix}
+$$
+
+$y=0$ で、$x$ は何でもよい（零でない）ので、ノルムを $1$ にすると、$|a_1\rangle=\begin{pmatrix}1\\0\end{pmatrix}$ です。$a_2=3$ のときは、次のようになります。
+
+$$
+\begin{pmatrix}-1&0\\0&0\end{pmatrix}\begin{pmatrix}x\\y\end{pmatrix}=\begin{pmatrix}-x\\0\end{pmatrix}=\begin{pmatrix}0\\0\end{pmatrix}
+$$
+
+$x=0$ で、$|a_2\rangle=\begin{pmatrix}0\\1\end{pmatrix}$ です。求めた $a_j$ と $|a_j\rangle$ で、$A|a_j\rangle$ を計算すると、次のようになります。
+
+$$
+A|a_1\rangle=\begin{pmatrix}2\\0\end{pmatrix}=2\,|a_1\rangle=a_1|a_1\rangle,\qquad A|a_2\rangle=\begin{pmatrix}0\\3\end{pmatrix}=3\,|a_2\rangle=a_2|a_2\rangle
+$$
+
+求めた固有値 $a_j$ と、対応する固有ベクトル $|a_j\rangle$ が、$A|a_j\rangle=a_j|a_j\rangle$ を満たしています。
+
+**例2（非対角成分が $0$ でない行列）**：この例の間だけ、$A$ を、次の $2\times2$ 行列とします。非対角成分が $0$ ではなく、標準基底は、固有ベクトルになりません。
+
+$$
+A=\begin{pmatrix}2&1\\1&2\end{pmatrix}
+$$
+
+任意のベクトル $|v\rangle=\begin{pmatrix}x\\y\end{pmatrix}$ に、$A$ を作用させると、次のようになります。
+
+$$
+A|v\rangle=\begin{pmatrix}2x+y\\x+2y\end{pmatrix}
+$$
+
+たとえば $|v\rangle=\begin{pmatrix}1\\0\end{pmatrix}$ なら、$A|v\rangle=\begin{pmatrix}2\\1\end{pmatrix}$ で、$|v\rangle$ の定数倍ではありません。例1と同じ手順で、$\det(A-\lambda I)=0$ を解きます。
+
+$$
+\det(A-\lambda I)=\det\begin{pmatrix}2-\lambda&1\\1&2-\lambda\end{pmatrix}=(2-\lambda)^2-1=(\lambda-1)(\lambda-3)=0
+$$
+
+解は、$\lambda=3$ と $\lambda=1$ で、これを、$a_1=3$、$a_2=1$ とします。
+
+$a_1=3$ のとき、$(A-a_1I)|v\rangle=0$ を、成分で書くと、次のようになります。
+
+$$
+\begin{pmatrix}-1&1\\1&-1\end{pmatrix}\begin{pmatrix}x\\y\end{pmatrix}=\begin{pmatrix}-x+y\\x-y\end{pmatrix}=\begin{pmatrix}0\\0\end{pmatrix}
+$$
+
+$y=x$ で、零でない解は、$\begin{pmatrix}x\\x\end{pmatrix}$ です。ノルムを $1$ にすると、$|a_1\rangle=\dfrac{1}{\sqrt2}\begin{pmatrix}1\\1\end{pmatrix}$ です。$a_2=1$ のときは、次のようになります。
+
+$$
+\begin{pmatrix}1&1\\1&1\end{pmatrix}\begin{pmatrix}x\\y\end{pmatrix}=\begin{pmatrix}x+y\\x+y\end{pmatrix}=\begin{pmatrix}0\\0\end{pmatrix}
+$$
+
+$y=-x$ で、$|a_2\rangle=\dfrac{1}{\sqrt2}\begin{pmatrix}1\\-1\end{pmatrix}$ です。求めた $a_j$ と $|a_j\rangle$ で、$A|a_j\rangle$ を計算すると、次のようになります。
+
+$$
+A|a_1\rangle=\frac{1}{\sqrt2}\begin{pmatrix}3\\3\end{pmatrix}=3\,|a_1\rangle=a_1|a_1\rangle,\qquad A|a_2\rangle=\frac{1}{\sqrt2}\begin{pmatrix}1\\-1\end{pmatrix}=1\cdot|a_2\rangle=a_2|a_2\rangle
+$$
+
+さらに、$\langle a_1|a_2\rangle=\dfrac12(1\cdot1+1\cdot(-1))=0$ なので、$|a_1\rangle$ と $|a_2\rangle$ は、正規直交基底になります。非対角成分が $0$ でなくても、同じ手順で、固有値と固有ベクトルが求まり、$A|a_j\rangle=a_j|a_j\rangle$ が成り立ちます（固有ベクトルは、標準基底ではなく、斜めの方向になります）。
+
+**(2) 同じ手順を、一般の $j$ で書く**
+
+具体例の $a_1,|a_1\rangle$ では、$(A-a_1I)|a_1\rangle=0$ を満たす $|a_1\rangle$ を、選びました。一般の $j$ でも、$|a_j\rangle$ は、$\lambda=a_j$ のときの $(A-\lambda I)|v\rangle=0$ の解として選んだので、次が成り立ちます。
+
+$$
+(A-a_jI)|a_j\rangle=0
+$$
+
+左辺を、行列とベクトルの積の分配法則で、展開します。
+
+$$
+A|a_j\rangle-a_jI\,|a_j\rangle=0
+$$
+
+単位行列は、ベクトルを変えません（$I|a_j\rangle=|a_j\rangle$）。
+
+$$
+A|a_j\rangle-a_j\,|a_j\rangle=0
+$$
+
+$a_j|a_j\rangle$ を右辺に移項すると、次の式が成り立ちます。
 
 $$
 \boxed{A|a_j\rangle=a_j\,|a_j\rangle}\tag{A-12}
 $$
+
+**(3) 結論**
+
+(A-12) は、固有値 $a_j$ を、$\det(A-\lambda I)=0$ の解として求め、対応するベクトル $|a_j\rangle$ を、$(A-a_jI)|v\rangle=0$ の解として選んだ結果として、成り立ちます（具体例の $A|a_1\rangle=2|a_1\rangle$、$A|a_2\rangle=3|a_2\rangle$ などは、その場合です）。
 
 以上で、行列式の条件から求めた $a_j$ と $|a_j\rangle$ が、定義の式を満たすことが示せました。次の計算では、(A-12) を使って、$\langle a_k|A|a_j\rangle$ の $A|a_j\rangle$ を $a_j|a_j\rangle$ に置き換えます。
 
@@ -2460,31 +2576,92 @@ $$
 
 **② 結果を記録しない場合の期待値**
 
-この項目では、結果を記録しない場合の $A$ の期待値が、(A-8) になることを示します。結果 $m$ が確率 $P(m)$ で出て、そのときの状態が $|\Phi_m\rangle$ になります。このとき、基底 $\{|a_j\rangle\}$ での結果 $j$ が出る確率 $q_j$ は、全確率の法則から、次のようになります。ここで、$P(m)>0$ の結果 $m$ について、$P(j\mid m)=|\langle a_j|\Phi_m\rangle|^2$ は、結果 $m$ のときの、結果 $j$ の確率です（$P(m)=0$ の結果では、$P(j\mid m)$ を定めず、$P(m)\,P(j\mid m)$ の項は $0$ とみなします）。
+この項目では、結果を記録しない場合の $A$ の期待値が、(A-8) になることを示します。結果 $m$ が確率 $P(m)$ で出て、そのときの状態が $|\Phi_m\rangle$ になります。
+
+ここで、① の内容と、この項目で使う記号を、整理します。
+
+**① で使ったもの（状態ベクトル $|\varphi\rangle$ の場合）**：$A=A^\dagger\in\mathbb C^{d\times d}$ の固有値 $a_j\in\mathbb R$ と、正規直交な固有ベクトル $|a_j\rangle\in\mathbb C^d$（$j=1,\dots,d$）です。基底 $\{|a_j\rangle\}$ で測ったときの結果 $j$ の確率は $p_j=|\langle a_j|\varphi\rangle|^2$ で、期待値は $\sum_ja_jp_j=\langle\varphi|A|\varphi\rangle$ でした。
+
+**この項目で使うもの（結果を記録しない場合）**：$m$ は、測定演算子 $K_m\in\mathbb C^{d\times d}$ の結果の添字です。結果 $m$ が出る確率 $P(m)$ と、出たあとの状態 $|\Phi_m\rangle$ は、(A-7) で与えられます。
+
+$$
+P(m)=\|K_m\Phi\|^2=\langle\Phi|K_m^\dagger K_m|\Phi\rangle,\qquad|\Phi_m\rangle=\frac{K_m|\Phi\rangle}{\sqrt{P(m)}}
+$$
+
+これは、射影測定の確率 $P(x)=\|M_x\Phi\|^2$（(A-4)）と、測定後の状態 $|\Phi_x\rangle=M_x|\Phi\rangle/\sqrt{P(x)}$（(A-5)）を、射影演算子 $M_x$ から、一般の $K_m$ に広げたものです（$K_m=M_x$ のとき、一致します）。$\sum_mP(m)=1$ は、(A-6) $\sum_mK_m^\dagger K_m=I$ から出ます。
+
+**添字 $m$ と $j$ の違い**：$m$ は、測定 $\{K_m\}$ の結果の番号です。$j$ は、① と同じで、観測量 $A$ の固有ベクトルの基底 $\{|a_j\rangle\}$ の番号です。別の測定の、別の番号なので、文字を分けています。
+
+> **注意：$p_j$ と $P(m)$ は、別の測定の、別の確率です。混同しないでください。**
+>
+> | | $p_j$ | $P(m)$ |
+> |---|---|---|
+> | 何の測定か | 状態 $\lvert\varphi\rangle$ を、$A$ の固有ベクトルの基底 $\{\lvert a_j\rangle\}$ で測る | 測定演算子 $K_m$ による測定 |
+> | 結果の番号 | $j$ | $m$ |
+> | 式 | $p_j=\lvert\langle a_j\vert\varphi\rangle\rvert^2$ | $P(m)=\lVert K_m\Phi\rVert^2$ |
+> | 式の形 | 内積（数）の絶対値の2乗 | ベクトル $K_m\lvert\Phi\rangle$ のノルムの2乗 |
+>
+> **関係**：$K_j=\lvert a_j\rangle\langle a_j\rvert$ とすると、$K_j\lvert\Phi\rangle=\lvert a_j\rangle\langle a_j\vert\Phi\rangle$ で、$\lVert a_j\rVert=1$ なので、$\lVert K_j\Phi\rVert^2=\lvert\langle a_j\vert\Phi\rangle\rvert^2$ となります。つまり、$p_j$ は、$P(m)$ の、$K_m=\lvert a_j\rangle\langle a_j\rvert$ の場合です。
+>
+> この項目では、まず $K_m$ で測り（結果 $m$、確率 $P(m)$）、結果を記録せずに、そのあと基底 $\{\lvert a_j\rangle\}$ で測る（結果 $j$）、という2回の測定を考えます。
+
+この項目では、① の $|\varphi\rangle$ を $|\Phi_m\rangle$ に取り替えた量 $\langle\Phi_m|A|\Phi_m\rangle$ を、$P(m)$ で重みづけて平均します。これが (A-8) です。
+
+(A-8) を、① の結果を使って、$a_j$ を使った形に書き直します。(A-8) の右辺の各項 $\langle\Phi_m|A|\Phi_m\rangle$ は、状態ベクトル $|\Phi_m\rangle$ での $A$ の期待値です。① の結果を、$|\varphi\rangle=|\Phi_m\rangle$ として使うと、次のようになります（$P(m)>0$ の $m$ について）。
+
+$$
+\langle\Phi_m|A|\Phi_m\rangle=\sum_ja_j\,\big|\langle a_j|\Phi_m\rangle\big|^2
+$$
+
+これを (A-8) に代入します。
+
+$$
+\langle A\rangle=\sum_mP(m)\sum_ja_j\,\big|\langle a_j|\Phi_m\rangle\big|^2
+$$
+
+和は有限なので、$m$ と $j$ の和の順序を入れ替えられます。$a_j$ は $m$ によらないので、$m$ の和の外に出せます。
+
+$$
+\langle A\rangle=\sum_ja_j\Big[\sum_mP(m)\,\big|\langle a_j|\Phi_m\rangle\big|^2\Big]
+$$
+
+角括弧の中を、$q_j$ と書きます。
 
 $$
 q_j=\sum_mP(m)\,\big|\langle a_j|\Phi_m\rangle\big|^2
 $$
 
-値 $a_j$ と確率 $q_j$ の積の和が、期待値です。$q_j$ を代入します。
+$q_j$ の意味を、確かめます。$P(j\mid m):=|\langle a_j|\Phi_m\rangle|^2$ は、結果 $m$ が出たあとの状態 $|\Phi_m\rangle$ を、基底 $\{|a_j\rangle\}$ で測ったときの、結果 $j$ の確率です。これは、結果 $m$ が出たという条件のもとでの、結果 $j$ の**条件付き確率**で、① の $p_j$ に、$|\varphi\rangle=|\Phi_m\rangle$ を入れたものです。全確率の法則から、$q_j=\sum_mP(m)\,P(j\mid m)$ は、結果 $m$ を記録せずに、そのあと基底 $\{|a_j\rangle\}$ で測ったときの、結果 $j$ の確率です。したがって、$\langle A\rangle$ は、次のように、値 $a_j$ と確率 $q_j$ の積の和になります。
 
 $$
-\sum_ja_j\,q_j=\sum_ja_j\sum_mP(m)\,\big|\langle a_j|\Phi_m\rangle\big|^2
+\langle A\rangle=\sum_ja_j\,q_j
 $$
 
-和は有限なので、$j$ と $m$ の和の順序を入れ替えられます。
+これは、期待値の定義 $\sum_ip_ix_i$ そのものです。
+
+**$P(m)=0$ の項**：(A-8) の和には、$P(m)=0$ の $m$ も含まれますが、そのときは $|\Phi_m\rangle$ が定まりません。しかし、① の結果から、規格化された任意の状態 $|\varphi\rangle$ で、$\langle\varphi|A|\varphi\rangle=\sum_ja_jp_j$ です（$p_j=|\langle a_j|\varphi\rangle|^2$）。① の展開 $|\varphi\rangle=\sum_jc_j|a_j\rangle$ と、そのブラ $\langle\varphi|=\sum_kc_k^\ast\langle a_k|$ から
 
 $$
-\sum_ja_j\,q_j=\sum_mP(m)\sum_ja_j\,\big|\langle a_j|\Phi_m\rangle\big|^2
+\langle\varphi|\varphi\rangle=\sum_k\sum_jc_k^\ast c_j\,\langle a_k|a_j\rangle=\sum_j|c_j|^2=\sum_jp_j
 $$
 
-各 $m$ について、① の結果 $\sum_ja_j\,|\langle a_j|\varphi\rangle|^2=\langle\varphi|A|\varphi\rangle$ を、$|\varphi\rangle=|\Phi_m\rangle$ に適用すると、次のようになります。
+（$\langle a_k|a_j\rangle=\delta_{kj}$）で、$\langle\varphi|\varphi\rangle=1$ なので、$\sum_jp_j=1$ です。$a_j$ は実数で、$p_j\ge0$ なので、$\big|\sum_ja_jp_j\big|\le\sum_j|a_j|\,p_j\le\max_j|a_j|$ で、有限の値です。そのため、$P(m)\,\langle\Phi_m|A|\Phi_m\rangle$ は、$|\Phi_m\rangle$ をどう決めても、$0\times(\text{有限})=0$ です。$P(m)\,P(j\mid m)$ も同じで、$P(m)=0$ の項は、和に足しても足さなくても、同じ値なので、$0$ とみなせます。
+
+**確認（同じ基底で測る場合）**：$K_m=|a_m\rangle\langle a_m|$（$m=1,\dots,d$）とすると、$K_m=|a_m\rangle\langle a_m|$ なので、(A-7) から、$K_m|\Phi\rangle=|a_m\rangle\langle a_m|\Phi\rangle$（$\langle a_m|\Phi\rangle$ は数）で、$\sqrt{P(m)}=\|K_m\Phi\|=|\langle a_m|\Phi\rangle|$ です。$P(m)>0$ のとき、$e^{i\theta}:=\langle a_m|\Phi\rangle/|\langle a_m|\Phi\rangle|$（$|e^{i\theta}|=1$）と置くと
 
 $$
-\sum_ja_j\,q_j=\sum_mP(m)\,\langle\Phi_m|A|\Phi_m\rangle
+|\Phi_m\rangle=\frac{K_m|\Phi\rangle}{\sqrt{P(m)}}=e^{i\theta}|a_m\rangle
 $$
 
-これが、(A-8) です。まとめると、次の2つの式は、どちらも、定義 $\sum_ip_ix_i$ を当てはめたものです。
+で、$|a_m\rangle$ に絶対値 $1$ の数が掛かったものです。内積はケットについて線形なので、$\langle a_j|\big(e^{i\theta}|a_m\rangle\big)=e^{i\theta}\langle a_j|a_m\rangle$ で、次のようになります。
+
+$$
+P(j\mid m)=\big|e^{i\theta}\langle a_j|a_m\rangle\big|^2=|\langle a_j|a_m\rangle|^2=\delta_{jm}
+$$
+
+（$|e^{i\theta}|=1$、$\langle a_j|a_m\rangle=\delta_{jm}$）。したがって、$q_j=\sum_mP(m)\,\delta_{jm}=P(j)$ で、先に基底 $\{|a_j\rangle\}$ で測ってから、もう一度、同じ基底で測ると、1回目と同じ結果 $j$ が、確率 $P(j)$ で、出ることを表しています。
+
+まとめると、次の2つの式は、どちらも、定義 $\sum_ip_ix_i$ を当てはめたものです。
 
 状態ベクトル $|\varphi\rangle$ の場合は、結果 $j$ の値が $a_j$、確率が $|\langle a_j|\varphi\rangle|^2$ で、結果は次の式です。
 
@@ -2505,6 +2682,68 @@ $$
 この項目では、期待値を $K_m$ と $\rho$ で書き直し、結果を記録しない場合の状態を表す行列を得ます。
 
 いまの期待値は、状態の情報が、ケットとブラの両側に、$A$ を挟む形で現れています。状態の情報だけを1つの行列にまとめ、観測量 $A$ と分けて書くには、$A$ を、挟まれた位置から外に出す必要があります。
+
+ここで、この項目で使う知識を、整理します。
+
+- **空間と次元**：$\mathcal H=\mathbb C^d$。$|\Phi\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=1$）、$K_m\in\mathbb C^{d\times d}$、$A=A^\dagger\in\mathbb C^{d\times d}$。
+- **(A-7)**：$P(m)>0$ のとき、$|\Phi_m\rangle=K_m|\Phi\rangle/\sqrt{P(m)}$。
+- **(A-8)**：$\langle A\rangle=\sum_mP(m)\,\langle\Phi_m|A|\Phi_m\rangle$。
+- **共役転置**：$(K|\Phi\rangle)^\dagger=\langle\Phi|K^\dagger$。
+- **完全性関係**：$\{|j\rangle\}$（$j=1,\dots,d$）を、$\mathbb C^d$ の計算基底（$j$ 番目の成分だけが $1$ のベクトル）とします。$|j\rangle\langle j|$ は、$(j,j)$ 成分だけが $1$ の行列なので、$\sum_j|j\rangle\langle j|=I$ です。
+
+**トレース**：$M\in\mathbb C^{d\times d}$ のトレースは、対角成分の和です。
+
+$$
+\operatorname{tr}M=\sum_{j=1}^dM_{jj}
+$$
+
+これを、計算基底のブラとケットで書きます。$M|j\rangle$ は $M$ の第 $j$ 列で、これに $\langle j|$ を掛けると、その第 $j$ 成分を取り出します。
+
+$$
+\langle j|M|j\rangle=M_{jj}
+$$
+
+したがって、次の式が成り立ちます。
+
+$$
+\operatorname{tr}M=\sum_j\langle j|M|j\rangle
+$$
+
+たとえば $M=\begin{pmatrix}1&2\\3&4\end{pmatrix}$ では、$M|1\rangle$ は第1列、$M|2\rangle$ は第2列です。
+
+$$
+M|1\rangle=\begin{pmatrix}1\\3\end{pmatrix},\quad\langle1|M|1\rangle=1,\qquad M|2\rangle=\begin{pmatrix}2\\4\end{pmatrix},\quad\langle2|M|2\rangle=4
+$$
+
+和は $1+4=5=\operatorname{tr}M$ です。線形性は、成分ごとの和なので、次のように成り立ちます。
+
+$$
+\operatorname{tr}(aX+bY)=a\operatorname{tr}X+b\operatorname{tr}Y
+$$
+
+**ケットとブラの積（外積）と、密度行列**：列ベクトル $|u\rangle\in\mathbb C^d$ と、行ベクトル $\langle w|$ の積 $|u\rangle\langle w|$ は、$d\times d$ 行列です（① の補足で、$|a_j\rangle\langle a_j|$ として扱いました）。$|\Phi\rangle$ から作る、次の行列を、**密度行列**と呼びます。状態ベクトル $|\Phi\rangle$ を、行列で表したものです。
+
+$$
+\rho=|\Phi\rangle\langle\Phi|\in\mathbb C^{d\times d}
+$$
+
+成分は、次のとおりです。
+
+$$
+\rho_{jk}=\Phi_j\Phi_k^\ast
+$$
+
+対角成分は $|\Phi_j|^2$ なので、トレースは、次のようになります。
+
+$$
+\operatorname{tr}\rho=\sum_j|\Phi_j|^2=\langle\Phi|\Phi\rangle=1
+$$
+
+たとえば $|\Phi\rangle=|+\rangle=\tfrac1{\sqrt2}\begin{pmatrix}1\\1\end{pmatrix}$ では、次のとおりです。
+
+$$
+\rho=\frac12\begin{pmatrix}1&1\\1&1\end{pmatrix}
+$$
 
 (A-7) の第2式から、$P(m)>0$ の結果 $m$ について、$|\Phi_m\rangle$ は次のように書けます（先に示した等式 $K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle$ の両辺を、$\sqrt{P(m)}$ で割ったものです）。
 
@@ -2527,47 +2766,101 @@ $$
 $\frac{1}{\sqrt{P(m)}}$ が2つ掛かって $\frac{1}{P(m)}$ になり、掛けてあった $P(m)$ と打ち消し合います。
 
 $$
-P(m)\,\langle\Phi_m|A|\Phi_m\rangle=\langle\Phi|K_m^\dagger\,A\,K_m|\Phi\rangle
+P(m)\,\langle\Phi_m|A|\Phi_m\rangle=\langle\Phi|K_m^\dagger\,A\,K_m|\Phi\rangle\tag{A-13}
 $$
 
-右辺は、状態ベクトル $|\Phi\rangle$ を、ケットとブラの両方に含んでいます。ここから $A$ を外に出すために、完全性関係を使います。$\{|j\rangle\}_{j=1}^d$ を、$\mathbb C^d$ の任意の正規直交基底とします。① で示した展開と同じように、任意の $|v\rangle\in\mathbb C^d$ は、$|v\rangle=\sum_j|j\rangle\langle j|v\rangle$ と書けます。これが任意の $|v\rangle$ で成り立つので、次が成り立ちます（完全性関係）。
+右辺は、状態ベクトル $|\Phi\rangle$ を、ケットとブラの両方に含んでいます。ここから $A$ を外に出すために、完全性関係を使います。$\{|j\rangle\}$（$j=1,\dots,d$）を、$\mathbb C^d$ の計算基底とします。任意の $|v\rangle\in\mathbb C^d$ は、成分 $v_j=\langle j|v\rangle$ を使って、$|v\rangle=\sum_j|j\rangle\langle j|v\rangle$ と書けます。これが任意の $|v\rangle$ で成り立つので、次が成り立ちます（完全性関係）。
 
 $$
-\sum_j|j\rangle\langle j|=I
+\sum_j|j\rangle\langle j|=I\tag{A-14}
 $$
 
-これを、$\langle\varphi|B|\varphi\rangle$ の $B$ と $|\varphi\rangle$ の間に挿入します。一般に、$|\varphi\rangle\in\mathbb C^d$ と $B\in\mathbb C^{d\times d}$ について、次のように変形できます。
+完全性関係 (A-14) を、$\langle\varphi|B|\varphi\rangle$ の $B$ と $|\varphi\rangle$ の間に挿入します。一般に、$|\varphi\rangle\in\mathbb C^d$ と $B\in\mathbb C^{d\times d}$ について、$B|\varphi\rangle=BI|\varphi\rangle$ なので、次のように変形できます。
 
 $$
-\langle\varphi|B|\varphi\rangle=\sum_j\langle\varphi|B|j\rangle\langle j|\varphi\rangle=\sum_j\langle j|\varphi\rangle\langle\varphi|B|j\rangle=\operatorname{tr}\big(|\varphi\rangle\langle\varphi|\,B\big)
+\langle\varphi|B|\varphi\rangle=\sum_j\langle\varphi|B\,\boxed{|j\rangle\langle j|}\,|\varphi\rangle=\sum_j\langle\varphi|B|j\rangle\langle j|\varphi\rangle
 $$
 
-2番目の等号は、$\langle j|\varphi\rangle$ と $\langle\varphi|B|j\rangle$ がどちらも数なので、順序を入れ替えたものです。3番目の等号は、$\sum_j\langle j|M|j\rangle$ が、行列 $M$ の対角成分の和、つまりトレース $\operatorname{tr}M$ であることから、$M=|\varphi\rangle\langle\varphi|B$ とおいたものです。ここで、$|\varphi\rangle\langle\varphi|$ というケットとブラの積が現れます。$\varphi$ がケットとブラの両方に含まれるので、$B$ を外に出すと、$\varphi$ の部分はこの積にまとまります。
+$\langle\varphi|B|j\rangle$ と $\langle j|\varphi\rangle$ は、どちらも数（スカラー）なので、順序を入れ替えられます。
+
+$$
+\langle\varphi|B|\varphi\rangle=\sum_j\boxed{\langle j|\varphi\rangle\langle\varphi|B|j\rangle}
+$$
+
+和の中の積 $\langle j|\varphi\rangle\langle\varphi|B$ は、行列の積の結合法則から、ブラ $\langle j|$ と、ケット $|j\rangle$ の間に、行列 $|\varphi\rangle\langle\varphi|B$ を挟んだ形 $\langle j|\big(|\varphi\rangle\langle\varphi|B\big)|j\rangle$ です。
+
+$$
+\langle\varphi|B|\varphi\rangle=\sum_j\langle j|\big(|\varphi\rangle\langle\varphi|B\big)|j\rangle
+$$
+
+復習のとおり、$\sum_j\langle j|M|j\rangle=\operatorname{tr}M$ なので、$M=|\varphi\rangle\langle\varphi|B$ とすると、次の式が成り立ちます。
+
+$$
+\langle\varphi|B|\varphi\rangle=\operatorname{tr}\big(\boxed{|\varphi\rangle\langle\varphi|}\,B\big)\tag{A-15}
+$$
+
+ここで、$|\varphi\rangle\langle\varphi|$ は、$|\varphi\rangle$ だけから決まる行列で、$B$ を含みません。(A-15) は、$\langle\varphi|B|\varphi\rangle$ を、$|\varphi\rangle$ だけに依存する行列 $|\varphi\rangle\langle\varphi|$ と、$B$ の積の、トレースとして書いたものです。
 
 たとえば、$|\varphi\rangle=|+\rangle$、$B=\begin{pmatrix}2&1\\1&2\end{pmatrix}$ なら、$\langle+|B|+\rangle=3$ で、$\operatorname{tr}\big(|+\rangle\langle+|B\big)=\frac12\operatorname{tr}\begin{pmatrix}3&3\\3&3\end{pmatrix}=3$ です。
 
-これを $B=K_m^\dagger AK_m$、$|\varphi\rangle=|\Phi\rangle$ に適用します。その前に、トレースの性質を確かめます。トレースには、積の順序を入れ替えても、値が変わらない性質があります（巡回性）。
+次に、トレースの性質（巡回性）を確かめます。トレースには、積の順序を入れ替えても、値が変わらない性質があります（巡回性）。
 
 $$
-\operatorname{tr}(XY)=\operatorname{tr}(YX)
+\operatorname{tr}(XY)=\operatorname{tr}(YX)\tag{A-16}
 $$
 
-成分で書くと、$\operatorname{tr}(XY)=\sum_{i,j}X_{ij}Y_{ji}=\sum_{j,i}Y_{ji}X_{ij}=\operatorname{tr}(YX)$ です。数の積の順序と、和の添字の名前を、入れ替えただけです。たとえば、$X=\begin{pmatrix}1&2\\3&4\end{pmatrix}$、$Y=\begin{pmatrix}0&1\\1&0\end{pmatrix}$ なら、$\operatorname{tr}(XY)=5=\operatorname{tr}(YX)$ です。これを、$X=\rho K_m^\dagger A$、$Y=K_m$ として使うと、$K_m$ を前に動かせます。ただし、$\rho=|\Phi\rangle\langle\Phi|$ です。
+成分で書くと、$\operatorname{tr}(XY)=\sum_{i,j}X_{ij}Y_{ji}=\sum_{j,i}Y_{ji}X_{ij}=\operatorname{tr}(YX)$ です。数の積の順序と、和の添字の名前を、入れ替えただけです。たとえば、$X=\begin{pmatrix}1&2\\3&4\end{pmatrix}$、$Y=\begin{pmatrix}0&1\\1&0\end{pmatrix}$ なら、$\operatorname{tr}(XY)=5=\operatorname{tr}(YX)$ です。
+
+**基底によらないこと**：計算基底でなくても、任意の正規直交基底 $\{|u_j\rangle\}$（$j=1,\dots,d$）で、$\sum_j\langle u_j|M|u_j\rangle=\operatorname{tr}M$ です。$U=(|u_1\rangle\ \cdots\ |u_d\rangle)$ はユニタリ行列（$U^\dagger U=UU^\dagger=I$）で、$\langle u_j|M|u_j\rangle=(U^\dagger MU)_{jj}$ なので、(A-16) から、$\sum_j\langle u_j|M|u_j\rangle=\operatorname{tr}(U^\dagger MU)=\operatorname{tr}(MUU^\dagger)=\operatorname{tr}M$ です。① で固有ベクトルの基底を使ったとき、$U^\dagger AU$ が対角行列になるのも、同じ形です。
+
+(A-15) を、$B=K_m^\dagger AK_m$、$|\varphi\rangle=|\Phi\rangle$ に適用します。$\rho=|\Phi\rangle\langle\Phi|$（測定前の密度行列）なので、次のようになります。
 
 $$
-\langle\Phi|K_m^\dagger AK_m|\Phi\rangle=\operatorname{tr}\big(|\Phi\rangle\langle\Phi|\,K_m^\dagger AK_m\big)=\operatorname{tr}\big(K_m|\Phi\rangle\langle\Phi|K_m^\dagger\,A\big)
+\langle\Phi|K_m^\dagger AK_m|\Phi\rangle=\operatorname{tr}\big(\rho\,K_m^\dagger AK_m\big)
 $$
 
-です。$\rho=|\Phi\rangle\langle\Phi|$ は、状態ベクトル $|\Phi\rangle$ を行列で表したもので、測定前の密度行列と呼びます。これを用いると、$K_m|\Phi\rangle\langle\Phi|K_m^\dagger=K_m\rho K_m^\dagger$ なので、結果を記録しない場合の期待値は、次の形になります。
+右辺の積の中で、$A$ は、$K_m^\dagger$ と $K_m$ の間にあります。(A-16) $\operatorname{tr}(XY)=\operatorname{tr}(YX)$ を、$X=\rho K_m^\dagger A$、$Y=K_m$ として使うと、トレースの中で、$K_m$ が、積の先頭に移ります。
 
 $$
-\langle A\rangle=\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\,A\big)=\operatorname{tr}\Big(\Big[\sum_mK_m\rho K_m^\dagger\Big]A\Big)
+\operatorname{tr}\big(\rho K_m^\dagger A\,K_m\big)=\operatorname{tr}\big(K_m\,\rho K_m^\dagger A\big)
 $$
 
-最後の等号は、トレースの線形性です。この式で、$A$ に依存しない部分は、次の行列です。
+2つの式をつなぐと、次の式が成り立ちます。
 
 $$
-\sum_mK_m\rho K_m^\dagger
+\langle\Phi|K_m^\dagger AK_m|\Phi\rangle=\operatorname{tr}\big(K_m\rho K_m^\dagger\,A\big)\tag{A-17}
+$$
+
+右辺の積で、$A$ は右端にあり、左側の $K_m\rho K_m^\dagger$ は、$A$ を含みません。つまり、$K_m\rho K_m^\dagger$ は、$A$ によらず、$\rho$ と $K_m$ だけで決まる行列です。
+
+(A-8) の各項に、(A-13) を使います。
+
+$$
+\langle A\rangle=\sum_m\langle\Phi|K_m^\dagger AK_m|\Phi\rangle
+$$
+
+各項に、(A-17) を使います。
+
+$$
+\langle A\rangle=\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\,A\big)
+$$
+
+トレースの線形性（$\sum_m\operatorname{tr}X_m=\operatorname{tr}\sum_mX_m$）で、和を、トレースの中に入れます。
+
+$$
+\langle A\rangle=\operatorname{tr}\Big(\sum_mK_m\rho K_m^\dagger\,A\Big)
+$$
+
+行列の積の分配法則（$\sum_mX_mA=\big(\sum_mX_m\big)A$）で、右端の共通の因子 $A$ を、和の外に括り出します。
+
+$$
+\langle A\rangle=\operatorname{tr}\Big(\Big[\sum_mK_m\rho K_m^\dagger\Big]A\Big)\tag{A-18}
+$$
+
+(A-18) の角括弧の中が、$A$ を含まない部分で、次の行列です。
+
+$$
+\boxed{\sum_mK_m\rho K_m^\dagger}\tag{A-19}
 $$
 
 任意の観測量の期待値が、この行列と $A$ のトレースで決まるので、結果を記録しない場合の状態は、この行列で表せます。
@@ -2580,24 +2873,80 @@ $$
 H_1=\frac{M+M^\dagger}{2},\qquad H_2=\frac{M-M^\dagger}{2i}
 $$
 
-**(2) 条件が、すべての行列 $M$ に広がる。** トレースの線形性から、次のようになります。
+ここで、(2)、(3) で示す命題を、式で書いておきます。$X,Y\in\mathbb C^{d\times d}$ について、仮定（すべての $A=A^\dagger\in\mathbb C^{d\times d}$ で $\operatorname{tr}(XA)=\operatorname{tr}(YA)$）から、結論 $X=Y$ が成り立ちます。
 
 $$
-\operatorname{tr}(XM)=\operatorname{tr}(XH_1)+i\operatorname{tr}(XH_2)=\operatorname{tr}(YH_1)+i\operatorname{tr}(YH_2)=\operatorname{tr}(YM)
+\Big[\ \operatorname{tr}(XA)=\operatorname{tr}(YA)\ \ (\forall A=A^\dagger\in\mathbb C^{d\times d})\ \Big]\ \Longrightarrow\ X=Y\tag{A-20}
 $$
 
-**(3) 成分が等しくなる。** $M=|j\rangle\langle k|$ とします。基底 $\{|i\rangle\}$ で、トレースを成分で書き、完全性関係 $\sum_i|i\rangle\langle i|=I$ を使うと、次のようになります。
+仮定は、「$Y$ も、すべての観測量で、$X$ と同じ期待値を再現する」という、$Y$ についての条件です。特定の行列について、成分で確かめるものではなく、これが成り立つとして、結論を導きます。
+
+**(2) 仮定の条件を、すべての行列 $M$ に広げる。** 仮定は、エルミート行列 $A$ についての等式ですが、これを、任意の行列 $M$ についての等式 $\operatorname{tr}(XM)=\operatorname{tr}(YM)$ に、広げます。(1) の $M=H_1+iH_2$ を、$\operatorname{tr}(XM)$ に代入し、トレースの線形性で、分けます。
 
 $$
-\operatorname{tr}\big(X|j\rangle\langle k|\big)=\sum_i\langle i|X|j\rangle\langle k|i\rangle=\langle k|\Big(\sum_i|i\rangle\langle i|\Big)X|j\rangle=\langle k|X|j\rangle=X_{kj}
+\operatorname{tr}(XM)=\operatorname{tr}(XH_1)+i\operatorname{tr}(XH_2)
 $$
 
-$Y$ についても、同じ計算で $\operatorname{tr}\big(Y|j\rangle\langle k|\big)=Y_{kj}$ なので、(2) から、すべての $j,k$ で $X_{kj}=Y_{kj}$ です。したがって $X=Y$ で、期待値を再現する行列は、1つに決まります。
-
-この行列の各項は、$K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle$ により、結果 $m$ の状態 $|\Phi_m\rangle$ に確率 $P(m)$ を掛けたものです。
+仮定は、すべてのエルミート行列 $A$ で成り立つので、$A=H_1$ と $A=H_2$ のときも、成り立ちます（$H_1,H_2$ は、エルミート行列です）。したがって、$\operatorname{tr}(XH_1)=\operatorname{tr}(YH_1)$、$\operatorname{tr}(XH_2)=\operatorname{tr}(YH_2)$ を、代入できます。
 
 $$
-K_m\rho K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger=P(m)\,|\Phi_m\rangle\langle\Phi_m|
+\operatorname{tr}(XM)=\operatorname{tr}(YH_1)+i\operatorname{tr}(YH_2)
+$$
+
+線形性で、戻します。
+
+$$
+\operatorname{tr}(XM)=\operatorname{tr}(YM)
+$$
+
+**(3) 成分を比べて、$X=Y$ を示す。** $M=|j\rangle\langle k|$ として、$\operatorname{tr}(XM)$ を、成分で計算します。トレースの式 $\operatorname{tr}N=\sum_i\langle i|N|i\rangle$（$\{|i\rangle\}$ は計算基底）に、$N=XM=X|j\rangle\langle k|$ を入れます。
+
+$$
+\operatorname{tr}\big(X|j\rangle\langle k|\big)=\sum_i\langle i|\big(X|j\rangle\langle k|\big)|i\rangle
+$$
+
+行列の積の結合法則で、括弧を外すと、$\langle i|X|j\rangle$ と $\langle k|i\rangle$ の積になります。$\langle k|i\rangle$ は数です。
+
+$$
+\operatorname{tr}\big(X|j\rangle\langle k|\big)=\sum_i\langle i|X|j\rangle\langle k|i\rangle
+$$
+
+$\langle i|X|j\rangle$ と $\langle k|i\rangle$ は数なので、順序を入れ替え、$\langle k|$ と $X|j\rangle$ の間に、$\sum_i|i\rangle\langle i|$ をまとめます。
+
+$$
+\operatorname{tr}\big(X|j\rangle\langle k|\big)=\langle k|\Big(\sum_i|i\rangle\langle i|\Big)X|j\rangle
+$$
+
+完全性関係 (A-14) を使います。
+
+$$
+\operatorname{tr}\big(X|j\rangle\langle k|\big)=\langle k|X|j\rangle=X_{kj}
+$$
+
+$Y$ についても、同じ計算で $\operatorname{tr}\big(Y|j\rangle\langle k|\big)=Y_{kj}$ です。(2) から、$\operatorname{tr}(XM)=\operatorname{tr}(YM)$ なので、すべての $j,k$ で $X_{kj}=Y_{kj}$ です。すべての成分が等しいので、次の式が成り立ちます。
+
+$$
+\boxed{X=Y}
+$$
+
+これで、(A-20) が示せました。つまり、期待値を再現する行列は、1つに決まります。
+
+この行列の各項は、結果 $m$ の状態 $|\Phi_m\rangle$ に、確率 $P(m)$ を掛けたものです。各項を、$\rho=|\Phi\rangle\langle\Phi|$ で書き直します。
+
+$$
+K_m\rho K_m^\dagger=K_m|\Phi\rangle\langle\Phi|K_m^\dagger
+$$
+
+共役転置 $\big(K_m|\Phi\rangle\big)^\dagger=\langle\Phi|K_m^\dagger$ を使うと、2つの括弧の積になります。
+
+$$
+K_m\rho K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger
+$$
+
+$K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle$ を代入します。$\sqrt{P(m)}$ は実数なので、共役転置で変わりません。
+
+$$
+K_m\rho K_m^\dagger=\sqrt{P(m)}\,|\Phi_m\rangle\;\sqrt{P(m)}\,\langle\Phi_m|=P(m)\,|\Phi_m\rangle\langle\Phi_m|\tag{A-21}
 $$
 
 ここまでは、$P(m)>0$ の結果についてでした。$P(m)=0$ の結果では、$\|K_m\Phi\|^2=0$ から $K_m|\Phi\rangle=0$ で、$K_m\rho K_m^\dagger=0$ です。$P(m)=0$ のとき、$P(m)\,|\Phi_m\rangle\langle\Phi_m|$ は $0$ とみなすと、この項は、足しても足さなくても同じなので、和は、すべての $m$ にわたってよいことになります。
@@ -2605,7 +2954,7 @@ $$
 したがって、次の等式が成り立ちます。
 
 $$
-\sum_mP(m)\,|\Phi_m\rangle\langle\Phi_m|=\sum_mK_m\rho K_m^\dagger
+\sum_mP(m)\,|\Phi_m\rangle\langle\Phi_m|=\sum_mK_m\rho K_m^\dagger\tag{A-22}
 $$
 
 ---
@@ -2615,7 +2964,7 @@ $$
 **純粋状態**は、測定前の $|\Phi\rangle$ のように、状態ベクトル $|\psi\rangle$ で記述できる状態です。密度行列は、次の形になります。
 
 $$
-|\psi\rangle\langle\psi|
+|\psi\rangle\langle\psi|\tag{A-23}
 $$
 
 **混合状態**は、状態ベクトルでは記述できない状態です。
@@ -2677,7 +3026,7 @@ $$
 状態 $\rho$ のとき、結果 $\pm$ の確率は、次の式で与えられます。
 
 $$
-\langle\pm|\rho|\pm\rangle
+\langle\pm|\rho|\pm\rangle\tag{A-24}
 $$
 
 **階数（ランク）の復習**：行列の階数は、一次独立な列の最大個数です。零でない状態ベクトルを、成分が $a,b$ の列ベクトルとして、次のように書きます。
@@ -2712,7 +3061,11 @@ $$
 |a|^2|b|^2-(ab^\ast)(ba^\ast)=0
 $$
 
-です。したがって、**零でない状態ベクトルの $|\psi\rangle\langle\psi|$ は、階数 $1$（行列式 $0$）の行列**です。
+です。したがって、零でない状態ベクトル $|\psi\rangle$ について、$|\psi\rangle\langle\psi|$ は、階数 $1$（行列式 $0$）の行列です。
+
+$$
+\operatorname{rank}\big(|\psi\rangle\langle\psi|\big)=1\qquad(|\psi\rangle\neq0)\tag{A-25}
+$$
 
 **具体例**：状態と測定演算子を、次のようにします。
 
@@ -2732,10 +3085,16 @@ $$
 K_0\rho K_0^\dagger=\frac12|0\rangle\langle0|,\qquad K_1\rho K_1^\dagger=\frac12|1\rangle\langle1|
 $$
 
-です。結果を区別せずに足すと
+です。結果を区別せずに足すと、次のようになります。
 
 $$
-\sum_mK_m\rho K_m^\dagger=\frac12|0\rangle\langle0|+\frac12|1\rangle\langle1|=\frac12I
+\sum_mK_m\rho K_m^\dagger=\frac12|0\rangle\langle0|+\frac12|1\rangle\langle1|
+$$
+
+$|0\rangle\langle0|+|1\rangle\langle1|=I$（(A-14)、$d=2$）なので、次の式が成り立ちます。
+
+$$
+\sum_mK_m\rho K_m^\dagger=\frac12I\tag{A-26}
 $$
 
 です。
@@ -2755,10 +3114,12 @@ $$
 零でない状態ベクトルの外積は、階数が $1$ です。$\frac12I$ の階数は $2$ なので、階数が違います。したがって、どんな状態ベクトル $|\psi\rangle$ についても、次が成り立ちます。
 
 $$
-\frac12I\neq|\psi\rangle\langle\psi|
+\frac12I\neq|\psi\rangle\langle\psi|\tag{A-27}
 $$
 
-つまり $\frac12I$ は、状態ベクトルでは記述できない**混合状態**です。確率 $p_j$ で状態 $|\psi_j\rangle$ にある、という古典的な混ぜ合わせにあたります。
+つまり $\frac12I$ は、状態ベクトルでは記述できない**混合状態**です。以下では、$|\psi_j\rangle$ を、混ぜる $j$ 番目の、規格化された状態ベクトルとし、$p_j$ を、$p_j\ge0$、$\sum_jp_j=1$ を満たす数とします。混合状態は、確率 $p_j$ で状態 $|\psi_j\rangle$ にある、という古典的な混ぜ合わせにあたります。
+
+この $p_j$ は、混合の重みで、② の $p_j=|\langle a_j|\varphi\rangle|^2$（1つの状態 $|\varphi\rangle$ を、固有基底 $\{|a_j\rangle\}$ で測ったときの、結果 $j$ の確率）とは、別の意味です。
 
 **重ね合わせと混合状態の違い**：$\pm$ 基底で測ると、次のように違いが出ます。
 
@@ -2773,7 +3134,7 @@ $$
 - 現実の測定には、読み出し誤差があります。後の [付録A-5-3](#A-5-3) の例（ラベル取り違えの模型）では、結果 $0$ に**複数の演算子**が対応し、結果 $0$ の後の状態が階数 $2$ の混合状態になって、1つの $K_0|\Phi\rangle$ では表せません。演算子の組 $\{K_{m\alpha}\}$ と、クラウス表現が要ります。
 - 環境との相互作用（ノイズ）も、系だけを見ると、同じ形 $\sum_mK_m\rho K_m^\dagger$ になります（[部分トレースのノート](partial_trace_reduced_density_matrix.md#p6) Part VI）。
 
-純粋状態を行列で表す形が、ケットとブラの積（密度行列と同じ形）です。そこで、規格化前のケットとそのブラの積を作ると
+純粋状態を行列で表す形が、ケットとブラの積（密度行列と同じ形）です。そこで、規格化前のケットとそのブラの積を作ります。(A-21) の前半と同じ式です。
 
 $$
 K_m\rho K_m^\dagger=K_m|\Phi\rangle\langle\Phi|K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger
@@ -2787,13 +3148,13 @@ $$
 K_m|\Phi\rangle\langle\Phi|K_m^\dagger
 $$
 
-は $d\times d$ の**行列**で、結果 $m$ が出たあとの**状態そのもの**（規格化前）を表します。確率という**数**は、行列から取り出します。その操作がトレースで、
+は $d\times d$ の**行列**で、結果 $m$ が出たあとの**状態そのもの**（規格化前）を表します。確率という**数**は、行列から取り出します。その操作がトレースで、次の式が成り立ちます。
 
 $$
-\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\langle\Phi|K_m^\dagger K_m|\Phi\rangle=P(m)
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\langle\Phi|K_m^\dagger K_m|\Phi\rangle=P(m)\tag{A-28}
 $$
 
-です（導出は、次の「なぜトレースが確率になるか」の (2)）。数から行列は戻せないので、状態を保つには、行列の形で持つ必要があります。下の数値例では、次のようになります。
+この主張を、数値例で確かめたあと、「なぜトレースが確率になるか」の (1)〜(5) で、証明します（(1) と (2) が (A-28) の証明で、(3) は混合状態への拡張、(4) は巡回性の式を作る段階、(5) は確率の和への拡張です）。数から行列は戻せないので、状態を保つには、行列の形で持つ必要があります。下の数値例では、次のようになります。
 
 $$
 K_0\rho K_0^\dagger=\frac12|0\rangle\langle0|\ \ (\text{行列}),\qquad\operatorname{tr}\big(K_0\rho K_0^\dagger\big)=\frac12\ \ (\text{確率})
@@ -2827,65 +3188,115 @@ $$
 |a\rangle\langle b|=\begin{pmatrix}1\\2\end{pmatrix}\begin{pmatrix}3&4\end{pmatrix}=\begin{pmatrix}3&4\\6&8\end{pmatrix},\qquad\operatorname{tr}\big(|a\rangle\langle b|\big)=3+8=11,\qquad\langle b|a\rangle=3\cdot1+4\cdot2=11
 $$
 
-で、トレースと内積が一致します。これを一般に示します。基底 $|j\rangle$ で $\operatorname{tr}\big(|a\rangle\langle b|\big)=\sum_j\langle j|a\rangle\langle b|j\rangle$ です。数 $\langle j|a\rangle$ と $\langle b|j\rangle$ の順序を入れ替え、完全性関係 $\sum_j|j\rangle\langle j|=I$ を使うと
+で、トレースと内積が一致します。これを一般に示します。計算基底で、トレースの式 $\operatorname{tr}M=\sum_j\langle j|M|j\rangle$ に、$M=|a\rangle\langle b|$ を入れます。
 
 $$
-\operatorname{tr}\big(|a\rangle\langle b|\big)=\sum_j\langle b|j\rangle\langle j|a\rangle=\langle b|\Big(\sum_j|j\rangle\langle j|\Big)|a\rangle=\langle b|a\rangle
+\operatorname{tr}\big(|a\rangle\langle b|\big)=\sum_j\langle j|\big(|a\rangle\langle b|\big)|j\rangle
 $$
 
-です。
-
-*(2) 純粋状態の確率*：(1) で $|a\rangle=|b\rangle=K_m|\Phi\rangle$ とすると
+行列の積の結合法則で、括弧を外すと、$\langle j|a\rangle$ と $\langle b|j\rangle$ の積になります。
 
 $$
-\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\Big(\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger\Big)=\big\|K_m\Phi\big\|^2=P(m)
+\operatorname{tr}\big(|a\rangle\langle b|\big)=\sum_j\langle j|a\rangle\langle b|j\rangle
 $$
 
-で、(A-7) の確率に一致します。**トレースが確率になる理由は、「外積のトレースが内積（ケットのノルムの2乗）になる」ことです。**
-
-*(3) 混合状態の確率*：$\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$）なら、トレースの線形性と (2) から
+$\langle j|a\rangle$ と $\langle b|j\rangle$ は数なので、順序を入れ替えます。
 
 $$
-\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\sum_jp_j\operatorname{tr}\big(K_m|\psi_j\rangle\langle\psi_j|K_m^\dagger\big)=\sum_jp_j\,\|K_m\psi_j\|^2
+\operatorname{tr}\big(|a\rangle\langle b|\big)=\sum_j\langle b|j\rangle\langle j|a\rangle
 $$
 
-です。各純粋状態 $|\psi_j\rangle$ で結果 $m$ が出る確率 $\|K_m\psi_j\|^2$ の、重み $p_j$ による平均になっています。
-
-*(4) トレースの巡回性*：2つの行列を掛ける順序を入れ替えても、トレースは変わらない、という性質です。たとえば
+和を、$\langle b|$ と $|a\rangle$ の間の、$\sum_j|j\rangle\langle j|$ にまとめ、完全性関係 (A-14) を使います。
 
 $$
-X=\begin{pmatrix}1&2\\3&4\end{pmatrix},\qquad Y=\begin{pmatrix}0&1\\1&0\end{pmatrix}
+\operatorname{tr}\big(|a\rangle\langle b|\big)=\langle b|\Big(\sum_j|j\rangle\langle j|\Big)|a\rangle=\langle b|a\rangle\tag{A-29}
 $$
 
-なら
+*(2) 純粋状態の確率*：(A-21) の前半から、$K_m\rho K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger$ です。(A-29) を、$|a\rangle=|b\rangle=K_m|\Phi\rangle$ として使います。
 
 $$
-XY=\begin{pmatrix}2&1\\4&3\end{pmatrix}\ \ (\operatorname{tr}XY=5),\qquad YX=\begin{pmatrix}3&4\\1&2\end{pmatrix}\ \ (\operatorname{tr}YX=5)
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\big\langle K_m\Phi\big|K_m\Phi\big\rangle=\big\|K_m\Phi\big\|^2
 $$
 
-で、$XY\neq YX$ でもトレースは一致します。一般には、トレースの定義と行列の積の成分から
+(A-7) から、$\|K_m\Phi\|^2=P(m)$ なので、次の式が成り立ち、(A-28) が示せました。
 
 $$
-\operatorname{tr}(XY)=\sum_{i,j}X_{ij}Y_{ji}=\sum_{j,i}Y_{ji}X_{ij}=\operatorname{tr}(YX)
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=P(m)
 $$
 
-です（数の順序と、和の文字 $i,j$ を入れ替えました）。$X=K_m$、$Y=\rho K_m^\dagger$ とすると
+これは、(A-7) の確率に一致します。**トレースが確率になる理由は、「外積のトレースが内積（ケットのノルムの2乗）になる」ことです。**
+
+*(3) 混合状態の確率*：$\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$。$|\psi_j\rangle$ は規格化された状態ベクトル）を代入し、行列の積の分配法則で、$K_m$ と $K_m^\dagger$ を、和の中に入れます。
 
 $$
-\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(\rho K_m^\dagger K_m\big)=\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)
+K_m\rho K_m^\dagger=\sum_jp_j\,K_m|\psi_j\rangle\langle\psi_j|K_m^\dagger
 $$
 
-（2つ目の等号は、同じ性質を $X=\rho$、$Y=K_m^\dagger K_m$ に使った）です。
-
-*(5) 確率の和*：(A-6) $\sum_mK_m^\dagger K_m=I$ と (4) から
+トレースの線形性で、和を、トレースの外に出します。
 
 $$
-\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\Big(\sum_mK_m^\dagger K_m\,\rho\Big)=\operatorname{tr}\rho=1
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\sum_jp_j\operatorname{tr}\big(K_m|\psi_j\rangle\langle\psi_j|K_m^\dagger\big)
 $$
 
-で、結果を区別せずに平均した状態 $\sum_mK_m\rho K_m^\dagger$ のトレースも $1$ です。
+各項で、(2) と同じく、$(K_m|\psi_j\rangle)^\dagger=\langle\psi_j|K_m^\dagger$ から、次の式が成り立ちます。
 
-（行列の指数関数との関係 $\det(e^A)=e^{\operatorname{tr}A}$ という別の等式がありますが、ここでは使いません。ここで使うのは、外積のトレースが内積になること (1) と、トレースの巡回性 (4) だけです。）
+$$
+K_m|\psi_j\rangle\langle\psi_j|K_m^\dagger=\big(K_m|\psi_j\rangle\big)\big(K_m|\psi_j\rangle\big)^\dagger
+$$
+
+これに (A-29) を、$|a\rangle=|b\rangle=K_m|\psi_j\rangle$ として使います。
+
+$$
+\operatorname{tr}\big(K_m|\psi_j\rangle\langle\psi_j|K_m^\dagger\big)=\big\langle K_m\psi_j\big|K_m\psi_j\big\rangle=\big\|K_m\psi_j\big\|^2
+$$
+
+これを、上のトレースの式の各項に入れます。
+
+$$
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\sum_jp_j\,\|K_m\psi_j\|^2\tag{A-30}
+$$
+
+各純粋状態 $|\psi_j\rangle$ で結果 $m$ が出る確率 $\|K_m\psi_j\|^2$ の、重み $p_j$ による平均になっています。
+
+*(4) トレースの巡回性*：(A-16) $\operatorname{tr}(XY)=\operatorname{tr}(YX)$ を、$X=K_m$、$Y=\rho K_m^\dagger$ として使うと、次の式が成り立ちます。
+
+$$
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(\rho K_m^\dagger K_m\big)=\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)\tag{A-31}
+$$
+
+（2つ目の等号は、(A-16) を $X=\rho$、$Y=K_m^\dagger K_m$ として使ったものです）。
+
+*(5) 確率の和*：(A-31) から、各 $m$ で、$\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)$ です。$m$ で足します。
+
+$$
+\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\sum_m\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)
+$$
+
+トレースの線形性で、和を、トレースの中に入れ、分配法則で、右端の $\rho$ を、和の外に括り出します。
+
+$$
+\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\Big(\Big[\sum_mK_m^\dagger K_m\Big]\rho\Big)
+$$
+
+(A-6) $\sum_mK_m^\dagger K_m=I$ を使います。
+
+$$
+\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\rho
+$$
+
+$\operatorname{tr}\rho=1$ です。(3) の $\rho$ について、トレースの線形性と (A-29) から、次の式が成り立ちます（純粋状態は、(3) で $j$ が1つ、$p_1=1$ の場合です）。
+
+$$
+\operatorname{tr}\rho=\sum_jp_j\operatorname{tr}\big(|\psi_j\rangle\langle\psi_j|\big)=\sum_jp_j\langle\psi_j|\psi_j\rangle=\sum_jp_j=1
+$$
+
+したがって、次の式が成り立ちます。
+
+$$
+\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=1\tag{A-32}
+$$
+
+つまり、結果を区別せずに平均した状態 $\sum_mK_m\rho K_m^\dagger$ のトレースも $1$ です。
 
 (4) に現れた $K_m^\dagger K_m$ は、確率と、完全性の条件 (A-6) の両方に現れる組み合わせです。次の A-5-2 節で、この組み合わせに名前を付けます。
 
@@ -2973,7 +3384,7 @@ $$
 **1結果1演算子で書けない測定**：結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当て、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすものを、一般の測定とします（(A-7) は各 $m$ に $\alpha$ が1つの場合です）。状態を密度行列 $\rho\in\mathbb C^{d\times d}$ で書くと、結果 $m$ の確率と、測定後の状態は
 
 $$
-P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-13}
+P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-33}
 $$
 
 です。
@@ -2994,7 +3405,7 @@ $$
 
 で、純粋状態です。非対角成分は $\sqrt{\epsilon(1-\epsilon)}=0.3$ 残ります。
 
-*ラベル取り違えの模型*：結果 $0$ の経路が2つあります（実際に $|0\rangle$ で取り違えなし、実際に $|1\rangle$ で取り違えあり）。(A-13) の演算子は
+*ラベル取り違えの模型*：結果 $0$ の経路が2つあります（実際に $|0\rangle$ で取り違えなし、実際に $|1\rangle$ で取り違えあり）。(A-33) の演算子は
 
 $$
 K_{0,1}=\sqrt{1-\epsilon}\,P_0,\qquad K_{0,2}=\sqrt\epsilon\,P_1,\qquad K_{1,1}=\sqrt{1-\epsilon}\,P_1,\qquad K_{1,2}=\sqrt\epsilon\,P_0
