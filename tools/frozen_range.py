@@ -135,7 +135,7 @@ def _in_place(hashes: list[str], seg: dict) -> bool:
     j = i + len(run)
     orig_b, orig_a = Counter(before), Counter(after)
     now_b, now_a = Counter(hashes[:i]), Counter(hashes[j:])
-    for h in (set(orig_b) | set(orig_a)) - set(run):
+    for h in set(orig_b) | set(orig_a):  # 範囲の内容と同じ段落が範囲の外にあっても、範囲の外の個数だけを数える
         if orig_b[h] + orig_a[h] != now_b[h] + now_a[h]:
             continue  # 総数が変わった（挿入・削除・書き換え）。動いたとは言えない
         if now_b[h] > orig_b[h] or now_a[h] > orig_a[h]:

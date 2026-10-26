@@ -332,3 +332,19 @@ def test_stop_blocks_when_note_deleted(real):
     root, p = real
     p.unlink()
     assert json.loads(run_hook(root, "", {}, ["--stop"]))["decision"] == "block"
+
+
+def test_move_when_run_content_also_appears_outside(note):
+    base = "# 題\n\nA\n\nA\n\nB\n\ntail\n"
+    note.write_text(base, encoding="utf-8")
+    fr.freeze(note, 7, 9, today="2026-10-26")  # 後ろの A、B
+    st = fr.load_state(note)
+    moved = "# 題\n\nA\n\nB\n\nA\n\ntail\n"
+    assert fr.check_edit(base, moved, st)
+
+
+def test_stop_ignores_fully_released_record_with_deleted_note(real):
+    root, p = real
+    fr.release(p, None, None, "全部解除", today="2026-10-26")
+    p.unlink()
+    assert run_hook(root, "", {}, ["--stop"]) == ""

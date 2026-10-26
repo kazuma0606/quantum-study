@@ -70,6 +70,8 @@ def stop(data: dict) -> None:
     bad = []
     for p in fr.FROZEN_DIR.glob("*.json"):
         st = json.loads(p.read_text(encoding="utf-8"))
+        if not st.get("segments"):
+            continue  # すべて解除された記録は、保護の対象がない
         note = fr.ROOT / st["note"]
         if not note.exists():
             bad.append(f"{st['note']}：ノートが見つかりません（削除または移動された）")
