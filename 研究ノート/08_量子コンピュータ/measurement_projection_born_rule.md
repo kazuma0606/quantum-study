@@ -1,6 +1,6 @@
 # 射影演算子による測定確率の計算 ―$P(x^\ast)=\big\|(|x^\ast\rangle\langle x^\ast|\otimes I)|\Psi\rangle\big\|^2=\tfrac1N$の導出―
 
-> **作成** 2026-10-17　**更新** 2026-10-26
+> **作成** 2026-10-17　**更新** 2026-10-27
 > 入力レジスタを測ると正解の確率が $\frac1N$ になることを、射影演算子 $P_{x^\ast}\otimes I$ とボルン則から導出する。テンソル積の作用の証明、4候補の数値例、付録（完全な射影測定とPOVM、結果レジスタの測定とエンタングルメント、クロネッカー積の性質とQiskitの並び順、検算の一覧）。
 
 関数を計算する量子回路に、すべての候補の均等な重ね合わせを入力したあと、入力レジスタを測定して正解$x^\ast$が得られる確率が$\tfrac1N$であることを、射影演算子を使って導出します。物理の仮定（ボルン則）を使う箇所と、線形代数だけで導ける箇所を区別しながら進めます。最後に4候補の数値例で確認します。
@@ -2929,9 +2929,37 @@ $$
 \boxed{X=Y}
 $$
 
-これで、(A-20) が示せました。つまり、期待値を再現する行列は、1つに決まります。
+これで、(A-20) が示せました。この結論を、結果を記録しない場合の状態に当てはめます。
 
-この行列の各項は、結果 $m$ の状態 $|\Phi_m\rangle$ に、確率 $P(m)$ を掛けたものです。各項を、$\rho=|\Phi\rangle\langle\Phi|$ で書き直します。
+測定前の状態 $\rho$ と測定演算子 $\{K_m\}$ を固定すると、各観測量 $A$（$A=A^\dagger$）の、結果を記録しない場合の期待値 $\langle A\rangle$ が決まります。(A-18) を、再掲します。
+
+$$
+\langle A\rangle=\operatorname{tr}\Big(\Big[\sum_mK_m\rho K_m^\dagger\Big]A\Big)
+$$
+
+角括弧の中が、(A-19) の行列です。これを $X$ と置きます。
+
+$$
+X=\sum_mK_m\rho K_m^\dagger
+$$
+
+このとき、(A-18) は、次の式です。
+
+$$
+\langle A\rangle=\operatorname{tr}(XA)\qquad(\forall A=A^\dagger)
+$$
+
+$Y\in\mathbb C^{d\times d}$ も、すべての $A=A^\dagger$ で、同じ期待値を再現する（$\operatorname{tr}(YA)=\langle A\rangle$）とします。$\langle A\rangle$ を経由して、次の式が成り立ちます。
+
+$$
+\operatorname{tr}(XA)=\langle A\rangle=\operatorname{tr}(YA)\qquad(\forall A=A^\dagger\in\mathbb C^{d\times d})
+$$
+
+両端の $\operatorname{tr}(XA)=\operatorname{tr}(YA)$ が、(A-20) の仮定そのものなので、$Y=X$ です。したがって、固定した $\rho$ と $\{K_m\}$ について、すべての観測量の期待値を再現する行列は、(A-19) の行列 $X$ だけです。$X$ と異なる行列は、少なくとも1つの $A$ で、期待値が合いません。
+
+---
+
+次に、この行列の各項 $K_m\rho K_m^\dagger$ と、結果 $m$ が出たときの状態との関係を確かめます。$P(m)>0$ の結果 $m$ では、$\rho=|\Phi\rangle\langle\Phi|$ と、(A-7) から $K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle$ です。この2つを使い、各項 $K_m\rho K_m^\dagger$ を、測定後の状態ベクトル $|\Phi_m\rangle$ と確率 $P(m)$ で書き表します。
 
 $$
 K_m\rho K_m^\dagger=K_m|\Phi\rangle\langle\Phi|K_m^\dagger
@@ -3381,13 +3409,97 @@ $$
 
 入力が $|0\rangle$（$\theta=0$）なら $|0\rangle$、$|1\rangle$（$\theta=\pi$）なら $|1\rangle$ のままです。**$0<\theta<\pi$ の重ね合わせ入力**では、$\cos\frac\theta2$ も $\sin\frac\theta2$ もゼロでないので、どちらの基底状態にも完全には崩れません（弱い測定）。
 
-**1結果1演算子で書けない測定**：結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当て、$\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ を満たすものを、一般の測定とします（(A-7) は各 $m$ に $\alpha$ が1つの場合です）。状態を密度行列 $\rho\in\mathbb C^{d\times d}$ で書くと、結果 $m$ の確率と、測定後の状態は
+**1結果1演算子で書けない測定**：(A-7) は、結果 $m$ に演算子 $K_m$ を1つ割り当てる測定でした。ここでは、結果 $m$ に至る経路 $\alpha$ が複数あり、結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当てる場合を、環境を使って導きます。
+
+**設定**：系の空間を $\mathcal H=\mathbb C^d$、状態を $|\Phi\rangle\in\mathcal H$（$\langle\Phi|\Phi\rangle=1$）、$\rho=|\Phi\rangle\langle\Phi|$ とします。環境の空間を $\mathcal H_E=\mathbb C^r$、初期状態を $|0_E\rangle\in\mathcal H_E$ とします。$\mathcal H_E$ の正規直交基底 $\{|m\alpha\rangle_E\}$ を、結果 $m$ と経路 $\alpha$ の組ごとに、1つずつ用意します（組の個数が $r$）。
+
+$$
+\langle m\alpha|m'\alpha'\rangle_E=\delta_{mm'}\delta_{\alpha\alpha'}
+$$
+
+系と環境をまとめた空間 $\mathcal H\otimes\mathcal H_E$ に、ユニタリ演算子 $U\in\mathbb C^{dr\times dr}$ を作用させ、$K_{m\alpha}\in\mathbb C^{d\times d}$ を、次のように定めます（[部分トレースのノート](partial_trace_reduced_density_matrix.md#p6) Part VI の $K_m$ と同じ定義で、添字を $(m,\alpha)$ にしたものです）。
+
+$$
+K_{m\alpha}:=\big(I\otimes\langle m\alpha|_E\big)\,U\,\big(I\otimes|0_E\rangle\big)
+$$
+
+*(1) 作用後の全体の状態*：$|\Omega\rangle:=U\big(|\Phi\rangle\otimes|0_E\rangle\big)$ とします。環境の完全性関係 $\sum_{m,\alpha}|m\alpha\rangle_E\langle m\alpha|_E=I_E$ を使うと、$|\Omega\rangle$ は、次のように書けます。
+
+$$
+|\Omega\rangle=\sum_{m,\alpha}\big(I\otimes|m\alpha\rangle\langle m\alpha|\big)|\Omega\rangle=\sum_{m,\alpha}\Big[\big(I\otimes\langle m\alpha|\big)|\Omega\rangle\Big]\otimes|m\alpha\rangle_E
+$$
+
+角括弧の中は、$|\Phi\rangle\otimes|0_E\rangle=\big(I\otimes|0_E\rangle\big)|\Phi\rangle$ なので、$K_{m\alpha}$ の定義から $\big(I\otimes\langle m\alpha|\big)U\big(I\otimes|0_E\rangle\big)|\Phi\rangle=K_{m\alpha}|\Phi\rangle$ です。
+
+$$
+|\Omega\rangle=\sum_{m,\alpha}\big(K_{m\alpha}|\Phi\rangle\big)\otimes|m\alpha\rangle_E
+$$
+
+*(2) 結果 $m$ の確率*：読み取るのは結果 $m$ だけで、経路 $\alpha$ は区別しません。結果 $m$ に対応する射影を $\Pi_m:=I\otimes\sum_\alpha|m\alpha\rangle_E\langle m\alpha|_E$ とします。$|m'\alpha'\rangle_E$ に $\sum_\alpha|m\alpha\rangle\langle m\alpha|$ を作用させると、基底の直交性から、$m'=m$ のときは $|m'\alpha'\rangle_E$ のまま、$m'\neq m$ のときは $0$ なので、$\Pi_m|\Omega\rangle$ は、$|\Omega\rangle$ の和のうち、結果 $m$ の項だけです。
+
+$$
+\Pi_m|\Omega\rangle=\sum_\alpha\big(K_{m\alpha}|\Phi\rangle\big)\otimes|m\alpha\rangle_E
+$$
+
+確率は、このノルムの2乗です。$\langle u\otimes e|u'\otimes e'\rangle=\langle u|u'\rangle\langle e|e'\rangle$ を使って展開します。
+
+$$
+P(m)=\big\|\Pi_m\Omega\big\|^2=\sum_{\alpha,\alpha'}\big\langle K_{m\alpha'}\Phi\big|K_{m\alpha}\Phi\big\rangle\,\langle m\alpha'|m\alpha\rangle_E=\sum_\alpha\big\|K_{m\alpha}\Phi\big\|^2
+$$
+
+$\alpha\neq\alpha'$ の項は、$\langle m\alpha'|m\alpha\rangle_E=0$ で消えます。
+
+*(3) 測定後の系の状態*：結果 $m$ が出たあとの全体の状態は $\Pi_m|\Omega\rangle/\sqrt{P(m)}$ です（$P(m)>0$ とします）。系だけを見るには、環境をトレースアウトします（[部分トレースのノート](partial_trace_reduced_density_matrix.md#p6)の $\operatorname{Tr}_E$。$\operatorname{Tr}_E\big(X\otimes|e\rangle\langle e'|\big)=\langle e'|e\rangle\,X$）。分子は、$\big(K_{m\alpha'}|\Phi\rangle\big)^\dagger=\langle\Phi|K_{m\alpha'}^\dagger$ から、次のようになります。
+
+$$
+\operatorname{Tr}_E\Big[|\Pi_m\Omega\rangle\langle\Pi_m\Omega|\Big]=\sum_{\alpha,\alpha'}K_{m\alpha}|\Phi\rangle\langle\Phi|K_{m\alpha'}^\dagger\,\langle m\alpha'|m\alpha\rangle_E=\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger
+$$
+
+ここでも、$\alpha\neq\alpha'$ の項（交差項 $K_{m\alpha}\rho K_{m\alpha'}^\dagger$）は、環境の状態 $|m\alpha\rangle_E$ が直交しているので、消えます。経路 $\alpha$ が環境に記録されている（環境が $\alpha$ を区別できる）ので、経路どうしは干渉しません。もし、$\alpha$ によらず、同じ環境の状態に至るなら、$K_{m\alpha}$ を先に足した演算子 $\sum_\alpha K_{m\alpha}$ が、1つの $K_m$ になり、(A-7) の場合です。
+
+*(4) 確率と $E_m$*：(A-28) を各 $\alpha$ に使うと、$\operatorname{tr}\big(K_{m\alpha}\rho K_{m\alpha}^\dagger\big)=\|K_{m\alpha}\Phi\|^2$ なので、(2) の確率は、トレースの線形性で、次のように書けます。
+
+$$
+P(m)=\sum_\alpha\operatorname{tr}\big(K_{m\alpha}\rho K_{m\alpha}^\dagger\big)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big)
+$$
+
+また、$\|K_{m\alpha}\Phi\|^2=\langle\Phi|K_{m\alpha}^\dagger K_{m\alpha}|\Phi\rangle$ なので、$E_m:=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}$ とすると、$P(m)=\langle\Phi|E_m|\Phi\rangle$ です。
+
+*(5) 完全性の条件*：$U^\dagger U=I$ と、環境の完全性関係から、次のようになります（[部分トレースのノート](partial_trace_reduced_density_matrix.md#p6) Part VI の導出と同じです）。
+
+$$
+\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=\big(I\otimes\langle0_E|\big)U^\dagger\Big(I\otimes\sum_{m,\alpha}|m\alpha\rangle\langle m\alpha|\Big)U\big(I\otimes|0_E\rangle\big)=\big(I\otimes\langle0_E|\big)U^\dagger U\big(I\otimes|0_E\rangle\big)=I
+$$
+
+これが、一般の測定の条件 $\sum_{m,\alpha}K_{m\alpha}^\dagger K_{m\alpha}=I$ です。逆に、この条件を満たす任意の組 $\{K_{m\alpha}\}$ は、ある環境とユニタリ演算子 $U$ から作れることが知られています（ナイマルクの拡張定理。ここでは証明せず、事実として引用します）。
+
+*(6) 混合状態*：状態が $\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$、$|\psi_j\rangle$ は規格化された状態ベクトル）のときを考えます。各 $|\psi_j\rangle$ に (2)、(3) を使うと、結果 $m$ の確率 $P_j(m)$ と、結果 $m$ のときの（規格化前の）系の状態 $N_j(m)$ は、次の式です。
+
+$$
+P_j(m)=\sum_\alpha\big\|K_{m\alpha}\psi_j\big\|^2,\qquad N_j(m)=\sum_\alpha K_{m\alpha}|\psi_j\rangle\langle\psi_j|K_{m\alpha}^\dagger
+$$
+
+$N_j(m)$ のトレースは、(A-28) と同じ計算（(3) の外積のトレース）で、$P_j(m)$ です。これらを、重み $p_j$ で混ぜます。
+
+$$
+P(m)=\sum_jp_jP_j(m),\qquad\text{規格化前の状態}=\sum_jp_jN_j(m)
+$$
+
+右の式に $N_j(m)$ を代入し、行列の積の分配法則で、$\sum_j$ を、$K_{m\alpha}$ と $K_{m\alpha}^\dagger$ の間に入れます。
+
+$$
+\sum_jp_jN_j(m)=\sum_\alpha K_{m\alpha}\Big(\sum_jp_j|\psi_j\rangle\langle\psi_j|\Big)K_{m\alpha}^\dagger=\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger
+$$
+
+測定後の状態は、これを $P(m)$ で割ったもの（$P(m)>0$）で、$P(m)$ は、この行列のトレースです。
+
+以上から、状態を密度行列 $\rho\in\mathbb C^{d\times d}$ で書くと、結果 $m$ の確率と、測定後の状態は、次の通りです。
 
 $$
 P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-33}
 $$
 
-です。
+各 $m$ に $\alpha$ が1つの場合が、(A-7) です。
 
 **注意（読み出し誤差との違い）**：上の例は、結果の確率だけを見れば、「射影測定をして、結果ラベルを確率 $\epsilon$ で取り違える」読み出し誤差と同じです。しかし**測定後の状態は違います**。状態 $|+\rangle=\frac{1}{\sqrt2}(|0\rangle+|1\rangle)$、$\epsilon=0.1$ で結果 $0$ が出たとき、2つの模型を比べます（確率はどちらも $P(0)=\frac12$）。
 
