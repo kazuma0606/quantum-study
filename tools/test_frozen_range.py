@@ -10,7 +10,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent))
 import frozen_range as fr  # noqa: E402
 
-HOOK = Path(__file__).resolve().parents[1] / ".claude" / "hooks" / "check_frozen.py"
+HOOK = Path(__file__).resolve().parent / "hooks" / "check_frozen.py"
 
 NOTE = """# 題
 
@@ -179,3 +179,31 @@ def test_stop_blocks_once_when_broken(real):
     root, p = real
     p.write_text(NOTE.replace("段落B", "段落b"), encoding="utf-8")
     assert json.loads(run_hook(root, "", {}, ["--stop"]))["decision"] == "block"
+
+
+DUP = "# 題\n\nA\n\nB\n\nA\n\nB\n"
+
+
+def test_duplicate_run_deletion_detected(note):
+    note.write_text(DUP, encoding="utf-8")
+    fr.freeze(note, 3, 5, today="2026-10-26")  # 最初の A、B
+    st = fr.load_state(note)
+    # 最初の A、B を削除して、後半の A、B だけを残す
+    after = "# 題\n\nA\n\nB\n"
+    assert fr.check_edit(DUP, after, st)
+
+
+def test_freeze_refuses_when_broken(note):
+    freeze_ab(note)
+    note.write_text(note.read_text(encoding="utf-8").replace("段落B", "段落b"), encoding="utf-8")
+    with pytest.raises(SystemExit):
+        fr.freeze(note, 1, 1, today="2026-10-26")
+    assert fr.load_state(note)["segments"]  # 記録は消えていない
+
+
+def test_partial_release_refused_when_broken(note):
+    freeze_ab(note)
+    note.write_text(note.read_text(encoding="utf-8").replace("段落B", "段落b"), encoding="utf-8")
+    with pytest.raises(SystemExit):
+        fr.release(note, 1, 1, "x", today="2026-10-26")
+    fr.release(note, None, None, "全部解除", today="2026-10-26")  # --all は可能

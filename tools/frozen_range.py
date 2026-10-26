@@ -15,7 +15,7 @@
   uv run python tools/frozen_range.py verify [<ノート>]    # 壊れていれば終了コード 1
 
 解除は、ユーザーが許可した後にだけ行う。許可の言葉を引用して残す（記録は log に入る）。
-フック（.claude/hooks/check_frozen.py）が、Edit / Write の前に、この検査を行う。
+フック（tools/hooks/check_frozen.py）が、Edit / Write の前に、この検査を行う。
 """
 
 from __future__ import annotations
@@ -89,15 +89,19 @@ def save_state(note: Path, st: dict) -> None:
     state_path(note).write_text(json.dumps(st, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
-def _contains_run(hashes: list[str], run: list[str]) -> bool:
+def _positions(hashes: list[str], run: list[str]) -> list[int]:
+    """run が現れる位置（先頭の番号）。重なる場合も数える。"""
     n = len(run)
-    return any(hashes[i:i + n] == run for i in range(len(hashes) - n + 1))
+    return [i for i in range(len(hashes) - n + 1) if hashes[i:i + n] == run]
 
 
 def broken_segments(text: str, st: dict) -> list[dict]:
     """内容 text で、並びが壊れている確定範囲の組を返す。"""
     hashes = [p.digest for p in paragraphs(text)]
-    return [seg for seg in st.get("segments", []) if not _contains_run(hashes, seg["hashes"])]
+    # 同じ段落列が複数あるときは、確定したときの個数（count）より減っていれば、壊れとみなす
+    # （どれが確定した方か区別できないので、1 つ消えたら必ず報告する）
+    return [seg for seg in st.get("segments", [])
+            if len(_positions(hashes, seg["hashes"])) < seg.get("count", 1)]
 
 
 def describe(seg: dict) -> str:
@@ -115,8 +119,10 @@ def _runs(indices: list[int]) -> list[list[int]]:
 
 
 def _segment(paras: list[Para], idx: list[int], today: str) -> dict:
+    hashes = [paras[i].digest for i in idx]
     return {
-        "hashes": [paras[i].digest for i in idx],
+        "hashes": hashes,
+        "count": len(_positions([p.digest for p in paras], hashes)),
         "preview": [paras[idx[0]].text.strip()[:30], paras[idx[-1]].text.strip()[:30]],
         "frozen_at": today,
     }
@@ -128,19 +134,32 @@ def frozen_indices(paras: list[Para], st: dict) -> list[int]:
     idx: list[int] = []
     for seg in st.get("segments", []):
         n = len(seg["hashes"])
-        for i in range(len(hashes) - n + 1):
-            if hashes[i:i + n] == seg["hashes"]:
-                idx.extend(range(i, i + n))
-                break
+        for i in _positions(hashes, seg["hashes"]):  # 同じ内容が複数あれば、すべてを確定とみなす（安全側）
+            idx.extend(range(i, i + n))
     return idx
+
+
+def _build(paras: list[Para], idx: list[int], today: str) -> list[dict]:
+    segs: list[dict] = []
+    seen: set[tuple] = set()
+    for run in _runs(idx):
+        seg = _segment(paras, run, today)
+        if tuple(seg["hashes"]) not in seen:
+            seen.add(tuple(seg["hashes"]))
+            segs.append(seg)
+    return segs
 
 
 def freeze(note: Path, from_line: int, to_line: int, today: str | None = None) -> dict:
     today = today or dt.date.today().isoformat()
     paras = paragraphs(note.read_text(encoding="utf-8"))
     st = load_state(note) or {"note": rel(note), "segments": [], "log": []}
+    bad = broken_segments(note.read_text(encoding="utf-8"), st)
+    if bad:
+        raise SystemExit("壊れた確定範囲があります。freeze すると、その記録が消えます。先に元に戻すか、release してください：\n"
+                         + "\n".join(describe(s) for s in bad))
     idx = frozen_indices(paras, st) + [i for i, p in enumerate(paras) if p.end >= from_line and p.start <= to_line]
-    st["segments"] = [_segment(paras, run, today) for run in _runs(idx)]
+    st["segments"] = _build(paras, idx, today)
     st["log"].append({"action": "freeze", "at": today, "lines": [from_line, to_line]})
     save_state(note, st)
     return st
@@ -154,12 +173,16 @@ def release(note: Path, from_line: int | None, to_line: int | None, quote: str, 
     if st is None:
         raise SystemExit("このノートに確定範囲の記録はありません")
     paras = paragraphs(note.read_text(encoding="utf-8"))
+    bad = broken_segments(note.read_text(encoding="utf-8"), st)
+    if bad and from_line is not None:
+        raise SystemExit("壊れた確定範囲があります。一部の解除は、その記録を消すので、できません。元に戻すか、--all で解除してください：\n"
+                         + "\n".join(describe(s) for s in bad))
     cur = frozen_indices(paras, st)
     if from_line is None:
         keep: list[int] = []
     else:
         keep = [i for i in cur if not (paras[i].end >= from_line and paras[i].start <= to_line)]
-    st["segments"] = [_segment(paras, run, today) for run in _runs(keep)]
+    st["segments"] = _build(paras, keep, today)
     st["log"].append({"action": "release", "at": today, "lines": [from_line, to_line] if from_line else "all", "approved_by_user": quote})
     save_state(note, st)
     return st
