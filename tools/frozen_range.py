@@ -31,7 +31,6 @@ from pathlib import Path
 
 ROOT = Path(os.environ.get("FROZEN_ROOT") or Path(__file__).resolve().parents[1])  # FROZEN_ROOT はテスト用
 FROZEN_DIR = ROOT / ".claude" / "frozen"
-W = 8  # 確定範囲の前後に、位置の手がかりとして記録する段落の個数
 
 
 @dataclass
@@ -116,8 +115,10 @@ def broken_segments(text: str, st: dict) -> list[dict]:
 def _in_place(hashes: list[str], seg: dict) -> bool:
     """確定範囲が、元の前後関係の位置にあるか（段落列ごとの移動を検出する）。
 
-    範囲の前（または後）に向かって、新しい段落（記録した前後の段落にない段落）を読み飛ばし、最初に見つかる
-    記録済みの段落が、前の側（before）の段落なら、元の位置とみなす。範囲の直前・直後への挿入は、読み飛ばされる。
+    確定したときに、範囲の前にあった段落（before）と、後にあった段落（after）を、すべて記録してある。
+    いまの文書にそれらが残っていて（ちょうど 1 つずつ）、前にあった段落が範囲より後ろに、または、
+    後にあった段落が範囲より前にあれば、範囲が動いたか、段落が範囲をまたいで動いたとみなす。
+    範囲の前後に新しい段落を、いくつ挿入しても、前後関係は変わらない。書き換えて消えた段落は、数えない。
     記録がない古い形式、同じ内容が複数ある範囲（どの出現か区別できない）は、この検査をしない。
     """
     before, after = seg.get("before"), seg.get("after")
@@ -125,22 +126,23 @@ def _in_place(hashes: list[str], seg: dict) -> bool:
     if before is None or after is None or seg.get("count", 1) > 1:
         return True
     pos = _positions(hashes, run)
-    if not pos:
+    if len(pos) != 1:
         return True  # 個数の検査が報告する
-    known_b, known_a = set(before), set(after)
-
-    def side_ok(i: int, step: int, own: set, other: set) -> bool:
-        j, steps = i, 0
-        while 0 <= j < len(hashes) and steps < 3 * W:
-            h = hashes[j]
-            if h in own or h in other:
-                return h in own
-            j += step
-            steps += 1
-        return (not own) and not (0 <= j < len(hashes))  # 端まで来て、この側の記録が空なら、元の位置
-
-    n = len(run)
-    return any(side_ok(i - 1, -1, known_b, known_a) or side_ok(i + n, 1, known_a, known_b) for i in pos)
+    i = pos[0]
+    j = i + len(run)
+    where: dict[str, list[int]] = {}
+    for k, h in enumerate(hashes):
+        where.setdefault(h, []).append(k)
+    ambiguous = set(before) & set(after) | set(run)
+    for h in set(before) - ambiguous:
+        ks = where.get(h, [])
+        if len(ks) == 1 and ks[0] >= j:
+            return False
+    for h in set(after) - ambiguous:
+        ks = where.get(h, [])
+        if len(ks) == 1 and ks[0] < i:
+            return False
+    return True
 
 
 def describe(seg: dict) -> str:
@@ -162,8 +164,8 @@ def _segment(paras: list[Para], idx: list[int], today: str) -> dict:
     return {
         "hashes": hashes,
         "count": len(_positions([p.digest for p in paras], hashes)),
-        "before": [paras[k].digest for k in range(max(0, idx[0] - W), idx[0])],
-        "after": [paras[k].digest for k in range(idx[-1] + 1, min(len(paras), idx[-1] + 1 + W))],
+        "before": [paras[k].digest for k in range(0, idx[0])],
+        "after": [paras[k].digest for k in range(idx[-1] + 1, len(paras))],
         "preview": [paras[idx[0]].text.strip()[:30], paras[idx[-1]].text.strip()[:30]],
         "frozen_at": today,
     }

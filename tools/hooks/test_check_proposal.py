@@ -121,3 +121,9 @@ def test_matching_with_note_passes():
 def test_row_with_wrong_cell_count_blocked():
     t = "## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | b | c | 一致 |\n"
     assert cp.check_text(t)
+
+
+def test_not_matching_words_blocked():
+    for w in ("一致しない", "不一致", "一致せず"):
+        t = f"## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| a | b | {w} |\n"
+        assert cp.check_text(t), w

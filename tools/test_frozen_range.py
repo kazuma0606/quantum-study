@@ -282,3 +282,29 @@ def test_old_state_without_neighbors_is_not_checked(note):
         s.pop("before"), s.pop("after")
     moved = "# 題\n\nhead\n\ntail\n\nA\n\nB\n"
     assert not fr.check_edit(MOVE, moved, st)
+
+
+def test_move_with_tail_on_right_detected(note):
+    base = "# 題\n\nhead\n\nA\n\nB\n\ntail\n\nX\n"
+    note.write_text(base, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")
+    st = fr.load_state(note)
+    moved = "# 題\n\nhead\n\ntail\n\nA\n\nB\n\nX\n"
+    assert fr.check_edit(base, moved, st)
+
+
+def test_many_insertions_on_both_sides_ok(note):
+    note.write_text(MOVE, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")
+    st = fr.load_state(note)
+    pre = "".join(f"前{k}\n\n" for k in range(40))
+    post = "".join(f"後{k}\n\n" for k in range(40))
+    many = "# 題\n\nhead\n\n" + pre + "A\n\nB\n\n" + post + "tail\n"
+    assert not fr.check_edit(MOVE, many, st)
+
+
+def test_moving_other_paragraph_across_range_detected(note):
+    note.write_text(MOVE, encoding="utf-8")
+    fr.freeze(note, 5, 7, today="2026-10-26")
+    st = fr.load_state(note)
+    assert fr.check_edit(MOVE, "# 題\n\nA\n\nB\n\nhead\n\ntail\n", st)
