@@ -88,18 +88,19 @@ def _outside_fences(text: str) -> list[str]:
     """コードフェンスの中の行を空行にして返す（フェンス内の見出しや表を、本物と数えない）。
 
     フェンスは、``` または ~~~ の3個以上の行で始まり、同じ文字で、開いたときと同じかそれ以上の個数だけの行で閉じる。
+    字下げは3スペースまで（4スペース以上は、字下げのコードブロックの内容で、フェンスではない）。
     """
     out, fence = [], None  # fence = (文字, 個数)
     for s in text.splitlines():
         if fence is None:
-            m = re.match(r"\s*(`{3,}|~{3,})", s)
+            m = re.match(r" {0,3}(`{3,}|~{3,})", s)
             if m:
                 fence = (m.group(1)[0], len(m.group(1)))
                 out.append("")
             else:
                 out.append(s)
         else:
-            m = re.match(r"\s*(`+|~+)\s*$", s)
+            m = re.match(r" {0,3}(`+|~+)\s*$", s)
             if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1]:
                 fence = None
             out.append("")

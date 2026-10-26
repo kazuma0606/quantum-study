@@ -174,3 +174,13 @@ def test_longer_fence_is_not_closed_by_shorter_fence():
     inner = "````\n```\n" + GOOD + "````\n"
     assert cp.check_text(inner)
     assert cp.check_text("# 案\n\n" + inner + "\n" + GOOD) == []
+
+
+def test_indented_four_spaces_is_not_a_fence():
+    t = "    ```\n\n" + GOOD
+    assert cp.check_text(t) == []
+
+
+def test_indented_three_spaces_is_a_fence():
+    t = "   ```\n" + GOOD
+    assert cp.check_text(t)

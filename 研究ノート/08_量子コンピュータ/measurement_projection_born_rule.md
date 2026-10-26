@@ -3553,7 +3553,13 @@ $$
 P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-33}
 $$
 
-各 $m$ に $\alpha$ が1つの場合が、(A-7) です。
+各 $m$ に $\alpha$ が1つの場合は、1つの演算子 $K_m$ による測定の、密度行列での書き方です。
+
+$$
+P(m)=\operatorname{tr}\big(K_m\rho K_m^\dagger\big),\qquad\rho_m=\frac{K_m\rho K_m^\dagger}{P(m)}
+$$
+
+入力が純粋状態 $\rho=|\Phi\rangle\langle\Phi|$ のときは、(A-28) から $P(m)=\|K_m\Phi\|^2$、(A-21) から $\rho_m=|\Phi_m\rangle\langle\Phi_m|$ で、(A-7) になります。
 
 **注意（読み出し誤差との違い）**：上の例は、結果の確率だけを見れば、「射影測定をして、結果ラベルを確率 $\epsilon$ で取り違える」読み出し誤差と同じです。しかし**測定後の状態は違います**。状態 $|+\rangle=\frac{1}{\sqrt2}(|0\rangle+|1\rangle)$、$\epsilon=0.1$ で結果 $0$ が出たとき、2つの模型を比べます（確率はどちらも $P(0)=\frac12$）。
 
