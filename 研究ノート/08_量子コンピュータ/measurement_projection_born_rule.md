@@ -3051,11 +3051,25 @@ $$
 |+\rangle\langle+|,\qquad|-\rangle\langle-|
 $$
 
-状態 $\rho$ のとき、結果 $\pm$ の確率は、次の式で与えられます。
+状態が $\rho$ のとき、結果 $\pm$ の確率を求めます。$P_+=|+\rangle\langle+|$、$P_-=|-\rangle\langle-|$ は、エルミートな観測量で、$P_+|+\rangle=|+\rangle$、$P_+|-\rangle=0$ なので、固有値は $1$（固有ベクトル $|+\rangle$）と $0$（固有ベクトル $|-\rangle$）です。① の期待値 $\sum_ja_jp_j$ に、固有値 $1,0$ を入れると、$P_+$ の期待値は、結果 $+$ の確率 $p_+$ になります。
 
 $$
-\langle\pm|\rho|\pm\rangle\tag{A-24}
+\langle P_+\rangle=1\cdot p_++0\cdot p_-=p_+
 $$
+
+$P_-$ も同じで、$\langle P_-\rangle=p_-$ です。状態を行列 $\rho$ で表すとは、すべての観測量の期待値が、$\operatorname{tr}(\rho A)$ になることでした（(A-18)、(A-20)）。$A=P_\pm$ とします。
+
+$$
+p_\pm=\operatorname{tr}\big(\rho\,|\pm\rangle\langle\pm|\big)
+$$
+
+(A-16) で、積の順序を入れ替え、(A-15) の $|\varphi\rangle=|\pm\rangle$、$B=\rho$ の形（$\langle\varphi|B|\varphi\rangle=\operatorname{tr}(|\varphi\rangle\langle\varphi|B)$）を使います。
+
+$$
+p_\pm=\operatorname{tr}\big(|\pm\rangle\langle\pm|\,\rho\big)=\langle\pm|\rho|\pm\rangle\tag{A-24}
+$$
+
+純粋状態 $\rho=|\psi\rangle\langle\psi|$ では、$\langle\pm|\psi\rangle\langle\psi|\pm\rangle=|\langle\pm|\psi\rangle|^2$ で、ボルン則に戻ります。
 
 **階数（ランク）の復習**：行列の階数は、一次独立な列の最大個数です。零でない状態ベクトルを、成分が $a,b$ の列ベクトルとして、次のように書きます。
 
@@ -3407,7 +3421,7 @@ $$
 \begin{pmatrix}\sqrt{1-\epsilon}\,\cos\frac\theta2\\\sqrt\epsilon\,\sin\frac\theta2\end{pmatrix}
 $$
 
-入力が $|0\rangle$（$\theta=0$）なら $|0\rangle$、$|1\rangle$（$\theta=\pi$）なら $|1\rangle$ のままです。**$0<\theta<\pi$ の重ね合わせ入力**では、$\cos\frac\theta2$ も $\sin\frac\theta2$ もゼロでないので、どちらの基底状態にも完全には崩れません（弱い測定）。
+入力が $|0\rangle$（$\theta=0$）なら $|0\rangle$、$|1\rangle$（$\theta=\pi$）なら $|1\rangle$ のままです。**$0<\theta<\pi$ の重ね合わせ入力**では、$\cos\frac\theta2$ も $\sin\frac\theta2$ もゼロでないので、どちらの基底状態にも完全には崩れません（射影測定ではない、一般の測定です）。
 
 **1結果1演算子で書けない測定**：(A-7) は、結果 $m$ に演算子 $K_m$ を1つ割り当てる測定でした。ここでは、結果 $m$ に至る経路 $\alpha$ が複数あり、結果 $m$ に演算子の組 $\{K_{m\alpha}\}_\alpha$ を割り当てる場合を、環境を使って導きます。
 
@@ -3957,7 +3971,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 | 付録A-3、A-4 | 測定後の状態の規格化、再現性、Part VIII の測定後の状態 | `test_post_measurement_state_and_repeatability`、`test_post_measurement_of_example_is_a_product_state` |
 | 付録A-5 | $\sum K^\dagger K=I$、$P(0)=(1-\epsilon)\cos^2+\epsilon\sin^2$、$\epsilon=0$ で射影測定、$K_0$ は射影でない | `test_general_measurement_kraus_completeness` |
 | 付録A-5 | $\sum K^\dagger K=I$ だが $(\sum K^\dagger)(\sum K)=I+2\sqrt{p(1-p)}X$。振幅減衰の $K_1^\dagger K_1=\gamma\lvert1\rangle\langle1\rvert$ | `test_sum_of_kraus_then_product_is_not_identity` |
-| 付録A-5 | 弱い測定 $K_0$ と、ラベル取り違えの読み出し誤差は、確率が同じで測定後の状態が違う（非対角成分 $\sqrt{\epsilon(1-\epsilon)}$ と $0$） | `test_unsharp_measurement_differs_from_readout_error_after_the_measurement` |
+| 付録A-5 | 誤差のある $Z$ 測定 $K_0$ と、ラベル取り違えの読み出し誤差は、確率が同じで測定後の状態が違う（非対角成分 $\sqrt{\epsilon(1-\epsilon)}$ と $0$） | `test_unsharp_measurement_differs_from_readout_error_after_the_measurement` |
 | Part III §2-e、Part IV §5、付録A-1 の補題6・7、付録B-3 | (III-1) と (IV-2) の数値例（複素ベクトル）、補題6（固有値の符号の積）・補題7（$\det=288$）の例、CNOT が積状態のままになる入力とベル状態になる入力、$s_k^2$ が $C^\dagger C$ の固有値であること・$\sum s_k^2=1$・階数 $=$ ゼロでない特異値の個数、零ベクトルの外積の階数 $0$、エントロピーの表の数値 | `test_numeric_examples_added_to_the_main_note` |
 | 付録B-3 | 階数はエンタングルメントの量でない（偏った振幅の1対1は階数2・約 $0.469$ bit。階数3でも $p=(0.999,\ldots)$ は階数2の $p=(0.5,0.5)$ よりエントロピーが小さい） | `test_rank_is_not_a_measure_of_entanglement` |
 | 付録A-5 | ラベル取り違えの読み出し誤差は、結果 $0$ に2つの演算子が要る（条件付き状態 $\mathrm{diag}(1-\epsilon,\epsilon)$ は階数 $2$、$E_0=(1-\epsilon)P_0+\epsilon P_1$） | `test_readout_error_needs_several_operators_per_outcome` |

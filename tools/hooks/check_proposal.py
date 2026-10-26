@@ -84,9 +84,25 @@ def _cells(row: str) -> list[str]:
     return [c.replace("\x00", "\\|").strip() for c in body.split("|")]
 
 
+def _outside_fences(text: str) -> list[str]:
+    """コードフェンス（``` または ~~~）の中の行を空行にして返す（フェンス内の見出しや表を、本物と数えない）。"""
+    out, fence = [], None
+    for s in text.splitlines():
+        m = re.match(r"\s*(`{3,}|~{3,})", s)
+        if fence is None and m:
+            fence = m.group(1)[0] * 3
+            out.append("")
+        elif fence is not None and re.match(r"\s*" + re.escape(fence) + r"[`~]*\s*$", s):
+            fence = None
+            out.append("")
+        else:
+            out.append("" if fence else s)
+    return out
+
+
 def check_text(text: str) -> list[str]:
     """案のファイルの本文を調べて、問題の説明を返す（空なら問題なし）。"""
-    lines = text.splitlines()
+    lines = _outside_fences(text)
     sections = [i for i, s in enumerate(lines) if re.match(r"#{1,6}\s", s) and "検証表" in s]
     if not sections:
         return ["「検証表」の見出しがありません（例：`## 検証表`）"]

@@ -150,3 +150,13 @@ def test_bad_word_in_other_column_blocked():
     assert cp.check_text(t)
     t2 = "## 検証表\n\n| 対象の文 | 確かめた操作 | 結果 |\n|---|---|---|\n| 不一致の例 | b | 一致 |\n"
     assert cp.check_text(t2)
+
+
+def test_table_inside_code_fence_is_not_a_real_table():
+    fenced = "```markdown\n" + GOOD + "```\n"
+    assert cp.check_text(fenced)
+    assert cp.check_text("# 案\n\n~~~\n" + GOOD + "~~~\n")
+
+
+def test_real_table_after_a_fenced_example_passes():
+    assert cp.check_text("```\n## 検証表\n```\n\n" + GOOD) == []
