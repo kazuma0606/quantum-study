@@ -2931,6 +2931,54 @@ $$
 
 これで、(A-20) が示せました。この結論を、結果を記録しない場合の状態に当てはめます。
 
+まず、「状態を行列で表す」ことの意味を定めます。状態を行列 $\rho$ で表すとは、その行列が、すべての観測量 $A$（$A=A^\dagger$）の期待値を、$\operatorname{tr}(\rho A)$ として再現することとします。
+
+測定前の状態 $|\Phi\rangle$ での、観測量 $A$ の期待値は $\langle\Phi|A|\Phi\rangle$ です。これが $\operatorname{tr}(\rho A)$ の形になることを、(A-15) から示します。(A-15) を再掲します。任意の $|\varphi\rangle\in\mathbb C^d$ と $B\in\mathbb C^{d\times d}$ について、次の式です。
+
+$$
+\langle\varphi|B|\varphi\rangle=\operatorname{tr}\big(|\varphi\rangle\langle\varphi|\,B\big)
+$$
+
+$|\varphi\rangle$ を、測定前の状態 $|\Phi\rangle\in\mathbb C^d$ にします。
+
+$$
+\langle\Phi|B|\Phi\rangle=\operatorname{tr}\big(|\Phi\rangle\langle\Phi|\,B\big)
+$$
+
+右辺の $|\Phi\rangle\langle\Phi|$ は、$\rho$ です。
+
+$$
+\langle\Phi|B|\Phi\rangle=\operatorname{tr}(\rho B)
+$$
+
+$B$ を、観測量 $A$（$A=A^\dagger\in\mathbb C^{d\times d}$）にします。
+
+$$
+\langle\Phi|A|\Phi\rangle=\operatorname{tr}(\rho A)\qquad(\forall A=A^\dagger)
+$$
+
+したがって、$\rho=|\Phi\rangle\langle\Phi|$ は、測定前の状態を、上の意味で表す行列です。
+
+この意味で表す行列は、$\rho$ だけです。それを、(A-20) で示します。$Y\in\mathbb C^{d\times d}$ も、すべての $A=A^\dagger$ で $\operatorname{tr}(YA)=\langle\Phi|A|\Phi\rangle$ を満たすとします。$\langle\Phi|A|\Phi\rangle$ を経由して、次の式が成り立ちます。
+
+$$
+\operatorname{tr}(\rho A)=\langle\Phi|A|\Phi\rangle=\operatorname{tr}(YA)\qquad(\forall A=A^\dagger\in\mathbb C^{d\times d})
+$$
+
+(A-20) を再掲します。
+
+$$
+\Big[\ \operatorname{tr}(XA)=\operatorname{tr}(YA)\ \ (\forall A=A^\dagger\in\mathbb C^{d\times d})\ \Big]\ \Longrightarrow\ X=Y
+$$
+
+上の式の両端は、$X$ を $\rho$ にした、(A-20) の仮定です。したがって、結論も $X$ を $\rho$ にして、次の式が成り立ちます。
+
+$$
+Y=\rho
+$$
+
+測定前の状態を、この意味で表す行列は、$\rho$ だけです。次に、結果を記録しない場合の状態を、この意味で調べます。
+
 測定前の状態 $\rho$ と測定演算子 $\{K_m\}$ を固定すると、各観測量 $A$（$A=A^\dagger$）の、結果を記録しない場合の期待値 $\langle A\rangle$ が決まります。(A-18) を、再掲します。
 
 $$
