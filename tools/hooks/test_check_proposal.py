@@ -184,3 +184,10 @@ def test_indented_four_spaces_is_not_a_fence():
 def test_indented_three_spaces_is_a_fence():
     t = "   ```\n" + GOOD
     assert cp.check_text(t)
+
+
+def test_indented_code_block_table_is_not_a_table():
+    t = "# 案\n\n## 検証表\n\n    | 対象の文 | 確かめた操作 | 結果 |\n    |---|---|---|\n    | a | b | 一致 |\n"
+    assert cp.check_text(t)
+    assert cp.check_text(t.replace("    |", "\t|"))
+    assert cp.check_text(t.replace("    |", "   |")) == []

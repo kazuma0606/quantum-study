@@ -109,7 +109,9 @@ def _outside_fences(text: str) -> list[str]:
 
 def _check_section(lines: list[str], start: int, end: int) -> list[str]:
     """「検証表」の節（lines[start:end]）の表を調べる。"""
-    table = [s for s in lines[start:end] if s.strip().startswith("|") and s.strip().endswith("|")]
+    # 4スペース以上（またはタブ）で字下げした行は、字下げのコードブロックの内容で、表ではない
+    body = [s for s in lines[start:end] if not re.match(r" {4,}|\t", s)]
+    table = [s for s in body if s.strip().startswith("|") and s.strip().endswith("|")]
     # 区切り行（|---|---|）は行に数えない
     rows = [s for s in table if not re.fullmatch(r"[\s|:\-]+", s.strip())]
     if len(rows) < 2:
