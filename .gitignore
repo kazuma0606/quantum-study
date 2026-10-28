@@ -43,3 +43,11 @@ experiments/a5_trotter_noise/results/s6/*_posterior.pkl
 # フックの実行時の状態ファイル
 tools/hooks/.check_*_state
 tools/hooks/__pycache__/
+
+# 確定範囲・検証表ゲートのツール（手元だけ。Git 管理外。2026-10-28 にユーザーが決定）
+tools/frozen_range.py
+tools/test_frozen_range.py
+tools/hooks/check_frozen.py
+tools/hooks/check_proposal.py
+tools/hooks/test_check_proposal.py
+.claude/frozen/
