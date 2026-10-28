@@ -3506,7 +3506,7 @@ $$
 
 **なぜトレースが確率になるか**：
 
-*(1) 外積のトレースは内積*：復習です。$|a\rangle$ は列ベクトル、$\langle b|$ はそれを横にして複素共役を取った行ベクトルで、**外積** $|a\rangle\langle b|$ は列ベクトル×行ベクトルの $d\times d$ 行列、トレースは対角成分の和です。たとえば実数の $a=(1,2)^T$、$b=(3,4)^T$ なら
+*(1) 外積のトレースは内積*：復習です。$|a\rangle,|b\rangle$ は列ベクトルです。$\langle b|$ は、$|b\rangle$ を横にして複素共役を取った行ベクトルで、**外積** $|a\rangle\langle b|$ は列ベクトル×行ベクトルの $d\times d$ 行列、トレースは対角成分の和です。たとえば実数の $a=(1,2)^T$、$b=(3,4)^T$ なら
 
 $$
 |a\rangle\langle b|=\begin{pmatrix}1\\2\end{pmatrix}\begin{pmatrix}3&4\end{pmatrix}=\begin{pmatrix}3&4\\6&8\end{pmatrix},\qquad\operatorname{tr}\big(|a\rangle\langle b|\big)=3+8=11,\qquad\langle b|a\rangle=3\cdot1+4\cdot2=11
