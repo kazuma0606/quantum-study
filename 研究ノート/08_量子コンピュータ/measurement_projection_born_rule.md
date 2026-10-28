@@ -2068,6 +2068,8 @@ $$
 
 量子力学でも、観測量 $A$ の期待値は、同じ定義で計算できます。$A$ の固有ベクトルの基底 $\{|a_j\rangle\}$ を1つ選び、この基底で測って、結果 $j$ が確率 $p_j$ で得られたとします。この結果 $j$ には、値 $a_j$ を対応させます。固有値が重なる場合は、複数の $j$ が同じ値になり、$p_j$ は、$A$ の測定値の確率ではなく、選んだ基底での結果 $j$ の確率です。値と確率の積の和は、$\sum_ja_j\,p_j$ です。
 
+次のブロックで扱うのは、測定前の状態が状態ベクトル $|\Phi\rangle$ で書ける場合です。
+
 ---
 
 **導出：結果を記録しない場合の状態を、行列で表す理由と、その行列**
@@ -2933,10 +2935,10 @@ $$
 
 まず、「状態を行列で表す」ことの意味を定めます。状態を行列 $\rho$ で表すとは、その行列が、すべての観測量 $A$（$A=A^\dagger$）の期待値を、$\operatorname{tr}(\rho A)$ として再現することとします。
 
-測定前の状態 $|\Phi\rangle$ での、観測量 $A$ の期待値は $\langle\Phi|A|\Phi\rangle$ です。これが $\operatorname{tr}(\rho A)$ の形になることを、(A-15) から示します。(A-15) を再掲します。任意の $|\varphi\rangle\in\mathbb C^d$ と $B\in\mathbb C^{d\times d}$ について、次の式です。
+測定前の状態 $|\Phi\rangle$ での、観測量 $A$ の期待値は $\langle\Phi|A|\Phi\rangle$ です。これが $\operatorname{tr}(\rho A)$ の形になることを、(A-15) から示します。任意の $|\varphi\rangle\in\mathbb C^d$ と $B\in\mathbb C^{d\times d}$ について、次の式です。
 
 $$
-\langle\varphi|B|\varphi\rangle=\operatorname{tr}\big(|\varphi\rangle\langle\varphi|\,B\big)
+\langle\varphi|B|\varphi\rangle=\operatorname{tr}\big(|\varphi\rangle\langle\varphi|\,B\big)\qquad(\text{A-15：再掲})
 $$
 
 $|\varphi\rangle$ を、測定前の状態 $|\Phi\rangle\in\mathbb C^d$ にします。
@@ -2945,7 +2947,13 @@ $$
 \langle\Phi|B|\Phi\rangle=\operatorname{tr}\big(|\Phi\rangle\langle\Phi|\,B\big)
 $$
 
-右辺の $|\Phi\rangle\langle\Phi|$ は、$\rho$ です。
+右辺の $|\Phi\rangle\langle\Phi|$ は、測定前の状態 $|\Phi\rangle$ から作る行列で、密度行列の定義に出てくる行列です。
+
+$$
+\rho:=|\Phi\rangle\langle\Phi|\in\mathbb C^{d\times d}\qquad(\text{密度行列の定義：再掲})
+$$
+
+この定義を、右辺に使います。
 
 $$
 \langle\Phi|B|\Phi\rangle=\operatorname{tr}(\rho B)
@@ -2957,33 +2965,50 @@ $$
 \langle\Phi|A|\Phi\rangle=\operatorname{tr}(\rho A)\qquad(\forall A=A^\dagger)
 $$
 
-したがって、$\rho=|\Phi\rangle\langle\Phi|$ は、測定前の状態を、上の意味で表す行列です。
+したがって、$\rho=|\Phi\rangle\langle\Phi|$ は、すべての観測量 $A$ の期待値を $\operatorname{tr}(\rho A)$ として再現します。これは、最初に定めた、状態を行列で表すための条件なので、$\rho$ は、測定前の状態 $|\Phi\rangle$ を表す行列です。
 
-この意味で表す行列は、$\rho$ だけです。それを、(A-20) で示します。$Y\in\mathbb C^{d\times d}$ も、すべての $A=A^\dagger$ で $\operatorname{tr}(YA)=\langle\Phi|A|\Phi\rangle$ を満たすとします。$\langle\Phi|A|\Phi\rangle$ を経由して、次の式が成り立ちます。
+次に、すべての観測量 $A$ について、測定前の期待値 $\langle\Phi|A|\Phi\rangle$ を、行列と $A$ のトレースとして再現する行列が、$\rho$ だけであることを、(A-20) を使って示します。
+
+$$
+\Big[\ \operatorname{tr}(XA)=\operatorname{tr}(YA)\ \ (\forall A=A^\dagger\in\mathbb C^{d\times d})\ \Big]\ \Longrightarrow\ X=Y\qquad(\text{A-20：再掲})
+$$
+
+**主張**：$Y\in\mathbb C^{d\times d}$ が、次の式を満たすなら、$Y=\rho$ です。
+
+$$
+\operatorname{tr}(YA)=\langle\Phi|A|\Phi\rangle\qquad(\forall A=A^\dagger\in\mathbb C^{d\times d})
+$$
+
+**導出**：測定前の期待値を再現する式は、次のとおりです。
+
+$$
+\langle\Phi|A|\Phi\rangle=\operatorname{tr}(\rho A)\qquad(\forall A=A^\dagger)
+$$
+
+主張の式の右辺は、この式の左辺と同じ $\langle\Phi|A|\Phi\rangle$ です。そこで、$\operatorname{tr}(\rho A)$ と $\operatorname{tr}(YA)$ を、$\langle\Phi|A|\Phi\rangle$ を挟んで並べます。
 
 $$
 \operatorname{tr}(\rho A)=\langle\Phi|A|\Phi\rangle=\operatorname{tr}(YA)\qquad(\forall A=A^\dagger\in\mathbb C^{d\times d})
 $$
 
-(A-20) を再掲します。
-
-$$
-\Big[\ \operatorname{tr}(XA)=\operatorname{tr}(YA)\ \ (\forall A=A^\dagger\in\mathbb C^{d\times d})\ \Big]\ \Longrightarrow\ X=Y
-$$
-
-上の式の両端は、$X$ を $\rho$ にした、(A-20) の仮定です。したがって、結論も $X$ を $\rho$ にして、次の式が成り立ちます。
+$\operatorname{tr}(\rho A)=\langle\Phi|A|\Phi\rangle=\operatorname{tr}(YA)$ の両端は、(A-20) の仮定 $\operatorname{tr}(XA)=\operatorname{tr}(YA)$ で、$X$ を $\rho$ にしたものです（$Y$ はそのままです）。したがって、(A-20) の結論 $X=Y$ も、$X$ を $\rho$ にして、次の式が成り立ちます。
 
 $$
 Y=\rho
 $$
 
-測定前の状態を、この意味で表す行列は、$\rho$ だけです。次に、結果を記録しない場合の状態を、この意味で調べます。
-
-測定前の状態 $\rho$ と測定演算子 $\{K_m\}$ を固定すると、各観測量 $A$（$A=A^\dagger$）の、結果を記録しない場合の期待値 $\langle A\rangle$ が決まります。(A-18) を、再掲します。
+測定前の状態を行列で表す条件を満たす行列は、$\rho$ だけです。次に、結果を記録しない場合の状態を表す行列を、(A-18) から求めます。
 
 $$
-\langle A\rangle=\operatorname{tr}\Big(\Big[\sum_mK_m\rho K_m^\dagger\Big]A\Big)
+\langle A\rangle=\operatorname{tr}\Big(\Big[\sum_mK_m\rho K_m^\dagger\Big]A\Big)\qquad(\text{A-18：再掲})
 $$
+
+ここで、$\rho$ と $\{K_m\}$ は固定します。各記号は、次のとおりです。
+
+- $\rho$：測定前の状態を表す行列（密度行列）
+- $\{K_m\}$：測定演算子
+- $A$：観測量（$A=A^\dagger$）
+- $\langle A\rangle$：結果を記録しない場合の、観測量 $A$ の期待値
 
 角括弧の中が、(A-19) の行列です。これを $X$ と置きます。
 
@@ -3004,6 +3029,215 @@ $$
 $$
 
 両端の $\operatorname{tr}(XA)=\operatorname{tr}(YA)$ が、(A-20) の仮定そのものなので、$Y=X$ です。したがって、固定した $\rho$ と $\{K_m\}$ について、すべての観測量の期待値を再現する行列は、(A-19) の行列 $X$ だけです。$X$ と異なる行列は、少なくとも1つの $A$ で、期待値が合いません。
+
+**一般形（$d=2$）**：$X\neq Y$ なら、期待値が合わない $A$ が少なくとも1つあることを、$2\times2$ 行列の成分で確かめます。
+
+$X,Y\in\mathbb C^{2\times2}$ とし、差を $D$ と置きます。
+
+$$
+D=X-Y
+$$
+
+トレースの線形性から、$\operatorname{tr}(XA)-\operatorname{tr}(YA)=\operatorname{tr}(DA)$ です。期待値が合う（$\operatorname{tr}(XA)=\operatorname{tr}(YA)$）ことは、$\operatorname{tr}(DA)=0$ と同じです。
+
+観測量 $A\in\mathbb C^{2\times2}$ の成分を、$A_{jk}$ と書きます。
+
+$$
+A=\begin{pmatrix}A_{11}&A_{12}\\A_{21}&A_{22}\end{pmatrix}
+$$
+
+※ 基底ケット $|0\rangle,|1\rangle$ と、そのブラは、次のとおりです。この順に、1 番目、2 番目と数えます。
+
+$$
+|0\rangle=\begin{pmatrix}1\\0\end{pmatrix},\quad|1\rangle=\begin{pmatrix}0\\1\end{pmatrix},\qquad\langle0|=\begin{pmatrix}1&0\end{pmatrix},\quad\langle1|=\begin{pmatrix}0&1\end{pmatrix}
+$$
+
+成分は、基底ケットとブラで挟んだ値です。たとえば、$A_{12}$ は、次のとおりです。
+
+$$
+\langle0|A|1\rangle=\begin{pmatrix}1&0\end{pmatrix}\begin{pmatrix}A_{11}&A_{12}\\A_{21}&A_{22}\end{pmatrix}\begin{pmatrix}0\\1\end{pmatrix}=\begin{pmatrix}1&0\end{pmatrix}\begin{pmatrix}A_{12}\\A_{22}\end{pmatrix}=A_{12}
+$$
+
+4つの成分は、次のとおりです。
+
+$$
+A_{11}=\langle0|A|0\rangle,\quad A_{12}=\langle0|A|1\rangle,\quad A_{21}=\langle1|A|0\rangle,\quad A_{22}=\langle1|A|1\rangle
+$$
+
+観測量は $A=A^\dagger$（エルミート行列）です。$A^\dagger$ の $(j,k)$ 成分は $A_{kj}^\ast$ なので、$A^\dagger=A$ は、すべての $j,k$ で次の式が成り立つことです。
+
+$$
+A_{jk}=A_{kj}^\ast
+$$
+
+$j=k$ では $A_{jj}=A_{jj}^\ast$ なので、$A_{11},A_{22}$ は実数です。$(j,k)=(2,1)$ では $A_{21}=A_{12}^\ast$ です。したがって、$A$ は次の形です。
+
+$$
+A=\begin{pmatrix}A_{11}&A_{12}\\A_{12}^\ast&A_{22}\end{pmatrix},\qquad A_{11},A_{22}\in\mathbb R,\quad A_{12}\in\mathbb C
+$$
+
+積 $DA$ の $(j,j)$ 成分は $\sum_kD_{jk}A_{kj}$ なので、トレース $\operatorname{tr}(DA)=\sum_{j,k}D_{jk}A_{kj}$ を、成分で書き下します。
+
+$$
+\operatorname{tr}(DA)=D_{11}A_{11}+D_{22}A_{22}+D_{21}A_{12}+D_{12}A_{12}^\ast
+$$
+
+「すべての $A$ で $\operatorname{tr}(DA)=0$」の $A$ に、$(A_{11},A_{22},A_{12})$ の値を入れます。次の4つで、式が4本できます。
+
+| $(A_{11},A_{22},A_{12})$ | $A$ | $\operatorname{tr}(DA)$ | $\operatorname{tr}(DA)=0$ から得られる式 |
+|---|---|---|---|
+| $(1,0,0)$ | $\begin{pmatrix}1&0\\0&0\end{pmatrix}$ | $D_{11}$ | $D_{11}=0$ |
+| $(0,1,0)$ | $\begin{pmatrix}0&0\\0&1\end{pmatrix}$ | $D_{22}$ | $D_{22}=0$ |
+| $(0,0,1)$ | $\begin{pmatrix}0&1\\1&0\end{pmatrix}$ | $D_{21}+D_{12}$ | $D_{12}+D_{21}=0$ |
+| $(0,0,i)$ | $\begin{pmatrix}0&i\\-i&0\end{pmatrix}$ | $iD_{21}-iD_{12}$ | $D_{21}-D_{12}=0$ |
+
+4行目は $iD_{21}-iD_{12}=0$ で、虚数単位 $i$（$\neq0$）で割ると、$D_{21}-D_{12}=0$ です。3行目と4行目の式を足すと $2D_{21}=0$、引くと $2D_{12}=0$ です。したがって、4つの式が成り立つなら、$D_{11}=D_{22}=D_{12}=D_{21}=0$、つまり $D=0$ で、$X=Y$ です（(A-20) の $d=2$ の場合を、成分で確かめたものです）。
+
+対偶は、次のとおりです。$X\neq Y$ なら、$D\neq0$ なので、$D_{11}$、$D_{22}$、$D_{12}+D_{21}$、$D_{21}-D_{12}$ の少なくとも1つは $0$ ではありません。そのとき、表の対応する $A$ で $\operatorname{tr}(DA)\neq0$、つまり $\operatorname{tr}(XA)\neq\operatorname{tr}(YA)$ で、期待値が合いません。
+
+**数値例**：この一般形を、具体的な $X,Y$ で確かめます。これまでの例とは別の値を使います。
+
+測定前の状態と、測定演算子を、次のようにします。
+
+$$
+|\Phi\rangle=\frac15\begin{pmatrix}3\\4\end{pmatrix},\qquad K_0=\begin{pmatrix}1&0\\0&\tfrac12\end{pmatrix},\qquad K_1=\begin{pmatrix}0&0\\0&\tfrac{\sqrt3}{2}\end{pmatrix}
+$$
+
+$\langle\Phi|\Phi\rangle=\frac{9+16}{25}=1$ です。(A-6) $\sum_mK_m^\dagger K_m=I$ も、成り立ちます。
+
+$$
+K_0^\dagger K_0+K_1^\dagger K_1=\begin{pmatrix}1&0\\0&\tfrac14\end{pmatrix}+\begin{pmatrix}0&0\\0&\tfrac34\end{pmatrix}=I
+$$
+
+この $K_0,K_1$ は、$|0\rangle$ を必ず結果 $0$ にし、$|1\rangle$ を確率 $\frac14$ で結果 $0$、確率 $\frac34$ で結果 $1$ にする測定です（$\|K_0|1\rangle\|^2=\frac14$、$\|K_1|1\rangle\|^2=\frac34$）。
+
+密度行列は、次のとおりです。
+
+$$
+\rho=|\Phi\rangle\langle\Phi|=\frac1{25}\begin{pmatrix}9&12\\12&16\end{pmatrix}
+$$
+
+$K_0,K_1$ は対角行列です。$K=\operatorname{diag}(s_1,s_2)$（$s_1,s_2$ は実数）とすると、$K\rho$ は $\rho$ の第 $j$ 行を $s_j$ 倍した行列で、$\rho K^\dagger$（$K^\dagger=K$）は $\rho$ の第 $k$ 列を $s_k$ 倍した行列です。したがって、$K\rho K^\dagger$ の $(j,k)$ 成分は、次のとおりです。
+
+$$
+(K\rho K^\dagger)_{jk}=s_j\,\rho_{jk}\,s_k
+$$
+
+$K_0$ では $(s_1,s_2)=(1,\tfrac12)$、$K_1$ では $(s_1,s_2)=(0,\tfrac{\sqrt3}{2})$ なので、次のようになります。
+
+$$
+K_0\rho K_0^\dagger=\frac1{25}\begin{pmatrix}9&6\\6&4\end{pmatrix},\qquad K_1\rho K_1^\dagger=\frac1{25}\begin{pmatrix}0&0\\0&12\end{pmatrix}
+$$
+
+和をとると、(A-19) の行列 $X$ が得られます。
+
+$$
+X=K_0\rho K_0^\dagger+K_1\rho K_1^\dagger=\frac1{25}\begin{pmatrix}9&6\\6&16\end{pmatrix}
+$$
+
+$X$ と異なる行列として、測定の影響を無視して、測定前の密度行列 $\rho$ をそのまま使う場合を考えます。(A-20) の $Y$ に、$\rho$ を入れます。
+
+$$
+Y=\rho=\frac1{25}\begin{pmatrix}9&12\\12&16\end{pmatrix}
+$$
+
+一般形の $D=X-Y$ を計算します。
+
+$$
+D=X-Y=\frac1{25}\begin{pmatrix}0&-6\\-6&0\end{pmatrix}
+$$
+
+一般形の表の4つの量は、$D_{11}=0$、$D_{22}=0$、$D_{12}+D_{21}=-\frac{12}{25}$、$D_{21}-D_{12}=0$ です。$0$ でないのは、$D_{12}+D_{21}$ だけなので、表の3行目の $A=\begin{pmatrix}0&1\\1&0\end{pmatrix}$ で、期待値が合わなくなります。ほかの3つの $A$ では、期待値が合います。
+
+$$
+\operatorname{tr}(X A)=\frac{6+6}{25}=\frac{12}{25},\qquad\operatorname{tr}(Y A)=\frac{12+12}{25}=\frac{24}{25}\qquad\Big(A=\begin{pmatrix}0&1\\1&0\end{pmatrix}\Big)
+$$
+
+たとえば、$A=\begin{pmatrix}1&0\\0&-1\end{pmatrix}$ では、$A_{11}=1$、$A_{22}=-1$ なので、$\operatorname{tr}(DA)=D_{11}-D_{22}=0$ で、$X$ と $Y$ の期待値は等しくなります。
+
+$$
+\operatorname{tr}(X A)=\operatorname{tr}(Y A)=\frac{9-16}{25}=-\frac7{25}\qquad\Big(A=\begin{pmatrix}1&0\\0&-1\end{pmatrix}\Big)
+$$
+
+このように、期待値が合う $A$ もあります。$X\neq Y$ を言うには、合わない $A$ が1つあれば足ります。
+
+結果を記録しない場合の、$A=\begin{pmatrix}0&1\\1&0\end{pmatrix}$ の期待値 $\langle A\rangle$ を、(A-8) から直接求めて、$\operatorname{tr}(XA)$ と比べます。
+
+$$
+\langle A\rangle=\sum_mP(m)\langle\Phi_m|A|\Phi_m\rangle\qquad(\text{A-8：再掲})
+$$
+
+ここで、各記号は次のとおりです。
+
+- $P(m)$：結果 $m$ が出る確率
+- $|\Phi_m\rangle$：結果 $m$ が出たあとの状態ベクトル
+- $A$：観測量
+
+結果 $0$ から計算します。$K_0|\Phi\rangle$ は、次のとおりです。
+
+$$
+K_0|\Phi\rangle=\begin{pmatrix}1&0\\0&\tfrac12\end{pmatrix}\frac15\begin{pmatrix}3\\4\end{pmatrix}=\frac15\begin{pmatrix}3\\2\end{pmatrix}
+$$
+
+確率は $P(0)=\|K_0|\Phi\rangle\|^2$ です。
+
+$$
+P(0)=\frac1{25}(3^2+2^2)=\frac{13}{25}
+$$
+
+測定後の状態ベクトルは、$|\Phi_0\rangle=K_0|\Phi\rangle/\sqrt{P(0)}$ です。
+
+$$
+|\Phi_0\rangle=\frac1{\sqrt{13}}\begin{pmatrix}3\\2\end{pmatrix}
+$$
+
+この状態での $A$ の期待値は、次のとおりです。
+
+$$
+\langle\Phi_0|A|\Phi_0\rangle=\frac1{13}\begin{pmatrix}3&2\end{pmatrix}\begin{pmatrix}0&1\\1&0\end{pmatrix}\begin{pmatrix}3\\2\end{pmatrix}=\frac{12}{13}
+$$
+
+次に、結果 $1$ です。$K_1|\Phi\rangle$ は、次のとおりです。
+
+$$
+K_1|\Phi\rangle=\begin{pmatrix}0&0\\0&\tfrac{\sqrt3}{2}\end{pmatrix}\frac15\begin{pmatrix}3\\4\end{pmatrix}=\frac{2\sqrt3}{5}\begin{pmatrix}0\\1\end{pmatrix}
+$$
+
+$|1\rangle$ の定数倍なので、規格化すると $|\Phi_1\rangle=|1\rangle$ です。確率は、$P(0)+P(1)=1$ から求められます。
+
+$$
+P(1)=1-\frac{13}{25}=\frac{12}{25}
+$$
+
+この状態での $A$ の期待値は、$\langle1|A|1\rangle=A_{22}=0$ です。
+
+$$
+\langle\Phi_1|A|\Phi_1\rangle=0
+$$
+
+(A-8) に代入します。
+
+$$
+\langle A\rangle=\frac{13}{25}\cdot\frac{12}{13}+\frac{12}{25}\cdot0=\frac{12}{25}
+$$
+
+これは $\operatorname{tr}(XA)$ と一致し、$\operatorname{tr}(YA)=\frac{24}{25}$ とは合いません。
+
+**測定演算子の具体例**：測定演算子の組 $\{K_m\}$ は、観測量 $A$（$A=A^\dagger$）とは別のものです。観測量は、測る量を表す行列です。$\{K_m\}$ は、結果 $m$ が出る確率と、出たあとの状態を決める行列の組で、(A-6) を満たします。同じ $A$ を測る場合でも、測る方法によって、$\{K_m\}$ は変わります。具体例を2つ挙げます。
+
+射影測定では、$K_m$ は射影演算子です（入力レジスタを測る場合は $K_m=M_x$）。1量子ビットを基底 $\{|0\rangle,|1\rangle\}$ で測るなら、$M_x$ の代わりに $|x\rangle\langle x|$ そのものを使って、次のとおりです。
+
+$$
+K_0=|0\rangle\langle0|,\qquad K_1=|1\rangle\langle1|
+$$
+
+直前の数値例の測定演算子は、次のとおりでした。
+
+$$
+K_0=\begin{pmatrix}1&0\\0&\tfrac12\end{pmatrix},\qquad K_1=\begin{pmatrix}0&0\\0&\tfrac{\sqrt3}{2}\end{pmatrix}
+$$
+
+これらは射影演算子ではありません（$K_0^2=\operatorname{diag}(1,\tfrac14)\neq K_0$、$K_1^2=\operatorname{diag}(0,\tfrac34)\neq K_1$）が、(A-6) を満たすので、測定演算子です。
 
 ---
 
