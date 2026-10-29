@@ -652,3 +652,185 @@
 [2026-10-25 19:25:19] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v10wBs7：終了（終了コード 0、結果あり）
 [2026-10-25 19:25:44] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v10wBs7：終了（終了コード 0、結果あり）
 [2026-10-25 19:25:44] 10/25 CPU 第 3 段が完了
+[2026-10-26 06:38:24] 10/26 CPU 第 1 段を開始（4 本、k = 0 の点の NUTS での確かめ／判定の線の追加の種）
+[2026-10-26 06:38:24] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s0：MAP 探索（出発点 20）
+[2026-10-26 06:38:26] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s0：MAP 探索（出発点 20）
+[2026-10-26 06:38:28] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s1：MAP 探索（出発点 20）
+[2026-10-26 06:38:30] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s1：MAP 探索（出発点 20）
+[2026-10-26 06:52:06] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s0：NUTS
+[2026-10-26 06:54:08] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s1：NUTS
+[2026-10-26 06:54:14] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s0：NUTS
+[2026-10-26 06:54:29] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s1：NUTS
+[2026-10-26 10:20:25] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s0：終了（終了コード 0、結果あり）
+[2026-10-26 10:21:11] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s1：終了（終了コード 0、結果あり）
+[2026-10-26 10:21:46] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s0：終了（終了コード 0、結果あり）
+[2026-10-26 10:22:26] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s1：終了（終了コード 0、結果あり）
+[2026-10-26 10:22:26] 10/26 CPU 第 1 段が完了
+[2026-10-26 10:22:26] 10/26 CPU 第 2 段を開始（4 本、k = 0 の点の NUTS での確かめ／判定の線の追加の種）
+[2026-10-26 10:22:27] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s2：MAP 探索（出発点 20）
+[2026-10-26 10:22:29] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s2：MAP 探索（出発点 20）
+[2026-10-26 10:22:31] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s3：MAP 探索（出発点 20）
+[2026-10-26 10:22:33] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s3：MAP 探索（出発点 20）
+[2026-10-26 10:37:29] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s2：NUTS
+[2026-10-26 10:37:29] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s2：NUTS
+[2026-10-26 10:38:28] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s3：NUTS
+[2026-10-26 10:38:57] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s3：NUTS
+[2026-10-26 13:59:08] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s3：終了（終了コード 0、結果あり）
+[2026-10-26 14:02:12] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s2：終了（終了コード 0、結果あり）
+[2026-10-26 14:03:42] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-16-48_v11wA1s2：終了（終了コード 0、結果あり）
+[2026-10-26 14:08:37] synthetic_F5_D1_t1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k0-16-48_v11wA1s3：終了（終了コード 0、結果あり）
+[2026-10-26 14:08:37] 10/26 CPU 第 2 段が完了
+[2026-10-26 14:08:37] 10/26 CPU 第 3 段を開始（4 本、k = 0 の点の NUTS での確かめ／判定の線の追加の種）
+[2026-10-26 14:08:37] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wA0s11：MAP 探索（出発点 20）
+[2026-10-26 14:08:39] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wA0s11：MAP 探索（出発点 20）
+[2026-10-26 14:08:41] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wBs9：MAP 探索（出発点 20）
+[2026-10-26 14:08:43] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wBs9：MAP 探索（出発点 20）
+[2026-10-26 14:23:25] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wA0s11：NUTS
+[2026-10-26 14:23:35] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wA0s11：NUTS
+[2026-10-26 14:23:47] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wBs9：NUTS
+[2026-10-26 14:28:27] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wBs9：NUTS
+[2026-10-26 17:52:30] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wA0s11：終了（終了コード 0、結果あり）
+[2026-10-26 17:54:14] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wA0s11：終了（終了コード 0、結果あり）
+[2026-10-26 17:58:23] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wBs9：終了（終了コード 0、結果あり）
+[2026-10-26 18:00:30] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v11wBs9：終了（終了コード 0、結果あり）
+[2026-10-26 18:00:30] 10/26 CPU 第 3 段が完了
+[2026-10-27 05:32:59] 10/27 CPU 第 1 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-27 05:32:59] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs10：MAP 探索（出発点 20）
+[2026-10-27 05:33:01] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs10：MAP 探索（出発点 20）
+[2026-10-27 05:33:03] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs11：MAP 探索（出発点 20）
+[2026-10-27 05:33:05] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs11：MAP 探索（出発点 20）
+[2026-10-27 05:47:51] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs11：NUTS
+[2026-10-27 05:49:19] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs11：NUTS
+[2026-10-27 05:50:16] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs10：NUTS
+[2026-10-27 05:50:21] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs10：NUTS
+[2026-10-27 09:33:32] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs10：終了（終了コード 0、結果あり）
+[2026-10-27 09:33:34] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs11：終了（終了コード 0、結果あり）
+[2026-10-27 09:34:21] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs10：終了（終了コード 0、結果あり）
+[2026-10-27 09:35:25] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs11：終了（終了コード 0、結果あり）
+[2026-10-27 09:35:25] 10/27 CPU 第 1 段が完了
+[2026-10-27 09:35:25] 10/27 CPU 第 2 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-27 09:35:25] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs12：MAP 探索（出発点 20）
+[2026-10-27 09:35:27] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs12：MAP 探索（出発点 20）
+[2026-10-27 09:35:29] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs13：MAP 探索（出発点 20）
+[2026-10-27 09:35:31] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs13：MAP 探索（出発点 20）
+[2026-10-27 09:52:10] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs13：NUTS
+[2026-10-27 09:52:20] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs12：NUTS
+[2026-10-27 09:52:23] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs12：NUTS
+[2026-10-27 09:52:27] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs13：NUTS
+[2026-10-27 13:32:41] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs12：終了（終了コード 0、結果あり）
+[2026-10-27 13:39:38] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs13：終了（終了コード 0、結果あり）
+[2026-10-27 13:40:48] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs12：終了（終了コード 0、結果あり）
+[2026-10-27 13:41:46] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs13：終了（終了コード 0、結果あり）
+[2026-10-27 13:41:46] 10/27 CPU 第 2 段が完了
+[2026-10-27 13:41:46] 10/27 CPU 第 3 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-27 13:41:46] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s12：MAP 探索（出発点 20）
+[2026-10-27 13:41:48] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s12：MAP 探索（出発点 20）
+[2026-10-27 13:41:51] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s13：MAP 探索（出発点 20）
+[2026-10-27 13:41:53] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s13：MAP 探索（出発点 20）
+[2026-10-27 13:57:19] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s12：NUTS
+[2026-10-27 13:57:26] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s13：NUTS
+[2026-10-27 13:58:05] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s13：NUTS
+[2026-10-27 13:58:32] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s12：NUTS
+[2026-10-27 17:42:43] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s12：終了（終了コード 0、結果あり）
+[2026-10-27 17:44:00] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s13：終了（終了コード 0、結果あり）
+[2026-10-27 17:45:44] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s12：終了（終了コード 0、結果あり）
+[2026-10-27 17:46:11] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s13：終了（終了コード 0、結果あり）
+[2026-10-27 17:46:11] 10/27 CPU 第 3 段が完了
+[2026-10-27 17:46:11] 10/27 CPU 第 4 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-27 17:46:11] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs14：MAP 探索（出発点 20）
+[2026-10-27 17:46:13] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs14：MAP 探索（出発点 20）
+[2026-10-27 17:46:15] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s14：MAP 探索（出発点 20）
+[2026-10-27 17:46:17] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s14：MAP 探索（出発点 20）
+[2026-10-27 18:02:03] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs14：NUTS
+[2026-10-27 18:02:15] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs14：NUTS
+[2026-10-27 18:02:17] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s14：NUTS
+[2026-10-27 18:02:33] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s14：NUTS
+[2026-10-27 21:34:41] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs14：終了（終了コード 0、結果あり）
+[2026-10-27 21:34:50] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wBs14：終了（終了コード 0、結果あり）
+[2026-10-27 21:36:59] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s14：終了（終了コード 0、結果あり）
+[2026-10-27 21:37:01] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v12wA0s14：終了（終了コード 0、結果あり）
+[2026-10-27 21:37:01] 10/27 CPU 第 4 段が完了
+[2026-10-28 06:33:37] 10/28 CPU 第 1 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-28 06:33:37] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs15：MAP 探索（出発点 20）
+[2026-10-28 06:33:39] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs15：MAP 探索（出発点 20）
+[2026-10-28 06:33:41] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s15：MAP 探索（出発点 20）
+[2026-10-28 06:33:43] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s15：MAP 探索（出発点 20）
+[2026-10-28 06:49:17] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s15：NUTS
+[2026-10-28 06:50:06] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs15：NUTS
+[2026-10-28 06:50:08] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s15：NUTS
+[2026-10-28 06:51:15] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs15：NUTS
+[2026-10-28 10:25:44] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs15：終了（終了コード 0、結果あり）
+[2026-10-28 10:28:28] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s15：終了（終了コード 0、結果あり）
+[2026-10-28 10:29:35] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s15：終了（終了コード 0、結果あり）
+[2026-10-28 10:34:00] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs15：終了（終了コード 0、結果あり）
+[2026-10-28 10:34:00] 10/28 CPU 第 1 段が完了
+[2026-10-28 10:34:00] 10/28 CPU 第 2 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-28 10:34:00] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs16：MAP 探索（出発点 20）
+[2026-10-28 10:34:02] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs16：MAP 探索（出発点 20）
+[2026-10-28 10:34:04] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s16：MAP 探索（出発点 20）
+[2026-10-28 10:34:06] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s16：MAP 探索（出発点 20）
+[2026-10-28 10:50:48] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s16：NUTS
+[2026-10-28 10:51:01] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs16：NUTS
+[2026-10-28 10:52:05] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s16：NUTS
+[2026-10-28 10:52:25] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs16：NUTS
+[2026-10-28 14:38:05] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs16：終了（終了コード 0、結果あり）
+[2026-10-28 14:38:06] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s16：終了（終了コード 0、結果あり）
+[2026-10-28 14:38:41] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s16：終了（終了コード 0、結果あり）
+[2026-10-28 14:38:43] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs16：終了（終了コード 0、結果あり）
+[2026-10-28 14:38:43] 10/28 CPU 第 2 段が完了
+[2026-10-28 14:38:43] 10/28 CPU 第 3 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-28 14:38:43] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs17：MAP 探索（出発点 20）
+[2026-10-28 14:38:45] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs17：MAP 探索（出発点 20）
+[2026-10-28 14:38:48] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s17：MAP 探索（出発点 20）
+[2026-10-28 14:38:50] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s17：MAP 探索（出発点 20）
+[2026-10-28 14:55:20] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s17：NUTS
+[2026-10-28 14:55:25] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s17：NUTS
+[2026-10-28 14:55:51] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs17：NUTS
+[2026-10-28 14:55:53] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs17：NUTS
+[2026-10-28 18:40:12] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s17：終了（終了コード 0、結果あり）
+[2026-10-28 18:41:46] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs17：終了（終了コード 0、結果あり）
+[2026-10-28 18:42:23] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wBs17：終了（終了コード 0、結果あり）
+[2026-10-28 18:43:00] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v13wA0s17：終了（終了コード 0、結果あり）
+[2026-10-28 18:43:00] 10/28 CPU 第 3 段が完了
+[2026-10-29 06:41:04] 10/29 CPU 第 1 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-29 06:41:04] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs18：MAP 探索（出発点 20）
+[2026-10-29 06:41:06] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs18：MAP 探索（出発点 20）
+[2026-10-29 06:41:08] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s18：MAP 探索（出発点 20）
+[2026-10-29 06:41:10] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s18：MAP 探索（出発点 20）
+[2026-10-29 06:57:38] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs18：NUTS
+[2026-10-29 06:58:24] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs18：NUTS
+[2026-10-29 06:58:35] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s18：NUTS
+[2026-10-29 06:58:38] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s18：NUTS
+[2026-10-29 10:23:05] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs18：終了（終了コード 0、結果あり）
+[2026-10-29 10:24:24] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs18：終了（終了コード 0、結果あり）
+[2026-10-29 10:29:41] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s18：終了（終了コード 0、結果あり）
+[2026-10-29 10:33:05] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s18：終了（終了コード 0、結果あり）
+[2026-10-29 10:33:05] 10/29 CPU 第 1 段が完了
+[2026-10-29 10:33:05] 10/29 CPU 第 2 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-29 10:33:05] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs19：MAP 探索（出発点 20）
+[2026-10-29 10:33:07] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs19：MAP 探索（出発点 20）
+[2026-10-29 10:33:09] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s19：MAP 探索（出発点 20）
+[2026-10-29 10:33:11] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s19：MAP 探索（出発点 20）
+[2026-10-29 10:47:25] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs19：NUTS
+[2026-10-29 10:47:54] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs19：NUTS
+[2026-10-29 10:48:48] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s19：NUTS
+[2026-10-29 10:50:11] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s19：NUTS
+[2026-10-29 14:22:40] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs19：終了（終了コード 0、結果あり）
+[2026-10-29 14:23:04] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s19：終了（終了コード 0、結果あり）
+[2026-10-29 14:23:57] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs19：終了（終了コード 0、結果あり）
+[2026-10-29 14:28:49] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s19：終了（終了コード 0、結果あり）
+[2026-10-29 14:28:49] 10/29 CPU 第 2 段が完了
+[2026-10-29 14:28:49] 10/29 CPU 第 3 段を開始（4 本、判定の線の成績を種を増やして数える：M2・M3）
+[2026-10-29 14:28:50] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs20：MAP 探索（出発点 20）
+[2026-10-29 14:28:52] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs20：MAP 探索（出発点 20）
+[2026-10-29 14:28:54] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s20：MAP 探索（出発点 20）
+[2026-10-29 14:28:56] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s20：MAP 探索（出発点 20）
+[2026-10-29 14:44:23] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs20：NUTS
+[2026-10-29 14:45:25] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s20：NUTS
+[2026-10-29 14:46:23] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s20：NUTS
+[2026-10-29 14:46:26] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs20：NUTS
+[2026-10-29 18:12:32] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs20：終了（終了コード 0、結果あり）
+[2026-10-29 18:15:16] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s20：終了（終了コード 0、結果あり）
+[2026-10-29 18:15:26] synthetic_F5_D1_os_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wA0s20：終了（終了コード 0、結果あり）
+[2026-10-29 18:16:39] synthetic_F5_D1_os_split_mix_t1p_ro_zc_sro0.01-0.03_t1k4-8-16-32-48_v14wBs20：終了（終了コード 0、結果あり）
+[2026-10-29 18:16:39] 10/29 CPU 第 3 段が完了
