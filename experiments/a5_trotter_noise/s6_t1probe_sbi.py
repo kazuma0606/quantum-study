@@ -52,6 +52,7 @@ THRESH = 0.0009
 LO_THRESH = 0.0003
 WORLDS = {"T1 なし（γ=0）": 0.0, "T1 小（γ=0.00086）": 0.00086, "T1 あり（γ=0.00179）": 0.00179}
 TRUE_REST = {"p": 0.00173, "e01": 0.01, "e10": 0.03}
+PREP_HI = 0.02    # --prep-err：|1> の準備（X）が失敗する確率 f の事前分布の上端（0〜PREP_HI の一様）
 
 
 def log(msg: str) -> None:
@@ -89,11 +90,14 @@ def theta_with_rotations(theta_fixed, rot):
     return th
 
 
-def make_expect(theta, free_rot: bool = False):
+def make_expect(theta, free_rot: bool = False, prep_idx=None):
     """パラメータ → 読み出しの結果の4通り（00, 01, 10, 11。左が制御）の確率。準備（|0>・|1>）× k（5通り）× 4 の 40 個。
     2つの量子ビットは同じショットで同時に測るので、本当の状態の同時確率に、量子ビットごとの読み出しの誤りの行列
     M = [[1−e01, e10], [e01, 1−e10]]（行が読んだ値、列が本当の値）のテンソル積をかける（10/15 の監査：制御と標的を
-    別々の二項分布で作ると、2つの値の相関が消える）。"""
+    別々の二項分布で作ると、2つの値の相関が消える）。
+    prep_idx を与えると、par[prep_idx] を「制御を |1> にする準備（X）が失敗する確率 f」とみなし、|1> から始めた回路の確率を
+    (1 − f) × |1> から始めた確率 ＋ f × |0> から始めた確率 にする（失敗すると制御は |0> のまま。10/25 の監査：実機では
+    k = 0 の点でも、読み出しの誤り e10 と準備の失敗 f を分けられない）。"""
     def conf(e01, e10):
         return jnp.array([[1 - e01, e10], [e01, 1 - e10]])
 
@@ -102,11 +106,12 @@ def make_expect(theta, free_rot: bool = False):
         th = theta_with_rotations(theta, par[6:12]) if free_rot else theta
         err = nm.error_sup(th, p, False, g)
         M = jnp.kron(conf(e01c, e10c), conf(e01t, e10t))
-        out = []
-        for c1 in (False, True):
-            P = nm.t1_probe_probs(err, c1, KS)              # (k, 4)
-            out.append(P @ M.T)
-        return jnp.concatenate(out).reshape(-1)
+        P0 = nm.t1_probe_probs(err, False, KS)             # (k, 4)
+        P1 = nm.t1_probe_probs(err, True, KS)
+        if prep_idx is not None:
+            f = par[prep_idx]
+            P1 = (1 - f) * P1 + f * P0
+        return jnp.concatenate([P0 @ M.T, P1 @ M.T]).reshape(-1)
     return jax.jit(jax.vmap(one))
 
 
@@ -114,18 +119,20 @@ ZC = np.array([1, 1, -1, -1])       # 制御の Z の値（00, 01, 10, 11 の順
 ZT = np.array([1, -1, 1, -1])       # 標的の Z の値
 
 
-def simulate(expect, pars: np.ndarray, shots: int, rng: np.random.Generator, batch: int = 4096) -> np.ndarray:
+def simulate(expect, pars: np.ndarray, shots, rng: np.random.Generator, batch: int = 4096) -> np.ndarray:
     """4通りの同時の結果を多項分布で引き、制御・標的の <Z> を集計する（データは 20 個：準備 × k × 量子ビット）。
-    実データ並みの余分なばらつき（統計誤差の 1.35 倍）も足す。"""
+    実データ並みの余分なばらつき（統計誤差の 1.35 倍）も足す。shots は整数（どの k も同じ）か、k ごとの並び（--k-shots）。"""
+    sh = np.broadcast_to(np.asarray(shots, dtype=np.int64), (len(KS),))
+    sig_n = np.broadcast_to(sh[None, :, None], (2, len(KS), 2)).reshape(-1)   # 準備 → k → 量子ビット の順
     xs = []
     for i in range(0, len(pars), batch):
         P = np.asarray(expect(jnp.asarray(pars[i:i + batch]))).reshape(-1, 2, len(KS), 4)
         P = np.clip(P, 0, None)
         P = P / P.sum(-1, keepdims=True)
-        n = rng.multinomial(shots, P.reshape(-1, 4)).reshape(P.shape) / shots
+        n = rng.multinomial(np.broadcast_to(sh[None, None, :], P.shape[:-1]), P) / sh[None, None, :, None]
         zc, zt = n @ ZC, n @ ZT                              # (batch, 準備, k)
         m = np.stack([zc, zt], axis=-1).reshape(len(P), -1)   # 準備 → k → 量子ビット の順
-        sig = np.sqrt(np.maximum(1 - m**2, 1e-6) / shots)
+        sig = np.sqrt(np.maximum(1 - m**2, 1e-6) / sig_n)
         xs.append(m + rng.standard_normal(m.shape) * sig * np.sqrt(NOISE**2 - 1))
     return np.concatenate(xs)
 
@@ -147,6 +154,10 @@ def main() -> None:
                     help="評価する世界の読み出しの誤り（既定 0.01 0.03）。学習の事前分布の範囲は 0〜0.08 のまま")
     ap.add_argument("--fix-ro", type=float, metavar="H",
                     help="読み出しの誤り4つの事前分布を、正解 ± H の狭い箱にする（読み出しがほぼ既知の場合）")
+    ap.add_argument("--prep-err", type=float, metavar="F",
+                    help="制御を |1> にする準備が失敗する確率 f も推定する（事前分布 0〜PREP_HI）。F は評価する世界の正解の f")
+    ap.add_argument("--k-shots", type=int, nargs="+",
+                    help="k ごとのショット数（--ks と同じ長さ）。指定したら --shots は1つだけにし、保存名の目印に使う")
     ap.add_argument("--free-rot", action="store_true",
                     help="回転（制御 |0>・|1> の X・Y・Z の6個）も推定する。事前分布は当てはめの平均 ± 4 標準偏差の箱")
     ap.add_argument("--pair", type=int, choices=[0, 1], default=0,
@@ -183,13 +194,27 @@ def main() -> None:
         rot_mean, rlo, rhi = rotation_prior(args.pair)
         NAMES = NAMES + ROT_NAMES
         LOW, HIGH = np.r_[LOW, rlo], np.r_[HIGH, rhi]
+    prep_idx = None
+    if args.prep_err is not None:
+        if not (np.isfinite(args.prep_err) and 0 <= args.prep_err <= PREP_HI):
+            ap.error(f"--prep-err は 0〜{PREP_HI:g} の範囲にする：{args.prep_err}")
+        NAMES = NAMES + ["f_prep"]
+        LOW, HIGH = np.r_[LOW, 0.0], np.r_[HIGH, PREP_HI]
+        prep_idx = len(NAMES) - 1
+    if args.k_shots is not None:
+        if len(args.k_shots) != len(KS) or min(args.k_shots) <= 0:
+            ap.error(f"--k-shots は --ks と同じ長さの正の整数にする：{args.k_shots}（k = {KS}）")
+        if len(args.shots) != 1:
+            ap.error("--k-shots を使うときは --shots を1つだけにする（保存名の目印）")
     # 保存名に組を入れる（同じ --tag で組だけ変えると上書きされるため。10/17 の監査）。10/16 までの結果は、入れる前の名前のまま
     pair_name = ["22-23", "142-143"][args.pair]
     # k の並びと、回転を推定するかどうかも保存名に入れる（10/17 の監査：条件だけ変えると上書きされる）。
     # 10/17 までの結果は、入れる前の名前のまま
     stem = (f"{args.tag}_pair{pair_name}_k{'-'.join(map(str, args.ks))}" + ("_freerot" if args.free_rot else "")
             + ("_gcurve" if args.gammas else "") + (f"_ro{args.true_ro[0]:g}-{args.true_ro[1]:g}" if args.true_ro else "")
-            + (f"_fixro{args.fix_ro:g}" if args.fix_ro is not None else ""))
+            + (f"_fixro{args.fix_ro:g}" if args.fix_ro is not None else "")
+            + (f"_prep{args.prep_err:g}" if args.prep_err is not None else "")
+            + (f"_kshots{'-'.join(map(str, args.k_shots))}" if args.k_shots else ""))
     # 保存名には --gammas の値や --shots などが入らないので、同じ名前の結果があれば上書きせずに止める（10/23 の監査）。
     # 完了の印は最後にだけ書く .md。.json だけあるのは途中で止まった実行なので、最初からやり直す
     # （ショット数ごとに乱数を引き継ぐので、途中から再開すると通しで回したときと乱数が変わる）
@@ -215,7 +240,7 @@ def main() -> None:
     from sbi.utils import BoxUniform
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     OUT.mkdir(parents=True, exist_ok=True)
-    expect = make_expect(fixed_theta(args.pair), args.free_rot)
+    expect = make_expect(fixed_theta(args.pair), args.free_rot, prep_idx)
     TRUE_REST["p"] = TRUE_P[args.pair]
     log(f"組の条件：{pair_name}（回転は{'推定する（6個）' if args.free_rot else '当てはめの事後平均に固定'}、"
         f"正解の p = {TRUE_REST['p']}）、k = {KS}")
@@ -224,10 +249,11 @@ def main() -> None:
     rng = np.random.default_rng(args.seed)
     results = {"args": vars(args), "device": dev, "by_shots": {}}
     for shots in args.shots:
+        sim_shots = np.array(args.k_shots) if args.k_shots else shots
         t0 = time.time()
         log(f"{shots} ショット：シミュレーション {args.sims} 回")
         th = LOW + (HIGH - LOW) * rng.random((args.sims, len(NAMES)))
-        xs = simulate(expect, th, shots, rng)
+        xs = simulate(expect, th, sim_shots, rng)
         log(f"{shots} ショット：シミュレーション完了（{time.time() - t0:.0f} 秒）。学習（{dev}）")
         inf = NPE(prior=prior, density_estimator="nsf", device=dev)
         inf.append_simulations(torch.tensor(th, dtype=torch.float32), torch.tensor(xs, dtype=torch.float32))
@@ -245,7 +271,7 @@ def main() -> None:
 
         # SBC：事前分布から正解を引き、γ の 68%・90% 区間に正解が入る割合
         th_s = LOW + (HIGH - LOW) * rng.random((args.sbc, len(NAMES)))
-        x_s = simulate(expect, th_s, shots, rng)
+        x_s = simulate(expect, th_s, sim_shots, rng)
         cov = {68: [], 90: []}
         for i in range(args.sbc):
             s = draws(x_s[i], 500)
@@ -261,8 +287,10 @@ def main() -> None:
             row = [g, TRUE_REST["p"], TRUE_REST["e01"], TRUE_REST["e10"], TRUE_REST["e01"], TRUE_REST["e10"]]
             if args.free_rot:
                 row += list(rot_mean)              # 世界の正解の回転は、固定の版と同じ当てはめの平均
+            if prep_idx is not None:
+                row += [args.prep_err]
             par = np.array([row] * args.n_test)
-            x_w = simulate(expect, par, shots, rng)
+            x_w = simulate(expect, par, sim_shots, rng)
             med, lo, hi, inside = [], [], [], []
             for i in range(args.n_test):
                 s = draws(x_w[i])[:, 0]
@@ -279,7 +307,7 @@ def main() -> None:
                 f"γ の中央値 {worlds[wname]['median_of_median']:.5f}、90% 区間の幅 {worlds[wname]['width90_median']:.5f}、"
                 f"正解が区間に入る割合 {worlds[wname]['coverage90']:.3f}")
         results["by_shots"][str(shots)] = {"sbc": sbc, "worlds": worlds, "seconds": time.time() - t0,
-                                           "qpu_s_estimate": 2.0 + 3e-4 * 2 * len(KS) * shots}
+                                           "qpu_s_estimate": 2.0 + 3e-4 * 2 * (sum(args.k_shots) if args.k_shots else len(KS) * shots)}
         (OUT / f"{stem}.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
 
     lines = ["# T1 専用の回路：ショット数ごとの見分けられる割合（SBI）", "",
