@@ -312,14 +312,16 @@ def main() -> None:
 
     lines = ["# T1 専用の回路：ショット数ごとの見分けられる割合（SBI）", "",
              f"{pair_name} の組、回転は固定。判定：事後分布の中央値が γ = {THRESH} を超えたら「T1 あり」。世界ごとに {args.n_test} 組。"
-             "QPU 秒は T1 専用の回路だけの見積もり（2 秒 ＋ 0.3 ms × 回路 10 本 × ショット）。", "",
+             "QPU 秒は T1 専用の回路だけの見積もり（2 秒 ＋ 0.3 ms × 準備 2 つ × 各 k のショットの合計）。"
+             + (f"k ごとのショット数：{dict(zip(KS, args.k_shots))}（「ショット」欄は --shots の目印の値）。" if args.k_shots else ""), "",
              f"判定率は「中央値 > {THRESH}」／「90% 区間の下の端 > {LO_THRESH}」の2通り。",  "",
              "| ショット | QPU 秒 | " + " | ".join(f"{w}：判定率" for w in WORLDS) + " | γ=0.00179 の 90% 区間の幅 | SBC γ（68%・90%） |",
              "|---|---|" + "---|" * len(WORLDS) + "---|---|"]
     WIDTH_KEY = next((n for n, g in WORLDS.items() if abs(g - 0.00179) < 1e-9), "")
     for sh, r in results["by_shots"].items():
         w = r["worlds"]
-        lines.append(f"| {sh} | {r['qpu_s_estimate']:.0f} | "
+        sh_label = f"{sh}（k ごと {'-'.join(map(str, args.k_shots))}）" if args.k_shots else sh
+        lines.append(f"| {sh_label} | {r['qpu_s_estimate']:.1f} | "
                      + " | ".join(f"{w[n]['detect_rate']:.3f}／{w[n]['detect_rate_lo']:.3f}" for n in WORLDS)
                      + f" | {w[WIDTH_KEY]['width90_median'] if WIDTH_KEY in w else float('nan'):.5f} | {r['sbc'][68]['gamma']:.2f}・{r['sbc'][90]['gamma']:.2f} |")
     (OUT / f"{stem}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
