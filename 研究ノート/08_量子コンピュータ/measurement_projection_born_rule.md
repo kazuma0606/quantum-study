@@ -2060,7 +2060,7 @@ $$
 P(m)=\langle\Phi|K_m^\dagger K_m|\Phi\rangle
 $$
 
-結果を記録しない場合は、起こりうる各結果と、それぞれが出る確率を、**合わせて**扱う必要があります（実験では、記録せずに次の操作に使うことがあります）。この混合を表すために、状態を行列で表します。先に示した等式 $K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle$ から、結果を記録しない場合の観測量 $A$ の期待値を計算します。これは、各結果 $m$ の状態 $|\Phi_m\rangle$ での期待値の、確率 $P(m)$ による平均です。
+結果を記録しない場合は、起こりうる各結果と、それぞれが出る確率を、**合わせて**扱う必要があります（実験では、記録せずに次の操作に使うことがあります）。このように合わせたものを表すために、状態を行列で表します。先に示した等式 $K_m|\Phi\rangle=\sqrt{P(m)}\,|\Phi_m\rangle$ から、結果を記録しない場合の観測量 $A$ の期待値を計算します。これは、各結果 $m$ の状態 $|\Phi_m\rangle$ での期待値の、確率 $P(m)$ による平均です。
 
 $$
 \langle A\rangle=\sum_mP(m)\,\langle\Phi_m|A|\Phi_m\rangle\tag{A-8}
@@ -2729,7 +2729,7 @@ $$
 \operatorname{tr}(aX+bY)=a\operatorname{tr}X+b\operatorname{tr}Y
 $$
 
-**ケットとブラの積（外積）と、密度行列**：列ベクトル $|u\rangle\in\mathbb C^d$ と、行ベクトル $\langle w|$ の積 $|u\rangle\langle w|$ は、$d\times d$ 行列です（① の補足で、$|a_j\rangle\langle a_j|$ として扱いました）。$|\Phi\rangle$ から作る、次の行列を、**密度行列**と呼びます。状態ベクトル $|\Phi\rangle$ を、行列で表したものです。
+**ケットとブラの積（外積）と、密度行列**：列ベクトル $|u\rangle\in\mathbb C^d$ と、行ベクトル $\langle w|$ の積 $|u\rangle\langle w|$ は、$d\times d$ 行列です（① の補足で、$|a_j\rangle\langle a_j|$ として扱いました）。$|\Phi\rangle$ から作る、次の行列を、純粋状態 $|\Phi\rangle$ の**密度行列**と呼びます。状態ベクトル $|\Phi\rangle$ を、行列で表したものです。
 
 $$
 \rho=|\Phi\rangle\langle\Phi|\in\mathbb C^{d\times d}
@@ -2939,7 +2939,7 @@ $$
 
 これで、(A-20) が示せました。この結論を、結果を記録しない場合の状態に当てはめます。
 
-まず、「状態を行列で表す」ことの意味を定めます。状態を行列 $\rho$ で表すとは、その行列が、すべての観測量 $A$（$A=A^\dagger$）の期待値を、$\operatorname{tr}(\rho A)$ として再現することとします。
+まず、「状態を行列で表す」ことの意味を定めます。状態を行列 $\rho$ で表すとは、その行列が、すべての観測量 $A$（$A=A^\dagger$）の期待値を、$\operatorname{tr}(\rho A)$ として再現することとします。この条件を満たす行列を、一般の**密度行列**と呼びます。純粋状態の $|\Phi\rangle\langle\Phi|$ が、この条件を満たすことを、次に示します。
 
 測定前の状態 $|\Phi\rangle$ での、観測量 $A$ の期待値は $\langle\Phi|A|\Phi\rangle$ です。これが $\operatorname{tr}(\rho A)$ の形になることを、(A-15) から示します。任意の $|\varphi\rangle\in\mathbb C^d$ と $B\in\mathbb C^{d\times d}$ について、次の式です。
 
@@ -2953,10 +2953,10 @@ $$
 \langle\Phi|B|\Phi\rangle=\operatorname{tr}\big(|\Phi\rangle\langle\Phi|\,B\big)
 $$
 
-右辺の $|\Phi\rangle\langle\Phi|$ は、測定前の状態 $|\Phi\rangle$ から作る行列で、密度行列の定義に出てくる行列です。
+右辺の $|\Phi\rangle\langle\Phi|$ は、測定前の状態 $|\Phi\rangle$ から作る行列で、純粋状態の密度行列の定義に出てくる行列です。
 
 $$
-\rho:=|\Phi\rangle\langle\Phi|\in\mathbb C^{d\times d}\qquad(\text{密度行列の定義：再掲})
+\rho:=|\Phi\rangle\langle\Phi|\in\mathbb C^{d\times d}\qquad(\text{純粋状態の密度行列の定義：再掲})
 $$
 
 この定義を、右辺に使います。
@@ -3599,17 +3599,74 @@ $$
 
 ---
 
-ここまでで、結果を記録しない場合の状態 $X=\sum_mK_m\rho K_m^\dagger$ は、結果 $m$ ごとの状態 $|\Phi_m\rangle$ を、確率 $P(m)$ で混ぜた行列 $\sum_mP(m)\,|\Phi_m\rangle\langle\Phi_m|$ に等しいことが分かりました（(A-28)）。次に、この状態 $X$ が、次のどちらになるかを調べます。
+<!-- 出典（アンサンブル）：Preskill, Lecture Notes for Physics 219, Chapter 2 §2.3, 式 (2.69) の直後（「ρ を、状態 |a> が確率 p_a で現れる、純粋状態のアンサンブルを表すものと解釈できる」）。Wikipedia "Density matrix"（確率 p_j で用意された純粋状態 |ψ_j> の集まり、ρ = Σ_j p_j |ψ_j><ψ_j|）。Nielsen & Chuang の Theorem 2.5 に、アンサンブルとその密度演算子の対応がある（二次資料による引用で確認。本文は未確認）。 -->
+ここまでで、結果を記録しない場合の状態 $X=\sum_mK_m\rho K_m^\dagger$ は、結果 $m$ ごとの状態 $|\Phi_m\rangle$ を、確率 $P(m)$ で混ぜ合わせた行列 $\sum_mP(m)\,|\Phi_m\rangle\langle\Phi_m|$ に等しいことが分かりました（(A-28)）。このように、複数の状態を、確率で混ぜ合わせたものを、**アンサンブル**と呼びます。次に、アンサンブルを一般の形で考え、その状態を行列（密度行列）で表します。そのあとで、純粋状態と混合状態の区別を述べ、この状態 $X$ が、そのどちらになるかを調べます。
 
+<!-- 出典（密度行列の一般の定義）：Preskill, Ph219, Ch.2 §2.3, 式 (2.56)、(2.62)、(2.69)（すべての観測量 M で <M> = tr(Mρ)。ρ は自己共役、半正定値、トレース 1）。Wikipedia "Density matrix"（<A> = tr(ρA)、半正定値・自己共役・トレース 1）。 -->
+一般の形では、アンサンブルの混ぜる $j$ 番目の状態を、規格化された状態ベクトル $|\psi_j\rangle$ とし、その状態にある確率を $p_j$ とします（$p_j\ge0$、$\sum_jp_j=1$）。
+純粋状態の密度行列は、$|\psi\rangle\langle\psi|$ と書けました。ただし、密度行列のそもそもの定義は、この形ではなく、「すべての観測量 $A$（$A=A^\dagger$）の期待値を $\operatorname{tr}(\rho A)$ として再現する行列 $\rho$」というものでした。この条件を満たす行列は、(A-20) から、1つだけです。アンサンブルでも、この定義に従って密度行列を導出する。
+
+アンサンブルでは、確率 $p_j$ で状態 $|\psi_j\rangle$ にあるので、アンサンブルでの $A$ の期待値 $\langle A\rangle$ は、各状態での期待値の、確率 $p_j$ での平均です。(A-8) は、次の式でした。
+
+$$
+\langle A\rangle=\sum_mP(m)\,\langle\Phi_m|A|\Phi_m\rangle\qquad(\text{A-8：再掲})
+$$
+
+$m\to j$、$P(m)\to p_j$、$|\Phi_m\rangle\to|\psi_j\rangle$ とすると、次の式です。
+
+$$
+\langle A\rangle=\sum_jp_j\,\langle\psi_j|A|\psi_j\rangle
+$$
+
+各項に (A-15) を使います。(A-15) は、任意の $|\varphi\rangle\in\mathbb C^d$ と $B\in\mathbb C^{d\times d}$ について、次の式でした。
+
+$$
+\langle\varphi|B|\varphi\rangle=\operatorname{tr}\big(|\varphi\rangle\langle\varphi|\,B\big)\qquad(\text{A-15：再掲})
+$$
+
+$|\varphi\rangle=|\psi_j\rangle$、$B=A$ として、各項を直します。
+
+$$
+\langle A\rangle=\sum_jp_j\operatorname{tr}\big(|\psi_j\rangle\langle\psi_j|\,A\big)
+$$
+
+トレースの線形性 $\operatorname{tr}(aX+bY)=a\operatorname{tr}X+b\operatorname{tr}Y$ で、確率 $p_j$ と和を、トレースの中に入れます。
+
+$$
+\langle A\rangle=\operatorname{tr}\Big(\Big[\sum_jp_j\,|\psi_j\rangle\langle\psi_j|\Big]A\Big)
+$$
+
+したがって、アンサンブルの密度行列は、各状態の密度行列 $|\psi_j\rangle\langle\psi_j|$ に、確率 $p_j$ をかけて足した、次の行列です。
+
+$$
+\sum_jp_j\,|\psi_j\rangle\langle\psi_j|\tag{A-29}
+$$
+
+(A-28) の左辺 $\sum_mP(m)\,|\Phi_m\rangle\langle\Phi_m|$ は、この形です。添字 $j$ が結果 $m$、重み $p_j$ が確率 $P(m)$、状態 $|\psi_j\rangle$ が測定後の状態 $|\Phi_m\rangle$ にあたります（$P(m)\ge0$ で、$\sum_mP(m)=1$ は (A-6) から出ます。$P(m)=0$ の結果は $|\Phi_m\rangle$ が定まらないので、その項を $0$ と約束しました）。
+
+<!-- 出典（純粋状態）：Preskill, Ph219, Ch.2 §2.3, 式 (2.67) の後（「状態が ray なら純粋。そのとき ρ = |ψ><ψ|、ρ^2 = ρ」）。Wikipedia "Density matrix"（純粋状態：他の状態の確率的な混合として書けない状態）。 -->
 **純粋状態**は、測定前の $|\Phi\rangle$ のように、状態ベクトル $|\psi\rangle$ で記述できる状態です。密度行列は、次の形になります。
 
 $$
-|\psi\rangle\langle\psi|\tag{A-29}
+|\psi\rangle\langle\psi|\tag{A-30}
 $$
 
-**混合状態**は、状態ベクトルでは記述できない状態です。
+<!-- 出典（混合状態）：Preskill, Ph219, Ch.2 §2.3, 式 (2.67) の後（「純粋でなければ混合。純粋でない状態では、和の項が 2 つ以上あり、ρ^2 ≠ ρ」）。Wikipedia "Density matrix"（混合状態は、確率的な混合として書ける状態）。 -->
+アンサンブルの密度行列 (A-29) は、混ぜる状態が1つだけ（ある $j$ で $p_j=1$、ほかは $p_j=0$）の場合や、混ぜる状態がすべて同じ状態の場合に、$|\psi_j\rangle\langle\psi_j|$ になり、純粋状態です。(A-29) の行列が、どんな状態ベクトル $|\psi\rangle$ の $|\psi\rangle\langle\psi|$ とも等しくないとき、そのアンサンブルが表す状態は、状態ベクトルでは記述できない状態で、これを混合状態と呼びます。等しくないかどうかの判定は、階数を使って、この後で行います。
 
-結果を記録しない場合の状態は、純粋状態でしょうか、混合状態でしょうか。答えは場合によります。
+**純粋状態・アンサンブル・混合状態の違い**：ここまでに出てきた3つの語は、指すものの種類が違います。違いを、次の表と図にまとめます。
+
+| 語 | 何を指すか | 書き方 | 密度行列 |
+|---|---|---|---|
+| 純粋状態 | 状態ベクトルで記述できる状態 | $\lvert\psi\rangle$ | $\lvert\psi\rangle\langle\psi\rvert$（(A-30)） |
+| アンサンブル | 確率 $p_j$ で状態 $\lvert\psi_j\rangle$ を用意する、という混ぜ合わせ（純粋になる場合を含む） | $\{p_j,\ \lvert\psi_j\rangle\}$ | $\sum_jp_j\lvert\psi_j\rangle\langle\psi_j\rvert$（(A-29)） |
+| 混合状態 | アンサンブルの密度行列が、どんな $\lvert\psi\rangle\langle\psi\rvert$ とも等しくない状態（状態ベクトルでは記述できない） | 密度行列で書く | $\sum_jp_j\lvert\psi_j\rangle\langle\psi_j\rvert$（(A-29) の形で、純粋状態の形にならないもの） |
+
+![アンサンブル、密度行列、純粋状態、混合状態の関係](figures/mp13_ensemble_pure_mixed.png)
+
+*アンサンブル $\{p_j,|\psi_j\rangle\}$ から、(A-29) で密度行列 $\rho$ が決まります。$\rho$ が、ある $|\psi\rangle\langle\psi|$ と等しければ純粋状態、どんな $|\psi\rangle\langle\psi|$ とも等しくなければ混合状態です。混ぜる状態が1つだけ（$p_j=1$）の場合や、すべて同じ状態の場合は、純粋状態になります。図を描くときに、混ぜる状態が1つだけのアンサンブルの密度行列が、$|\psi\rangle\langle\psi|$ の形になることを、行列から計算して確かめています。*
+
+以上を使って、結果を記録しない場合の状態 $X$ は、純粋状態でしょうか、混合状態でしょうか。答えは場合によります。
 
 状態ベクトルで記述できる例を挙げます。測定前の状態と測定演算子を、次のようにします。
 
@@ -3623,7 +3680,7 @@ $$
 \sum_mK_m\rho K_m^\dagger=K_0\rho K_0^\dagger=\big(K_0|0\rangle\big)\big(K_0|0\rangle\big)^\dagger=|0\rangle\langle0|
 $$
 
-で、状態ベクトル $|0\rangle$ の純粋状態です。
+で、状態ベクトル $|0\rangle$ の純粋状態です。(A-28) の形で見ると、$P(0)=\|K_0|0\rangle\|^2=1$、$P(1)=\|K_1|0\rangle\|^2=0$ なので、混ぜる状態が $|\Phi_0\rangle=|0\rangle$ の1つだけの場合です（$P(1)=0$ の項は、$0$ と約束した項です）。
 
 記述できない例は、次の状態です。
 
@@ -3678,7 +3735,7 @@ $$
 (A-16) は、任意の行列 $S,T$ で $\operatorname{tr}(ST)=\operatorname{tr}(TS)$ という式でした。$S=\rho$、$T=|\pm\rangle\langle\pm|$ として、積の順序を入れ替えます。(A-15) は、任意の行列 $B$ とベクトル $|\varphi\rangle$ で $\langle\varphi|B|\varphi\rangle=\operatorname{tr}(|\varphi\rangle\langle\varphi|B)$ という式でした。これを、$|\varphi\rangle=|\pm\rangle$、$B=\rho$ として使います。
 
 $$
-p_\pm=\operatorname{tr}\big(|\pm\rangle\langle\pm|\,\rho\big)=\langle\pm|\rho|\pm\rangle\tag{A-30}
+p_\pm=\operatorname{tr}\big(|\pm\rangle\langle\pm|\,\rho\big)=\langle\pm|\rho|\pm\rangle\tag{A-31}
 $$
 
 純粋状態 $\rho=|\psi\rangle\langle\psi|$ では、$\langle\psi|\pm\rangle$ が $\langle\pm|\psi\rangle$ の複素共役なので、$\langle\pm|\psi\rangle\langle\psi|\pm\rangle=|\langle\pm|\psi\rangle|^2$ です。これは、基底で測ったときの結果の確率が、係数の絶対値の2乗になる、というボルン則（Part IV §2）と同じです。
@@ -3718,7 +3775,7 @@ $$
 したがって、零でない状態ベクトル $|\psi\rangle$ について、$|\psi\rangle\langle\psi|$ は、階数 $1$（行列式 $0$）の行列です。
 
 $$
-\operatorname{rank}\big(|\psi\rangle\langle\psi|\big)=1\qquad(|\psi\rangle\neq0)\tag{A-31}
+\operatorname{rank}\big(|\psi\rangle\langle\psi|\big)=1\qquad(|\psi\rangle\neq0)\tag{A-32}
 $$
 
 **具体例**：状態と測定演算子を、次のようにします。
@@ -3748,7 +3805,7 @@ $$
 $|0\rangle\langle0|+|1\rangle\langle1|=I$（(A-14)、$d=2$）なので、次の式が成り立ちます。
 
 $$
-\sum_mK_m\rho K_m^\dagger=\frac12I\tag{A-32}
+\sum_mK_m\rho K_m^\dagger=\frac12I\tag{A-33}
 $$
 
 **説明**：結果を記録しない場合の状態は、次の行列でした。
@@ -3763,15 +3820,34 @@ $$
 \text{第1列}=\begin{pmatrix}\frac12\\0\end{pmatrix},\qquad\text{第2列}=\begin{pmatrix}0\\\frac12\end{pmatrix}
 $$
 
-零でない状態ベクトルの外積は、(A-31) から、階数が $1$ です。$\frac12I$ の階数は $2$ なので、階数が違います。したがって、どんな状態ベクトル $|\psi\rangle$ についても、次が成り立ちます。
+零でない状態ベクトルの外積は、(A-32) から、階数が $1$ です。$\frac12I$ の階数は $2$ なので、階数が違います。したがって、どんな状態ベクトル $|\psi\rangle$ についても、次が成り立ちます。
 
 $$
-\frac12I\neq|\psi\rangle\langle\psi|\tag{A-33}
+\frac12I\neq|\psi\rangle\langle\psi|\tag{A-34}
 $$
 
-つまり $\frac12I$ は、状態ベクトルでは記述できない**混合状態**です。以下では、$|\psi_j\rangle$ を、混ぜる $j$ 番目の、規格化された状態ベクトルとし、$p_j$ を、$p_j\ge0$、$\sum_jp_j=1$ を満たす数とします。混合状態は、確率 $p_j$ で状態 $|\psi_j\rangle$ にある、という古典的な混ぜ合わせにあたり、密度行列は $\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$ です。たとえば、$\frac12I=\frac12|0\rangle\langle0|+\frac12|1\rangle\langle1|$ は、$p_0=p_1=\frac12$、$|\psi_0\rangle=|0\rangle$、$|\psi_1\rangle=|1\rangle$ の混合です（(A-32)、(A-14)）。
+つまり $\frac12I$ は、状態ベクトルでは記述できない**混合状態**です。先に定義したアンサンブルは、確率 $p_j$ で状態 $|\psi_j\rangle$ にある、という古典的な混ぜ合わせにあたり、以下では、その密度行列 (A-29) を $\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$ と書きます。たとえば、$\frac12I=\frac12|0\rangle\langle0|+\frac12|1\rangle\langle1|$ は、$p_0=p_1=\frac12$、$|\psi_0\rangle=|0\rangle$、$|\psi_1\rangle=|1\rangle$ のアンサンブルです（(A-33)、(A-14)）。
 
-この $p_j$ は、混合の重みで、② の $p_j=|\langle a_j|\varphi\rangle|^2$（1つの状態 $|\varphi\rangle$ を、固有基底 $\{|a_j\rangle\}$ で測ったときの、結果 $j$ の確率）とは、別の意味です。
+この $p_j$ は、アンサンブルの重みで、② の $p_j=|\langle a_j|\varphi\rangle|^2$（1つの状態 $|\varphi\rangle$ を、固有基底 $\{|a_j\rangle\}$ で測ったときの、結果 $j$ の確率）とは、別の意味です。
+
+<!-- 出典（同じ密度行列を作る複数のアンサンブル）：Preskill, Ph219, Ch.2 §2.5「Ambiguity of the ensemble interpretation」（2 つの異なるアンサンブルが、まったく同じ密度演算子で記述される）。 -->
+アンサンブルと密度行列の関係を、もう1つ確かめます。同じ密度行列を作るアンサンブルが、複数あることがあります。たとえば、次の2つのアンサンブルは、どちらも $\frac12I$ を作ります。
+
+$$
+\frac12|0\rangle\langle0|+\frac12|1\rangle\langle1|=\frac12I,\qquad\frac12|+\rangle\langle+|+\frac12|-\rangle\langle-|=\frac12I
+$$
+
+左の式は (A-33) です。右の式は、$|+\rangle\langle+|$ と $|-\rangle\langle-|$ を、成分で足して確かめます。
+
+$$
+|+\rangle\langle+|+|-\rangle\langle-|=\frac12\begin{pmatrix}1&1\\1&1\end{pmatrix}+\frac12\begin{pmatrix}1&-1\\-1&1\end{pmatrix}=I
+$$
+
+両辺を $\frac12$ 倍すると、右の式です。密度行列が同じなら、すべての観測量の期待値 $\operatorname{tr}(\rho A)$ が同じなので、アンサンブルは、状態を一意に決めません。決まるのは、密度行列です。
+
+![同じ密度行列を作るアンサンブルは、複数ある](figures/mp14_ensemble_many_to_one.png)
+
+*3つのアンサンブルと、その密度行列です。アは、純粋状態 $|+\rangle\langle+|$（階数 $1$）を作ります。イとウは、混ぜる状態が違うのに、どちらも $\frac12I$（階数 $2$、混合状態）を作ります。図を描くときに、3つの密度行列、階数、イとウの期待値の一致（ランダムなエルミート行列 5 つ）を、行列から計算して確かめています。*
 
 **重ね合わせと混合状態の違い**：$\pm$ 基底で測ると、次のように違いが出ます。
 
@@ -3782,7 +3858,7 @@ $$
 
 **なぜ密度行列とクラウス表現が必要か**：
 
-- 結果を記録しない（忘れる）と、状態は混合状態になる場合があります。たとえば、$|+\rangle$ を $|0\rangle,|1\rangle$ の基底で測って結果を忘れると、$\frac12I$ になります（(A-32)）。混合状態は、状態ベクトルでは記述できず、密度行列なら記述できます。入力が $|0\rangle$ で、$|0\rangle,|1\rangle$ の基底で測る場合のように、結果を忘れても純粋状態のままのときもあります。
+- 結果を記録しない（忘れる）と、状態は混合状態になる場合があります。たとえば、$|+\rangle$ を $|0\rangle,|1\rangle$ の基底で測って結果を忘れると、$\frac12I$ になります（(A-33)）。混合状態は、状態ベクトルでは記述できず、密度行列なら記述できます。入力が $|0\rangle$ で、$|0\rangle,|1\rangle$ の基底で測る場合のように、結果を忘れても純粋状態のままのときもあります。
 - 現実の測定には、読み出し誤差があります。後の [付録A-5-3](#A-5-3) の例（射影測定をして、結果のラベルを確率 $\epsilon$ で取り違える模型）では、結果 $0$ に**複数の演算子**が対応し、結果 $0$ の後の状態が階数 $2$ の混合状態になって、1つの $K_0|\Phi\rangle$ では表せません。演算子の組 $\{K_{m\alpha}\}$ と、クラウス表現が要ります。
 - 環境との相互作用（ノイズ）も、系だけを見ると、同じ形 $\sum_mK_m\rho K_m^\dagger$ になります（[部分トレースのノート](partial_trace_reduced_density_matrix.md#p6) Part VI）。
 
@@ -3803,10 +3879,10 @@ $$
 は $d\times d$ の**行列**で、結果 $m$ が出たあとの**状態そのもの**（規格化前）を表します。確率という**数**は、行列から取り出します。その操作がトレースで、次の式が成り立ちます。
 
 $$
-\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\langle\Phi|K_m^\dagger K_m|\Phi\rangle=P(m)\tag{A-34}
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\langle\Phi|K_m^\dagger K_m|\Phi\rangle=P(m)\tag{A-35}
 $$
 
-この主張を、数値例で確かめたあと、「なぜトレースが確率になるか」の (T1)〜(T5) で、証明します（(T1) と (T2) が (A-34) の証明で、(T3) は混合状態への拡張、(T4) は巡回性の式を作る段階、(T5) は確率の和への拡張です）。確率という数 $P(m)$ だけからは、測定後の状態は分からないので、状態を保つには、行列の形で持つ必要があります。次の数値例で、行列と確率の違いを確かめます。
+この主張を、数値例で確かめたあと、「なぜトレースが確率になるか」の (T1)〜(T5) で、証明します（(T1) と (T2) が (A-35) の証明で、(T3) はアンサンブルへの拡張、(T4) は巡回性の式を作る段階、(T5) は確率の和への拡張です）。確率という数 $P(m)$ だけからは、測定後の状態は分からないので、状態を保つには、行列の形で持つ必要があります。次の数値例で、行列と確率の違いを確かめます。
 
 **数値例**：1量子ビットで、$|\Phi\rangle=\frac1{\sqrt2}(|0\rangle+|1\rangle)$、$K_0=|0\rangle\langle0|=\begin{pmatrix}1&0\\0&0\end{pmatrix}$（結果 $0$ の測定演算子。射影演算子の場合）とします。密度行列は、列ベクトル $\frac1{\sqrt2}(1,1)^T$ と行ベクトル $\frac1{\sqrt2}(1,1)$ の積（列×行）で
 
@@ -3857,16 +3933,16 @@ $$
 和を、$\langle b|$ と $|a\rangle$ の間の、$\sum_j|j\rangle\langle j|$ にまとめ、完全性関係 (A-14) を使います。
 
 $$
-\operatorname{tr}\big(|a\rangle\langle b|\big)=\langle b|\Big(\sum_j|j\rangle\langle j|\Big)|a\rangle=\langle b|a\rangle\tag{A-35}
+\operatorname{tr}\big(|a\rangle\langle b|\big)=\langle b|\Big(\sum_j|j\rangle\langle j|\Big)|a\rangle=\langle b|a\rangle\tag{A-36}
 $$
 
-*(T2) 純粋状態の確率*：(A-27) の前半から、$K_m\rho K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger$ です。(A-35) を、$|a\rangle=|b\rangle=K_m|\Phi\rangle$ として使います。
+*(T2) 純粋状態の確率*：(A-27) の前半から、$K_m\rho K_m^\dagger=\big(K_m|\Phi\rangle\big)\big(K_m|\Phi\rangle\big)^\dagger$ です。(A-36) を、$|a\rangle=|b\rangle=K_m|\Phi\rangle$ として使います。
 
 $$
 \operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\big\langle K_m\Phi\big|K_m\Phi\big\rangle=\big\|K_m\Phi\big\|^2
 $$
 
-(A-7) は $P(m)=\|K_m\Phi\|^2$ でした。したがって、次の式が成り立ち、(A-34) が示せました。
+(A-7) は $P(m)=\|K_m\Phi\|^2$ でした。したがって、次の式が成り立ち、(A-35) が示せました。
 
 $$
 \operatorname{tr}\big(K_m\rho K_m^\dagger\big)=P(m)
@@ -3874,7 +3950,7 @@ $$
 
 これは、(A-7) の確率に一致します。**トレースが確率になる理由は、「外積のトレースが内積（ケットのノルムの2乗）になる」ことです。**
 
-*(T3) 混合状態の確率*：$\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$。$|\psi_j\rangle$ は規格化された状態ベクトル）を代入し、行列の積の分配法則で、$K_m$ と $K_m^\dagger$ を、和の中に入れます。
+*(T3) アンサンブルの場合の確率*：$\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$。$|\psi_j\rangle$ は規格化された状態ベクトル）を代入し、行列の積の分配法則で、$K_m$ と $K_m^\dagger$ を、和の中に入れます。
 
 $$
 K_m\rho K_m^\dagger=\sum_jp_j\,K_m|\psi_j\rangle\langle\psi_j|K_m^\dagger
@@ -3892,7 +3968,7 @@ $$
 K_m|\psi_j\rangle\langle\psi_j|K_m^\dagger=\big(K_m|\psi_j\rangle\big)\big(K_m|\psi_j\rangle\big)^\dagger
 $$
 
-これに (A-35) を、$|a\rangle=|b\rangle=K_m|\psi_j\rangle$ として使います。
+これに (A-36) を、$|a\rangle=|b\rangle=K_m|\psi_j\rangle$ として使います。
 
 $$
 \operatorname{tr}\big(K_m|\psi_j\rangle\langle\psi_j|K_m^\dagger\big)=\big\langle K_m\psi_j\big|K_m\psi_j\big\rangle=\big\|K_m\psi_j\big\|^2
@@ -3901,7 +3977,7 @@ $$
 これを、上のトレースの式の各項に入れます。
 
 $$
-\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\sum_jp_j\,\|K_m\psi_j\|^2\tag{A-36}
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\sum_jp_j\,\|K_m\psi_j\|^2\tag{A-37}
 $$
 
 各純粋状態 $|\psi_j\rangle$ で結果 $m$ が出る確率 $\|K_m\psi_j\|^2$ の、重み $p_j$ による平均になっています。
@@ -3909,12 +3985,12 @@ $$
 *(T4) トレースの巡回性*：(A-16) は、任意の行列 $S,T$ で $\operatorname{tr}(ST)=\operatorname{tr}(TS)$ という式でした。$S=K_m$、$T=\rho K_m^\dagger$ として使うと、次の式が成り立ちます。
 
 $$
-\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(\rho K_m^\dagger K_m\big)=\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)\tag{A-37}
+\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(\rho K_m^\dagger K_m\big)=\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)\tag{A-38}
 $$
 
 （2つ目の等号は、(A-16) を $S=\rho$、$T=K_m^\dagger K_m$ として使ったものです）。
 
-*(T5) 確率の和*：(A-37) から、各 $m$ で、$\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)$ です。$m$ で足します。
+*(T5) 確率の和*：(A-38) から、各 $m$ で、$\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)$ です。$m$ で足します。
 
 $$
 \sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\sum_m\operatorname{tr}\big(K_m^\dagger K_m\,\rho\big)
@@ -3932,7 +4008,7 @@ $$
 \sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=\operatorname{tr}\rho
 $$
 
-$\operatorname{tr}\rho$ を計算します。(T3) の $\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$ について、トレースの線形性と (A-35) から、次の式が成り立ちます（純粋状態は、(T3) で $j$ が1つ、$p_1=1$ の場合です）。
+$\operatorname{tr}\rho$ を計算します。(T3) の $\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$ について、トレースの線形性と (A-36) から、次の式が成り立ちます（純粋状態は、(T3) で $j$ が1つ、$p_1=1$ の場合です）。
 
 $$
 \operatorname{tr}\rho=\sum_jp_j\operatorname{tr}\big(|\psi_j\rangle\langle\psi_j|\big)=\sum_jp_j\langle\psi_j|\psi_j\rangle=\sum_jp_j=1
@@ -3941,7 +4017,7 @@ $$
 $\operatorname{tr}\rho=1$ なので、次の式が成り立ちます。
 
 $$
-\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=1\tag{A-38}
+\sum_m\operatorname{tr}\big(K_m\rho K_m^\dagger\big)=1\tag{A-39}
 $$
 
 つまり、結果を区別せずに平均した状態 $\sum_mK_m\rho K_m^\dagger$ のトレースも $1$ です。
@@ -4149,7 +4225,7 @@ $$\Big(\sum_\alpha K_{m\alpha}|\Phi\rangle\Big)\otimes|m\rangle_E$$
 
 $K_{m\alpha}$ を先に足した演算子 $\sum_\alpha K_{m\alpha}$ を1つの $K_m$ とみると、(A-7) の形です。
 
-*(E4) 確率と $E_m$*：(A-34) を各 $\alpha$ に使うと、$\operatorname{tr}\big(K_{m\alpha}\rho K_{m\alpha}^\dagger\big)=\|K_{m\alpha}\Phi\|^2$ なので、(E2) の確率は、トレースの線形性で、次のように書けます。
+*(E4) 確率と $E_m$*：(A-35) を各 $\alpha$ に使うと、$\operatorname{tr}\big(K_{m\alpha}\rho K_{m\alpha}^\dagger\big)=\|K_{m\alpha}\Phi\|^2$ なので、(E2) の確率は、トレースの線形性で、次のように書けます。
 
 $$
 P(m)=\sum_\alpha\operatorname{tr}\big(K_{m\alpha}\rho K_{m\alpha}^\dagger\big)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big)
@@ -4235,13 +4311,13 @@ $$
 
 これがすべての $|\Phi\rangle$ で成り立つので、$K_{m\alpha}=\big(I\otimes\langle m\alpha|\big)U\big(I\otimes|0_E\rangle\big)$ です。
 
-*(E6) 混合状態*：状態が $\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$、$|\psi_j\rangle$ は規格化された状態ベクトル）のときを考えます。各 $|\psi_j\rangle$ に (E2)、(E3) を使うと、結果 $m$ の確率 $P_j(m)$ と、結果 $m$ のときの（規格化前の）系の状態 $N_j(m)$ は、次の式です。
+*(E6) アンサンブル*：状態が $\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$（$p_j\ge0$、$\sum_jp_j=1$、$|\psi_j\rangle$ は規格化された状態ベクトル）のときを考えます。各 $|\psi_j\rangle$ に (E2)、(E3) を使うと、結果 $m$ の確率 $P_j(m)$ と、結果 $m$ のときの（規格化前の）系の状態 $N_j(m)$ は、次の式です。
 
 $$
 P_j(m)=\sum_\alpha\big\|K_{m\alpha}\psi_j\big\|^2,\qquad N_j(m)=\sum_\alpha K_{m\alpha}|\psi_j\rangle\langle\psi_j|K_{m\alpha}^\dagger
 $$
 
-$N_j(m)$ のトレースは、(E4) と同じく、各 $\alpha$ で $\operatorname{tr}\big(K_{m\alpha}|\psi_j\rangle\langle\psi_j|K_{m\alpha}^\dagger\big)=\|K_{m\alpha}\psi_j\|^2$（(A-35)）で、$\alpha$ で足すと $P_j(m)$ です。$\rho$ は、確率 $p_j$ で $|\psi_j\rangle$ にある状態を表すので、結果 $m$ の確率は、全確率の法則で、各 $j$ の確率 $P_j(m)$ を、重み $p_j$ で平均したものです。規格化前の状態も、同じ重みで平均します。
+$N_j(m)$ のトレースは、(E4) と同じく、各 $\alpha$ で $\operatorname{tr}\big(K_{m\alpha}|\psi_j\rangle\langle\psi_j|K_{m\alpha}^\dagger\big)=\|K_{m\alpha}\psi_j\|^2$（(A-36)）で、$\alpha$ で足すと $P_j(m)$ です。$\rho$ は、確率 $p_j$ で $|\psi_j\rangle$ にある状態を表すので、結果 $m$ の確率は、全確率の法則で、各 $j$ の確率 $P_j(m)$ を、重み $p_j$ で平均したものです。規格化前の状態も、同じ重みで平均します。
 
 $$
 P(m)=\sum_jp_jP_j(m),\qquad\text{規格化前の状態}=\sum_jp_jN_j(m)
@@ -4255,14 +4331,14 @@ $$
 
 この行列のトレースは、トレースの線形性と $\operatorname{tr}N_j(m)=P_j(m)$ から、$\sum_jp_jP_j(m)=P(m)$ です。測定後の状態は、これを $P(m)$ で割ったもの（$P(m)>0$）です。
 
-$P_j(m)=0$ の $j$ では、$P_j(m)=\sum_\alpha\|K_{m\alpha}\psi_j\|^2=0$ から、各 $\alpha$ で $K_{m\alpha}|\psi_j\rangle=0$ で、$N_j(m)=0$ です。その項は、和に入れても入れなくても同じです。そこで、$P_j(m)>0$ の $j$ だけを考えます。測定後の状態は、結果 $m$ のもとで $j$ だった確率 $p_jP_j(m)/P(m)$ を重みにして、各 $|\psi_j\rangle$ の測定後の状態 $N_j(m)/P_j(m)$ を混ぜたものに等しいです。
+$P_j(m)=0$ の $j$ では、$P_j(m)=\sum_\alpha\|K_{m\alpha}\psi_j\|^2=0$ から、各 $\alpha$ で $K_{m\alpha}|\psi_j\rangle=0$ で、$N_j(m)=0$ です。その項は、和に入れても入れなくても同じです。そこで、$P_j(m)>0$ の $j$ だけを考えます。測定後の状態は、結果 $m$ のもとで $j$ だった確率 $p_jP_j(m)/P(m)$ を重みにして、各 $|\psi_j\rangle$ の測定後の状態 $N_j(m)/P_j(m)$ を足し合わせた行列に等しいです。
 
 $$\sum_{j:\,P_j(m)>0}\frac{p_jP_j(m)}{P(m)}\cdot\frac{N_j(m)}{P_j(m)}=\frac{\sum_jp_jN_j(m)}{P(m)}$$
 
 以上から、状態を密度行列 $\rho\in\mathbb C^{d\times d}$ で書くと、結果 $m$ の確率と、測定後の状態は、次の通りです。
 
 $$
-P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-39}
+P(m)=\operatorname{tr}\Big(\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger\Big),\qquad\rho_m=\frac{\sum_\alpha K_{m\alpha}\rho K_{m\alpha}^\dagger}{P(m)},\qquad E_m=\sum_\alpha K_{m\alpha}^\dagger K_{m\alpha}\tag{A-40}
 $$
 
 各 $m$ に $\alpha$ が1つの場合は、1つの演算子 $K_m$ による測定の、密度行列での書き方です。
@@ -4271,7 +4347,7 @@ $$
 P(m)=\operatorname{tr}\big(K_m\rho K_m^\dagger\big),\qquad\rho_m=\frac{K_m\rho K_m^\dagger}{P(m)}
 $$
 
-入力が純粋状態 $\rho=|\Phi\rangle\langle\Phi|$ のときは、(A-34) から $P(m)=\operatorname{tr}(K_m\rho K_m^\dagger)=\|K_m\Phi\|^2$、(A-27) から $K_m\rho K_m^\dagger=P(m)\,|\Phi_m\rangle\langle\Phi_m|$ なので $\rho_m=|\Phi_m\rangle\langle\Phi_m|$ で、(A-7) になります。
+入力が純粋状態 $\rho=|\Phi\rangle\langle\Phi|$ のときは、(A-35) から $P(m)=\operatorname{tr}(K_m\rho K_m^\dagger)=\|K_m\Phi\|^2$、(A-27) から $K_m\rho K_m^\dagger=P(m)\,|\Phi_m\rangle\langle\Phi_m|$ なので $\rho_m=|\Phi_m\rangle\langle\Phi_m|$ で、(A-7) になります。
 
 **注意（読み出し誤差との違い）**：上の例は、結果の確率だけを見れば、「射影測定をして、結果ラベルを確率 $\epsilon$ で取り違える」読み出し誤差と同じです。しかし**測定後の状態は違います**。状態 $|+\rangle=\frac{1}{\sqrt2}(|0\rangle+|1\rangle)$、$\epsilon=0.1$ で結果 $0$ が出たとき、2つの模型を比べます（確率はどちらも $P(0)=\frac12$）。
 
@@ -4296,7 +4372,7 @@ $$
 - $\alpha=1$：本当の結果が $m$（取り違えなし、確率 $1-\epsilon$）。
 - $\alpha=2$：本当の結果が $1-m$（取り違えあり、確率 $\epsilon$）。
 
-各経路の演算子は、本当の結果 $x$ を取り出す射影 $Q_x$ に、確率の平方根をかけたものです（確率は $\|K\Phi\|^2$ に入るので、平方根が付きます）。(A-39) の演算子は、次のとおりです。
+各経路の演算子は、本当の結果 $x$ を取り出す射影 $Q_x$ に、確率の平方根をかけたものです（確率は $\|K\Phi\|^2$ に入るので、平方根が付きます）。(A-40) の演算子は、次のとおりです。
 
 $$
 K_{0,1}=\sqrt{1-\epsilon}\,Q_0,\qquad K_{0,2}=\sqrt\epsilon\,Q_1,\qquad K_{1,1}=\sqrt{1-\epsilon}\,Q_1,\qquad K_{1,2}=\sqrt\epsilon\,Q_0
@@ -4744,7 +4820,7 @@ Qiskit のコードと教科書の式を突き合わせるときは、最初に�
 | 付録A-5 | ラベル取り違えの読み出し誤差は、結果 $0$ に2つの演算子が要る（条件付き状態 $\mathrm{diag}(1-\epsilon,\epsilon)$ は階数 $2$、$E_0=(1-\epsilon)Q_0+\epsilon Q_1$） | `test_readout_error_needs_several_operators_per_outcome` |
 | 付録B-3 | 1対1では階数 $=$ 振幅がゼロでない入力の個数（$\alpha=(\sqrt{0.4},\ldots)$ は階数 $4$ でエントロピーは $2$ bit 未満）。入力が $\lvert0\rangle$ だけなら、非定数の $f$ でも積状態 | `test_injective_function_rank_counts_nonzero_amplitudes` |
 | 付録A-5 | $K_m=\langle m_E\vert U\vert0_E\rangle$ から $\sum K^\dagger K=I$ | `test_stinespring_form_of_kraus` |
-| 付録A-5-1 | $\operatorname{tr}(\lvert a\rangle\langle b\rvert)=\langle b\vert a\rangle$、$\operatorname{tr}(K_m\rho K_m^\dagger)=\lVert K_m\Phi\rVert^2$（純粋状態）、混合状態では確率の平均、$\operatorname{tr}(K\rho K^\dagger)=\operatorname{tr}(K^\dagger K\rho)$（巡回性）、$\sum_m\operatorname{tr}(K_m\rho K_m^\dagger)=1$ | `test_trace_of_kraus_form_is_the_outcome_probability` |
+| 付録A-5-1 | $\operatorname{tr}(\lvert a\rangle\langle b\rvert)=\langle b\vert a\rangle$、$\operatorname{tr}(K_m\rho K_m^\dagger)=\lVert K_m\Phi\rVert^2$（純粋状態）、アンサンブルでは確率の平均、$\operatorname{tr}(K\rho K^\dagger)=\operatorname{tr}(K^\dagger K\rho)$（巡回性）、$\sum_m\operatorname{tr}(K_m\rho K_m^\dagger)=1$ | `test_trace_of_kraus_form_is_the_outcome_probability` |
 | 付録B-2 | 結果レジスタを測ったときの確率と状態、逆像の重ね合わせ | `test_result_register_collapse_for_example`、`test_result_register_collapse_is_uniform_on_preimage` |
 | 付録B-3 | 係数行列の階数（定数 $1$、例 $2$、1対1 $4$）、階数 $1$ ⇔ 積状態、特異値とエントロピー | `test_rank_of_coefficient_matrix_decides_product_form`、`test_schmidt_numbers_of_example_and_entropy` |
 | 付録B | $CC^\dagger$ の対角成分が $P(x)$ | `test_reduced_state_diagonal_is_input_probability` |

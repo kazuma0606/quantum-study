@@ -17,6 +17,8 @@
     mp10_pauli_inner_product.png  付録A-5-1 補足  積 σjσk の表と、内積の表 tr(PjPk)=2δjk
     mp11_pauli_dimension.png    付録A-5-1 補足  2×2 行列は4次元＝3（トレース0）＋1（I）
     mp12_pauli_coefficients.png 付録A-5-1 補足  数値例の X と Y のパウリ展開の係数（σx の係数だけが違う）
+    mp13_ensemble_pure_mixed.png  付録A-5-1  アンサンブル → 密度行列 → 純粋状態／混合状態の関係
+    mp14_ensemble_many_to_one.png 付録A-5-1  3 つのアンサンブルと 2 つの密度行列（異なるアンサンブルが同じ ½I を作る）
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -584,7 +586,120 @@ def mp12():
     plt.close(fig)
 
 
-FIGS = dict(mp01=mp01, mp02=mp02, mp03=mp03, mp04=mp04, mp05=mp05, mp06=mp06, mp07=mp07, mp08=mp08, mp09=mp09, mp10=mp10, mp11=mp11, mp12=mp12)
+# ------------------------------------------------------------------------------------- mp13, mp14
+KET0 = np.array([1, 0], dtype=complex)
+KET1 = np.array([0, 1], dtype=complex)
+KETP = (KET0 + KET1) / np.sqrt(2)
+KETM = (KET0 - KET1) / np.sqrt(2)
+
+
+def _density(ensemble):
+    """アンサンブル [(p_j, |ψ_j>), ...] の密度行列 Σ p_j |ψ_j><ψ_j|（式 (A-29)）。"""
+    ps = [p for p, _ in ensemble]
+    assert np.isclose(sum(ps), 1) and all(p >= 0 for p in ps)
+    assert all(np.isclose(np.linalg.norm(v), 1) for _, v in ensemble)
+    return sum(p * np.outer(v, v.conj()) for p, v in ensemble)
+
+
+def _draw_box(ax, x, y, w, h, text, fc, ec, fs=11.5):
+    ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.05,rounding_size=0.12", fc=fc, ec=ec, lw=1.6))
+    ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=fs)
+
+
+def _draw_matrix(ax, cx, cy, rows, fs=15, dx=0.5, dy=0.42):
+    """2×2 の行列を、数字を並べてかっこで囲んで描く。rows は 2×2 の文字列。"""
+    for i in range(2):
+        for j in range(2):
+            ax.text(cx + (j - 0.5) * dx * 2, cy + (0.5 - i) * dy * 2, rows[i][j], ha="center", va="center", fontsize=fs)
+    for s in (-1, 1):
+        xb = cx + s * (dx * 2 + 0.05)
+        ax.plot([xb, xb], [cy - dy * 1.3, cy + dy * 1.3], color="k", lw=1.4)
+        ax.plot([xb, xb - s * 0.12], [cy + dy * 1.3, cy + dy * 1.3], color="k", lw=1.4)
+        ax.plot([xb, xb - s * 0.12], [cy - dy * 1.3, cy - dy * 1.3], color="k", lw=1.4)
+
+
+def mp13():
+    # 関係図：アンサンブル → 密度行列 (A-29) → 純粋状態 (A-30) / 混合状態。階数の例（(A-32)〜(A-34)）は、図では示さず、assert でだけ確かめる
+    rho_pure = _density([(1.0, KETP)])
+    rho_mix = _density([(0.5, KET0), (0.5, KET1)])
+    assert np.allclose(rho_pure, np.outer(KETP, KETP.conj()))  # 1 つだけのアンサンブル → |+><+|（(A-30) の形）
+    assert np.linalg.matrix_rank(rho_pure) == 1
+    assert np.allclose(rho_mix, np.eye(2) / 2) and np.linalg.matrix_rank(rho_mix) == 2  # (A-33)：階数 2
+
+    fig, ax = plt.subplots(figsize=(11.5, 5.4))
+    ax.set_xlim(0, 11.5)
+    ax.set_ylim(0, 5.4)
+    ax.axis("off")
+    _draw_box(ax, 0.2, 1.9, 3.0, 1.9, "アンサンブル\n" + r"$\{p_j,\ |\psi_j\rangle\}$" + "\n確率 $p_j$ で状態 $|\\psi_j\\rangle$ を\n用意する混ぜ合わせ", "#e8f1fa", C_A)
+    ax.annotate("", xy=(4.3, 2.85), xytext=(3.35, 2.85), arrowprops=dict(arrowstyle="-|>", lw=2.0, color="k"))
+    ax.text(3.82, 3.05, "(A-29)", ha="center", fontsize=10.5)
+    _draw_box(ax, 4.4, 1.9, 2.9, 1.9, "密度行列 $\\rho$\n" + r"$\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$" + "\n（状態を表す行列）", "#fff1d6", C_B)
+    ax.annotate("", xy=(8.3, 4.3), xytext=(7.4, 3.5), arrowprops=dict(arrowstyle="-|>", lw=2.0, color=C_C))
+    ax.annotate("", xy=(8.3, 1.4), xytext=(7.4, 2.2), arrowprops=dict(arrowstyle="-|>", lw=2.0, color=C_BAD))
+    ax.text(7.2, 4.35, r"どれかの $|\psi\rangle\langle\psi|$ と等しい", ha="center", fontsize=10.5, color=C_C)
+    ax.text(6.2, 1.0, r"どんな $|\psi\rangle\langle\psi|$ とも等しくない", ha="center", fontsize=10.5, color=C_BAD)
+    _draw_box(ax, 8.4, 3.6, 2.9, 1.5, "純粋状態\n" + r"$\rho=|\psi\rangle\langle\psi|$ (A-30)", "#e6f4e6", C_C, fs=11.5)
+    _draw_box(ax, 8.4, 0.4, 2.9, 1.5, "混合状態\n状態ベクトルでは書けない", "#fbe6e6", C_BAD, fs=11.5)
+    ax.text(0.3, 0.3, "混ぜる状態が 1 つだけ（$p_j=1$）、または全部同じ状態の\nアンサンブルは、純粋状態になる", ha="left", va="center", fontsize=10.5, color="#555555")
+    ax.set_title("アンサンブル、密度行列、純粋状態、混合状態の関係", fontsize=12.5)
+    fig.savefig(OUT / "mp13_ensemble_pure_mixed.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+def mp14():
+    # 多対一：3 つのアンサンブルから 2 つの密度行列（本文の (A-33) の ½I と、|+><+|）。内部の名前 E1〜E3 は、図・本文では ア・イ・ウ
+    ens = {
+        "E1": [(1.0, KETP)],
+        "E2": [(0.5, KET0), (0.5, KET1)],
+        "E3": [(0.5, KETP), (0.5, KETM)],
+    }
+    rho = {k: _density(v) for k, v in ens.items()}
+    assert np.allclose(rho["E1"], np.array([[1, 1], [1, 1]]) / 2)
+    assert np.allclose(rho["E2"], np.eye(2) / 2)  # (A-33)
+    assert np.allclose(rho["E3"], rho["E2"])  # 別のアンサンブルが同じ密度行列
+    assert not np.allclose(rho["E1"], rho["E2"])
+    pur = {k: np.trace(r @ r).real for k, r in rho.items()}  # tr(ρ²)：純粋 1、混合 1 未満
+    assert np.isclose(pur["E1"], 1) and np.isclose(pur["E2"], 0.5) and np.isclose(pur["E3"], 0.5)
+    rk = {k: np.linalg.matrix_rank(r) for k, r in rho.items()}
+    assert rk == {"E1": 1, "E2": 2, "E3": 2}
+    # 区別できない：どんな観測量でも期待値が同じ（E2 と E3）
+    rng = np.random.default_rng(0)
+    for _ in range(5):
+        A = rng.normal(size=(2, 2)) + 1j * rng.normal(size=(2, 2))
+        A = A + A.conj().T
+        assert np.isclose(np.trace(rho["E2"] @ A), np.trace(rho["E3"] @ A))
+
+    fig, ax = plt.subplots(figsize=(11.5, 5.6))
+    ax.set_xlim(0, 11.5)
+    ax.set_ylim(-0.4, 6.0)
+    ax.axis("off")
+    labels = [
+        (4.4, r"ア：$\{1:\ |+\rangle\}$" + "\n1 つだけ"),
+        (2.7, r"イ：$\{\frac{1}{2}:\ |0\rangle,\ \frac{1}{2}:\ |1\rangle\}$"),
+        (1.0, r"ウ：$\{\frac{1}{2}:\ |+\rangle,\ \frac{1}{2}:\ |-\rangle\}$"),
+    ]
+    for y, t in labels:
+        _draw_box(ax, 0.2, y - 0.5, 4.2, 1.0, t, "#e8f1fa", C_A, fs=11.5)
+    ax.text(2.3, 5.65, "アンサンブル（状態の作り方）", ha="center", fontsize=12, color=C_A)
+    ax.text(9.1, 5.65, "密度行列（状態）", ha="center", fontsize=12, color=C_B)
+    # 右：2 つの密度行列
+    _draw_box(ax, 7.0, 3.55, 4.2, 1.7, "", "#e6f4e6", C_C)
+    _draw_matrix(ax, 8.1, 4.4, [["1/2", "1/2"], ["1/2", "1/2"]], fs=13, dx=0.4, dy=0.36)
+    ax.text(9.9, 4.55, "純粋状態\n階数 1", ha="center", va="center", fontsize=11)
+    _draw_box(ax, 7.0, 0.4, 4.2, 2.3, "", "#fbe6e6", C_BAD)
+    _draw_matrix(ax, 8.1, 1.55, [["1/2", "0"], ["0", "1/2"]], fs=13, dx=0.4, dy=0.36)
+    ax.text(9.9, 1.7, "混合状態\n階数 2", ha="center", va="center", fontsize=11)
+    ax.text(9.1, 0.65, "どの観測量でも、イ と ウ の期待値は同じ", ha="center", fontsize=9.5, color="#555555")
+    ax.annotate("", xy=(6.95, 4.4), xytext=(4.5, 4.4), arrowprops=dict(arrowstyle="-|>", lw=2.0, color=C_C))
+    ax.annotate("", xy=(6.95, 1.9), xytext=(4.5, 2.7), arrowprops=dict(arrowstyle="-|>", lw=2.0, color=C_BAD))
+    ax.annotate("", xy=(6.95, 1.5), xytext=(4.5, 1.0), arrowprops=dict(arrowstyle="-|>", lw=2.0, color=C_BAD))
+    ax.text(5.75, -0.15, "異なるアンサンブル イ、ウ が、同じ密度行列 $\\frac{1}{2}I$ を作る（多対一）", ha="center", fontsize=11, color=C_BAD)
+    ax.set_title("同じ密度行列を作るアンサンブルは、複数ある", fontsize=12.5)
+    fig.savefig(OUT / "mp14_ensemble_many_to_one.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+FIGS = dict(mp01=mp01, mp02=mp02, mp03=mp03, mp04=mp04, mp05=mp05, mp06=mp06, mp07=mp07, mp08=mp08, mp09=mp09, mp10=mp10, mp11=mp11, mp12=mp12, mp13=mp13, mp14=mp14)
 
 if __name__ == "__main__":
     names = sys.argv[1:] or list(FIGS)
