@@ -13,6 +13,10 @@
     mp06_qiskit_order.png       付録C  教科書と Qiskit のラベルの並び順、CNOT の行列
     mp07_reduced_states.png     partial_trace ノート Part IV  縮約密度行列 ρ_A = CC†（3つの関数）
     mp08_interference_visibility.png  partial_trace ノート Part V  環境の重なりと干渉の見えやすさ
+    mp09_pauli_components.png   付録A-5-1 補足  I, σx, σy, σz の成分と、積のトレースが 0 になる仕組み
+    mp10_pauli_inner_product.png  付録A-5-1 補足  積 σjσk の表と、内積の表 tr(PjPk)=2δjk
+    mp11_pauli_dimension.png    付録A-5-1 補足  2×2 行列は4次元＝3（トレース0）＋1（I）
+    mp12_pauli_coefficients.png 付録A-5-1 補足  数値例の X と Y のパウリ展開の係数（σx の係数だけが違う）
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -376,7 +380,211 @@ def mp08():
     plt.close(fig)
 
 
-FIGS = dict(mp01=mp01, mp02=mp02, mp03=mp03, mp04=mp04, mp05=mp05, mp06=mp06, mp07=mp07, mp08=mp08)
+# ------------------------------------------------------------------------------------- パウリ行列の展開（付録A-5-1 の補足）用
+I2 = np.eye(2, dtype=complex)
+SX = np.array([[0, 1], [1, 0]], dtype=complex)
+SY = np.array([[0, -1j], [1j, 0]], dtype=complex)
+SZ = np.array([[1, 0], [0, -1]], dtype=complex)
+PAULI = [("I", I2), ("σx", SX), ("σy", SY), ("σz", SZ)]
+PAULI_TEX = [r"$I$", r"$\sigma_x$", r"$\sigma_y$", r"$\sigma_z$"]
+C_VAL = {1: "#4a90c9", -1: "#d94c4c", 1j: "#4caf50", -1j: "#a679c6", 0: "#ffffff"}
+L_VAL = {1: "1", -1: "−1", 1j: "i", -1j: "−i", 0: "0"}
+
+
+def _val_key(v):
+    for k in C_VAL:
+        if abs(v - k) < 1e-12:
+            return k
+    raise ValueError(v)
+
+
+def _draw_matrix(ax, M, x0, y0, cell=0.9):
+    """2×2 の成分を、値ごとに色分けして描く（左上が (1,1) 成分）。"""
+    for a in range(2):
+        for b in range(2):
+            k = _val_key(M[a, b])
+            ax.add_patch(Rectangle((x0 + b * cell, y0 - (a + 1) * cell), cell, cell, fc=C_VAL[k], ec="#444444", lw=1.2))
+            ax.text(x0 + (b + 0.5) * cell, y0 - (a + 0.5) * cell, L_VAL[k], ha="center", va="center", fontsize=14, color="white" if k != 0 else "#999999")
+
+
+# ------------------------------------------------------------------------------------- mp09
+def mp09():
+    # 本文の式：tr(PQ)=Σ_{a,b} P_{ab} Q_{ba}（成分の積の和）。I と σz、σx と σy で打ち消し合う
+    def tr_terms(P, Q):
+        return [P[a, b] * Q[b, a] for a in range(2) for b in range(2)]
+
+    assert np.isclose(np.trace(I2 @ SZ), 0) and np.isclose(sum(tr_terms(I2, SZ)), 0)
+    assert np.isclose(np.trace(SX @ SY), 0) and np.isclose(sum(tr_terms(SX, SY)), 0)
+    assert np.isclose(np.trace(SX @ SX), 2) and np.isclose(sum(tr_terms(SX, SX)), 2)
+    # 4つの行列の成分の位置：σz と I は対角だけ、σx と σy は非対角だけ
+    assert all(abs(M[0, 1]) < 1e-12 and abs(M[1, 0]) < 1e-12 for M in (I2, SZ))
+    assert all(abs(M[0, 0]) < 1e-12 and abs(M[1, 1]) < 1e-12 for M in (SX, SY))
+
+    fig = plt.figure(figsize=(12.5, 6.2))
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, 12.5)
+    ax.set_ylim(0, 6.2)
+    ax.axis("off")
+    ax.text(6.25, 5.95, r"4つの行列 $I,\sigma_x,\sigma_y,\sigma_z$ の成分（色は成分の値）", ha="center", fontsize=13)
+    xs = [0.8, 3.9, 7.0, 10.1]
+    for x0, (name, M), tex in zip(xs, PAULI, PAULI_TEX):
+        _draw_matrix(ax, M, x0, 5.2)
+        ax.text(x0 + 0.9, 3.15, tex, ha="center", fontsize=15)
+    ax.text(6.25, 2.55, r"積のトレース $\mathrm{tr}(PQ)=\sum_{a,b}P_{ab}Q_{ba}$（$P$ の $(a,b)$ 成分 × $Q$ の $(b,a)$ 成分の和）", ha="center", fontsize=12)
+    boxes = [
+        (0.4, r"$I$ と $\sigma_z$（どちらも対角）" + "\n" + r"$\mathrm{tr}(I\sigma_z)=1\cdot1+1\cdot(-1)=0$" + "\n符号が逆で打ち消す"),
+        (4.5, r"$\sigma_x$ と $\sigma_y$（どちらも非対角）" + "\n" + r"$\mathrm{tr}(\sigma_x\sigma_y)=1\cdot i+1\cdot(-i)=0$" + "\n位相が逆で打ち消す"),
+        (8.6, r"同じ行列どうし" + "\n" + r"$\mathrm{tr}(\sigma_x\sigma_x)=1\cdot1+1\cdot1=2$" + "\n同じ向きで足し合わさる"),
+    ]
+    for x0, text in boxes:
+        ax.add_patch(FancyBboxPatch((x0, 0.55), 3.7, 1.3, boxstyle="round,pad=0.05", fc="#f4f6fb", ec="#555555", lw=1.2))
+        ax.text(x0 + 1.85, 1.2, text, ha="center", va="center", fontsize=11)
+    fig.savefig(OUT / "mp09_pauli_components.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+# ------------------------------------------------------------------------------------- mp10
+def mp10():
+    mats = [SX, SY, SZ]
+    # 積の表：本文の表と一致（行が左、列が右）
+    expected = {
+        (0, 0): "I", (0, 1): "iσz", (0, 2): "-iσy",
+        (1, 0): "-iσz", (1, 1): "I", (1, 2): "iσx",
+        (2, 0): "iσy", (2, 1): "-iσx", (2, 2): "I",
+    }
+    base = {"σx": SX, "σy": SY, "σz": SZ}
+
+    def parse(lab):
+        if lab == "I":
+            return I2
+        if lab.startswith("-i"):
+            return -1j * base[lab[2:]]
+        return 1j * base[lab[1:]]
+
+    prod_tr = np.zeros((3, 3))
+    for (a, b), lab in expected.items():
+        assert np.allclose(mats[a] @ mats[b], parse(lab))
+        prod_tr[a, b] = np.trace(mats[a] @ mats[b]).real
+    assert np.allclose(prod_tr, 2 * np.eye(3))  # 対角は tr(I)=2、非対角は tr(±iσ)=0
+    gram = np.array([[np.trace(P @ Q).real for _, Q in PAULI] for _, P in PAULI])
+    assert np.allclose(gram, 2 * np.eye(4))  # 内積の表：2δ_{jk}
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5.0), gridspec_kw=dict(width_ratios=[1.15, 1]))
+    # (a) 積の表
+    ax1.set_xlim(0, 3)
+    ax1.set_ylim(3, 0)
+    pretty = {"I": r"$I$", "iσz": r"$i\sigma_z$", "-iσy": r"$-i\sigma_y$", "-iσz": r"$-i\sigma_z$", "iσx": r"$i\sigma_x$", "iσy": r"$i\sigma_y$", "-iσx": r"$-i\sigma_x$"}
+    for (a, b), lab in expected.items():
+        diag = a == b
+        ax1.add_patch(Rectangle((b, a), 1, 1, fc="#4a90c9" if diag else "#f1dcb0", ec="#444444", lw=1.2))
+        ax1.text(b + 0.5, a + 0.42, pretty[lab], ha="center", va="center", fontsize=17, color="white" if diag else "k")
+        ax1.text(b + 0.5, a + 0.78, f"tr = {int(prod_tr[a, b])}", ha="center", va="center", fontsize=10.5, color="white" if diag else "#555555")
+    ax1.set_xticks([0.5, 1.5, 2.5])
+    ax1.set_xticklabels([r"$\sigma_x$", r"$\sigma_y$", r"$\sigma_z$"], fontsize=13)
+    ax1.set_yticks([0.5, 1.5, 2.5])
+    ax1.set_yticklabels([r"$\sigma_x$", r"$\sigma_y$", r"$\sigma_z$"], fontsize=13)
+    ax1.xaxis.tick_top()
+    ax1.set_title(r"(a) 積 $\sigma_j\sigma_k$（行が左、列が右）と、そのトレース", fontsize=11.5, pad=28)
+    for s in ax1.spines.values():
+        s.set_visible(False)
+    # (b) 内積の表
+    ax2.imshow(gram, cmap="Blues", vmin=0, vmax=2.6)
+    for a in range(4):
+        for b in range(4):
+            ax2.text(b, a, f"{int(gram[a, b])}", ha="center", va="center", fontsize=15, color="white" if gram[a, b] > 1 else "#999999")
+    ax2.set_xticks(range(4))
+    ax2.set_xticklabels(PAULI_TEX, fontsize=13)
+    ax2.set_yticks(range(4))
+    ax2.set_yticklabels(PAULI_TEX, fontsize=13)
+    ax2.xaxis.tick_top()
+    ax2.set_title(r"(b) 内積の表 $\mathrm{tr}(P_jP_k)=2\delta_{jk}$（対角だけ $2$）", fontsize=11.5, pad=28)
+    fig.tight_layout()
+    fig.savefig(OUT / "mp10_pauli_inner_product.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+# ------------------------------------------------------------------------------------- mp11
+def mp11():
+    # 例：M=[[1,2],[3,4]]。c0=tr(M)/2。M−c0 I はトレースが 0 で、I と直交する
+    M = np.array([[1, 2], [3, 4]], dtype=complex)
+    c0 = np.trace(M) / 2
+    R = M - c0 * I2
+    assert np.isclose(c0, 2.5) and np.isclose(np.trace(R), 0)
+    assert np.isclose(np.trace(I2 @ R), 0)  # tr(I R)=0：I と直交
+    # R は σx, σy, σz の組み合わせで書ける（係数は ½tr(σR)）
+    coef = [np.trace(P @ R) / 2 for P in (SX, SY, SZ)]
+    assert np.allclose(R, sum(c * P for c, P in zip(coef, (SX, SY, SZ))))
+    assert 4 == 3 + 1
+
+    fig, ax = plt.subplots(figsize=(10.5, 6.0))
+    ax.set_xlim(-0.8, 10.2)
+    ax.set_ylim(-0.7, 6.4)
+    ax.axis("off")
+    # トレースが 0 の行列の空間（3次元）：平面で表す
+    ax.add_patch(plt.Polygon([[0.5, 1.2], [8.6, 1.2], [9.8, 2.9], [1.7, 2.9]], fc="#fff1d6", ec="#e67e00", lw=1.6, alpha=0.9))
+    ax.text(2.75, 1.4, r"トレースが $0$ の行列の部分空間（次元 3）" + "\n" + r"$\{\,a_x\sigma_x+a_y\sigma_y+a_z\sigma_z\,\}$", ha="center", va="bottom", fontsize=11.5)
+    # I の軸（1次元）
+    ax.annotate("", xy=(5.1, 6.0), xytext=(5.1, 2.05), arrowprops=dict(arrowstyle="-|>", lw=2.4, color=C_A))
+    ax.text(5.35, 5.8, r"$I$ の方向（次元 1）", color=C_A, fontsize=12, va="top")
+    ax.text(3.4, 4.0, r"$\mathrm{tr}(I\sigma_j)=0$" + "\n（平面と直交）", color=C_A, fontsize=11, va="center", ha="center")
+    # M とその成分
+    px, py = 7.6, 4.6
+    ax.annotate("", xy=(px, py), xytext=(5.1, 2.05), arrowprops=dict(arrowstyle="-|>", lw=2.6, color=C_BAD))
+    ax.text(px + 0.15, py, r"$M$", color=C_BAD, fontsize=16, va="center")
+    ax.plot([px, px], [py, 2.05], color=C_GRAY, lw=1.0, ls=":")
+    ax.plot([px, 5.1], [2.05, 2.05], color=C_GRAY, lw=1.0, ls=":")
+    ax.text(px + 0.12, 3.3, r"$c_0I$" + "\n" + r"$c_0=\frac{1}{2}\mathrm{tr}(M)$", fontsize=11, color=C_BAD, va="center")
+    ax.text(6.4, 1.85, "平面の中の成分" + "\n" + r"（$\mathrm{tr}=0$）", fontsize=10.5, color="#555555", ha="center", va="top")
+    ax.text(5.1, 0.0, "全体：$\\mathbb{C}^{2\\times2}$ の次元は 4 ＝ 3（トレース $0$ の部分空間）＋ 1（$I$）\n3つ（$\\sigma_x,\\sigma_y,\\sigma_z$）だけでは、平面の外（$\\mathrm{tr}(M)\\neq0$）の $M$ を書けない。$I$ も含めた4つで全体を張れる", ha="center", va="top", fontsize=11.5)
+    fig.savefig(OUT / "mp11_pauli_dimension.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+# ------------------------------------------------------------------------------------- mp12
+def mp12():
+    # 数値例（本文）：|Φ>=(3,4)/5、K0=diag(1,1/2)、K1=diag(0,√3/2)。X=ΣKρK†、Y=ρ
+    phi = np.array([3, 4]) / 5
+    rho = np.outer(phi, phi.conj()).astype(complex)
+    K0 = np.diag([1, 0.5]).astype(complex)
+    K1 = np.diag([0, np.sqrt(3) / 2]).astype(complex)
+    assert np.allclose(K0.conj().T @ K0 + K1.conj().T @ K1, np.eye(2))
+    X = K0 @ rho @ K0.conj().T + K1 @ rho @ K1.conj().T
+    Y = rho
+    assert np.allclose(X * 25, [[9, 6], [6, 16]]) and np.allclose(Y * 25, [[9, 12], [12, 16]])
+    cX = np.array([np.trace(P @ X).real / 2 for _, P in PAULI])
+    cY = np.array([np.trace(P @ Y).real / 2 for _, P in PAULI])
+    assert np.allclose(cX, [1 / 2, 6 / 25, 0, -7 / 50])  # (c0, cx, cy, cz)
+    assert np.allclose(cY, [1 / 2, 12 / 25, 0, -7 / 50])
+    # 係数から元の行列に戻る（展開の式）
+    assert np.allclose(sum(c * P for c, (_, P) in zip(cX, PAULI)), X)
+    assert np.allclose(sum(c * P for c, (_, P) in zip(cY, PAULI)), Y)
+    D = X - Y
+    cD = cX - cY
+    assert np.allclose(cD, [0, -6 / 25, 0, 0])  # D=-(6/25)σx：σx の係数だけが違う
+    assert np.allclose(D, -6 / 25 * SX)
+
+    fig, ax = plt.subplots(figsize=(9.5, 4.8))
+    w = 0.36
+    xs = np.arange(4)
+    ax.bar(xs - w / 2, cX, w, color=C_A, label=r"$X=\sum_mK_m\rho K_m^\dagger$（測定後、結果を記録しない）")
+    ax.bar(xs + w / 2, cY, w, color=C_B, label=r"$Y=\rho$（測定前）")
+    for x, a, b in zip(xs, cX, cY):
+        ax.text(x - w / 2, a + 0.012 if a >= 0 else a - 0.04, f"{a:.2f}", ha="center", fontsize=10)
+        ax.text(x + w / 2, b + 0.012 if b >= 0 else b - 0.04, f"{b:.2f}", ha="center", fontsize=10)
+    ax.set_xticks(xs)
+    ax.set_xticklabels(PAULI_TEX, fontsize=14)
+    ax.axhline(0, color="k", lw=0.8)
+    ax.set_ylabel(r"係数 $c_j=\frac{1}{2}\mathrm{tr}(P_jM)$", fontsize=12)
+    ax.set_ylim(-0.2, 0.88)
+    ax.annotate(r"$\sigma_x$ の係数だけが違う" + "\n" + r"$D=X-Y=-\frac{6}{25}\sigma_x$", xy=(1, 0.46), xytext=(1.9, 0.6), fontsize=11.5, color=C_BAD, arrowprops=dict(arrowstyle="->", color=C_BAD))
+    ax.legend(loc="upper left", fontsize=10)
+    ax.set_title(r"数値例の $X$ と $Y$ のパウリ展開の係数", fontsize=12.5)
+    fig.tight_layout()
+    fig.savefig(OUT / "mp12_pauli_coefficients.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+FIGS = dict(mp01=mp01, mp02=mp02, mp03=mp03, mp04=mp04, mp05=mp05, mp06=mp06, mp07=mp07, mp08=mp08, mp09=mp09, mp10=mp10, mp11=mp11, mp12=mp12)
 
 if __name__ == "__main__":
     names = sys.argv[1:] or list(FIGS)
