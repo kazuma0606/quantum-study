@@ -535,7 +535,7 @@ def mp11():
     ax.plot([px, 5.1], [2.05, 2.05], color=C_GRAY, lw=1.0, ls=":")
     ax.text(px + 0.12, 3.3, r"$c_0I$" + "\n" + r"$c_0=\frac{1}{2}\mathrm{tr}(M)$", fontsize=11, color=C_BAD, va="center")
     ax.text(6.4, 1.85, "平面の中の成分" + "\n" + r"（$\mathrm{tr}=0$）", fontsize=10.5, color="#555555", ha="center", va="top")
-    ax.text(5.1, 0.0, "全体：$\\mathbb{C}^{2\\times2}$ の次元は 4 ＝ 3（トレース $0$ の部分空間）＋ 1（$I$）\n3つ（$\\sigma_x,\\sigma_y,\\sigma_z$）だけでは、平面の外（$\\mathrm{tr}(M)\\neq0$）の $M$ を書けない。$I$ も含めた4つで全体を張れる", ha="center", va="top", fontsize=11.5)
+    ax.text(5.1, 0.0, r"全体：$\mathbb{C}^{2\times2}$ の次元は 4 ＝ 3（トレース $0$ の部分空間）＋ 1（$I$）" + "\n" + r"3つ（$\sigma_x,\sigma_y,\sigma_z$）だけでは、平面の外（$\mathrm{tr}(M)\neq0$）の $M$ を書けない。$I$ も含めた4つで全体を張れる", ha="center", va="top", fontsize=11.5)
     fig.savefig(OUT / "mp11_pauli_dimension.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
     plt.close(fig)
 
