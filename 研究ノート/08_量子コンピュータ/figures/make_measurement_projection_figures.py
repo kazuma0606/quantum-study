@@ -606,7 +606,7 @@ def _draw_box(ax, x, y, w, h, text, fc, ec, fs=11.5):
     ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=fs)
 
 
-def _draw_matrix(ax, cx, cy, rows, fs=15, dx=0.5, dy=0.42):
+def _draw_matrix_text(ax, cx, cy, rows, fs=15, dx=0.5, dy=0.42):
     """2×2 の行列を、数字を並べてかっこで囲んで描く。rows は 2×2 の文字列。"""
     for i in range(2):
         for j in range(2):
@@ -684,10 +684,10 @@ def mp14():
     ax.text(9.1, 5.65, "密度行列（状態）", ha="center", fontsize=12, color=C_B)
     # 右：2 つの密度行列
     _draw_box(ax, 7.0, 3.55, 4.2, 1.7, "", "#e6f4e6", C_C)
-    _draw_matrix(ax, 8.1, 4.4, [["1/2", "1/2"], ["1/2", "1/2"]], fs=13, dx=0.4, dy=0.36)
+    _draw_matrix_text(ax, 8.1, 4.4, [["1/2", "1/2"], ["1/2", "1/2"]], fs=13, dx=0.4, dy=0.36)
     ax.text(9.9, 4.55, "純粋状態\n階数 1", ha="center", va="center", fontsize=11)
     _draw_box(ax, 7.0, 0.4, 4.2, 2.3, "", "#fbe6e6", C_BAD)
-    _draw_matrix(ax, 8.1, 1.55, [["1/2", "0"], ["0", "1/2"]], fs=13, dx=0.4, dy=0.36)
+    _draw_matrix_text(ax, 8.1, 1.55, [["1/2", "0"], ["0", "1/2"]], fs=13, dx=0.4, dy=0.36)
     ax.text(9.9, 1.7, "混合状態\n階数 2", ha="center", va="center", fontsize=11)
     ax.text(9.1, 0.65, "どの観測量でも、イ と ウ の期待値は同じ", ha="center", fontsize=9.5, color="#555555")
     ax.annotate("", xy=(6.95, 4.4), xytext=(4.5, 4.4), arrowprops=dict(arrowstyle="-|>", lw=2.0, color=C_C))
