@@ -193,8 +193,19 @@ def model_opts(args) -> dict:
             "ro_model": getattr(args, "ro_model", False), "zcorr": getattr(args, "zcorr", False),
             "split_shrink": getattr(args, "split_shrink", None),
             "prep_model": getattr(args, "prep_model", False),
-            "holdout": np.load(args.holdout).astype(int) if getattr(args, "holdout", None) else None,
+            "holdout": load_holdout(args.holdout) if getattr(args, "holdout", None) else None,
             "hw_jobs": split_jobs(args)}
+
+
+def load_holdout(path) -> np.ndarray:
+    """取り置きの番号（.npy）を読む。1 次元の整数の配列で、負の番号と重複がないこと。上限（点の数）は、点の並びが決まる model の中で確かめる。
+    （Codex 指摘 #93：`astype(int)` で小数を黙って切り捨てていた。負の番号は、どの点にも一致せず、取り置いたつもりで学習に使っていた）"""
+    ho = np.load(path)
+    if ho.ndim != 1 or not np.issubdtype(ho.dtype, np.integer):
+        raise ValueError(f"--holdout は 1 次元の整数の配列にする：{path}（形 {ho.shape}、型 {ho.dtype}）")
+    if (ho < 0).any() or len(np.unique(ho)) != len(ho):
+        raise ValueError(f"--holdout の番号に、負の値か重複がある：{path}")
+    return ho.astype(int)
 
 
 def split_jobs(args) -> list[str]:
@@ -209,6 +220,10 @@ def split_jobs(args) -> list[str]:
 
 def build_data(args):
     """実データ、または正解の分かる合成データ（必要なら制御 |1> の直接の測定を加える）を作り、prepare する。"""
+    f = getattr(args, "syn_prep_err", 0.0)
+    if not (np.isfinite(f) and 0 <= f <= 1):
+        # 確率なので 0〜1。範囲外だと、a5_data の確率の切り詰めと規格化で、指定と別の分布になる（Codex 指摘 #92）
+        raise ValueError(f"--syn-prep-err は 0〜1 の確率にする：{f}")
     trotter, probes = a5_data.load_all(with_c1=getattr(args, "with_c1_hw", False))
     for spec in getattr(args, "drop_trotter", None) or []:
         # 外れ値の影響を見るため、トロッター回路の1点を抜く（ジョブ ID:次数:n）
@@ -560,6 +575,10 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
     mask_y = True
     if opts["holdout"] is not None:
         ho = np.asarray(opts["holdout"])
+        # 点の数 = 残りの y の点 ＋ yz の組（組 1 つが y の 2 点を置き換える）。番号がこの範囲になければ、取り置けていない（Codex 指摘 #93）
+        n_obs = int(keep.sum()) + (len(y) - int(keep.sum())) // 2
+        if ho.max(initial=-1) >= n_obs:
+            raise ValueError(f"--holdout の番号 {int(ho.max())} が、点の数 {n_obs} 以上")
         mask_y = ~np.isin(np.arange(int(keep.sum())), ho)
     if opts["robust"]:
         # 外れ値に強い尤度：自由度 4 の t 分布（正規分布より裾が重く、外れた点の重みが自動で下がる。深層学習の Huber 損失に近い）
