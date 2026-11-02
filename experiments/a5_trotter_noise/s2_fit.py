@@ -51,6 +51,7 @@ FORMS = {
 }
 I_ZI = nm.LABELS15.index("ZI")
 KMAX = 12
+PREP_HI = 0.02                              # --prep-model：準備の失敗 f の事前分布の上端（0〜PREP_HI の一様。s6_t1probe_sbi.py と同じ）
 KMAX_T1 = 24                                # T1 専用の回路の、CX の組の回数の上限（既定。データの k がこれより大きければ、そちらに合わせる）
 
 
@@ -102,6 +103,13 @@ def add_common_args(ap) -> None:
     ap.add_argument("--t1-ks", type=_nonneg_int, nargs="+", help="T1 専用の回路の CX の組の回数の並び（既定 2 4 8 16 24、0 以上の整数）")
     ap.add_argument("--syn-ro", type=float, nargs=2,
                     help="合成データの T1 専用の回路に、読み出しの誤り（e01 = P(1|0)、e10 = P(0|1)）を入れる")
+    ap.add_argument("--syn-prep-err", type=float, default=0.0,
+                    help="合成データの T1 専用の回路で、制御を |1> にする準備が失敗する確率 f（正解。既定 0）")
+    ap.add_argument("--prep-model", action="store_true",
+                    help="T1 専用の回路の、準備の失敗 f（組ごと、事前分布 0〜PREP_HI の一様）を推定する")
+    ap.add_argument("--holdout",
+                    help="点ごとの対数尤度の番号（.npy）の点を、当てはめから取り置く。保存する対数尤度は全点で、"
+                         "取り置いた点の値は、その点を使わない事後分布での予測になる")
     ap.add_argument("--zcorr", action="store_true",
                     help="T1 専用の回路の制御と標的の <Z>（同じショットの同時測定）を、相関つきの2変量正規分布で数える（10/17 の監査）")
     ap.add_argument("--ro-model", action="store_true",
@@ -157,6 +165,8 @@ def make_tag(args) -> str:
         tag += "_ro"
     if getattr(args, "zcorr", False):
         tag += "_zc"
+    if getattr(args, "prep_model", False):
+        tag += "_pf"
     # 合成データの条件も名前に入れる（同じ --label で条件だけ変えると結果が上書きされるため。10/14 の監査）。
     # 10/14 の結果のファイル名は、これを入れる前の名前のまま
     if getattr(args, "syn_ro", None):
@@ -165,6 +175,10 @@ def make_tag(args) -> str:
         tag += f"_t1s{args.t1_shots}"
     if getattr(args, "t1_ks", None):
         tag += "_t1k" + "-".join(map(str, args.t1_ks))
+    if getattr(args, "syn_prep_err", 0.0):
+        tag += f"_spe{args.syn_prep_err:g}"
+    if getattr(args, "holdout", None):
+        tag += "_ho" + Path(args.holdout).stem
     if args.extra_c1:
         tag += "_c1" if getattr(args, "c1_design", "all") == "all" else "_c1rec"
     if args.label:
@@ -178,6 +192,8 @@ def model_opts(args) -> dict:
             "robust": getattr(args, "robust", False), "split_hw": getattr(args, "split_hw", False),
             "ro_model": getattr(args, "ro_model", False), "zcorr": getattr(args, "zcorr", False),
             "split_shrink": getattr(args, "split_shrink", None),
+            "prep_model": getattr(args, "prep_model", False),
+            "holdout": np.load(args.holdout).astype(int) if getattr(args, "holdout", None) else None,
             "hw_jobs": split_jobs(args)}
 
 
@@ -242,7 +258,8 @@ def build_data(args):
                                                        t1_probe=getattr(args, "t1_probe", False),
                                                        t1_shots=getattr(args, "t1_shots", None),
                                                        t1_ks=tuple(args.t1_ks) if getattr(args, "t1_ks", None) else None,
-                                                       readout=tuple(args.syn_ro) if getattr(args, "syn_ro", None) else None)
+                                                       readout=tuple(args.syn_ro) if getattr(args, "syn_ro", None) else None,
+                                                       prep_err=getattr(args, "syn_prep_err", 0.0))
             trotter, probes = trotter + t_mix, probes + p_mix
         if args.extra_c1:
             design = REC_C1_DESIGN if getattr(args, "c1_design", "all") == "rec" else None
@@ -250,7 +267,8 @@ def build_data(args):
                                                           design=design, noise_scale=noise[1])
         prep = prepare(trotter, probes)
         truth_meta = {pair: {"theta": dict(zip(nm.LABELS15, tr.theta15.tolist())), "p": tr.p,
-                             "job_offsets": tr.job_offsets, "gamma": tr.gamma} for pair, tr in truths.items()}
+                             "job_offsets": tr.job_offsets, "gamma": tr.gamma,
+                             "prep_err": getattr(args, "syn_prep_err", 0.0)} for pair, tr in truths.items()}
     return prep, truth_meta
 
 
@@ -315,7 +333,7 @@ def _wrap(x):
     return jnp.arctan2(jnp.sin(x), jnp.cos(x))
 
 
-def predictions(theta_job, p_job, prep, gamma_job=None):
+def predictions(theta_job, p_job, prep, gamma_job=None, f_job=None):
     """ジョブごとのパラメータから、すべての観測の予測を、観測の順に並べて返す（y と sd も同じ順）。
     gamma_job があれば、CX ごとの振幅減衰（T1）も入れる。"""
     mus, ys, sds = [], [], []
@@ -348,6 +366,11 @@ def predictions(theta_job, p_job, prep, gamma_job=None):
             err = jax.vmap(lambda th, p, ga: nm.error_sup(th, p, False, ga))(theta_job[g["job"]], p_job[g["job"]],
                                                                              gamma_job[g["job"]])
         z = jax.vmap(lambda e: nm.t1_probe_z(e, c1, tuple(range(kmax_t1(prep) + 1)))[q])(err)
+        if c1 and f_job is not None:
+            # 準備の失敗 f：|1> のつもりが確率 f で |0> のまま。<Z> は確率の1次式なので、<Z> どうしを同じ重みで混ぜてよい
+            z0 = jax.vmap(lambda e: nm.t1_probe_z(e, False, tuple(range(kmax_t1(prep) + 1)))[q])(err)
+            f = f_job[g["job"]][:, None]
+            z = (1 - f) * z + f * z0
         mus.append(z[jnp.arange(len(g["k"])), jnp.asarray(g["k"])])
         ys.append(g["z"])
         sds.append(g["sigma"])
@@ -356,7 +379,7 @@ def predictions(theta_job, p_job, prep, gamma_job=None):
 
 def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = None):
     opts = {"width": 0.05, "calib": False, "t1": False, "obs_scale": False, "obs_scale_pair": False, "robust": False,
-            "ro_model": False, "zcorr": False, **(opts or {})}
+            "ro_model": False, "zcorr": False, "prep_model": False, "holdout": None, **(opts or {})}
     w = opts["width"]
     active = FORMS[form]
     if active == "branch":
@@ -439,7 +462,11 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         # CX 1回と前後の1量子ビットゲートの時間 約 0.1 μs から、γ ≈ 6×10⁻⁴ を中心に置く（対数で幅 0.7、およそ 0.5〜2 倍）
         gamma = numpyro.sample("gamma", dist.LogNormal(jnp.full(2, np.log(GAMMA_T1)), 0.7))
         gamma_job = gamma[jp]
-    mu, y, sd_obs = predictions(theta_job, p[jp], prep, gamma_job)
+    f_job = None
+    if opts["prep_model"] and prep.get("zgroups"):
+        f_prep = numpyro.sample("f_prep", dist.Uniform(jnp.zeros(2), PREP_HI))
+        f_job = f_prep[jp]
+    mu, y, sd_obs = predictions(theta_job, p[jp], prep, gamma_job, f_job)
     if opts["ro_model"] and prep.get("zgroups"):
         # 読み出しの偏り：測った <Z> = 倍率 × 本当の <Z> ＋ ずれ。倍率 = 1 − e01 − e10、ずれ = e10 − e01（組・量子ビットごと）。
         # 偏りは k によらず一定、T1 は k とともに育つので、k への依存で分けられる
@@ -493,6 +520,10 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
             else:
                 errs = jax.vmap(lambda a, b, c: nm.error_sup(a, b, False, c))(th, pp, gamma_job[jobs])
             P = jax.vmap(lambda e: nm.t1_probe_probs(e, c1, tuple(range(kmax_t1(prep) + 1))))(errs)[jnp.arange(len(jobs)), jnp.asarray(g0["k"])]
+            if c1 and f_job is not None:
+                P0 = jax.vmap(lambda e: nm.t1_probe_probs(e, False, tuple(range(kmax_t1(prep) + 1))))(errs)[jnp.arange(len(jobs)), jnp.asarray(g0["k"])]
+                f = f_job[jobs][:, None]
+                P = (1 - f) * P + f * P0
             if e01 is not None:
                 pr = prep["job_pair"][jobs]
 
@@ -514,18 +545,27 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
             keep[i0] = False
             keep[i1] = False
         loc_z, cov_z = jnp.concatenate(locs), jnp.concatenate(covs)
+        mask_z = True
+        if opts["holdout"] is not None:
+            n_y = int(keep.sum())
+            ho = np.asarray(opts["holdout"])
+            mask_z = ~np.isin(np.arange(len(loc_z)), ho[ho >= n_y] - n_y)
         if opts["robust"]:
             # --robust と併用するときは、組の観測も外れ値に強い形にする：自由度 4 の2変量 t 分布（尺度行列は上の共分散。
             # 10/17 の確認：組だけ正規分布のままで、--robust が残りの観測にしか効いていなかった）
-            numpyro.sample("yz", dist.MultivariateStudentT(4.0, loc_z, scale_tril=jnp.linalg.cholesky(cov_z)),
+            numpyro.sample("yz", dist.MultivariateStudentT(4.0, loc_z, scale_tril=jnp.linalg.cholesky(cov_z)).mask(mask_z),
                            obs=np.concatenate(obs))
         else:
-            numpyro.sample("yz", dist.MultivariateNormal(loc_z, covariance_matrix=cov_z), obs=np.concatenate(obs))
+            numpyro.sample("yz", dist.MultivariateNormal(loc_z, covariance_matrix=cov_z).mask(mask_z), obs=np.concatenate(obs))
+    mask_y = True
+    if opts["holdout"] is not None:
+        ho = np.asarray(opts["holdout"])
+        mask_y = ~np.isin(np.arange(int(keep.sum())), ho)
     if opts["robust"]:
         # 外れ値に強い尤度：自由度 4 の t 分布（正規分布より裾が重く、外れた点の重みが自動で下がる。深層学習の Huber 損失に近い）
-        numpyro.sample("y", dist.StudentT(4.0, mu[keep], sd_obs[keep]), obs=y[keep])
+        numpyro.sample("y", dist.StudentT(4.0, mu[keep], sd_obs[keep]).mask(mask_y), obs=y[keep])
     else:
-        numpyro.sample("y", dist.Normal(mu[keep], sd_obs[keep]), obs=y[keep])
+        numpyro.sample("y", dist.Normal(mu[keep], sd_obs[keep]).mask(mask_y), obs=y[keep])
 
 
 # S6 で選んだ制御 |1> の測定（反転を戻す Z だけ。22–23 は位相の折り返しを避けて k を小さく）
@@ -631,7 +671,9 @@ def main() -> None:
     samples = jax.block_until_ready(mcmc.get_samples(group_by_chain=True))   # JAX は非同期に計算するので、終わるのを待ってから時刻を記録する
     elapsed = time.time() - t0
     log(f"サンプリング終了（{elapsed:.0f} 秒）。後処理中")
-    ll_all = log_likelihood(model, mcmc.get_samples(), *margs)
+    # 取り置いた点があっても、保存する対数尤度は全点で計算する（取り置いた点の値は、その点を使わない事後分布での予測）
+    margs_full = margs[:-1] + ({**margs[-1], "holdout": None},)
+    ll_all = log_likelihood(model, mcmc.get_samples(), *margs_full)
     # 点ごとの対数尤度：ふつうの観測は1点ずつ、--zcorr の T1 専用の回路は (制御, 標的) の組を1点として数える
     ll = jnp.concatenate([ll_all["y"]] + ([ll_all["yz"]] if "yz" in ll_all else []), axis=1)
     extra = mcmc.get_extra_fields(group_by_chain=True)
@@ -642,9 +684,10 @@ def main() -> None:
 
     OUT.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(OUT / f"{tag}_draws.npz", log_lik=np.asarray(ll),
+                        holdout=np.asarray(margs[-1]["holdout"] if margs[-1]["holdout"] is not None else [], dtype=int),
                         **{k: np.asarray(v) for k, v in samples.items()})
     import arviz as az
-    idata = az.from_dict({"posterior": {k: np.asarray(v) for k, v in samples.items() if k in ("theta", "p", "sigma_drift", "delta_job", "s", "tau", "gamma", "obs_scale")}})
+    idata = az.from_dict({"posterior": {k: np.asarray(v) for k, v in samples.items() if k in ("theta", "p", "sigma_drift", "delta_job", "s", "tau", "gamma", "obs_scale", "f_prep")}})
     summ = az.summary(idata)
     summ.to_csv(OUT / f"{tag}_summary.csv")
     meta = {"args": vars(args), "elapsed_s": elapsed, "divergences": divergences, "n_obs": int(ll.shape[1]),

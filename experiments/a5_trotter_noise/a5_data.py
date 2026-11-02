@@ -172,7 +172,8 @@ MIXED_JOB = "synthetic_mixed_{pair}"
 def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tuple[float, float] = (1.0, 1.0),
                         shots_trotter: int = 8000, shots_probe: int = 3000,
                         t1_probe: bool = False, readout: tuple[float, float] | None = None,
-                        t1_shots: int | None = None, t1_ks: tuple[int, ...] | None = None) -> tuple[list[dict], list[dict]]:
+                        t1_shots: int | None = None, t1_ks: tuple[int, ...] | None = None,
+                        prep_err: float = 0.0) -> tuple[list[dict], list[dict]]:
     """来月の測り方の予行演習用：1本のジョブ（組ごと）に、次を混ぜた合成データ。
       トロッター回路（1次・2次、ツイリングなし、n=1〜14、8000 ショット）、監視用の回路（制御の Z 位相・標的の X 回転、k=12）、
       制御 |1> の Z の測定（反転を戻す。22–23 は k=1〜4、142–143 は k=2〜12）
@@ -221,9 +222,15 @@ def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tup
             conf = np.array([[1 - e01, e10], [e01, 1 - e10]])           # 行が読んだ値、列が本当の値
             M = np.kron(conf, conf)
             zsign = (np.array([1, 1, -1, -1]), np.array([1, -1, 1, -1]))   # 00, 01, 10, 11 の順（左が制御）
+            # 準備の失敗 f：制御を |1> にするつもりの回路が、確率 f で |0> のまま走る（読み出しの誤りの前に混ぜる。
+            # s6_t1probe_sbi.py の --prep-err と同じ置き方）
+            P_ideal = {c1: np.asarray(nm.t1_probe_probs(err, c1, ks)) for c1 in (False, True)}
+            Z_ideal = {c1: np.asarray(nm.t1_probe_z(err, c1, ks)) for c1 in (False, True)}
+            P_ideal[True] = (1 - prep_err) * P_ideal[True] + prep_err * P_ideal[False]
+            Z_ideal[True] = (1 - prep_err) * Z_ideal[True] + prep_err * Z_ideal[False]
             for c1 in (False, True):
-                P = np.asarray(nm.t1_probe_probs(err, c1, ks)) @ M.T
-                zs = nm.t1_probe_z(err, c1, ks)
+                P = P_ideal[c1] @ M.T
+                zs = Z_ideal[c1]
                 for i, k in enumerate(ks):
                     pk = np.clip(P[i], 0, None)
                     freq = rng.multinomial(n_sh, pk / pk.sum()) / n_sh
