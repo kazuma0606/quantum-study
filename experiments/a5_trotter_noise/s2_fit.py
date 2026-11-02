@@ -205,7 +205,10 @@ def load_holdout(path) -> np.ndarray:
         raise ValueError(f"--holdout は 1 次元の整数の配列にする：{path}（形 {ho.shape}、型 {ho.dtype}）")
     if (ho < 0).any() or len(np.unique(ho)) != len(ho):
         raise ValueError(f"--holdout の番号に、負の値か重複がある：{path}")
-    return ho.astype(int)
+    # 符号なしの大きな値は、int への変換で負になり、上限の確かめを通ってしまう（Codex 指摘 #93 の再監査）。変換の前に止める
+    if len(ho) and int(ho.max()) > np.iinfo(np.int64).max:
+        raise ValueError(f"--holdout の番号が大きすぎる：{path}（最大 {int(ho.max())}）")
+    return ho.astype(np.int64)
 
 
 def split_jobs(args) -> list[str]:
