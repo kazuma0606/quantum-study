@@ -331,7 +331,8 @@ def build_data(args):
     for spec in getattr(args, "drop_probe", None) or []:
         # 直接の測定・監視用の回路の1点を抜く（ジョブ ID:軸:対象:k）
         job, axis, target, k = spec.split(":")
-        hits = [i for i, o in enumerate(probes) if o["job"] == job and o["axis"] == axis
+        # T1 専用の回路の記録（kind "zpop"）は軸・対象を持たないので、探す対象から外す（2026-11-10、Codex の監査 #100）
+        hits = [i for i, o in enumerate(probes) if o.get("kind") != "zpop" and o["job"] == job and o["axis"] == axis
                 and o["target"] == int(target) and o["k"] == int(k)]
         assert len(hits) == 1, f"抜く点が見つからない：{spec}（{len(hits)} 件）"
         probes = [o for i, o in enumerate(probes) if i != hits[0]]
