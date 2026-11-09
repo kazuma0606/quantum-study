@@ -70,6 +70,31 @@ def job_circuits(pair: str, args) -> list[tuple[str, dict, object, int]]:
     return rows
 
 
+def expected_two_qubit_gates(kind: str, label: dict) -> int:
+    """回路の種類ごとの、変換後の 2 量子ビットゲートの想定数（hardware.py・hardware_zprobe.py・hardware_t1probe.py と同じ）。
+    トロッター回路は 1 次・2 次とも 2(N−1)n、監視用・c1 Z・T1 専用の回路は 2k、読み出しの較正は 0。"""
+    if kind.startswith("トロッター"):
+        return 2 * (N - 1) * label["n"]
+    if kind in ("監視用", "c1 Z", "T1 専用"):
+        return 2 * label["k"]
+    if kind == "読み出しの較正":
+        return 0
+    raise ValueError(f"想定のゲート数が決まっていない回路の種類：{kind}")
+
+
+def check_two_qubit_gates(rows, isa) -> None:
+    """変換で 2 量子ビットゲートがまとめられたり消えたりしていないかを、投入の前に確かめる（数が違えば止める）。
+    記録の n・k と、実際に雑音を受ける回数を食い違わせないため（2026-11-10、Codex の監査 #96）。"""
+    bad = []
+    for (kind, label, _, _), tq in zip(rows, isa):
+        got = tq.count_ops().get("cz", 0) + tq.count_ops().get("ecr", 0)
+        want = expected_two_qubit_gates(kind, label)
+        if got != want:
+            bad.append(f"{kind} {label}：{got} 個（想定 {want} 個）")
+    if bad:
+        raise SystemExit("変換後の 2 量子ビットゲートの数が想定と違う。投入しない：\n" + "\n".join(bad))
+
+
 def calibration(backend, qubits: list[int]) -> dict:
     """投入の時点の較正の値（hardware.py と同じ項目）。"""
     t = backend.target
@@ -146,6 +171,7 @@ def main() -> None:
             rows += [("トロッター（ツイリング）", lab, qc, sh) for kind, lab, qc, sh in rows if kind == "トロッター"]
         pm = generate_preset_pass_manager(optimization_level=1, backend=backend, initial_layout=PAIRS[pair])
         isa = pm.run([qc for _, _, qc, _ in rows])
+        check_two_qubit_gates(rows, isa)
         jobs.append((pair, rows, isa))
         by_kind: dict[str, list[float]] = {}
         for (kind, _, qc, sh), tq in zip(rows, isa):

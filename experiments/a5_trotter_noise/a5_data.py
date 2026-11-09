@@ -143,7 +143,10 @@ def load_mixed_hardware(tag: str = "m1") -> tuple[list[dict], list[dict]]:
     """実機の混ぜたジョブ（hardware_mixed_job.py の results/hardware_mixed_<tag>_<組>_<時刻>.json）を、
     synthetic_mixed_job と同じ形（トロッター回路、位相、T1 専用の回路の <Z>）にする。
       トロッター回路：同じジョブの読み出しの較正（全 0・全 1）で、量子ビット 0 の <Z> を補正する（hardware.py と同じ式）
-      監視用の回路・c1 Z の測定：位相 atan2(<Y>, <基準>)。読み出しは補正しない（load_probes と同じ）
+      監視用の回路・c1 Z の測定：位相 atan2(<Y>, <基準>)。読み出しは補正しない（load_probes と同じ）。
+        3 つ目の基底（2026-11-07 から監視用の回路で測る。Z 回転なら Z、X 回転なら X）があれば、その <..> とショット数を
+        third_basis・third_value・third_shots に残す。ただし s2_fit.py の尤度はまだ位相しか使わないので、当てはめには入らない
+        （面外への回転は、まだ推定で区別できない。2026-11-10、Codex の監査 #95）。11/03 の 1 回目（m1）は 2 つの基底だけ
       T1 専用の回路：補正していない、量子ビットごとの <Z>（読み出しの偏りは s2_fit.py の --ro-model で推定する）
     k = 0 の T1 専用の回路も含める（synthetic_mixed_job と同じ。準備と読み出しを決める点になる）。"""
     import trotter_noise as tn
@@ -183,9 +186,14 @@ def load_mixed_hardware(tag: str = "m1") -> tuple[list[dict], list[dict]]:
         for (axis, target, c1, k), b in sorted(groups.items()):
             (e_ref, sh_ref), (e_y, sh_y) = b[ref_basis[axis]], b["Y"]
             assert sh_ref == sh_y, f"{path.name}：基準と Y のショット数が違う（{sh_ref}、{sh_y}）"
-            probes.append({"pair": pair, "job": job, "time": time, "axis": axis, "target": target, "k": k,
-                           "control_one": c1, "unflip": c1, "phase": float(np.arctan2(e_y, e_ref)),
-                           "sigma": _phase_sigma(e_ref, e_y, sh_ref)})
+            rec = {"pair": pair, "job": job, "time": time, "axis": axis, "target": target, "k": k,
+                   "control_one": c1, "unflip": c1, "phase": float(np.arctan2(e_y, e_ref)),
+                   "sigma": _phase_sigma(e_ref, e_y, sh_ref)}
+            extra = set(b) - {ref_basis[axis], "Y"}
+            if extra:
+                assert extra == {axis}, f"{path.name}：想定していない基底 {sorted(extra)}"
+                rec.update(third_basis=axis, third_value=b[axis][0], third_shots=b[axis][1])
+            probes.append(rec)
         for c in cs:
             if c["kind"] == "T1 専用":
                 for q in (0, 1):
