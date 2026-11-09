@@ -132,6 +132,90 @@ def load_c1_probes() -> list[dict]:
     return obs
 
 
+def _z_from_counts(counts: dict[str, int], bit: int) -> float:
+    """ビット列の右から bit 番目（0 が右端）の <Z>。"""
+    shots = sum(counts.values())
+    ones = sum(c for b, c in counts.items() if b[-1 - bit] == "1")
+    return 1 - 2 * ones / shots
+
+
+def load_mixed_hardware(tag: str = "m1") -> tuple[list[dict], list[dict]]:
+    """実機の混ぜたジョブ（hardware_mixed_job.py の results/hardware_mixed_<tag>_<組>_<時刻>.json）を、
+    synthetic_mixed_job と同じ形（トロッター回路、位相、T1 専用の回路の <Z>）にする。
+      トロッター回路：同じジョブの読み出しの較正（全 0・全 1）で、量子ビット 0 の <Z> を補正する（hardware.py と同じ式）
+      監視用の回路・c1 Z の測定：位相 atan2(<Y>, <基準>)。読み出しは補正しない（load_probes と同じ）
+      T1 専用の回路：補正していない、量子ビットごとの <Z>（読み出しの偏りは s2_fit.py の --ro-model で推定する）
+    k = 0 の T1 専用の回路も含める（synthetic_mixed_job と同じ。準備と読み出しを決める点になる）。"""
+    import trotter_noise as tn
+    trot, probes = [], []
+    paths = sorted(RES.glob(f"hardware_mixed_{tag}_*.json"))
+    if not paths:
+        raise FileNotFoundError(f"実機の混ぜたジョブの記録がない：results/hardware_mixed_{tag}_*.json")
+    for path in paths:
+        r = json.loads(path.read_text(encoding="utf-8"))
+        if "finished_utc" not in r:
+            raise ValueError(f"{path.name}：結果がまだ入っていない（ジョブ {r['job_id']}）")
+        pair, job, time = r["pair"], r["job_id"], _utc(r["submitted_utc"])
+        cs = r["circuits"]
+        for c in cs:
+            assert sum(c["counts"].values()) == c["shots"], f"{path.name}：{c['name']} のカウントの合計が合わない"
+        cal = {c["prepared"]: c["counts"] for c in cs if c["kind"] == "読み出しの較正"}
+        e0 = (1 - _z_from_counts(cal["00"], 0)) / 2           # 全 0 を準備して、量子ビット 0 を 1 と読んだ割合
+        e1 = (1 + _z_from_counts(cal["11"], 0)) / 2           # 全 1 を準備して、量子ビット 0 を 0 と読んだ割合
+        for order in (1, 2):
+            rows = sorted((c for c in cs if c["kind"] == "トロッター" and c["order"] == order), key=lambda c: c["n"])
+            n = np.array([c["n"] for c in rows])
+            z_meas = np.array([_z_from_counts(c["counts"], 0) for c in rows])
+            shots = np.array([c["shots"] for c in rows])
+            sims = [tn.run_point(2, 2.0, order, int(k), 0.0) for k in n]
+            trot.append({"pair": pair, "job": job, "time": time, "order": order, "twirled": False, "dd": False,
+                         "source": path.name, "n": n, "z": (z_meas - (e1 - e0)) / (1 - e0 - e1),
+                         "sem": np.sqrt(np.maximum(1 - z_meas**2, 0)) / np.sqrt(shots) / (1 - e0 - e1),
+                         "z_trot": np.array([s.z_exact + s.z_trotter_part for s in sims]),
+                         "z_exact": float(sims[0].z_exact)})
+        # 位相：(軸, 対象, 制御 |1>, k) ごとに、基準の基底と Y の 2 本を組にする
+        ref_basis = {"Z": "X", "X": "Z"}
+        groups: dict[tuple, dict[str, tuple[float, int]]] = {}
+        for c in cs:
+            if c["kind"] in ("監視用", "c1 Z"):
+                key = (c["axis"], c["target"], bool(c.get("control_one", False)), c["k"])
+                groups.setdefault(key, {})[c["basis"]] = (_z_from_counts(c["counts"], 0), c["shots"])
+        for (axis, target, c1, k), b in sorted(groups.items()):
+            (e_ref, sh_ref), (e_y, sh_y) = b[ref_basis[axis]], b["Y"]
+            assert sh_ref == sh_y, f"{path.name}：基準と Y のショット数が違う（{sh_ref}、{sh_y}）"
+            probes.append({"pair": pair, "job": job, "time": time, "axis": axis, "target": target, "k": k,
+                           "control_one": c1, "unflip": c1, "phase": float(np.arctan2(e_y, e_ref)),
+                           "sigma": _phase_sigma(e_ref, e_y, sh_ref)})
+        for c in cs:
+            if c["kind"] == "T1 専用":
+                for q in (0, 1):
+                    m = _z_from_counts(c["counts"], q)
+                    probes.append({"pair": pair, "job": job, "time": time, "kind": "zpop", "control_one": c["control_one"],
+                                   "qubit": q, "k": c["k"], "z": m, "sigma": float(np.sqrt(max(1 - m**2, 1e-6) / c["shots"])),
+                                   "shots": c["shots"]})
+    return trot, probes
+
+
+def load_mixed_readout_cal(tag: str = "m1") -> dict[str, dict]:
+    """実機の混ぜたジョブの読み出しの較正の回路（全 0・全 1 を準備）から、量子ビットごとの誤読の数を数える（2026-11-08）。
+    組 → {"n01": [制御, 標的]（全 0 を準備して 1 と読んだショットの数）, "n10": [制御, 標的]（全 1 を準備して 0 と読んだ数）,
+    "shots00", "shots11"}。量子ビット 0（制御）はビット列の右端（_z_from_counts と同じ）。組ごとにジョブは 1 本と仮定する。"""
+    out = {}
+    for path in sorted(RES.glob(f"hardware_mixed_{tag}_*.json")):
+        r = json.loads(path.read_text(encoding="utf-8"))
+        if r["pair"] in out:
+            raise ValueError(f"{path.name}：組 {r['pair']} の混ぜたジョブが 2 本以上ある（読み出しの較正の扱いが決まっていない）")
+        cal = {c["prepared"]: c["counts"] for c in r["circuits"] if c["kind"] == "読み出しの較正"}
+
+        def count(counts, q, val):
+            return int(sum(n for b, n in counts.items() if b[-1 - q] == val))
+        out[r["pair"]] = {"n01": [count(cal["00"], q, "1") for q in (0, 1)], "n10": [count(cal["11"], q, "0") for q in (0, 1)],
+                          "shots00": int(sum(cal["00"].values())), "shots11": int(sum(cal["11"].values()))}
+    if not out:
+        raise FileNotFoundError(f"実機の混ぜたジョブの記録がない：results/hardware_mixed_{tag}_*.json")
+    return out
+
+
 def load_all(with_c1: bool = False) -> tuple[list[dict], list[dict]]:
     """with_c1=True なら、10/12 の制御 |1> の直接の測定も加える（それまでの当てはめを再現できるよう、既定では加えない）。"""
     return load_trotter(), load_probes() + (load_c1_probes() if with_c1 else [])
@@ -173,7 +257,7 @@ def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tup
                         shots_trotter: int = 8000, shots_probe: int = 3000,
                         t1_probe: bool = False, readout: tuple[float, float] | None = None,
                         t1_shots: int | None = None, t1_ks: tuple[int, ...] | None = None,
-                        prep_err: float = 0.0) -> tuple[list[dict], list[dict]]:
+                        prep_err: float = 0.0, t1_k_shots: tuple[int, ...] | None = None) -> tuple[list[dict], list[dict]]:
     """来月の測り方の予行演習用：1本のジョブ（組ごと）に、次を混ぜた合成データ。
       トロッター回路（1次・2次、ツイリングなし、n=1〜14、8000 ショット）、監視用の回路（制御の Z 位相・標的の X 回転、k=12）、
       制御 |1> の Z の測定（反転を戻す。22–23 は k=1〜4、142–143 は k=2〜12）
@@ -182,6 +266,9 @@ def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tup
     # 負の k は配列の末尾を指してしまい、生成と尤度で別の回路になる（10/17 の監査）。0 以上の整数だけを受け付ける
     if t1_ks is not None and any((not isinstance(k, (int, np.integer))) or k < 0 for k in t1_ks):
         raise ValueError(f"T1 専用の回路の k は 0 以上の整数にする：{tuple(t1_ks)}")
+    # k ごとのショット数（s6_t1probe_sbi.py の --k-shots と同じ）。並びは t1_ks と同じ長さの正の整数
+    if t1_k_shots is not None and (t1_ks is None or len(t1_k_shots) != len(t1_ks) or min(t1_k_shots) <= 0):
+        raise ValueError(f"T1 専用の回路の k ごとのショット数は、k と同じ長さの正の整数にする：{t1_k_shots}（k = {t1_ks}）")
     trot, probes = [], []
     for pair, tr in truths.items():
         job = MIXED_JOB.format(pair=pair)
@@ -232,6 +319,7 @@ def synthetic_mixed_job(truths: dict, rng: np.random.Generator, noise_scale: tup
                 P = P_ideal[c1] @ M.T
                 zs = Z_ideal[c1]
                 for i, k in enumerate(ks):
+                    n_sh = int(t1_k_shots[i]) if t1_k_shots is not None else (t1_shots or shots_probe)
                     pk = np.clip(P[i], 0, None)
                     freq = rng.multinomial(n_sh, pk / pk.sum()) / n_sh
                     for q in (0, 1):

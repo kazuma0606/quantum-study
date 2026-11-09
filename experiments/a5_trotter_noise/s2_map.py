@@ -48,6 +48,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     s2_fit.add_common_args(ap)
     ap.add_argument("--starts", type=int, default=40)
+    ap.add_argument("--start-from", metavar="TAG",
+                    help="出発点を、このタグの NUTS の事後平均（zi、rot_c0、rot_c1、p、gamma）から始める（11 月の回転も 10 月の値から）")
+    ap.add_argument("--p-jitter", type=float, default=0.0, metavar="SIGMA",
+                    help="2 本目からの出発点で、p・gamma・dephase に exp(N(0, SIGMA)) をかけて広げる（既定 0：広げない）。"
+                         "11/08 の MAP の探索は、--start-from の p（約 3×10⁻⁴）のまわりだけを探し、NUTS が見つけた p≈10⁻⁴ の領域を見落とした")
     args = ap.parse_args()
     tag = s2_fit.make_tag(args)
     prep, _ = s2_fit.build_data(args)
@@ -68,6 +73,17 @@ def main() -> None:
 
     pot(flat0).block_until_ready()
 
+    start_vals = {}
+    if args.start_from:
+        d = np.load(s2_fit.OUT / f"{args.start_from}_draws.npz")
+        for name in ("zi", "rot_c0", "rot_c1", "p", "gamma"):
+            if name in d.files:
+                m = d[name].reshape((-1,) + d[name].shape[2:]).mean(0)
+                start_vals[name] = m
+                if name in ("zi", "rot_c0", "rot_c1"):
+                    start_vals[f"{name}_p2"] = m
+        print(f"出発点：{args.start_from} の事後平均（{sorted(start_vals)}）", flush=True)
+
     results = []
     t0 = time.time()
     for i in range(args.starts):
@@ -81,12 +97,15 @@ def main() -> None:
                 values[name] = jnp.asarray(rng.normal(0, 0.02, shape))
             elif name == "zraw":
                 values[name] = jnp.asarray(rng.normal(0, 0.3, shape))
-            elif name == "zi":
+            elif name in ("zi", "zi_p2"):
                 values[name] = jnp.asarray(rng.normal(0, 0.005, shape))
-            elif name == "rot_c0":
+            elif name in ("rot_c0", "rot_c0_p2"):
                 values[name] = jnp.asarray(rng.normal(0, 0.01, shape))
-            elif name == "rot_c1":
+            elif name in ("rot_c1", "rot_c1_p2"):
                 values[name] = jnp.asarray(rng.normal(0, 0.02, shape))
+            elif name in ("zi_change", "rot_c0_change", "rot_c1_change"):
+                # --split-period-shrink の変化 Δ。指定しないと、既定の −2〜2 の一様乱数から始まってしまう（2026-11-07）
+                values[name] = jnp.asarray(rng.normal(0, 0.01, shape))
             elif name == "iz_zz_sum":
                 values[name] = jnp.asarray(rng.normal(0, 0.005, shape))
             elif name in ("iz_zz_diff_22",):
@@ -101,8 +120,26 @@ def main() -> None:
                 values[name] = jnp.asarray(s2_fit.GAMMA_T1 * np.exp(rng.normal(0, 0.3, shape)))
             elif name in ("ro_e01", "ro_e10"):
                 values[name] = jnp.asarray(np.clip(0.02 + rng.normal(0, 0.005, shape), 0.005, 0.1))
-            elif name == "obs_scale":
+            elif name in ("obs_scale", "obs_scale_zpop", "obs_scale_p2"):
                 values[name] = jnp.asarray(np.exp(rng.normal(0.2, 0.1, shape)))
+            elif name == "dephase":
+                values[name] = jnp.asarray(2e-4 * np.exp(rng.normal(0, 0.3, shape)))
+            elif name == "flip_ratio":
+                # 1（対称な脱分極）から 0.2 くらいまでを広く探す
+                values[name] = jnp.asarray(np.exp(rng.uniform(np.log(0.2), 0.0, shape)))
+        if start_vals:
+            # --start-from：別の当てはめの事後平均から始める（1 本目はそのまま、2 本目からは回転に 0.002 rad の揺らぎを足す）。
+            # 11 月の回転（*_p2）も、10 月の値から始める
+            for name, v in start_vals.items():
+                if name not in values:
+                    continue
+                jit = rng.normal(0, 0.002, np.shape(v)) if (i > 0 and name.startswith(("zi", "rot_"))) else 0.0
+                values[name] = jnp.asarray(v + jit)
+        if args.p_jitter > 0 and i > 0:
+            for name in ("p", "gamma", "dephase"):
+                if name in values:
+                    v = np.asarray(values[name])
+                    values[name] = jnp.asarray(v * np.exp(rng.normal(0, args.p_jitter, np.shape(v))))
         start = initialize_model(jax.random.PRNGKey(1000 + i), s2_fit.model, model_args=model_args,
                                  init_strategy=init_to_value(values=values))
         x0, _ = ravel_pytree(start.param_info.z)
@@ -118,7 +155,7 @@ def main() -> None:
             continue
         results.append({"start": i, "neg_log_post": val, "x": np.asarray(res.x),
                         "theta": np.asarray(cons["theta"]), "p": np.asarray(cons["p"]),
-                        "extra": {k: np.asarray(cons[k]).tolist() for k in ("gamma", "obs_scale", "sigma_drift") if k in cons}})
+                        "extra": {k: np.asarray(cons[k]).tolist() for k in ("gamma", "obs_scale", "sigma_drift", "dephase", "flip_ratio", "obs_scale_zpop", "obs_scale_p2") if k in cons}})
         print(f"[{time.strftime('%H:%M:%S')}] 出発点 {i + 1}/{args.starts}：負の対数事後確率 {val:.2f}（経過 {time.time() - t0:.0f} 秒）", flush=True)
 
     # 着いた点を、回転の角度（2組 × 15成分）が 0.002 rad 以内なら同じ山とみなしてまとめる

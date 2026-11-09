@@ -61,7 +61,28 @@ def damp_sup(gamma):
     return sum(sup(jnp.kron(a, b)) for a in (k0, k1) for b in (k0, k1))
 
 
+def dephase_sup(lam):
+    """量子ビットごとの位相緩和（Z 型のパウリ通路）の超演算子。lam = (λ_制御, λ_標的)。
+    ρ → (1−λ_c)ρ + λ_c Z_c ρ Z_c のあとに、標的にも同じ形をかける（2つは交換する）。
+    計算基底の対角の状態は変えず、横向きの成分（コヒーレンス）だけを 1−2λ 倍にする（2026-11-08）。"""
+    lam = jnp.clip(lam, 0.0, 0.5)
+    i16 = jnp.eye(16, dtype=complex)
+    sc = (1 - lam[0]) * i16 + lam[0] * sup(Z0)
+    st = (1 - lam[1]) * i16 + lam[1] * sup(jnp.array(np.kron(_I2, _Z)))
+    return st @ sc
+
+
 SUP16 = jax.vmap(sup)(PAULI16)
+FLIP16 = np.array([l[0] in "XY" for l in LABELS16])      # 制御を反転させる 8 項（1 文字目が X・Y）
+
+
+def flip_depol_sup(p, ratio):
+    """脱分極を「制御を反転させる 8 項」と「残りの 7 項」に分けたパウリ通路（2026-11-08）。
+    脱分極 p は 15 個のパウリ P に同じ重み p/16 をかける（ρ → (1−15p/16)ρ + (p/16) Σ_P PρP）。ここでは、反転の 8 項の重みだけを
+    ratio 倍にする：反転の項 p·ratio/16、残りの項 p/16、恒等 1 − 8·p·ratio/16 − 7·p/16。ratio = 1 で depol_sup(p) に戻る。"""
+    a, b = p * ratio / 16, p / 16
+    w = jnp.where(FLIP16, a, b).at[0].set(1 - 8 * a - 7 * b)
+    return jnp.einsum("k,kab->ab", w.astype(complex), SUP16)
 
 
 def pauli_twirl(S):
@@ -69,16 +90,21 @@ def pauli_twirl(S):
     return jnp.einsum("kab,bc,kcd->ad", SUP16, S, SUP16) / 16
 
 
-def error_sup(theta15, p, twirled: bool, gamma=None):
-    """CX の直後に入れる誤差の超演算子（コヒーレントな誤差のあとに脱分極。gamma があれば、さらに振幅減衰）。
-    ツイリングありでは、振幅減衰もツイリングされる（|0> への偏りが消え、パウリ通路になる）。"""
+def error_sup(theta15, p, twirled: bool, gamma=None, dephase=None, flip=None):
+    """CX の直後に入れる誤差の超演算子（コヒーレントな誤差のあとに脱分極。dephase があれば量子ビットごとの位相緩和、
+    gamma があれば、さらに振幅減衰）。
+    ツイリングありでは、振幅減衰もツイリングされる（|0> への偏りが消え、パウリ通路になる）。位相緩和はもともとパウリ通路なので、
+    ツイリングしても変わらない。flip があれば、脱分極の代わりに flip_depol_sup(p, flip)（制御を反転させる項だけ flip 倍。
+    これもパウリ通路なので、ツイリングで変わらない）。"""
     E = coherent_unitary(theta15)
     if twirled:
         c = jnp.einsum("kij,ji->k", PAULI16, E) / 4                 # c_P = tr(P E) / 4
         S = jnp.einsum("k,kab->ab", jnp.abs(c) ** 2, SUP16)
     else:
         S = sup(E)
-    S = depol_sup(p) @ S
+    S = (depol_sup(p) if flip is None else flip_depol_sup(p, flip)) @ S
+    if dephase is not None:
+        S = dephase_sup(dephase) @ S
     if gamma is not None:
         D = damp_sup(gamma)
         S = (pauli_twirl(D) if twirled else D) @ S

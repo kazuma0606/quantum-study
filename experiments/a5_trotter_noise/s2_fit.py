@@ -96,10 +96,25 @@ def add_common_args(ap) -> None:
     ap.add_argument("--obs-scale", action="store_true", help="誤差棒を広げる係数（トロッター回路・直接の測定で別々）を入れる")
     ap.add_argument("--drop-trotter", nargs="*", help="トロッター回路の点を抜く（ジョブ ID:次数:n。外れ値の影響を見るとき。--label で名前を変える）")
     ap.add_argument("--with-c1-hw", action="store_true", help="10/12 の実機の、制御 |1> の Z 回転の直接の測定を加える")
+    ap.add_argument("--with-mixed-hw", metavar="TAG",
+                    help="実データに、実機の混ぜたジョブ（results/hardware_mixed_<TAG>_*.json、11/03 の 1 回目は m1）を加える")
+    ap.add_argument("--split-period", action="store_true",
+                    help="--with-mixed-hw のジョブだけ、回転の 7 成分（ZI、制御 |0>・|1> の標的の X・Y・Z）を別のパラメータにする"
+                         "（F5 だけ。10 月から回転が変わった、という仮説）")
+    ap.add_argument("--obs-scale-zpop", action="store_true",
+                    help="--obs-scale で、T1 専用の回路の誤差棒の倍率を、位相とは別のパラメータにする")
+    ap.add_argument("--obs-scale-period", action="store_true",
+                    help="--obs-scale で、--with-mixed-hw のジョブ（11 月）のトロッター回路と位相の誤差棒の倍率を、10 月とは別のパラメータにする"
+                         "（分けないモデルが 11 月に合わせられないと、共通の倍率が膨らんで 10 月の点まで緩む。2026-11-07 の比較を公平にするため）")
+    ap.add_argument("--split-period-shrink", type=_pos_float,
+                    help="--split-period で、11 月の回転を「10 月の回転＋変化 Δ」と置き、Δ ～ N(0, この値) で縮める"
+                         "（自由な 7 成分では山がいくつもできた。2026-11-07 の試運転）")
     ap.add_argument("--mixed-job", action="store_true",
                     help="合成データに、来月の測り方（1本のジョブにトロッター回路・監視用の回路・制御 |1> の Z の測定を混ぜる）を組ごとに加える")
     ap.add_argument("--t1-probe", action="store_true", help="--mixed-job に、T1 専用の回路（制御 |0>・|1>、k=2〜24）を加える")
     ap.add_argument("--t1-shots", type=int, help="T1 専用の回路のショット数（既定は直接の測定と同じ 3000）")
+    ap.add_argument("--t1-k-shots", type=int, nargs="+",
+                    help="T1 専用の回路のショット数を k ごとに配る（--t1-ks と同じ長さ。s6_t1probe_sbi.py の --k-shots と同じ）")
     ap.add_argument("--t1-ks", type=_nonneg_int, nargs="+", help="T1 専用の回路の CX の組の回数の並び（既定 2 4 8 16 24、0 以上の整数）")
     ap.add_argument("--syn-ro", type=float, nargs=2,
                     help="合成データの T1 専用の回路に、読み出しの誤り（e01 = P(1|0)、e10 = P(0|1)）を入れる")
@@ -114,6 +129,15 @@ def add_common_args(ap) -> None:
                     help="T1 専用の回路の制御と標的の <Z>（同じショットの同時測定）を、相関つきの2変量正規分布で数える（10/17 の監査）")
     ap.add_argument("--ro-model", action="store_true",
                     help="T1 専用の回路の <Z> に、読み出しの倍率とずれ（組・量子ビットごと）を推定するパラメータを入れる")
+    ap.add_argument("--ro-cal", action="store_true",
+                    help="--ro-model の誤読の確率 ro_e01・ro_e10 を、--with-mixed-hw のジョブの読み出しの較正の回路（全 0・全 1）の"
+                         "誤読の数（二項分布）でも決める（2026-11-08。標的の e10 が k=48 の 2 点だけで決まり、回転や T1 と取り替えがきいていた）")
+    ap.add_argument("--dephase", action="store_true",
+                    help="CX ごとに、量子ビットごとの位相緩和（Z 型の雑音 λ、組 × 量子ビットの 4 個）を入れる（2026-11-08。対称な脱分極だけでは、"
+                         "トロッター回路・位相が求める減衰と、T1 専用の回路の制御の反転の少なさが食い違う）")
+    ap.add_argument("--flip-split", action="store_true",
+                    help="脱分極 p のうち、制御を反転させる 8 項（パウリの 1 文字目が X・Y）の重みだけを flip_ratio 倍にする（組ごと 2 個。"
+                         "2026-11-08。対称な脱分極では、T1 専用の回路で制御 |0> が実機より多く反転する）")
     ap.add_argument("--truth-no-t1", action="store_true", help="--truth-from の当てはめに T1 があっても、正解の T1 を 0 にする")
     ap.add_argument("--truth-new-c1z", type=float,
                     help="--mixed-job のジョブだけ、22–23 の制御 |1> の Z 回転をこの値にする（「時期で回転が変わった」世界）")
@@ -145,8 +169,16 @@ def make_tag(args) -> str:
         tag += "_calib"
     if getattr(args, "t1", False):
         tag += "_t1"
+    if getattr(args, "dephase", False):
+        tag += "_dp"
+    if getattr(args, "flip_split", False):
+        tag += "_fs"
     if getattr(args, "obs_scale", False):
         tag += "_os"
+        if getattr(args, "obs_scale_zpop", False):
+            tag += "z"
+        if getattr(args, "obs_scale_period", False):
+            tag += "_ospd"
     if getattr(args, "obs_scale_pair", False):
         tag += "_osp"
     if getattr(args, "robust", False):
@@ -157,12 +189,20 @@ def make_tag(args) -> str:
         tag += "_split"
         if getattr(args, "split_shrink", None):
             tag += f"shr{args.split_shrink:g}"
+    if getattr(args, "with_mixed_hw", None):
+        tag += f"_mhw{args.with_mixed_hw}"
+    if getattr(args, "split_period", False):
+        tag += "_sp"
+        if getattr(args, "split_period_shrink", None):
+            tag += f"shr{args.split_period_shrink:g}"
     if getattr(args, "mixed_job", False):
         tag += "_mix"
     if getattr(args, "t1_probe", False):
         tag += "_t1p"
     if getattr(args, "ro_model", False):
         tag += "_ro"
+        if getattr(args, "ro_cal", False):
+            tag += "c"
     if getattr(args, "zcorr", False):
         tag += "_zc"
     if getattr(args, "prep_model", False):
@@ -175,6 +215,8 @@ def make_tag(args) -> str:
         tag += f"_t1s{args.t1_shots}"
     if getattr(args, "t1_ks", None):
         tag += "_t1k" + "-".join(map(str, args.t1_ks))
+    if getattr(args, "t1_k_shots", None):
+        tag += "_t1ks" + "-".join(map(str, args.t1_k_shots))
     if getattr(args, "syn_prep_err", 0.0):
         tag += f"_spe{args.syn_prep_err:g}"
     if getattr(args, "holdout", None):
@@ -189,12 +231,56 @@ def make_tag(args) -> str:
 def model_opts(args) -> dict:
     return {"width": args.prior_width, "calib": args.calib, "t1": getattr(args, "t1", False),
             "obs_scale": getattr(args, "obs_scale", False), "obs_scale_pair": getattr(args, "obs_scale_pair", False),
+            "obs_scale_zpop": getattr(args, "obs_scale_zpop", False),
             "robust": getattr(args, "robust", False), "split_hw": getattr(args, "split_hw", False),
             "ro_model": getattr(args, "ro_model", False), "zcorr": getattr(args, "zcorr", False),
             "split_shrink": getattr(args, "split_shrink", None),
             "prep_model": getattr(args, "prep_model", False),
             "holdout": load_holdout(args.holdout) if getattr(args, "holdout", None) else None,
-            "hw_jobs": split_jobs(args)}
+            "hw_jobs": split_jobs(args),
+            "split_period": getattr(args, "split_period", False), "period2_jobs": period2_jobs(args),
+            "split_period_shrink": getattr(args, "split_period_shrink", None),
+            "obs_scale_period": getattr(args, "obs_scale_period", False), "mixed_jobs": mixed_jobs(args),
+            "ro_cal": ro_cal_counts(args), "dephase": getattr(args, "dephase", False),
+            "flip_split": getattr(args, "flip_split", False)}
+
+
+def ro_cal_counts(args):
+    """--ro-cal で使う、読み出しの較正の回路の誤読の数（PAIRS の順 × (制御, 標的)）。使わなければ None。"""
+    if not getattr(args, "ro_cal", False):
+        return None
+    if not getattr(args, "ro_model", False) or args.data != "real" or not getattr(args, "with_mixed_hw", None):
+        raise ValueError("--ro-cal は --ro-model と --data real と --with-mixed-hw と一緒に使う")
+    c = a5_data.load_mixed_readout_cal(args.with_mixed_hw)
+    missing = [p for p in PAIRS if p not in c]
+    if missing:
+        raise ValueError(f"--ro-cal：読み出しの較正がない組 {missing}")
+    return {"n01": np.array([c[p]["n01"] for p in PAIRS]), "n10": np.array([c[p]["n10"] for p in PAIRS]),
+            "shots00": np.array([c[p]["shots00"] for p in PAIRS]), "shots11": np.array([c[p]["shots11"] for p in PAIRS])}
+
+
+def mixed_jobs(args) -> list[str]:
+    """--obs-scale-period で、誤差棒の倍率を別にするジョブ（--with-mixed-hw の実機のジョブ）。"""
+    if not getattr(args, "obs_scale_period", False):
+        return []
+    if not getattr(args, "obs_scale", False) or args.data != "real" or not getattr(args, "with_mixed_hw", None):
+        raise ValueError("--obs-scale-period は --obs-scale と --data real と --with-mixed-hw と一緒に使う")
+    trot, _ = a5_data.load_mixed_hardware(args.with_mixed_hw)
+    return sorted({j["job"] for j in trot})
+
+
+def period2_jobs(args) -> list[str]:
+    """--split-period で、回転を別にするジョブ（--with-mixed-hw の実機のジョブ）。"""
+    if not getattr(args, "split_period", False):
+        if getattr(args, "split_period_shrink", None):
+            raise ValueError("--split-period-shrink は --split-period と一緒に使う")
+        return []
+    if args.data != "real" or not getattr(args, "with_mixed_hw", None):
+        raise ValueError("--split-period は --data real と --with-mixed-hw と一緒に使う")
+    if args.form != "F5":
+        raise ValueError("--split-period は --form F5（制御の状態ごとの回転）だけで使える")
+    trot, _ = a5_data.load_mixed_hardware(args.with_mixed_hw)
+    return sorted({j["job"] for j in trot})
 
 
 def load_holdout(path) -> np.ndarray:
@@ -228,6 +314,11 @@ def build_data(args):
         # 確率なので 0〜1。範囲外だと、a5_data の確率の切り詰めと規格化で、指定と別の分布になる（Codex 指摘 #92）
         raise ValueError(f"--syn-prep-err は 0〜1 の確率にする：{f}")
     trotter, probes = a5_data.load_all(with_c1=getattr(args, "with_c1_hw", False))
+    if getattr(args, "with_mixed_hw", None):
+        if args.data != "real":
+            raise ValueError("--with-mixed-hw は --data real と一緒に使う（合成データの混ぜたジョブは --mixed-job）")
+        t_mix, p_mix = a5_data.load_mixed_hardware(args.with_mixed_hw)
+        trotter, probes = trotter + t_mix, probes + p_mix
     for spec in getattr(args, "drop_trotter", None) or []:
         # 外れ値の影響を見るため、トロッター回路の1点を抜く（ジョブ ID:次数:n）
         job, order, n = spec.split(":")
@@ -277,7 +368,8 @@ def build_data(args):
                                                        t1_shots=getattr(args, "t1_shots", None),
                                                        t1_ks=tuple(args.t1_ks) if getattr(args, "t1_ks", None) else None,
                                                        readout=tuple(args.syn_ro) if getattr(args, "syn_ro", None) else None,
-                                                       prep_err=getattr(args, "syn_prep_err", 0.0))
+                                                       prep_err=getattr(args, "syn_prep_err", 0.0),
+                                                       t1_k_shots=tuple(args.t1_k_shots) if getattr(args, "t1_k_shots", None) else None)
             trotter, probes = trotter + t_mix, probes + p_mix
         if args.extra_c1:
             design = REC_C1_DESIGN if getattr(args, "c1_design", "all") == "rec" else None
@@ -347,30 +439,43 @@ def point_kind_pair(prep):
     return np.array(kind), np.array(pair)
 
 
+def point_jobs(prep):
+    """predictions() と同じ順に、観測ごとのジョブの番号を返す。"""
+    out = []
+    for _, g in sorted(prep["tgroups"].items()):
+        for jb, mask in zip(g["job"], g["mask"]):
+            out += [int(jb)] * int(mask.sum())
+    for _, g in sorted(prep["pgroups"].items()):
+        out += [int(jb) for jb in g["job"]]
+    for _, g in sorted(prep.get("zgroups", {}).items()):
+        out += [int(jb) for jb in g["job"]]
+    return np.array(out)
+
+
 def _wrap(x):
     return jnp.arctan2(jnp.sin(x), jnp.cos(x))
 
 
-def predictions(theta_job, p_job, prep, gamma_job=None, f_job=None):
+def _errs(theta_job, p_job, idx, twirled, gamma_job=None, dephase_job=None, flip_job=None):
+    """ジョブの番号 idx ごとに、CX の直後の誤差の超演算子を作る（gamma_job・dephase_job・flip_job が None なら入れない）。"""
+    ga = None if gamma_job is None else gamma_job[idx]
+    dp = None if dephase_job is None else dephase_job[idx]
+    fl = None if flip_job is None else flip_job[idx]
+    return jax.vmap(lambda th, p, g, d, f: nm.error_sup(th, p, twirled, g, d, f))(theta_job[idx], p_job[idx], ga, dp, fl)
+
+
+def predictions(theta_job, p_job, prep, gamma_job=None, f_job=None, dephase_job=None, flip_job=None):
     """ジョブごとのパラメータから、すべての観測の予測を、観測の順に並べて返す（y と sd も同じ順）。
-    gamma_job があれば、CX ごとの振幅減衰（T1）も入れる。"""
+    gamma_job があれば、CX ごとの振幅減衰（T1）も、dephase_job があれば量子ビットごとの位相緩和も入れる。"""
     mus, ys, sds = [], [], []
     for (order, twirled), g in sorted(prep["tgroups"].items()):
-        if gamma_job is None:
-            err = jax.vmap(lambda th, p: nm.error_sup(th, p, twirled))(theta_job[g["job"]], p_job[g["job"]])
-        else:
-            err = jax.vmap(lambda th, p, ga: nm.error_sup(th, p, twirled, ga))(theta_job[g["job"]], p_job[g["job"]],
-                                                                               gamma_job[g["job"]])
+        err = _errs(theta_job, p_job, g["job"], twirled, gamma_job, dephase_job, flip_job)
         z = jax.vmap(lambda e, n: nm.trotter_z0(order, n, e))(err, jnp.asarray(g["n"]))
         mus.append(z[g["mask"]])
         ys.append(g["z"][g["mask"]])
         sds.append(g["sem"][g["mask"]])
     for (axis, target, c1, unflip), g in sorted(prep["pgroups"].items()):
-        if gamma_job is None:
-            err = jax.vmap(lambda th, p: nm.error_sup(th, p, False))(theta_job[g["job"]], p_job[g["job"]])
-        else:
-            err = jax.vmap(lambda th, p, ga: nm.error_sup(th, p, False, ga))(theta_job[g["job"]], p_job[g["job"]],
-                                                                             gamma_job[g["job"]])
+        err = _errs(theta_job, p_job, g["job"], False, gamma_job, dephase_job, flip_job)
         e_ref, e_y = jax.vmap(lambda e: nm.probe_expectations(e, axis, target, tuple(range(KMAX + 1)),
                                                               control_one=c1, unflip=unflip))(err)
         ph = jnp.arctan2(e_y, e_ref)[jnp.arange(len(g["k"])), jnp.asarray(g["k"])]
@@ -378,11 +483,7 @@ def predictions(theta_job, p_job, prep, gamma_job=None, f_job=None):
         ys.append(g["phase"])
         sds.append(g["sigma"])
     for (c1, q), g in sorted(prep.get("zgroups", {}).items()):
-        if gamma_job is None:
-            err = jax.vmap(lambda th, p: nm.error_sup(th, p, False))(theta_job[g["job"]], p_job[g["job"]])
-        else:
-            err = jax.vmap(lambda th, p, ga: nm.error_sup(th, p, False, ga))(theta_job[g["job"]], p_job[g["job"]],
-                                                                             gamma_job[g["job"]])
+        err = _errs(theta_job, p_job, g["job"], False, gamma_job, dephase_job, flip_job)
         z = jax.vmap(lambda e: nm.t1_probe_z(e, c1, tuple(range(kmax_t1(prep) + 1)))[q])(err)
         if c1 and f_job is not None:
             # 準備の失敗 f：|1> のつもりが確率 f で |0> のまま。<Z> は確率の1次式なので、<Z> どうしを同じ重みで混ぜてよい
@@ -463,6 +564,27 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         iz, zz = nm.LABELS15.index("IZ"), nm.LABELS15.index("ZZ")
         for i in hw:
             theta_job = theta_job.at[i, iz].set((r0[0, 2] + r1z_hw) / 2).at[i, zz].set((r0[0, 2] - r1z_hw) / 2)
+    p2 = np.array([job in opts.get("period2_jobs", []) for _, job in prep["jobs"]])
+    if opts.get("split_period"):
+        # 時期で分けるモデル（2026-11-07）：実機の混ぜたジョブ（11/03）だけ、回転の 7 成分を別のパラメータにする。
+        # 事前分布は 10 月の回転と同じ（変化を縮めない）。11/03 は 10 月から大きく変わって見えた（docs/noise_library_concept.md の 1 節）
+        assert active == "branch" and p2.any(), "--split-period は F5 と、11 月のジョブがあるときだけ"
+        s_ch = opts.get("split_period_shrink")
+        if s_ch:
+            # 縮める事前分布：11 月の回転 = 10 月の回転 ＋ 変化 Δ、Δ ～ N(0, s_ch)（--split-shrink と同じ考え方）
+            zi2 = numpyro.deterministic("zi_p2", zi + numpyro.sample("zi_change", dist.Normal(jnp.zeros(2), s_ch)))
+            r02 = numpyro.deterministic("rot_c0_p2", r0 + numpyro.sample("rot_c0_change", dist.Normal(jnp.zeros((2, 3)), s_ch)))
+            r12 = numpyro.deterministic("rot_c1_p2", r1 + numpyro.sample("rot_c1_change", dist.Normal(jnp.zeros((2, 3)), s_ch)))
+        else:
+            zi2 = numpyro.sample("zi_p2", dist.Normal(jnp.zeros(2), w))
+            r02 = numpyro.sample("rot_c0_p2", dist.Normal(jnp.zeros((2, 3)), w * np.sqrt(2)))
+            r12 = numpyro.sample("rot_c1_p2", dist.Normal(jnp.zeros((2, 3)), w * np.sqrt(2)))
+        theta2 = jnp.zeros((2, 15)).at[:, I_ZI].set(zi2)
+        for ax, (li, lz) in enumerate((("IX", "ZX"), ("IY", "ZY"), ("IZ", "ZZ"))):
+            theta2 = theta2.at[:, nm.LABELS15.index(li)].set((r02[:, ax] + r12[:, ax]) / 2)
+            theta2 = theta2.at[:, nm.LABELS15.index(lz)].set((r02[:, ax] - r12[:, ax]) / 2)
+        theta2 = numpyro.deterministic("theta_p2", theta2)
+        theta_job = jnp.where(jnp.asarray(p2)[:, None], theta2[jp], theta_job)
     if drift == "D1":
         sd = numpyro.sample("sigma_drift", dist.HalfNormal(0.01))
         # δ を σ・t と分けず、直接置く（中心化）。監視用の回路などでずれがよく決まるジョブでは、分けると
@@ -471,8 +593,15 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         # 組ごとに平均 0 にする：組全体のずれは theta の ZI が、ジョブごとの違いは delta が担う
         # （平均 0 にしないと、全ジョブのずれに同じ値を足して ZI から引いても予測が変わらず、尾根ができる）
         raw = sd * t
-        pair_mean = jax.ops.segment_sum(raw, jp, num_segments=2) / jnp.bincount(jp, length=2)
-        delta = numpyro.deterministic("delta_job", raw - pair_mean[jp])
+        if opts.get("split_period"):
+            # 11 月のジョブは組ごとに 1 本なので、そのずれは 11 月の ZI（zi_p2）と分けて決められない。11 月のジョブのずれは 0 にし、
+            # 平均 0 の条件も 10 月のジョブだけで取る
+            m1 = jnp.asarray(~p2, float)
+            pair_mean = jax.ops.segment_sum(raw * m1, jp, num_segments=2) / jax.ops.segment_sum(m1, jp, num_segments=2)
+            delta = numpyro.deterministic("delta_job", (raw - pair_mean[jp]) * m1)
+        else:
+            pair_mean = jax.ops.segment_sum(raw, jp, num_segments=2) / jnp.bincount(jp, length=2)
+            delta = numpyro.deterministic("delta_job", raw - pair_mean[jp])
         theta_job = theta_job.at[:, I_ZI].add(delta)
     gamma_job = None
     if opts["t1"]:
@@ -484,7 +613,19 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
     if opts["prep_model"] and prep.get("zgroups"):
         f_prep = numpyro.sample("f_prep", dist.Uniform(jnp.zeros(2), PREP_HI))
         f_job = f_prep[jp]
-    mu, y, sd_obs = predictions(theta_job, p[jp], prep, gamma_job, f_job)
+    dephase_job = None
+    if opts.get("dephase"):
+        # 量子ビットごとの位相緩和 λ（組 × 量子ビット）。CX ごとの横向きの成分の減り 1−2λ。脱分極 p（MAP で約 3×10⁻⁴）と同じくらいを
+        # 中心に、対数で幅 1.0（およそ 0.4〜2.7 倍）
+        dephase = numpyro.sample("dephase", dist.LogNormal(jnp.full((2, 2), np.log(2e-4)), 1.0))
+        dephase_job = dephase[jp]
+    flip_job = None
+    if opts.get("flip_split"):
+        # 制御を反転させる 8 項の重みの倍率 r（組ごと）。r = 1 が対称な脱分極。T1 専用の回路の制御 |0> の k=48 から、r ≈ 0.3〜0.5 と
+        # 見込む（11/08 の下調べ）。事前分布は 1 を中心に、対数で幅 1.0（およそ 0.37〜2.7 倍）とし、データに決めさせる
+        flip_ratio = numpyro.sample("flip_ratio", dist.LogNormal(jnp.zeros(2), 1.0))
+        flip_job = flip_ratio[jp]
+    mu, y, sd_obs = predictions(theta_job, p[jp], prep, gamma_job, f_job, dephase_job, flip_job)
     if opts["ro_model"] and prep.get("zgroups"):
         # 読み出しの偏り：測った <Z> = 倍率 × 本当の <Z> ＋ ずれ。倍率 = 1 − e01 − e10、ずれ = e10 − e01（組・量子ビットごと）。
         # 偏りは k によらず一定、T1 は k とともに育つので、k への依存で分けられる
@@ -494,6 +635,13 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         e10 = numpyro.sample("ro_e10", dist.Beta(jnp.full((2, 2), 1.5), 40.0))
         ro_s = numpyro.deterministic("ro_scale", 1 - e01 - e10)
         ro_b = numpyro.deterministic("ro_bias", e10 - e01)
+        if opts.get("ro_cal") is not None:
+            # 読み出しの較正の回路：全 0 を準備して 1 と読んだ数 ~ Binomial(ショット, e01)、全 1 を準備して 0 と読んだ数 ~ Binomial(ショット, e10)。
+            # 2 つの量子ビットは同じショットだが、全 1 の準備で 00 はほぼ出ない（2 つの誤読の相関は小さい）ので、別々に数える（2026-11-08）
+            rc = opts["ro_cal"]
+            # ショット数は NumPy の配列で渡す（JAX の配列だと、JIT の中で観測値の範囲の検査が値を取り出せずに落ちる。11/08 の起動で確認）
+            numpyro.sample("ro_cal01", dist.Binomial(np.broadcast_to(rc["shots00"][:, None], (2, 2)), probs=e01), obs=rc["n01"])
+            numpyro.sample("ro_cal10", dist.Binomial(np.broadcast_to(rc["shots11"][:, None], (2, 2)), probs=e10), obs=rc["n10"])
         n_z = sum(len(g["k"]) for g in prep["zgroups"].values())
         zq = np.concatenate([np.full(len(g["k"]), q) for (c1, q), g in sorted(prep["zgroups"].items())])
         zp = np.concatenate([prep["job_pair"][g["job"]] for _, g in sorted(prep["zgroups"].items())])
@@ -505,7 +653,23 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         # トロッター回路と、直接の測定（位相）で別々に置く
         scale = numpyro.sample("obs_scale", dist.LogNormal(jnp.zeros(2), 0.5))
         n_trot = sum(int(g["mask"].sum()) for g in prep["tgroups"].values())
-        sd_obs = sd_obs * jnp.where(jnp.arange(len(y)) < n_trot, scale[0], scale[1])
+        is_trot = jnp.arange(len(y)) < n_trot
+        fac = jnp.where(is_trot, scale[0], scale[1])
+        if opts.get("obs_scale_period"):
+            # 11 月のジョブのトロッター回路と位相は、別の倍率にする（2026-11-07）。T1 専用の回路は、下の --obs-scale-zpop が上書きする
+            scale2 = numpyro.sample("obs_scale_p2", dist.LogNormal(jnp.zeros(2), 0.5))
+            pj = point_jobs(prep)
+            assert len(pj) == len(y), (len(pj), len(y))
+            is2 = np.array([job in opts["mixed_jobs"] for _, job in prep["jobs"]])[pj]
+            assert is2.any(), "--obs-scale-period：11 月のジョブの点がない"
+            fac = jnp.where(is2, jnp.where(is_trot, scale2[0], scale2[1]), fac)
+        if opts.get("obs_scale_zpop") and prep.get("zgroups"):
+            # T1 専用の回路だけ、別の倍率にする（2026-11-07）。11/03 の 10000 ショットの点は誤差棒が約 0.002 と小さく、モデルの形の粗さ
+            # （対称な脱分極では、制御が実機より多く反転する）を吸収するために共通の倍率が 7〜74 倍に膨らみ、10 月の位相まで緩めていた
+            scale_z = numpyro.sample("obs_scale_zpop", dist.LogNormal(0.0, 1.0))
+            n_z = sum(len(g["k"]) for g in prep["zgroups"].values())
+            fac = jnp.where(jnp.arange(len(y)) >= len(y) - n_z, scale_z, fac)
+        sd_obs = sd_obs * fac
     if opts["obs_scale_pair"]:
         # 誤差棒の倍率を、(種類, 組) の 2×2 で別々に置く。10/11 に、142–143 の1点を抜くと 22–23 の値まで入れ替わった
         # （倍率を2つの組で共有していたことが原因の候補）ため
@@ -532,11 +696,7 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
             g0, g1 = prep["zgroups"][(c1, 0)], prep["zgroups"][(c1, 1)]
             assert np.array_equal(g0["job"], g1["job"]) and np.array_equal(g0["k"], g1["k"])
             jobs = g0["job"]
-            th, pp = theta_job[jobs], p[jp][jobs]
-            if gamma_job is None:
-                errs = jax.vmap(lambda a, b: nm.error_sup(a, b, False))(th, pp)
-            else:
-                errs = jax.vmap(lambda a, b, c: nm.error_sup(a, b, False, c))(th, pp, gamma_job[jobs])
+            errs = _errs(theta_job, p[jp], jobs, False, gamma_job, dephase_job, flip_job)
             P = jax.vmap(lambda e: nm.t1_probe_probs(e, c1, tuple(range(kmax_t1(prep) + 1))))(errs)[jnp.arange(len(jobs)), jnp.asarray(g0["k"])]
             if c1 and f_job is not None:
                 P0 = jax.vmap(lambda e: nm.t1_probe_probs(e, False, tuple(range(kmax_t1(prep) + 1))))(errs)[jnp.arange(len(jobs)), jnp.asarray(g0["k"])]
@@ -709,7 +869,7 @@ def main() -> None:
                         holdout=np.asarray(margs[-1]["holdout"] if margs[-1]["holdout"] is not None else [], dtype=int),
                         **{k: np.asarray(v) for k, v in samples.items()})
     import arviz as az
-    idata = az.from_dict({"posterior": {k: np.asarray(v) for k, v in samples.items() if k in ("theta", "p", "sigma_drift", "delta_job", "s", "tau", "gamma", "obs_scale", "f_prep")}})
+    idata = az.from_dict({"posterior": {k: np.asarray(v) for k, v in samples.items() if k in ("theta", "p", "sigma_drift", "delta_job", "s", "tau", "gamma", "obs_scale", "obs_scale_p2", "obs_scale_zpop", "f_prep", "dephase", "flip_ratio")}})
     summ = az.summary(idata)
     summ.to_csv(OUT / f"{tag}_summary.csv")
     meta = {"args": vars(args), "elapsed_s": elapsed, "divergences": divergences, "n_obs": int(ll.shape[1]),
