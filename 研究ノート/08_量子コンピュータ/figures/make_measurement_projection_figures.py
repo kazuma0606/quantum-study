@@ -19,6 +19,9 @@
     mp12_pauli_coefficients.png 付録A-5-1 補足  数値例の X と Y のパウリ展開の係数（σx の係数だけが違う）
     mp13_ensemble_pure_mixed.png  付録A-5-1  アンサンブル → 密度行列 → 純粋状態／混合状態の関係
     mp14_ensemble_many_to_one.png 付録A-5-1  3 つのアンサンブルと 2 つの密度行列（異なるアンサンブルが同じ ½I を作る）
+    mp15_unsharp_p0_range.png   付録A-5-3  誤差のある Z 測定の P(0)：θ と cos²(θ/2) を横軸に、範囲 ε〜1−ε と両端
+    mp16_unsharp_post_state.png 付録A-5-3  測定前の状態と結果 0 のあとの状態（ε=0 と ε=0.1）
+    mp17_readout_vs_unsharp.png 付録A-5-3  読み出し誤差との違い：同じ E_0・確率で、結果 0 のあとの密度行列が違う
 
 各図は、描く値が本文の式と一致することを assert で確認してから保存する。
 """
@@ -619,12 +622,12 @@ def _draw_matrix_text(ax, cx, cy, rows, fs=15, dx=0.5, dy=0.42):
 
 
 def mp13():
-    # 関係図：アンサンブル → 密度行列 (A-29) → 純粋状態 (A-30) / 混合状態。階数の例（(A-32)〜(A-34)）は、図では示さず、assert でだけ確かめる
+    # 関係図：アンサンブル → 密度行列 (A-29) → 純粋状態 (A-30) / 混合状態。階数の例（(A-31)〜(A-33)）は、図では示さず、assert でだけ確かめる
     rho_pure = _density([(1.0, KETP)])
     rho_mix = _density([(0.5, KET0), (0.5, KET1)])
     assert np.allclose(rho_pure, np.outer(KETP, KETP.conj()))  # 1 つだけのアンサンブル → |+><+|（(A-30) の形）
     assert np.linalg.matrix_rank(rho_pure) == 1
-    assert np.allclose(rho_mix, np.eye(2) / 2) and np.linalg.matrix_rank(rho_mix) == 2  # (A-33)：階数 2
+    assert np.allclose(rho_mix, np.eye(2) / 2) and np.linalg.matrix_rank(rho_mix) == 2  # (A-31)：階数 2
 
     fig, ax = plt.subplots(figsize=(11.5, 5.4))
     ax.set_xlim(0, 11.5)
@@ -633,12 +636,12 @@ def mp13():
     _draw_box(ax, 0.2, 1.9, 3.0, 1.9, "アンサンブル\n" + r"$\{p_j,\ |\psi_j\rangle\}$" + "\n確率 $p_j$ で状態 $|\\psi_j\\rangle$ を\n用意する混ぜ合わせ", "#e8f1fa", C_A)
     ax.annotate("", xy=(4.3, 2.85), xytext=(3.35, 2.85), arrowprops=dict(arrowstyle="-|>", lw=2.0, color="k"))
     ax.text(3.82, 3.05, "(A-29)", ha="center", fontsize=10.5)
-    _draw_box(ax, 4.4, 1.9, 2.9, 1.9, "密度行列 $\\rho$\n" + r"$\rho=\sum_jp_j|\psi_j\rangle\langle\psi_j|$" + "\n（状態を表す行列）", "#fff1d6", C_B)
+    _draw_box(ax, 4.4, 1.9, 2.9, 1.9, r"密度行列 $\rho_{\mathrm{ens}}$" + "\n" + r"$\rho_{\mathrm{ens}}=\sum_jp_j|\psi_j\rangle\langle\psi_j|$" + "\n（状態を表す行列）", "#fff1d6", C_B)
     ax.annotate("", xy=(8.3, 4.3), xytext=(7.4, 3.5), arrowprops=dict(arrowstyle="-|>", lw=2.0, color=C_C))
     ax.annotate("", xy=(8.3, 1.4), xytext=(7.4, 2.2), arrowprops=dict(arrowstyle="-|>", lw=2.0, color=C_BAD))
-    ax.text(7.2, 4.35, r"どれかの $|\psi\rangle\langle\psi|$ と等しい", ha="center", fontsize=10.5, color=C_C)
-    ax.text(6.2, 1.0, r"どんな $|\psi\rangle\langle\psi|$ とも等しくない", ha="center", fontsize=10.5, color=C_BAD)
-    _draw_box(ax, 8.4, 3.6, 2.9, 1.5, "純粋状態\n" + r"$\rho=|\psi\rangle\langle\psi|$ (A-30)", "#e6f4e6", C_C, fs=11.5)
+    ax.text(7.2, 4.35, r"どれかの $\rho_{\mathrm{pure}}$ と等しい", ha="center", fontsize=10.5, color=C_C)
+    ax.text(6.2, 1.0, r"どんな $\rho_{\mathrm{pure}}$ とも等しくない", ha="center", fontsize=10.5, color=C_BAD)
+    _draw_box(ax, 8.4, 3.6, 2.9, 1.5, "純粋状態\n" + r"$\rho_{\mathrm{pure}}=|\psi\rangle\langle\psi|$ (A-30)", "#e6f4e6", C_C, fs=11.5)
     _draw_box(ax, 8.4, 0.4, 2.9, 1.5, "混合状態\n状態ベクトルでは書けない", "#fbe6e6", C_BAD, fs=11.5)
     ax.text(0.3, 0.3, "混ぜる状態が 1 つだけ（$p_j=1$）、または全部同じ状態の\nアンサンブルは、純粋状態になる", ha="left", va="center", fontsize=10.5, color="#555555")
     ax.set_title("アンサンブル、密度行列、純粋状態、混合状態の関係", fontsize=12.5)
@@ -647,7 +650,7 @@ def mp13():
 
 
 def mp14():
-    # 多対一：3 つのアンサンブルから 2 つの密度行列（本文の (A-33) の ½I と、|+><+|）。内部の名前 E1〜E3 は、図・本文では ア・イ・ウ
+    # 多対一：3 つのアンサンブルから 2 つの密度行列（本文の (A-31) の ½I と、|+><+|）。内部の名前 E1〜E3 は、図・本文では ア・イ・ウ
     ens = {
         "E1": [(1.0, KETP)],
         "E2": [(0.5, KET0), (0.5, KET1)],
@@ -655,7 +658,7 @@ def mp14():
     }
     rho = {k: _density(v) for k, v in ens.items()}
     assert np.allclose(rho["E1"], np.array([[1, 1], [1, 1]]) / 2)
-    assert np.allclose(rho["E2"], np.eye(2) / 2)  # (A-33)
+    assert np.allclose(rho["E2"], np.eye(2) / 2)  # (A-31)
     assert np.allclose(rho["E3"], rho["E2"])  # 別のアンサンブルが同じ密度行列
     assert not np.allclose(rho["E1"], rho["E2"])
     pur = {k: np.trace(r @ r).real for k, r in rho.items()}  # tr(ρ²)：純粋 1、混合 1 未満
@@ -699,7 +702,148 @@ def mp14():
     plt.close(fig)
 
 
-FIGS = dict(mp01=mp01, mp02=mp02, mp03=mp03, mp04=mp04, mp05=mp05, mp06=mp06, mp07=mp07, mp08=mp08, mp09=mp09, mp10=mp10, mp11=mp11, mp12=mp12, mp13=mp13, mp14=mp14)
+# ------------------------------------------------------------------------------------- mp15〜mp17（付録A-5-3）
+
+
+def _p0(eps, th):
+    """誤差のある Z 測定の結果 0 の確率（付録A-5-3：P(0)=(1-ε)cos²(θ/2)+ε sin²(θ/2)）。"""
+    K0, _ = mp.unsharp_measurement_kraus(eps)
+    return np.array([np.linalg.norm(K0 @ np.array([np.cos(t / 2), np.sin(t / 2)])) ** 2 for t in np.atleast_1d(th)])
+
+
+def mp15():
+    th = np.linspace(0, np.pi, 401)
+    eps_list = [0.0, 0.1, 0.3, 0.5]
+    cols = [C_A, C_B, C_C, C_GRAY]
+    fig, axs = plt.subplots(1, 2, figsize=(11.5, 4.4))
+    for eps, c in zip(eps_list, cols):
+        p0 = _p0(eps, th)
+        x = np.cos(th / 2) ** 2
+        assert np.allclose(p0, (1 - eps) * np.cos(th / 2) ** 2 + eps * np.sin(th / 2) ** 2)  # P(0) の式
+        assert np.allclose(p0, eps + (1 - 2 * eps) * x)  # cos² の1次式
+        assert np.isclose(p0[0], 1 - eps) and np.isclose(p0[-1], eps)  # 両端：θ=0 で 1-ε、θ=π で ε
+        assert p0.min() >= min(eps, 1 - eps) - 1e-12 and p0.max() <= max(eps, 1 - eps) + 1e-12  # 範囲
+        lab = rf"$\epsilon={eps:g}$" + ("（通常の $Z$ 測定）" if eps == 0 else "")
+        axs[0].plot(th, p0, color=c, lw=2, label=lab)
+        axs[1].plot(x, p0, color=c, lw=2, label=lab)
+        for ax, xe in ((axs[0], [0, np.pi]), (axs[1], [1, 0])):
+            ax.plot(xe, [1 - eps, eps], "o", color=c, ms=6)
+    # ε=0.1 の範囲を帯で示す
+    for ax, xr in ((axs[0], (0, np.pi)), (axs[1], (0, 1))):
+        ax.axhspan(0.1, 0.9, color=C_B, alpha=0.10)
+        ax.set_ylim(-0.04, 1.04)
+        ax.set_ylabel(r"結果 $0$ の確率 $P(0)$", fontsize=10)
+        ax.axhline(0, color="k", lw=0.6)
+        ax.axhline(1, color="k", lw=0.6)
+    axs[0].set_xticks([0, np.pi / 2, np.pi])
+    axs[0].set_xticklabels([r"$0$" + "\n" + r"($|0\rangle$)", r"$\pi/2$", r"$\pi$" + "\n" + r"($|1\rangle$)"])
+    axs[0].set_xlabel(r"$\theta$（測定前の状態 $\cos\frac{\theta}{2}|0\rangle+\sin\frac{\theta}{2}|1\rangle$）", fontsize=10)
+    axs[0].set_title(r"$\theta$ を横軸に：どの $\theta$ でも $P(0)$ は $\epsilon$ と $1-\epsilon$ の間（帯は $\epsilon=0.1$）", fontsize=10.5)
+    axs[1].set_xticks([0, 0.5, 1])
+    axs[1].set_xticklabels([r"$0$" + "\n" + r"($\theta=\pi$, $|1\rangle$)", r"$0.5$", r"$1$" + "\n" + r"($\theta=0$, $|0\rangle$)"])
+    axs[1].set_xlabel(r"$\cos^2\frac{\theta}{2}$", fontsize=10)
+    axs[1].set_title(r"$\cos^2\frac{\theta}{2}$ を横軸に：$P(0)=\epsilon+(1-2\epsilon)\cos^2\frac{\theta}{2}$ は直線", fontsize=10.5)
+    axs[0].legend(fontsize=9, loc="upper right")
+    fig.tight_layout()
+    fig.savefig(OUT / "mp15_unsharp_p0_range.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+def mp16():
+    ths = [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4, np.pi]
+    names = [r"$0$", r"$\pi/4$", r"$\pi/2$", r"$3\pi/4$", r"$\pi$"]
+    cols = [C_A, C_C, C_B, "#9467bd", C_BAD]
+    fig, axs = plt.subplots(1, 2, figsize=(11.0, 5.2))
+    arc = np.linspace(0, np.pi / 2, 100)
+    for ax, eps in zip(axs, [0.0, 0.1]):
+        K0, _ = mp.unsharp_measurement_kraus(eps)
+        ax.plot(np.cos(arc), np.sin(arc), color=C_GRAY, lw=0.8, ls=":")
+        for t, nm, c in zip(ths, names, cols):
+            phi = np.array([np.cos(t / 2), np.sin(t / 2)])
+            ax.annotate("", xy=phi, xytext=(0, 0), arrowprops=dict(arrowstyle="-|>", lw=1.2, color=c, alpha=0.35, ls="--"))
+            p0 = np.linalg.norm(K0 @ phi) ** 2
+            if p0 < 1e-12:  # ε=0、θ=π：結果 0 は出ない
+                assert eps == 0 and np.isclose(t, np.pi)
+                ax.text(phi[0] + 0.03, phi[1] + 0.02, "結果 $0$ は出ない", color=c, fontsize=9)
+                continue
+            post = (K0 @ phi).real / np.sqrt(p0)
+            assert np.isclose(np.linalg.norm(post), 1)
+            assert np.allclose(post, np.array([np.sqrt(1 - eps) * np.cos(t / 2), np.sqrt(eps) * np.sin(t / 2)]) / np.sqrt(p0))
+            if eps == 0:
+                assert np.allclose(post, [1, 0])  # 通常の Z 測定：結果 0 のあとは |0>
+            else:
+                if np.isclose(t, 0):
+                    assert np.allclose(post, [1, 0])
+                elif np.isclose(t, np.pi):
+                    assert np.allclose(post, [0, 1])  # θ=π：|1> のまま
+                else:
+                    assert post[0] > 0 and post[1] > 0  # 重ね合わせが残る
+            if eps > 0:  # ε=0 では、どの θ でも |0> に重なるので、ループのあとに1本だけ描く
+                ax.annotate("", xy=post, xytext=(0, 0), arrowprops=dict(arrowstyle="-|>", lw=2.2, color=c))
+            ax.text(phi[0] * 1.08, phi[1] * 1.08, r"$\theta=$" + nm, color=c, fontsize=9.5, ha="center", va="center")
+        if eps == 0:
+            ax.annotate("", xy=(1, 0), xytext=(0, 0), arrowprops=dict(arrowstyle="-|>", lw=2.6, color="k"))
+            ax.text(0.5, 0.05, r"$\theta=0,\pi/4,\pi/2,3\pi/4$ のどれでも $|0\rangle$", ha="center", fontsize=9.5)
+        ax.set_xlim(-0.08, 1.3)
+        ax.set_ylim(-0.08, 1.2)
+        ax.set_aspect("equal")
+        ax.axhline(0, color="k", lw=0.6)
+        ax.axvline(0, color="k", lw=0.6)
+        ax.set_xlabel(r"$|0\rangle$ の係数", fontsize=10)
+        ax.set_ylabel(r"$|1\rangle$ の係数", fontsize=10)
+        ttl = (r"$\epsilon=0$（通常の $Z$ 測定）：結果 $0$ のあとの状態は $|0\rangle$" if eps == 0
+               else r"$\epsilon=0.1$：$0<\theta<\pi$ では $|0\rangle$ の側に倒れ、" + "\n" + r"$|1\rangle$ の係数が残る")
+        ax.set_title(ttl, fontsize=10.5)
+    axs[0].plot([], [], color=C_GRAY, ls="--", label="測定前の状態")
+    axs[0].plot([], [], color=C_GRAY, lw=2.2, label=r"結果 $0$ のあとの状態")
+    axs[0].legend(fontsize=9, loc="upper right")
+    fig.tight_layout()
+    fig.savefig(OUT / "mp16_unsharp_post_state.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+def mp17():
+    eps = 0.1
+    rho = np.outer(KETP, KETP.conj())
+    # 誤差のある Z 測定
+    K0, _ = mp.unsharp_measurement_kraus(eps)
+    E0_a = K0.conj().T @ K0
+    p_a = np.trace(K0 @ rho @ K0.conj().T).real
+    rho_a = K0 @ rho @ K0.conj().T / p_a
+    # ラベル取り違えの模型
+    Q0, Q1 = np.diag([1, 0]).astype(complex), np.diag([0, 1]).astype(complex)
+    K01, K02 = np.sqrt(1 - eps) * Q0, np.sqrt(eps) * Q1
+    E0_b = K01.conj().T @ K01 + K02.conj().T @ K02
+    p_b = np.trace(K01 @ rho @ K01.conj().T + K02 @ rho @ K02.conj().T).real
+    rho_b = (K01 @ rho @ K01.conj().T + K02 @ rho @ K02.conj().T) / p_b
+    assert np.allclose(E0_a, E0_b) and np.allclose(E0_a, np.diag([0.9, 0.1]))  # 同じ E_0
+    assert np.isclose(p_a, 0.5) and np.isclose(p_b, 0.5)  # 同じ確率
+    assert np.allclose(rho_a, [[0.9, 0.3], [0.3, 0.1]]) and np.linalg.matrix_rank(rho_a) == 1  # 純粋状態
+    assert np.allclose(rho_b, np.diag([0.9, 0.1])) and np.linalg.matrix_rank(rho_b) == 2  # 混合状態
+
+    fig, axs = plt.subplots(1, 3, figsize=(11.5, 3.9))
+    mats = [(E0_a.real, r"$E_0$（2つの模型で同じ）" + "\n" + r"$P(0)=\langle+|E_0|+\rangle=0.5$", "#fff1d6"),
+            (rho_a.real, "誤差のある $Z$ 測定：結果 $0$ のあとの状態\n純粋状態（階数 $1$）", "#e6f4e6"),
+            (rho_b.real, "ラベル取り違えの模型：結果 $0$ のあとの状態\n混合状態（階数 $2$）", "#e8f1fa")]
+    for ax, (M, ttl, fc) in zip(axs, mats):
+        ax.set_xlim(0, 2)
+        ax.set_ylim(0, 2)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        for i in range(2):
+            for j in range(2):
+                v = M[i, j]
+                ax.add_patch(Rectangle((j, 1 - i), 1, 1, fc=fc if abs(v) > 1e-12 else "white", ec="k", lw=1.0))
+                ax.text(j + 0.5, 1.5 - i, f"{v:.1f}", ha="center", va="center", fontsize=16,
+                        color=C_BAD if (i != j and abs(v) > 1e-12) else "k")
+        ax.set_title(ttl, fontsize=10.5)
+    fig.suptitle(r"測定前の状態 $|+\rangle$、$\epsilon=0.1$：同じ $E_0$・同じ確率でも、結果 $0$ のあとの状態が違う（赤は非対角成分）", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(OUT / "mp17_readout_vs_unsharp.png", dpi=150, bbox_inches="tight", pad_inches=0.2)
+    plt.close(fig)
+
+
+FIGS = dict(mp01=mp01, mp02=mp02, mp03=mp03, mp04=mp04, mp05=mp05, mp06=mp06, mp07=mp07, mp08=mp08, mp09=mp09, mp10=mp10, mp11=mp11, mp12=mp12, mp13=mp13, mp14=mp14, mp15=mp15, mp16=mp16, mp17=mp17)
 
 if __name__ == "__main__":
     names = sys.argv[1:] or list(FIGS)
