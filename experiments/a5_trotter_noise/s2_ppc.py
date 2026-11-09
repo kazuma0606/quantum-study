@@ -65,7 +65,18 @@ def main() -> None:
         # --zcorr の当てはめは、T1 専用の回路の (制御, 標的) の組を1点として log_lik に保存する。このスクリプトは k ごとに1点
         # ずつ並べるので、点の数と順番が合わず、k̂ も複製データ（組の相関）も正しく作れない（10/17 の確認）。対象外にする
         raise SystemExit(f"{args.tag}：--zcorr の当てはめは、事後予測チェックの対象外（組単位の k̂ と、相関つきの複製データに未対応）")
+    # 下の mu_of は、10 月の回転・p・γ・ずれ（と --split-hw）だけで予測を作る。11/07 以降の選択肢（11 月の回転、位相緩和、反転の項、
+    # 準備の失敗、時期・T1 専用の誤差棒の倍率）は再現しないので、予測と残差が当てはめのモデルと食い違う。対象外にする
+    # （2026-11-10、Codex の監査 #99）
+    unsupported = [o for o in ("split_period", "dephase", "flip_split", "prep_model", "obs_scale_period", "obs_scale_zpop")
+                   if meta["args"].get(o)]
+    if unsupported:
+        raise SystemExit(f"{args.tag}：{'、'.join('--' + o.replace('_', '-') for o in unsupported)} の当てはめは、事後予測チェックの対象外"
+                         "（予測を当てはめのモデルと同じに作れない）")
     prep, _ = s2_fit.build_data(a)
+    if prep.get("p3groups"):
+        # 監視用の回路の 3 つ目の基底は、model で誤読の確率と誤差棒の倍率をかけて比べるが、ここではそれを再現しない
+        raise SystemExit(f"{args.tag}：監視用の回路の 3 つ目の基底を含む当てはめは、事後予測チェックの対象外（誤読の確率を再現しない）")
     d = np.load(OUT / f"{args.tag}_draws.npz")
     theta = d["theta"].reshape(-1, 2, 15)
     p = d["p"].reshape(-1, 2)
