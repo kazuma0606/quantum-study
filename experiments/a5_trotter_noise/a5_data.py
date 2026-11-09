@@ -145,8 +145,8 @@ def load_mixed_hardware(tag: str = "m1") -> tuple[list[dict], list[dict]]:
       トロッター回路：同じジョブの読み出しの較正（全 0・全 1）で、量子ビット 0 の <Z> を補正する（hardware.py と同じ式）
       監視用の回路・c1 Z の測定：位相 atan2(<Y>, <基準>)。読み出しは補正しない（load_probes と同じ）。
         3 つ目の基底（2026-11-07 から監視用の回路で測る。Z 回転なら Z、X 回転なら X）があれば、その <..> とショット数を
-        third_basis・third_value・third_shots に残す。ただし s2_fit.py の尤度はまだ位相しか使わないので、当てはめには入らない
-        （面外への回転は、まだ推定で区別できない。2026-11-10、Codex の監査 #95）。11/03 の 1 回目（m1）は 2 つの基底だけ
+        third_basis・third_value・third_shots に残す。s2_fit.py は、その期待値を予測して尤度に入れる（2 つの基底の面から外へ
+        倒れる回転を区別するため。2026-11-10、Codex の監査 #95）。11/03 の 1 回目（m1）は 2 つの基底だけ
       T1 専用の回路：補正していない、量子ビットごとの <Z>（読み出しの偏りは s2_fit.py の --ro-model で推定する）
     k = 0 の T1 専用の回路も含める（synthetic_mixed_job と同じ。準備と読み出しを決める点になる）。"""
     import trotter_noise as tn

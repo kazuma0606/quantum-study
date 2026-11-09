@@ -401,7 +401,7 @@ def prepare(trotter: list[dict], probes: list[dict]) -> dict:
         for k, v in (("n", n), ("mask", mask), ("z", z), ("sem", sem)):
             g[k].append(v)
     tgroups = {k: {kk: np.array(vv) for kk, vv in g.items()} for k, g in tgroups.items()}
-    pgroups, zgroups = {}, {}
+    pgroups, zgroups, p3groups = {}, {}, {}
     for o in probes:
         if o.get("kind") == "zpop":
             # T1 専用の回路（制御を |0>／|1> に準備し CX の組を k 回、量子ビット q の <Z>）
@@ -418,9 +418,19 @@ def prepare(trotter: list[dict], probes: list[dict]) -> dict:
         g["k"].append(o["k"])
         g["phase"].append(o["phase"])
         g["sigma"].append(o["sigma"])
+        if "third_value" in o:
+            # 監視用の回路の 3 つ目の基底（2 つの基底の面から外へ倒れる回転を見る。2026-11-10、Codex の監査 #95）。
+            # 読み出しは補正していない値なので、--ro-model の誤読の確率を、T1 専用の回路と同じようにかけて比べる
+            g3 = p3groups.setdefault(key, {"job": [], "k": [], "value": [], "sigma": []})
+            v, n = float(o["third_value"]), int(o["third_shots"])
+            g3["job"].append(job_index[(o["pair"], o["job"])])
+            g3["k"].append(o["k"])
+            g3["value"].append(v)
+            g3["sigma"].append(float(np.sqrt(max(1 - v**2, 1e-6) / n)))
     pgroups = {k: {kk: np.array(vv) for kk, vv in g.items()} for k, g in pgroups.items()}
     zgroups = {k: {kk: np.array(vv) for kk, vv in g.items()} for k, g in zgroups.items()}
-    return {"jobs": jobs, "job_pair": job_pair, "tgroups": tgroups, "pgroups": pgroups, "zgroups": zgroups}
+    p3groups = {k: {kk: np.array(vv) for kk, vv in g.items()} for k, g in p3groups.items()}
+    return {"jobs": jobs, "job_pair": job_pair, "tgroups": tgroups, "pgroups": pgroups, "zgroups": zgroups, "p3groups": p3groups}
 
 
 def point_kind_pair(prep):
@@ -430,9 +440,10 @@ def point_kind_pair(prep):
         for jb, mask in zip(g["job"], g["mask"]):
             kind += [0] * int(mask.sum())
             pair += [int(prep["job_pair"][jb])] * int(mask.sum())
-    for _, g in sorted(prep["pgroups"].items()):
-        kind += [1] * len(g["job"])
-        pair += [int(prep["job_pair"][jb]) for jb in g["job"]]
+    for grp in ("pgroups", "p3groups"):
+        for _, g in sorted(prep.get(grp, {}).items()):
+            kind += [1] * len(g["job"])
+            pair += [int(prep["job_pair"][jb]) for jb in g["job"]]
     for _, g in sorted(prep.get("zgroups", {}).items()):
         kind += [1] * len(g["job"])
         pair += [int(prep["job_pair"][jb]) for jb in g["job"]]
@@ -445,8 +456,9 @@ def point_jobs(prep):
     for _, g in sorted(prep["tgroups"].items()):
         for jb, mask in zip(g["job"], g["mask"]):
             out += [int(jb)] * int(mask.sum())
-    for _, g in sorted(prep["pgroups"].items()):
-        out += [int(jb) for jb in g["job"]]
+    for grp in ("pgroups", "p3groups"):
+        for _, g in sorted(prep.get(grp, {}).items()):
+            out += [int(jb) for jb in g["job"]]
     for _, g in sorted(prep.get("zgroups", {}).items()):
         out += [int(jb) for jb in g["job"]]
     return np.array(out)
@@ -481,6 +493,14 @@ def predictions(theta_job, p_job, prep, gamma_job=None, f_job=None, dephase_job=
         ph = jnp.arctan2(e_y, e_ref)[jnp.arange(len(g["k"])), jnp.asarray(g["k"])]
         mus.append(g["phase"] - _wrap(g["phase"] - ph))          # 観測との差を ±π で折り返した予測
         ys.append(g["phase"])
+        sds.append(g["sigma"])
+    for (axis, target, c1, unflip), g in sorted(prep.get("p3groups", {}).items()):
+        # 3 つ目の基底の期待値（読み出しの誤りを入れる前。model の --ro-model で、T1 専用の回路と同じようにかける）
+        err = _errs(theta_job, p_job, g["job"], False, gamma_job, dephase_job, flip_job)
+        e3 = jax.vmap(lambda e: nm.probe_expectations(e, axis, target, tuple(range(KMAX + 1)),
+                                                      control_one=c1, unflip=unflip, third=True)[2])(err)
+        mus.append(e3[jnp.arange(len(g["k"])), jnp.asarray(g["k"])])
+        ys.append(g["value"])
         sds.append(g["sigma"])
     for (c1, q), g in sorted(prep.get("zgroups", {}).items()):
         err = _errs(theta_job, p_job, g["job"], False, gamma_job, dephase_job, flip_job)
@@ -646,6 +666,13 @@ def model(prep, form: str, drift: str, d_sign: float = 1.0, opts: dict | None = 
         zq = np.concatenate([np.full(len(g["k"]), q) for (c1, q), g in sorted(prep["zgroups"].items())])
         zp = np.concatenate([prep["job_pair"][g["job"]] for _, g in sorted(prep["zgroups"].items())])
         mu = mu.at[-n_z:].set(ro_s[zp, zq] * mu[-n_z:] + ro_b[zp, zq])
+        if prep.get("p3groups"):
+            # 監視用の回路の 3 つ目の基底も、測った量子ビット（標的 target）の誤読をかける。点は位相のすぐ後、T1 専用の回路の前に並ぶ
+            n_tp = sum(int(g["mask"].sum()) for g in prep["tgroups"].values()) + sum(len(g["k"]) for g in prep["pgroups"].values())
+            p3q = np.concatenate([np.full(len(g["k"]), key[1]) for key, g in sorted(prep["p3groups"].items())])
+            p3p = np.concatenate([prep["job_pair"][g["job"]] for _, g in sorted(prep["p3groups"].items())])
+            sl = slice(n_tp, n_tp + len(p3q))
+            mu = mu.at[sl].set(ro_s[p3p, p3q] * mu[sl] + ro_b[p3p, p3q])
     else:
         e01 = e10 = None
     if opts["obs_scale"]:
@@ -812,7 +839,8 @@ def main() -> None:
     def log(msg: str) -> None:
         print(f"[{time.strftime('%H:%M:%S')}] {tag}：{msg}", flush=True)
 
-    log(f"開始（観測 {sum(int(g['mask'].sum()) for g in prep['tgroups'].values()) + sum(len(g['k']) for g in prep['pgroups'].values())} 点、"
+    log(f"開始（観測 {sum(int(g['mask'].sum()) for g in prep['tgroups'].values()) + sum(len(g['k']) for g in prep['pgroups'].values())} 点"
+        f"＋3 つ目の基底 {sum(len(g['k']) for g in prep.get('p3groups', {}).values())} 点、"
         f"チェーン {args.chains}、ウォームアップ {args.warmup}、サンプル {args.samples}）")
 
     t0 = time.time()
