@@ -1,0 +1,763 @@
+{
+  "args": {
+    "backend": "ibm_fez",
+    "pairs": [
+      "22-23",
+      "142-143"
+    ],
+    "trotter_ns": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "trotter_shots": 8000,
+    "twirl": false,
+    "monitor_k": 12,
+    "probe_shots": 3000,
+    "t1_ks": [
+      0,
+      48
+    ],
+    "t1_shots": 7500,
+    "t1_k_shots": [
+      5000,
+      10000
+    ],
+    "cal_shots": 3000,
+    "tag": "m1",
+    "submit": true,
+    "no_wait": false
+  },
+  "backend": "ibm_fez",
+  "pair": "22-23",
+  "qubits": [
+    22,
+    23
+  ],
+  "job_id": "dbkplpd6p51s73cn5bq0",
+  "submitted_utc": "2026-11-03T08:27:15.598078+00:00",
+  "calibration": {
+    "pair_error": 0.0018733951424075579,
+    "readout_errors": {
+      "22": 0.00390625,
+      "23": 0.00634765625
+    },
+    "t1_us": {
+      "22": 116.50242636221391,
+      "23": 271.956344463721
+    },
+    "t2_us": {
+      "22": 85.97483482544804,
+      "23": 158.35032843878494
+    }
+  },
+  "circuits": [
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 1,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n1",
+      "depth": 16,
+      "two_qubit_gates": 2,
+      "counts": {
+        "11": 5316,
+        "01": 1316,
+        "10": 1081,
+        "00": 287
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 2,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n2",
+      "depth": 28,
+      "two_qubit_gates": 4,
+      "counts": {
+        "00": 5588,
+        "11": 1563,
+        "10": 392,
+        "01": 457
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 3,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n3",
+      "depth": 40,
+      "two_qubit_gates": 6,
+      "counts": {
+        "11": 2210,
+        "01": 1385,
+        "10": 1390,
+        "00": 3015
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 4,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n4",
+      "depth": 52,
+      "two_qubit_gates": 8,
+      "counts": {
+        "01": 1579,
+        "00": 2081,
+        "11": 2882,
+        "10": 1458
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 5,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n5",
+      "depth": 64,
+      "two_qubit_gates": 10,
+      "counts": {
+        "10": 1357,
+        "01": 1663,
+        "11": 3187,
+        "00": 1793
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 6,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n6",
+      "depth": 76,
+      "two_qubit_gates": 12,
+      "counts": {
+        "10": 1408,
+        "11": 3404,
+        "00": 1614,
+        "01": 1574
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 7,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n7",
+      "depth": 88,
+      "two_qubit_gates": 14,
+      "counts": {
+        "00": 1477,
+        "11": 3481,
+        "10": 1510,
+        "01": 1532
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 8,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n8",
+      "depth": 100,
+      "two_qubit_gates": 16,
+      "counts": {
+        "11": 3508,
+        "01": 1631,
+        "00": 1471,
+        "10": 1390
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 9,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n9",
+      "depth": 112,
+      "two_qubit_gates": 18,
+      "counts": {
+        "00": 1433,
+        "11": 3520,
+        "10": 1434,
+        "01": 1613
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 10,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n10",
+      "depth": 124,
+      "two_qubit_gates": 20,
+      "counts": {
+        "10": 1486,
+        "11": 3531,
+        "00": 1347,
+        "01": 1636
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 11,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n11",
+      "depth": 136,
+      "two_qubit_gates": 22,
+      "counts": {
+        "01": 1630,
+        "10": 1347,
+        "11": 3607,
+        "00": 1416
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 12,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n12",
+      "depth": 148,
+      "two_qubit_gates": 24,
+      "counts": {
+        "01": 1611,
+        "10": 1412,
+        "11": 3649,
+        "00": 1328
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 13,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n13",
+      "depth": 160,
+      "two_qubit_gates": 26,
+      "counts": {
+        "00": 1284,
+        "11": 3627,
+        "01": 1576,
+        "10": 1513
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 1,
+      "n": 14,
+      "shots": 8000,
+      "name": "trotter_N2_o1_n14",
+      "depth": 172,
+      "two_qubit_gates": 28,
+      "counts": {
+        "01": 1585,
+        "11": 3596,
+        "10": 1409,
+        "00": 1410
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 1,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n1",
+      "depth": 18,
+      "two_qubit_gates": 2,
+      "counts": {
+        "00": 6492,
+        "01": 308,
+        "11": 895,
+        "10": 305
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 2,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n2",
+      "depth": 30,
+      "two_qubit_gates": 4,
+      "counts": {
+        "00": 3946,
+        "10": 127,
+        "11": 3749,
+        "01": 178
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 3,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n3",
+      "depth": 42,
+      "two_qubit_gates": 6,
+      "counts": {
+        "10": 805,
+        "00": 1984,
+        "11": 4255,
+        "01": 956
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 4,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n4",
+      "depth": 54,
+      "two_qubit_gates": 8,
+      "counts": {
+        "11": 3987,
+        "00": 1612,
+        "01": 1262,
+        "10": 1139
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 5,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n5",
+      "depth": 66,
+      "two_qubit_gates": 10,
+      "counts": {
+        "11": 4006,
+        "10": 1199,
+        "00": 1415,
+        "01": 1380
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 6,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n6",
+      "depth": 78,
+      "two_qubit_gates": 12,
+      "counts": {
+        "00": 1334,
+        "10": 1414,
+        "11": 3809,
+        "01": 1443
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 7,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n7",
+      "depth": 90,
+      "two_qubit_gates": 14,
+      "counts": {
+        "01": 1486,
+        "11": 3796,
+        "00": 1380,
+        "10": 1338
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 8,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n8",
+      "depth": 102,
+      "two_qubit_gates": 16,
+      "counts": {
+        "11": 3834,
+        "00": 1409,
+        "01": 1481,
+        "10": 1276
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 9,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n9",
+      "depth": 114,
+      "two_qubit_gates": 18,
+      "counts": {
+        "11": 3769,
+        "01": 1517,
+        "00": 1322,
+        "10": 1392
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 10,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n10",
+      "depth": 126,
+      "two_qubit_gates": 20,
+      "counts": {
+        "11": 3810,
+        "01": 1501,
+        "10": 1431,
+        "00": 1258
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 11,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n11",
+      "depth": 138,
+      "two_qubit_gates": 22,
+      "counts": {
+        "10": 1388,
+        "00": 1307,
+        "11": 3689,
+        "01": 1616
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 12,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n12",
+      "depth": 150,
+      "two_qubit_gates": 24,
+      "counts": {
+        "01": 1562,
+        "11": 3708,
+        "10": 1460,
+        "00": 1270
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 13,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n13",
+      "depth": 162,
+      "two_qubit_gates": 26,
+      "counts": {
+        "11": 3707,
+        "01": 1590,
+        "10": 1450,
+        "00": 1253
+      }
+    },
+    {
+      "kind": "トロッター",
+      "order": 2,
+      "n": 14,
+      "shots": 8000,
+      "name": "trotter_N2_o2_n14",
+      "depth": 174,
+      "two_qubit_gates": 28,
+      "counts": {
+        "01": 1587,
+        "10": 1381,
+        "00": 1334,
+        "11": 3698
+      }
+    },
+    {
+      "kind": "監視用",
+      "target": 0,
+      "axis": "Z",
+      "k": 12,
+      "basis": "X",
+      "shots": 3000,
+      "name": "zprobe_t0_k12_X",
+      "depth": 172,
+      "two_qubit_gates": 24,
+      "counts": {
+        "0": 2865,
+        "1": 135
+      }
+    },
+    {
+      "kind": "監視用",
+      "target": 0,
+      "axis": "Z",
+      "k": 12,
+      "basis": "Y",
+      "shots": 3000,
+      "name": "zprobe_t0_k12_Y",
+      "depth": 171,
+      "two_qubit_gates": 24,
+      "counts": {
+        "1": 1406,
+        "0": 1594
+      }
+    },
+    {
+      "kind": "監視用",
+      "target": 1,
+      "axis": "X",
+      "k": 12,
+      "basis": "Z",
+      "shots": 3000,
+      "name": "xprobe_t1_k12_Z",
+      "depth": 169,
+      "two_qubit_gates": 24,
+      "counts": {
+        "0": 2870,
+        "1": 130
+      }
+    },
+    {
+      "kind": "監視用",
+      "target": 1,
+      "axis": "X",
+      "k": 12,
+      "basis": "Y",
+      "shots": 3000,
+      "name": "xprobe_t1_k12_Y",
+      "depth": 171,
+      "two_qubit_gates": 24,
+      "counts": {
+        "1": 1826,
+        "0": 1174
+      }
+    },
+    {
+      "kind": "c1 Z",
+      "target": 1,
+      "axis": "Z",
+      "k": 1,
+      "basis": "X",
+      "control_one": true,
+      "shots": 3000,
+      "name": "zprobe_c1_t1_k1_X",
+      "depth": 16,
+      "two_qubit_gates": 2,
+      "counts": {
+        "0": 2994,
+        "1": 6
+      }
+    },
+    {
+      "kind": "c1 Z",
+      "target": 1,
+      "axis": "Z",
+      "k": 1,
+      "basis": "Y",
+      "control_one": true,
+      "shots": 3000,
+      "name": "zprobe_c1_t1_k1_Y",
+      "depth": 15,
+      "two_qubit_gates": 2,
+      "counts": {
+        "1": 1502,
+        "0": 1498
+      }
+    },
+    {
+      "kind": "c1 Z",
+      "target": 1,
+      "axis": "Z",
+      "k": 2,
+      "basis": "X",
+      "control_one": true,
+      "shots": 3000,
+      "name": "zprobe_c1_t1_k2_X",
+      "depth": 30,
+      "two_qubit_gates": 4,
+      "counts": {
+        "0": 2981,
+        "1": 19
+      }
+    },
+    {
+      "kind": "c1 Z",
+      "target": 1,
+      "axis": "Z",
+      "k": 2,
+      "basis": "Y",
+      "control_one": true,
+      "shots": 3000,
+      "name": "zprobe_c1_t1_k2_Y",
+      "depth": 29,
+      "two_qubit_gates": 4,
+      "counts": {
+        "0": 1517,
+        "1": 1483
+      }
+    },
+    {
+      "kind": "c1 Z",
+      "target": 1,
+      "axis": "Z",
+      "k": 3,
+      "basis": "X",
+      "control_one": true,
+      "shots": 3000,
+      "name": "zprobe_c1_t1_k3_X",
+      "depth": 44,
+      "two_qubit_gates": 6,
+      "counts": {
+        "0": 2982,
+        "1": 18
+      }
+    },
+    {
+      "kind": "c1 Z",
+      "target": 1,
+      "axis": "Z",
+      "k": 3,
+      "basis": "Y",
+      "control_one": true,
+      "shots": 3000,
+      "name": "zprobe_c1_t1_k3_Y",
+      "depth": 43,
+      "two_qubit_gates": 6,
+      "counts": {
+        "1": 1564,
+        "0": 1436
+      }
+    },
+    {
+      "kind": "c1 Z",
+      "target": 1,
+      "axis": "Z",
+      "k": 4,
+      "basis": "X",
+      "control_one": true,
+      "shots": 3000,
+      "name": "zprobe_c1_t1_k4_X",
+      "depth": 58,
+      "two_qubit_gates": 8,
+      "counts": {
+        "0": 2989,
+        "1": 11
+      }
+    },
+    {
+      "kind": "c1 Z",
+      "target": 1,
+      "axis": "Z",
+      "k": 4,
+      "basis": "Y",
+      "control_one": true,
+      "shots": 3000,
+      "name": "zprobe_c1_t1_k4_Y",
+      "depth": 57,
+      "two_qubit_gates": 8,
+      "counts": {
+        "1": 1497,
+        "0": 1503
+      }
+    },
+    {
+      "kind": "T1 専用",
+      "k": 0,
+      "control_one": false,
+      "shots": 5000,
+      "name": "t1probe_c0_k0",
+      "depth": 1,
+      "two_qubit_gates": 0,
+      "counts": {
+        "00": 4969,
+        "10": 15,
+        "01": 16
+      }
+    },
+    {
+      "kind": "T1 専用",
+      "k": 48,
+      "control_one": false,
+      "shots": 10000,
+      "name": "t1probe_c0_k48",
+      "depth": 673,
+      "two_qubit_gates": 96,
+      "counts": {
+        "00": 7738,
+        "10": 2200,
+        "11": 25,
+        "01": 37
+      }
+    },
+    {
+      "kind": "T1 専用",
+      "k": 0,
+      "control_one": true,
+      "shots": 5000,
+      "name": "t1probe_c1_k0",
+      "depth": 2,
+      "two_qubit_gates": 0,
+      "counts": {
+        "01": 4957,
+        "00": 28,
+        "11": 15
+      }
+    },
+    {
+      "kind": "T1 専用",
+      "k": 48,
+      "control_one": true,
+      "shots": 10000,
+      "name": "t1probe_c1_k48",
+      "depth": 673,
+      "two_qubit_gates": 96,
+      "counts": {
+        "01": 7055,
+        "10": 888,
+        "00": 992,
+        "11": 1065
+      }
+    },
+    {
+      "kind": "読み出しの較正",
+      "prepared": "00",
+      "shots": 3000,
+      "name": "cal_0",
+      "depth": 1,
+      "two_qubit_gates": 0,
+      "counts": {
+        "00": 2985,
+        "01": 10,
+        "10": 5
+      }
+    },
+    {
+      "kind": "読み出しの較正",
+      "prepared": "11",
+      "shots": 3000,
+      "name": "cal_1",
+      "depth": 2,
+      "two_qubit_gates": 0,
+      "counts": {
+        "11": 2965,
+        "01": 27,
+        "10": 8
+      }
+    }
+  ],
+  "qiskit": "2.5.2",
+  "qiskit_ibm_runtime": "0.50.0",
+  "usage_quantum_seconds": 79,
+  "finished_utc": "2026-11-03T08:30:27.785066+00:00"
+}
