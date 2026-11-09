@@ -155,15 +155,19 @@ def main() -> None:
             continue
         results.append({"start": i, "neg_log_post": val, "x": np.asarray(res.x),
                         "theta": np.asarray(cons["theta"]), "p": np.asarray(cons["p"]),
+                        # --split-period の 11 月の回転（2026-11-10、Codex の監査 #98：10 月の回転だけで山を分けると、11 月の回転だけが違う山をまとめてしまう）
+                        "theta_p2": np.asarray(cons["theta_p2"]) if "theta_p2" in cons else None,
                         "extra": {k: np.asarray(cons[k]).tolist() for k in ("gamma", "obs_scale", "sigma_drift", "dephase", "flip_ratio", "obs_scale_zpop", "obs_scale_p2") if k in cons}})
         print(f"[{time.strftime('%H:%M:%S')}] 出発点 {i + 1}/{args.starts}：負の対数事後確率 {val:.2f}（経過 {time.time() - t0:.0f} 秒）", flush=True)
 
-    # 着いた点を、回転の角度（2組 × 15成分）が 0.002 rad 以内なら同じ山とみなしてまとめる
+    # 着いた点を、回転の角度（2組 × 15成分。--split-period では 10 月と 11 月の両方）が 0.002 rad 以内なら同じ山とみなしてまとめる
+    def angles(r):
+        return r["theta"] if r["theta_p2"] is None else np.concatenate([r["theta"], r["theta_p2"]])
     results.sort(key=lambda r: r["neg_log_post"])
     modes = []
     for r in results:
         for m in modes:
-            if np.max(np.abs(r["theta"] - m["theta"])) < 0.002:
+            if np.max(np.abs(angles(r) - angles(m))) < 0.002:
                 m["count"] += 1
                 break
         else:
@@ -175,6 +179,9 @@ def main() -> None:
                  "count": m["count"], "p": m["p"].tolist(), **m["extra"]}
         for g, pair in enumerate(s2_fit.PAIRS):
             entry[pair] = {lab: float(m["theta"][g, k]) for k, lab in enumerate(nm.LABELS15) if abs(m["theta"][g, k]) > 1e-4}
+            if m["theta_p2"] is not None:
+                entry[pair + "_p2"] = {lab: float(m["theta_p2"][g, k]) for k, lab in enumerate(nm.LABELS15)
+                                       if abs(m["theta_p2"][g, k]) > 1e-4}
         out.append(entry)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f"{tag}_modes.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
