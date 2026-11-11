@@ -59,7 +59,7 @@ uv run --no-sync python tools/codex_pre_push.py --dry-run --range HEAD~1 HEAD
 ```bash
 uv run --no-sync python tools/codex_note_audit.py 研究ノート/…/note.md                    # すべての監査
 uv run --no-sync python tools/codex_note_audit.py draft.md --base 研究ノート/…/note.md      # 直す前との差分の監査も行う
-uv run --no-sync python tools/codex_note_audit.py 研究ノート/…/note.md --only math diff     # 監査を絞る
+uv run --no-sync python tools/codex_note_audit.py 研究ノート/…/note.md --only math consistency   # 監査を絞る（diff を含めるときは、--base が必要）
 uv run --no-sync python tools/codex_note_audit.py 研究ノート/…/note.md --dry-run            # 起動する監査の一覧だけ
 ```
 
