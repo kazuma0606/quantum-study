@@ -15,7 +15,8 @@ push 前の監査（codex_pre_push.py）は、コミット済みの差分を対�
     uv run --no-sync python tools/codex_note_audit.py 研究ノート/…/note.md --dry-run   # 起動する監査の一覧だけを表示する
 
 報告は .codex/audit-reports/notes/<ノート名>-<日時>/ に、監査ごとの Markdown と、進捗の log.txt で保存する（Git には入れない）。
-終了コードは、監査を1つでも完了できなかったとき 1、それ以外は 0（指摘の有無では変えない）。
+終了コードは、引数が正しくないとき（--only diff に --base がない、など）、起動する監査がないとき、
+監査を1つでも完了できなかったとき 1、それ以外は 0（指摘の有無では変えない）。
 """
 
 from __future__ import annotations
@@ -115,7 +116,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="研究ノートを Codex に読み取り専用で監査させる（報告だけ）")
     parser.add_argument("note", type=Path, help="対象のノート（コミット前の下書きでもよい）")
     parser.add_argument("--base", type=Path, help="直す前のファイル。渡すと、差分の監査（diff）も行う")
-    parser.add_argument("--only", nargs="+", choices=ASPECTS, default=list(ASPECTS), help="行う監査（既定はすべて）")
+    parser.add_argument("--only", nargs="+", choices=ASPECTS,
+                        help="行う監査（既定は、math・consistency・granularity と、--base があるときの diff）")
     parser.add_argument("--timeout", type=int, default=1200, help="監査1つの上限（秒）")
     parser.add_argument("--dry-run", action="store_true", help="起動する監査の一覧だけを表示する")
     args = parser.parse_args(argv)
@@ -128,12 +130,22 @@ def main(argv: list[str] | None = None) -> int:
     if args.base is not None and not args.base.is_file():
         print(f"直す前のファイルがありません：{args.base}", file=sys.stderr)
         return 1
+    if args.only is None:
+        only = set(ASPECTS) if args.base is not None else set(ASPECTS) - {"diff"}
+    else:
+        only = set(args.only)
+        if "diff" in only and args.base is None:
+            print("--only diff には、--base <直す前のファイル> が必要です", file=sys.stderr)
+            return 1
     text = note.read_text(encoding="utf-8")
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     out = REPORTS / f"{note.stem}-{stamp}"
 
     if args.dry_run:
-        jobs = build_jobs(note, text, set(args.only), out / "changes.patch" if args.base else None)
+        jobs = build_jobs(note, text, only, out / "changes.patch" if args.base else None)
+        if not jobs:
+            print("起動する監査がありません", file=sys.stderr)
+            return 1
         print("起動する監査：" + "、".join(jobs))
         return 0
 
@@ -143,7 +155,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     out.mkdir(parents=True, exist_ok=True)
     patch = make_patch(args.base.resolve(), note, out) if args.base else None
-    jobs = build_jobs(note, text, set(args.only), patch)
+    jobs = build_jobs(note, text, only, patch)
+    if not jobs:
+        print("起動する監査がありません", file=sys.stderr)
+        return 1
     log_file = out / "log.txt"
     lock = threading.Lock()
     failed: list[str] = []

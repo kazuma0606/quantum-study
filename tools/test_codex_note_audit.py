@@ -74,5 +74,24 @@ def test_dry_run_lists_jobs(tmp_path, capsys):
     assert "math" in out and "granularity-PartI" in out
 
 
+def test_only_diff_without_base_is_an_error(tmp_path, capsys):
+    note = tmp_path / "note.md"
+    note.write_text(NOTE, encoding="utf-8")
+    assert cna.main([str(note), "--dry-run", "--only", "diff"]) == 1
+    assert "--base" in capsys.readouterr().err
+    assert cna.main([str(note), "--only", "math", "diff"]) == 1
+
+
+def test_default_runs_diff_only_with_base(tmp_path, capsys):
+    note = tmp_path / "note.md"
+    base = tmp_path / "old.md"
+    note.write_text(NOTE, encoding="utf-8")
+    base.write_text(NOTE, encoding="utf-8")
+    assert cna.main([str(note), "--dry-run"]) == 0
+    assert "diff" not in capsys.readouterr().out
+    assert cna.main([str(note), "--dry-run", "--base", str(base)]) == 0
+    assert "diff" in capsys.readouterr().out
+
+
 def test_missing_note_returns_error(tmp_path):
     assert cna.main([str(tmp_path / "none.md"), "--dry-run"]) == 1

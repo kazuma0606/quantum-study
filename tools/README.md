@@ -65,7 +65,7 @@ uv run --no-sync python tools/codex_note_audit.py 研究ノート/…/note.md --
 
 同時に起動する監査は、`math`（式の再計算、端点、量化。全文を1回）、`consistency`（説明の文と直後の式の一致。全文を1回）、`granularity`（説明の粒度。Part・付録ごとに1回ずつ）、`diff`（`--base` を渡したときだけ。差分のまとまりごと）です。説明の粒度を Part ごとに分けるのは、全文を1回で読ませると、指摘が大幅に減るためです（2026-11-11 の試行で、同じ下書きに対して、全文1回では3件、Part ごとでは Part III だけで20件）。
 
-報告は `.codex/audit-reports/notes/<ノート名>-<日時>/` に、監査ごとの Markdown と `log.txt` で保存され、Git には追加されません。監査1つの上限は 20 分（`--timeout`）で、試行では 2〜3 分でした。名前が `_source` のフォルダは読まないように指示しています。テストは `uv run --no-sync pytest tools/test_codex_note_audit.py -q`（9 件。Codex は呼びません）。
+報告は `.codex/audit-reports/notes/<ノート名>-<日時>/` に、監査ごとの Markdown と `log.txt` で保存され、Git には追加されません。監査1つの上限は 20 分（`--timeout`）で、試行では 2〜3 分でした。名前が `_source` のフォルダは読まないように指示しています。テストは `uv run --no-sync pytest tools/test_codex_note_audit.py -q`（11 件。Codex は呼びません）。`--only diff` を `--base` なしで指定したときと、起動する監査が1つもないときは、終了コード 1 で終わります。
 
 ## ノートブックの生成スクリプト（`notebook_generators/`）
 
