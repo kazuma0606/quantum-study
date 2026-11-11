@@ -1,6 +1,6 @@
 # 概念の一覧 ―どのノートで導出済みか―
 
-> **作成** 2026-10-20　**更新** 2026-10-20
+> **作成** 2026-10-20　**更新** 2026-11-11
 > 研究ノートで使う概念が、どのノートのどの節で詳しく導出されているかの一覧。新しい概念を使うときの「初出か既出か」の判定に使う。
 
 使い方は `docs/note_style.md` の §1 にあります。
@@ -86,6 +86,16 @@
 | 水素原子（変数分離、ルジャンドル・ラゲール） | `05_量子力学/hydrogen_atom_legendre_laguerre.md`、`05_量子力学/hydrogen_textbook_notation.md` |
 | 正規化フロー、確率密度の変数変換 | `06_確率・統計/normalizing_flows_introduction.md` |
 | ヴァンデルモンド行列、スペクトル微分 | `07_数値計算/vandermonde_finite_difference_spectral.md` |
+
+## 論文読解（09_）
+
+| 概念 | 場所 |
+|---|---|
+| 離散立方体 $Q_n$、符号を変えた点 $x^S$、対蹠点、$(x^S)^T=x^{S\triangle T}$ | `09_論文読解/aaronson_ambainis/01_functions_on_discrete_cube.md` Part II §1〜§4 |
+| $Q_n$ 上の平均と分散、平均の線形性、$x\mapsto x^S$ で平均が変わらないこと | 同上 Part II §6、§7 |
+| 関数 $\chi_T$、$\chi_T\chi_U=\chi_{T\triangle U}$、関数の展開 $f=\sum_T\hat f(T)\chi_T$、次数が $d$ 以下の関数 | 同上 Part III |
+| 影響力、平均絶対増分、$\mathbb E[(h-c)^2]=\mathrm{Var}(h)+(\mathbb Eh-c)^2$ | 同上 Part I §3、Part IV |
+| $0$ と $1$ の列の上の多項式と、$Q_n$ 上の関数の対応 | 同上 Part V |
 
 ## 頻出する基本語（初めて使うときに1行で意味を述べれば足りる）
 

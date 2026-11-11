@@ -1,6 +1,6 @@
 # quantum
 
-> **作成** 2026-09-17　**更新** 2026-10-17
+> **作成** 2026-09-17　**更新** 2026-11-11
 > リポジトリ全体の入口。目的（理論の整理 → 実装 → テスト → 可視化）、
 > フォルダの構成、研究ノートの一覧（ジャンル別）、ノートブック・実験・Lean への案内。
 
@@ -119,6 +119,13 @@ quantum/
 |---|---|
 | [measurement_projection_born_rule](研究ノート/08_量子コンピュータ/measurement_projection_born_rule.md) | 射影演算子による測定確率の計算（$P(x^\ast)=\frac1N$ の導出、テンソル積の作用の証明、ボルン則。付録：射影測定とPOVM、結果レジスタの測定とエンタングルメント、クロネッカー積とQiskitの並び順、検算の一覧。図・Qiskit での検算つき） |
 | [partial_trace_reduced_density_matrix](研究ノート/08_量子コンピュータ/partial_trace_reduced_density_matrix.md) | 部分トレースと縮約密度行列（入力レジスタだけを見る。$\rho_A=CC^\dagger$、結果レジスタが入力を覚えると干渉が消える仕組み、環境を使った見方（Kraus 表現）。図・検算つき） |
+
+### 09_論文読解
+
+| ノート | 内容 |
+|---|---|
+| [aaronson_ambainis/00_reading_guide](研究ノート/09_論文読解/aaronson_ambainis/00_reading_guide.md) | 論文「A proof of the Aaronson–Ambainis conjecture」を、節ごとに分解して読むノート群の案内（査読を経ていない論文として扱う。論文の節との対応、読む順、進み具合、用語の対応表） |
+| [aaronson_ambainis/01_functions_on_discrete_cube](研究ノート/09_論文読解/aaronson_ambainis/01_functions_on_discrete_cube.md) | ノート1：離散立方体上の関数と多項式（予想の文、$Q_n$ の記号、関数の展開と次数、影響力と平均絶対増分、$0$ と $1$ の列との対応。論文 §1.1、§2.1〜2.2 の式 (2.1)〜(2.4) を導出。数値例つき） |
 
 学習の候補と今後の計画は、[docs/learning_roadmap.md](docs/learning_roadmap.md) と [docs/roadmap.md](docs/roadmap.md) にあります。
 
