@@ -76,12 +76,13 @@ Pkg.add("Yao")  # 量子回路フレームワーク
 | `quantum-experiment` | シミュレータ・実機（IBM、AWS Braket）で実験する |
 
 サブエージェント（`.claude/agents/`）：
-- ノートの監査（どれも編集しない。ノート1本、または大きな改訂ごとに、プッシュの前に使う）：`granularity-reviewer`（初学者の目で、説明の粒度と論理の飛躍を見る）、`math-auditor`（式を再計算し、端点・次元・量化を見る）、`note-reviewer`（式番号・縦棒・リンク・日付などの形式を見る）。
+- ノートの監査は、Codex に行わせる：`uv run --no-sync python tools/codex_note_audit.py <ノート>`（式の再計算、文と式の照合、Part ごとの説明の粒度。読み取り専用で、案を出す前に使う。詳細は `tools/README.md`）。
+- Claude の監査役（どれも編集しない）：`granularity-reviewer`（初学者の目で、説明の粒度と論理の飛躍を見る）、`math-auditor`（式を再計算し、端点・次元・量化を見る）、`proposal-auditor`（案の文と式の対応を見る）は、ユーザーに頼まれたときと、Codex が使えないときだけ使う。`note-reviewer`（式番号・縦棒・リンク・日付などの形式を見る）は、これまでどおり使う。
 - `literature-scout`（先行研究の調査）、`lean-prover`（Lean の証明の試行錯誤）。
 
 ノートの説明の粒度の方針と、予備知識の線引き（「導出済み」の扱い）は `docs/note_style.md`、どの概念がどのノートで導出済みかは `docs/concepts.md`。
 
-ノート本文の案を出す前は、`research-note` Skill の「案を出す前の関門」（式と説明の照合、数値検算、検証表）を終えてから出す。
+ノート本文の案を出す前は、`research-note` Skill の「案を出す前の関門」（式と説明の照合、数値検算、検証表、Codex の監査）を終えてから出す。
 
 補助スクリプトは `tools/`（リンク検査、縦棒の検査、スライダーのチェック、図の書き出しとスクリーンショット、ノートブックの生成スクリプト、ノートの粒度の機械的な点検 `lint_notes.py`）。詳細は `tools/README.md`（`lint_notes.py` の使い方は、スクリプトの先頭の説明を参照）。
 
