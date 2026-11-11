@@ -1,6 +1,6 @@
 # tools ― ノート・図・ノートブックを作るための補助スクリプト
 
-> **作成** 2026-10-04　**更新** 2026-10-11
+> **作成** 2026-10-04　**更新** 2026-11-11
 > 研究ノートとノートブックを作るための補助スクリプトの一覧。リンクや記法の点検、図の書き出し、ノートブックの生成、見出しの日付の更新。
 
 研究ノートとノートブックを作るときに、くり返し使うスクリプトです。どれもリポジトリのルートから実行します。手順の約束事は `.claude/skills/` の Skill（`research-note`、`note-figures`、`notebook-gen`、`quantum-experiment`）にまとめてあります。
@@ -51,6 +51,21 @@ uv run --no-sync python tools/audit_eval.py --regression
 ```bash
 uv run --no-sync python tools/codex_pre_push.py --dry-run --range HEAD~1 HEAD
 ```
+
+## 案を出す前の Codex 監査（`codex_note_audit.py`）
+
+研究ノートを、コミットの前に、Codex に読み取り専用で監査させます。報告を保存するだけで、push は止めません。push 前の監査（上の節）は、コミットした差分を対象にするので、両方を使います。
+
+```bash
+uv run --no-sync python tools/codex_note_audit.py 研究ノート/…/note.md                    # すべての監査
+uv run --no-sync python tools/codex_note_audit.py draft.md --base 研究ノート/…/note.md      # 直す前との差分の監査も行う
+uv run --no-sync python tools/codex_note_audit.py 研究ノート/…/note.md --only math diff     # 監査を絞る
+uv run --no-sync python tools/codex_note_audit.py 研究ノート/…/note.md --dry-run            # 起動する監査の一覧だけ
+```
+
+同時に起動する監査は、`math`（式の再計算、端点、量化。全文を1回）、`consistency`（説明の文と直後の式の一致。全文を1回）、`granularity`（説明の粒度。Part・付録ごとに1回ずつ）、`diff`（`--base` を渡したときだけ。差分のまとまりごと）です。説明の粒度を Part ごとに分けるのは、全文を1回で読ませると、指摘が大幅に減るためです（2026-11-11 の試行で、同じ下書きに対して、全文1回では3件、Part ごとでは Part III だけで20件）。
+
+報告は `.codex/audit-reports/notes/<ノート名>-<日時>/` に、監査ごとの Markdown と `log.txt` で保存され、Git には追加されません。監査1つの上限は 20 分（`--timeout`）で、試行では 2〜3 分でした。名前が `_source` のフォルダは読まないように指示しています。テストは `uv run --no-sync pytest tools/test_codex_note_audit.py -q`（9 件。Codex は呼びません）。
 
 ## ノートブックの生成スクリプト（`notebook_generators/`）
 
