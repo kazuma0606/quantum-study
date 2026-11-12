@@ -239,7 +239,15 @@ check("III: Σ_j Inf_j = Σ_T |T| f^(T)^2", good_sum)
 check("III: Inf[p] ≤ d E[f^2] ≤ d（値が [0,1]）", good_le)
 # 次数が d 以下の一次の関数：X_i = (χ_∅ - χ_{i})/2
 x_sym = sp.symbols("x1:5")
-check("III: X_i = (1 - x_i)/2 の係数は χ_∅ に 1/2、χ_{i} に -1/2", True)
+good_u = True
+for N in range(1, 5):
+    for i in range(1, N + 1):
+        for T in subsets(N):
+            # u_i(x) = (1 - x_i)/2 の係数 E[u_i χ_T]（x は Q_N の全点）
+            c = sum((F(1 - x[i - 1], 2) * chi(T, x) for x in itertools.product((1, -1), repeat=N)), F(0)) / 2**N
+            want = F(1, 2) if T == () else (F(-1, 2) if T == (i,) else F(0))
+            good_u &= c == want
+check("III: X_i = (1 - x_i)/2 の係数は χ_∅ に 1/2、χ_{i} に -1/2、ほかは 0（N=1〜4）", good_u)
 # 次数の対応で、単項式 X_1^2 X_2（次数 3）→ (1-x1)^2(1-x2)/8 を x_i^2=1 で直すと次数 ≤ 3
 e = sp.expand(((1 - x_sym[0]) / 2) ** 2 * ((1 - x_sym[1]) / 2))
 e_ml = sp.expand(e.subs(x_sym[0] ** 2, 1))
