@@ -96,6 +96,13 @@
 | 関数 $\chi_T$、$\chi_T\chi_U=\chi_{T\triangle U}$、関数の展開 $f=\sum_T\hat f(T)\chi_T$、次数が $d$ 以下の関数 | 同上 Part III |
 | 影響力、平均絶対増分、$\mathbb E[(h-c)^2]=\mathrm{Var}(h)+(\mathbb Eh-c)^2$ | 同上 Part I §3、Part IV |
 | $0$ と $1$ の列の上の多項式と、$Q_n$ 上の関数の対応 | 同上 Part V |
+| クエリの演算子 $O_X$、クエリの回数、受理確率（クエリの模型） | `09_論文読解/aaronson_ambainis/02_acceptance_probability_polynomial.md` Part II |
+| 複素係数の多項式の次数（一次結合、積）、振幅は次数 $t$ 以下の多項式 | 同上 Part III |
+| 受理確率は次数 $2T$ 以下の実係数の多項式で、値は $0$ 以上 $1$ 以下、多重線形の多項式 | 同上 Part IV、Part V |
+| 決定的な古典アルゴリズム（クエリの模型）、履歴と、履歴と合う入力の集合 $A_h$ | `09_論文読解/aaronson_ambainis/03_conjecture_to_classical_algorithm.md` Part II §1 |
+| 変数の固定 $p\vert_{i\leftarrow b}$、総影響力 $\mathrm{Inf}[p]$ と、固定による変わり方、固定した座標によらない関数の平均 | 同上 Part II §2〜§4 |
+| チェビシェフの不等式、マルコフの不等式（$\{0,1\}^N$ の上の確率） | 同上 Part II §5 |
+| 次数の対応（$p$ の次数が $d$ 以下なら $f=2p-1$ も）、$\mathrm{Inf}_j(f)=\sum_{S\ni j}\hat f(S)^2$、$\mathbb E[f^2]=\sum_S\hat f(S)^2$、総影響力は次数以下 | 同上 Part III |
 
 ## 頻出する基本語（初めて使うときに1行で意味を述べれば足りる）
 

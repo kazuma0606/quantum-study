@@ -126,6 +126,8 @@ quantum/
 |---|---|
 | [aaronson_ambainis/00_reading_guide](研究ノート/09_論文読解/aaronson_ambainis/00_reading_guide.md) | 論文「A proof of the Aaronson–Ambainis conjecture」を、節ごとに分解して読むノート群の案内（査読を経ていない論文として扱う。論文の節との対応、読む順、進み具合、用語の対応表） |
 | [aaronson_ambainis/01_functions_on_discrete_cube](研究ノート/09_論文読解/aaronson_ambainis/01_functions_on_discrete_cube.md) | ノート1：離散立方体上の関数と多項式（予想の文、$Q_n$ の記号、関数の展開と次数、影響力と平均絶対増分、$0$ と $1$ の列との対応。論文 §1.1、§2.1〜2.2 の式 (2.1)〜(2.4) を導出。数値例つき） |
+| [aaronson_ambainis/02_acceptance_probability_polynomial](研究ノート/09_論文読解/aaronson_ambainis/02_acceptance_probability_polynomial.md) | ノート2：受理確率は多項式になる（クエリの模型、[BBCMW] の補題。$T$ 回のクエリを行う量子アルゴリズムの受理確率が、次数 $2T$ 以下の実係数の多重線形多項式で、値が $0$ 以上 $1$ 以下であることを導出。論文 §1 の冒頭、§1.3 の冒頭。$N=2$、$T=1$ の数値例つき） |
+| [aaronson_ambainis/03_conjecture_to_classical_algorithm](研究ノート/09_論文読解/aaronson_ambainis/03_conjecture_to_classical_algorithm.md) | ノート3：予想から古典アルゴリズムへ（[AA14] の Theorem 3.3。総影響力は次数以下になること（[AA14] の Lemma 3.1）と、影響力の大きい変数を問い合わせて固定する古典アルゴリズムが、$(4T)^8\varepsilon^{-14}\delta^{-8}$ 回以下のクエリで、入力のうち $1-\delta$ の割合で受理確率を誤差 $\varepsilon$ 以内に近似することを導出。論文の Corollary 1.2 は仮定として使う。論文 §1.3。$N=2$、$T=1$ の数値例つき） |
 
 学習の候補と今後の計画は、[docs/learning_roadmap.md](docs/learning_roadmap.md) と [docs/roadmap.md](docs/roadmap.md) にあります。
 
