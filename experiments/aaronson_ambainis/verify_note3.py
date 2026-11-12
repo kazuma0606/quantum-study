@@ -278,7 +278,8 @@ def run_C(tab, N, v, theta, Mfloor=None):
     return res
 
 
-good_assume = good_tele = good_EK = good_markov = good_fail = good_leaf = good_new = True
+good_assume = good_tele = good_EK = good_markov = good_fail = good_leaf = good_new = good_cut = True
+n_cut = 0
 n_runs = 0
 for N in range(1, 5):
     for _ in range(25):
@@ -323,13 +324,34 @@ for N in range(1, 5):
         good_fail &= fail <= delta
         # 止まったときは、葉の上で Var ≤ v
         good_fail &= all(var(r[4]) <= v for r in res.values())
+        # 打ち切りの分岐：本文の M はこの大きさの例では打ち切りが起きないので、
+        # 人工の小さい打ち切り値 Mc=0..N で C_M の動きを確かめる（(Q1)〜(Q3) の形）
+        for Mc in range(0, N + 1):
+            resT = run_C(tab, N, v, theta, Mc)
+            for X in tab:
+                K_C, out_C, h_C = res[X][0], res[X][1], res[X][2]
+                K_M, out_M, h_M, _, g_M = resT[X]
+                good_cut &= K_M <= Mc  # クエリは打ち切り値以下
+                good_cut &= h_M == h_C[:K_M]  # 打ち切るまでは C と同じ履歴
+                good_cut &= out_M == mean(g_M)  # 出力は、止まった時点の多項式の平均
+                if K_C <= Mc:
+                    good_cut &= (K_M, out_M) == (K_C, out_C)  # (Q1)：C と同じ動き
+                else:
+                    good_cut &= K_M == Mc  # 打ち切りが起きる
+                    n_cut += 1
+            nf_M = sum(1 for X in tab if abs(resT[X][1] - tab[X]) > eps)
+            n_over = sum(1 for X in tab if res[X][0] > Mc)
+            n_fail_le = sum(1 for X in tab if res[X][0] <= Mc and abs(res[X][1] - tab[X]) > eps)
+            good_cut &= nf_M <= n_over + n_fail_le  # (Q3) の和の形
 check("IV: 小さい例で、仮定 Inf_i ≥ (Var/2T)^7 を満たす i がある（参考。論文の主張の検査ではない）", good_assume)
 check("IV: E[Inf[p_K]] = Inf[p] - E[Σ_j Inf_{i_j}[p_j]]", good_tele)
 check("IV: θ E[K] ≤ E[Σ Inf_{i_j}[p_j]] ≤ Inf[p] ≤ 2T", good_EK)
 check("IV: 選ぶ番号は、まだ聞いていない番号", good_new)
 check("IV: M = 4T/(δθ) = (4T)^8 ε^-14 δ^-8、Pr[K ≥ M] ≤ δ/2", good_markov)
 check("IV: 同じ履歴で止まる入力の集合 = 履歴と合う入力の集合", good_leaf)
-check("IV: 誤差が ε を超える割合 ≤ δ、止まったとき Var ≤ ε^2δ/2", good_fail)
+check("IV: (IV-7) の誤差の評価。C：誤差が ε を超える割合 ≤ δ、止まったとき Var ≤ ε^2δ/2（本文の M では打ち切りは起きない）。"
+      f"C_M：人工の打ち切り値 0〜N で、回数 ≤ 打ち切り値、K ≤ 打ち切り値なら C と同じ、誤差の個数は (Q3) の和以下（打ち切りが起きた入力 {n_cut} 件）",
+      good_fail and good_cut and n_cut > 0)
 check(f"IV: アルゴリズムを走らせた例の数 = {n_runs}（0 でない）", n_runs > 0)
 
 # θ を大きくした（人工の）しきい値でも、E[K] ≤ Inf[p]/θ' の議論が成り立つこと
