@@ -49,7 +49,7 @@ Lean の証明は、ビルドの環境を一つにするため、このフォル
 | 準備2 1変数の微分 | [`P2_1変数の微分.md`](P2_1変数の微分.md) | 01/functions_linear_maps_derivatives_integrals.md（Part III §1〜3） | 検証済み（2026-11-15。Codex の監査と SymPy の検算を通し、著者が目視で確認した。コラム「微分できるのに、導関数がつながらない関数」を含め、全体を確定範囲に登録） |
 | 準備3 ベクトルと行列 | [`P3_ベクトルと行列.md`](P3_ベクトルと行列.md) | 01/functions_linear_maps_derivatives_integrals.md（Part II §1・§4・§9・§10） | 検証済み（2026-11-15。Codex の監査と SymPy の検算を通し、著者が目視で確認した。コラム「回転を2回すると、加法定理が出てくる」「サラスの公式と、その背景」を含め、全体を確定範囲に登録） |
 | 1 多変数の微分 | [`01_多変数の微分.md`](01_多変数の微分.md) | 01/functions_linear_maps_derivatives_integrals.md（Part III §2・§5〜§7）、01/derivative_map.md（Part II §4） | 監査済み（2026-11-15。Codex の監査と SymPy の検算を通し、著者が読んで確認した。手計算での検証の前。全体を確定範囲に登録） |
-| 2 ベクトル微分 | `02_ベクトル微分.md` | 01/grad_div_rot_identities_full_derivation.md、02/球座標の計量テンソル計算例.md | 未着手 |
+| 2 ベクトル微分 | [`02_ベクトル微分.md`](02_ベクトル微分.md) | 01/grad_div_rot_identities_full_derivation.md、02/球座標の計量テンソル計算例.md | 下書き（2026-11-15） |
 | 3 共変微分 | `03_共変微分.md` | 02/christoffel_riemann_intro.md、02/計量テンソルと共変反変_まとめ.md | 未着手 |
 | 4 曲率と曲面 | `04_曲率と曲面.md` | 02/christoffel_riemann_intro.md、03/manifolds_introduction.md（Part VI） | 未着手 |
 | 5 抽象化 | `05_抽象化.md` | 03/differential_forms_hodge_star.md、03/poincare_lemma_d_squared_zero.md、02/abstract_differential_geometry_bridge.md | 未着手 |
