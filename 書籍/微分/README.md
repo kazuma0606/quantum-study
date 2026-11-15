@@ -24,7 +24,7 @@ Lean の証明は、ビルドの環境を一つにするため、このフォル
 
 | 章 | ファイル（仮） | 素材のノート | 状態 |
 |---|---|---|---|
-| はじめに | `00_はじめに.md` | （新規） | 未着手 |
+| はじめに | [`00_はじめに.md`](00_はじめに.md) | （新規） | 下書き（2026-11-15。Codex の監査と SymPy の検算は通した。体験談の事実関係は著者の確認待ち） |
 | 準備1 極限と収束 | `P1_極限と収束.md` | 01/power_series_radius_of_convergence.md（Part I） | 未着手 |
 | 準備2 1変数の微分 | `P2_1変数の微分.md` | 01/functions_linear_maps_derivatives_integrals.md（Part III） | 未着手 |
 | 準備3 ベクトルと行列 | `P3_ベクトルと行列.md` | 01/functions_linear_maps_derivatives_integrals.md（Part II） | 未着手 |

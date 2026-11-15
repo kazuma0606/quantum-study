@@ -65,10 +65,16 @@ def int01():
         width = xs.max() - xs.min()
         # 横幅の倍率は、小さな円では 1/cos φ に近い（赤道の円との比）
         ratio = width / (2 * rho)
+        if lat_d == 0:
+            # 赤道の円は、縦横の目盛りをそろえた地図で円に見える（縦と横の幅がほぼ等しい）
+            height = ys.max() - ys.min()
+            assert abs(width / height - 1) < 0.02, width / height
         if lat_d == 60:
             assert abs(ratio - 1 / np.cos(np.radians(60))) / 2 < 0.03, ratio
         f_area = 1 / np.cos(np.radians(lat_d)) ** 2
-        label = f"緯度 {lat_d}°\n面積 約{f_area:.1f} 倍" if f_area < 10 else f"緯度 {lat_d}°\n面積 約{f_area:.0f} 倍"
+        # 中心の緯度での面積の倍率 1/cos²φ（円全体の平均ではない。大きな円では、北側ほど倍率が大きい）
+        label = (f"中心 緯度 {lat_d}°\n面積の倍率 約{f_area:.1f}" if f_area < 10
+                 else f"中心 緯度 {lat_d}°\n面積の倍率 約{f_area:.0f}")
         if lat_d < 70:
             ax1.text(xs.max() + np.radians(4), mercator_y(np.radians(lat_d)), label, ha="left", va="center", fontsize=9)
         else:
@@ -79,6 +85,7 @@ def int01():
     ax1.set_yticks([mercator_y(np.radians(d)) for d in yt], [f"{d}°" for d in yt])
     ax1.set_xticks([])
     ax1.set_ylabel("緯度")
+    ax1.set_aspect("equal")  # 縦横の目盛りをそろえる（メルカトル図法は角度を保つので、赤道の円は円に見える）
     ax1.set_title("(a) 地球の上で同じ大きさの円を、メルカトル図法で描くと", fontsize=11)
 
     # (b) 実際の面積と、見かけの面積の目安
@@ -104,7 +111,8 @@ def int01():
     ax2.set_title("(b) 実際の面積と、地図での見かけ", fontsize=11)
 
     fig.text(0.5, 0.01,
-             "(b) の見かけの面積は、国のおおよその中心の緯度での面積の倍率 1/cos²(緯度) を掛けた目安です。",
+             "(a) の倍率は、円の中心の緯度での面積の倍率 1/cos²(緯度) です。"
+             "(b) の見かけの面積は、国のおおよその中心の緯度での、この倍率を掛けた目安です。",
              ha="center", fontsize=9, color="#444444")
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.savefig(OUT / "int01_mercator.png", dpi=150)
