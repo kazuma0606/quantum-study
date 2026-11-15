@@ -46,7 +46,7 @@ Lean の証明は、ビルドの環境を一つにするため、このフォル
 |---|---|---|---|
 | はじめに | [`00_はじめに.md`](00_はじめに.md) | （新規） | 監査済み（2026-11-15。Codex の監査と SymPy の検算を通し、体験談の事実関係も著者が確認した） |
 | 準備1 極限と収束 | [`P1_極限と収束.md`](P1_極限と収束.md) | 01/power_series_radius_of_convergence.md（Part I、Part III §1） | 検証済み（2026-11-15。Codex の監査と SymPy の検算を通し、著者が目視で確認した。準備編なので、手計算は不要と著者が判断。コラム「1 + 2 + 4 + 8 + ⋯ = −1 ？」「北極とδ関数」を含め、全体を確定範囲に登録） |
-| 準備2 1変数の微分 | `P2_1変数の微分.md` | 01/functions_linear_maps_derivatives_integrals.md（Part III） | 未着手 |
+| 準備2 1変数の微分 | [`P2_1変数の微分.md`](P2_1変数の微分.md) | 01/functions_linear_maps_derivatives_integrals.md（Part III §1〜3） | 検証済み（2026-11-15。Codex の監査と SymPy の検算を通し、著者が目視で確認した。コラム「微分できるのに、導関数がつながらない関数」を含め、全体を確定範囲に登録） |
 | 準備3 ベクトルと行列 | `P3_ベクトルと行列.md` | 01/functions_linear_maps_derivatives_integrals.md（Part II） | 未着手 |
 | 1 多変数の微分 | `01_多変数の微分.md` | 01/functions_linear_maps_derivatives_integrals.md（Part III）、01/derivative_map.md（Part II） | 未着手 |
 | 2 ベクトル微分 | `02_ベクトル微分.md` | 01/grad_div_rot_identities_full_derivation.md、02/球座標の計量テンソル計算例.md | 未着手 |
