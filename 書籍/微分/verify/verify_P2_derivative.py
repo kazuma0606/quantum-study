@@ -95,6 +95,16 @@ ap = sp.symbols("ap", positive=True)
 check("a^x の x=0 での傾きは log a", sp.simplify(sp.limit((ap**h - 1) / h, h, 0) - sp.log(ap)) == 0)
 check("log a の a についての導関数 1/a は正（傾きは a について増える）", sp.diff(sp.log(ap), ap) == 1 / ap)
 check("log a = 1 となる a は e だけ", sp.solve(sp.Eq(sp.log(ap), 1), ap) == [sp.E])
+# f''(a)=0 の点では2次の項が 0 で、近似の値は変わらない：f=x³、a=0
+fx3 = x**3
+lin3 = fx3.subs(x, 0) + sp.diff(fx3, x).subs(x, 0) * h
+quad3 = lin3 + sp.diff(fx3, x, 2).subs(x, 0) / 2 * h**2
+check("x³ の x=0 では、1次と2次の近似がどちらも 0（誤差はどちらも h³）", lin3 == 0 and quad3 == 0)
+# 2次の近似：(誤差)/h² → 0（√x の x=4）、接線だけでは (誤差)/h² → f''(a)/2 ≠ 0
+err2 = sp.sqrt(4 + h) - (2 + h / 4 - h**2 / 64)
+err1 = sp.sqrt(4 + h) - (2 + h / 4)
+check("√x の x=4：2次の近似の誤差/h² → 0", sp.limit(err2 / h**2, h, 0) == 0)
+check("√x の x=4：接線の誤差/h² → f''(4)/2 = -1/64（h² 程度）", sp.limit(err1 / h**2, h, 0) == -sp.Rational(1, 64))
 # 2次の近似の係数 1/2：f=x² では f(a)+f'(a)h+f''(a)h²/2 がちょうど (a+h)²
 fx2 = x**2
 check("x² では2次までの近似が厳密に一致（係数 1/2 の確かめ）",
