@@ -97,6 +97,13 @@ check("(1 2; 2 4) は (2,-1) を 0 に写す", sp.Matrix([[1, 2], [2, 4]]) * sp.
 check("(1 2; 2 4) の行き先は (1,2) の方向だけ", sp.simplify(sp.Matrix([[1, 2], [2, 4]]) * X - (x1 + 2 * x2) * sp.Matrix([1, 2])) == sp.zeros(2, 1))
 check("左右を入れ替える (0 1; 1 0) の行列式は -1", sp.Matrix([[0, 1], [1, 0]]).det() == -1)
 check("det(BA) = det B · det A", sp.expand((B2 * A2).det() - B2.det() * A2.det()) == 0)
+# 囲む長方形から余分な部分を引く：(a+b)(c+d) - ac - bd - 2bc = ad - bc
+sa_, sb_, sc2, sd_ = sp.symbols("a b c d", positive=True)
+check("(a+b)(c+d) - ac - bd - 2bc = ad - bc", sp.expand((sa_ + sb_) * (sc2 + sd_) - sa_ * sc2 - sb_ * sd_ - 2 * sb_ * sc2) == sa_ * sd_ - sb_ * sc2)
+# 具体例：列 (3,1)、(1,2)（(3,1) が右下）で、靴ひも公式の面積と ad - bc = 5 が一致
+pts_ = [(0, 0), (3, 1), (4, 3), (1, 2)]
+shoelace = sp.Rational(1, 2) * abs(sum(pts_[k][0] * pts_[(k + 1) % 4][1] - pts_[(k + 1) % 4][0] * pts_[k][1] for k in range(4)))
+check("列 (3,1)、(1,2) の平行四辺形の面積は 3·2 - 1·1 = 5", shoelace == 5)
 # 単位正方形の像の平行四辺形の面積 = |det|（2つの列ベクトルの張る平行四辺形）
 p, q = M[:, 0], M[:, 1]
 check("列 (2,1)、(1,3) の張る平行四辺形の面積は 5", abs(p[0] * q[1] - p[1] * q[0]) == 5)
