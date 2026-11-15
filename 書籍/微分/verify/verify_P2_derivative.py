@@ -67,6 +67,15 @@ table = {
 }
 for fx, dfx in table.items():
     check(f"({fx})' = {dfx}", sp.simplify(sp.diff(fx, x) - dfx) == 0)
+# 1/x と √x の差分商の変形
+xn0 = sp.symbols("xn0", nonzero=True)
+check("1/x の差分商 = -1/(x(x+h))", sp.simplify((1 / (xn0 + h) - 1 / xn0) / h - (-1 / (xn0 * (xn0 + h)))) == 0)
+check("-1/(x(x+h)) → -1/x²", sp.limit(-1 / (xn0 * (xn0 + h)), h, 0) == -1 / xn0**2)
+xq = sp.symbols("xq", positive=True)
+hq = sp.symbols("hq", positive=True)
+check("√x の差分商 = 1/(√(x+h)+√x)",
+      sp.simplify((sp.sqrt(xq + hq) - sp.sqrt(xq)) / hq - 1 / (sp.sqrt(xq + hq) + sp.sqrt(xq))) == 0)
+check("1/(√(x+h)+√x) → 1/(2√x)", sp.limit(1 / (sp.sqrt(xq + h) + sp.sqrt(xq)), h, 0) == 1 / (2 * sp.sqrt(xq)))
 xp_ = sp.symbols("xp_", positive=True)
 check("x>0 で (√x)' = 1/(2√x)", sp.simplify(sp.diff(sp.sqrt(xp_), xp_) - 1 / (2 * sp.sqrt(xp_))) == 0)
 check("√x は x=0 で（右からの）微分係数を持たない：√h/h → ∞", sp.limit(sp.sqrt(h) / h, h, 0, "+") == sp.oo)
