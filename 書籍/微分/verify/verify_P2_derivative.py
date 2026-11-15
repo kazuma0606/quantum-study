@@ -47,7 +47,8 @@ for hv, err_expect, ratio in [(0.1, 0.000154, 0.00154), (0.01, 0.00000156, 0.000
     check(f"h={hv} で 誤差/h ≈ {ratio}", abs(err / hv - ratio) / ratio < 0.02)
 # 接線以外の傾き m では、誤差/h が 0 に近づかない
 err_m = (sp.sqrt(4 + h) - 2 - m * h) / h
-check("傾き m の直線の誤差/h → 1/4 - m", sp.limit(err_m, h, 0) == sp.Rational(1, 4) - m)
+check("傾き m の直線との符号つきの差/h → 1/4 - m", sp.limit(err_m, h, 0) == sp.Rational(1, 4) - m)
+check("m=1 なら、その大きさは |1/4 - 1| = 3/4", sp.limit(sp.Abs(err_m.subs(m, 1)), h, 0, "+") == sp.Rational(3, 4))
 check("x² の差分 = 2xh + h²", sp.expand((x + h) ** 2 - x**2) == 2 * x * h + h**2)
 
 # §2 |x| は x=0 で微分できない（右からの傾き 1、左からの傾き -1）
