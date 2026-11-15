@@ -85,6 +85,17 @@ check("sin(x+h) - sin x = sin x (cos h - 1) + cos x sin h",
 for av, slope in [(2, 0.693), (3, 1.099)]:
     check(f"a={av} の x=0 での傾きは約 {slope}", abs(float(sp.limit((av**h - 1) / h, h, 0)) - slope) < 1e-3)
 check("e = 2.71828…", abs(math.e - 2.71828) < 1e-5)
+# 角度を度で測ると、sin(h°)/h → π/180（1 ではない）
+check("度で測ると sin(h°)/h → π/180", sp.limit(sp.sin(h * sp.pi / 180) / h, h, 0) == sp.pi / 180)
+# a^x の x=0 での傾きは log a で、a について増える（導関数 1/a > 0）。傾きが 1 になるのは a = e だけ
+ap = sp.symbols("ap", positive=True)
+check("a^x の x=0 での傾きは log a", sp.simplify(sp.limit((ap**h - 1) / h, h, 0) - sp.log(ap)) == 0)
+check("log a の a についての導関数 1/a は正（傾きは a について増える）", sp.diff(sp.log(ap), ap) == 1 / ap)
+check("log a = 1 となる a は e だけ", sp.solve(sp.Eq(sp.log(ap), 1), ap) == [sp.E])
+# 2次の近似の係数 1/2：f=x² では f(a)+f'(a)h+f''(a)h²/2 がちょうど (a+h)²
+fx2 = x**2
+check("x² では2次までの近似が厳密に一致（係数 1/2 の確かめ）",
+      sp.expand(fx2.subs(x, a) + sp.diff(fx2, x).subs(x, a) * h + sp.diff(fx2, x, 2).subs(x, a) / 2 * h**2 - (a + h) ** 2) == 0)
 
 # §3 積の微分と合成関数の微分（連鎖律）
 u = sp.Function("u")(x)
