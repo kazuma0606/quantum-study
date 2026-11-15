@@ -1,0 +1,40 @@
+# 微分の本の原稿 ―『微分のすべてをここにおいてきた。』（仮）―
+
+> **作成** 2026-11-15
+> 副題「接線から曲率、そして現代数学へ」。Zenn の本として公開する予定の原稿の置き場。構想は [docs/book_plan_differentiation.md](../../docs/book_plan_differentiation.md) にある。
+
+このフォルダには、微分の本の原稿を、章ごとに1つのファイルで置きます。原稿は Zenn の記法（`:::details`、`:::message` など）で書き、公開するときは Zenn の Web エディタに手でコピペします。本の方針（この本で言いたいこと、想定読者、節の形、公開の方針、章立て）は構想メモにまとめてあり、このファイルには、各章のファイルと素材のノートの対応と、検証の状態だけを書きます。
+
+`研究ノート/` の決まり（式番号、目次、README への登録など）は、このフォルダには掛けません。章の下書きは、研究ノートと同じく、Codex の監査（`tools/codex_note_audit.py`）と SymPy の検算を通してから出します。
+
+## フォルダの構成
+
+| 場所 | 置くもの |
+|---|---|
+| `README.md` | このファイル。各章と素材のノートの対応と、検証の状態 |
+| 章のファイル | 下の表の「ファイル（仮）」の名前で置く |
+| `figures/` | 概念図と、図を作るスクリプト |
+| `verify/` | 章ごとの SymPy の検算とテスト |
+
+Lean の証明は、ビルドの環境を一つにするため、このフォルダではなく `lean4/` の中（`QuantumStudy/Book/` など）に置きます。
+
+## 各章と検証の状態
+
+「素材のノート」は `研究ノート/` からの場所です。章の分け方とファイルの名前は仮のもので、書き始めるときに決めます。
+
+| 章 | ファイル（仮） | 素材のノート | 状態 |
+|---|---|---|---|
+| はじめに | `00_はじめに.md` | （新規） | 未着手 |
+| 準備1 極限と収束 | `P1_極限と収束.md` | 01/power_series_radius_of_convergence.md（Part I） | 未着手 |
+| 準備2 1変数の微分 | `P2_1変数の微分.md` | 01/functions_linear_maps_derivatives_integrals.md（Part III） | 未着手 |
+| 準備3 ベクトルと行列 | `P3_ベクトルと行列.md` | 01/functions_linear_maps_derivatives_integrals.md（Part II） | 未着手 |
+| 1 多変数の微分 | `01_多変数の微分.md` | 01/functions_linear_maps_derivatives_integrals.md（Part III）、01/derivative_map.md（Part II） | 未着手 |
+| 2 ベクトル微分 | `02_ベクトル微分.md` | 01/grad_div_rot_identities_full_derivation.md、02/球座標の計量テンソル計算例.md | 未着手 |
+| 3 共変微分 | `03_共変微分.md` | 02/christoffel_riemann_intro.md、02/計量テンソルと共変反変_まとめ.md | 未着手 |
+| 4 曲率と曲面 | `04_曲率と曲面.md` | 02/christoffel_riemann_intro.md、03/manifolds_introduction.md（Part VI） | 未着手 |
+| 5 抽象化 | `05_抽象化.md` | 03/differential_forms_hodge_star.md、03/poincare_lemma_d_squared_zero.md、02/abstract_differential_geometry_bridge.md | 未着手 |
+| 6 その先 | `06_その先.md` | 02/lie_derivative.md、01/derivative_map.md（Part III・IV） | 未着手 |
+| 番外編 重力レンズ | `X1_重力レンズ.md` | （新規） | 未着手 |
+| おまけ ディープラーニングの数理 | `X2_ディープラーニングの数理.md` | （新規） | 未着手 |
+
+状態は、「未着手」「下書き」「監査済み」（Codex の監査と SymPy の検算を通した）「公開（検証前）」（章の冒頭に、著者の手計算での検証の前だと書いて公開した）「検証済み」（著者が手計算で検証した）の順に進めます。
