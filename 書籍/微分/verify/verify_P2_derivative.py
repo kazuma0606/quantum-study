@@ -66,6 +66,9 @@ table = {
 }
 for fx, dfx in table.items():
     check(f"({fx})' = {dfx}", sp.simplify(sp.diff(fx, x) - dfx) == 0)
+xp_ = sp.symbols("xp_", positive=True)
+check("x>0 で (√x)' = 1/(2√x)", sp.simplify(sp.diff(sp.sqrt(xp_), xp_) - 1 / (2 * sp.sqrt(xp_))) == 0)
+check("√x は x=0 で（右からの）微分係数を持たない：√h/h → ∞", sp.limit(sp.sqrt(h) / h, h, 0, "+") == sp.oo)
 n = sp.symbols("n", positive=True, integer=True)
 check("(x^n)' = n x^(n-1)", sp.simplify(sp.diff(x**n, x) - n * x ** (n - 1)) == 0)
 # 二項展開による (x^n)' の導出の要：(x+h)^n - x^n = n x^(n-1) h + (h² 以上の項)
